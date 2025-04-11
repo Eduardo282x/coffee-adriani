@@ -1,128 +1,166 @@
-import { useState } from "react"
-import { Search, Table } from "lucide-react"
-import { inventarioData, resumenData } from "./inventory.data"
+import { useEffect, useState } from "react"
+import { extraColumn, inventoryColumns } from "./inventory.data"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Progress } from "@/components/ui/progress"
+import { TableComponent } from "@/components/table/TableComponent"
+import { BodyInventory, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface"
+import { getInventory, getInventoryHistory, postInventory } from "@/services/inventory.service"
+import { Filter } from "@/components/table/Filter"
+import { Button } from "@/components/ui/button"
+import { ArrowUpDown, Package, Plus } from "lucide-react"
+import { ScreenLoader } from "@/components/loaders/ScreenLoader"
+import { DialogComponent } from "@/components/dialog/DialogComponent"
+import { InventoryForm } from "./InventoryForm"
+import { IColumns } from "@/components/table/table.interface"
+import { InventoryCards } from "./InventoryCards"
 
 export const Inventory = () => {
-    const [searchTerm, setSearchTerm] = useState("")
+    const [inventory, setInventory] = useState<IInventory[]>([]);
+    const [inventoryHistory, setInventoryHistory] = useState<IInventory[]>([]);
+    const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
+    const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [column, setColumn] = useState<IColumns<IInventory>[]>(inventoryColumns)
+    const [history, setHistory] = useState<boolean>(false);
+    const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
 
     // Filtrar inventario según el término de búsqueda
-    const filteredInventario = inventarioData.filter(
-        (item) =>
-            item.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.ubicacion.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
 
     // Función para calcular el porcentaje de stock
-    const calcularPorcentajeStock = (stock: number, stockMinimo: number) => {
-        const porcentaje = (stock / (stockMinimo * 2)) * 100
-        return Math.min(porcentaje, 100)
+    // const calcularPorcentajeStock = (stock: number, stockMinimo: number) => {
+    //     const porcentaje = (stock / (stockMinimo * 2)) * 100
+    //     return Math.min(porcentaje, 100)
+    // }
+
+    // // Función para obtener el color según el nivel de stock
+    // const getStockColor = (stock: number, stockMinimo: number) => {
+    //     if (stock === 0) return "text-red-600"
+    //     if (stock < stockMinimo) return "text-yellow-600"
+    //     return "text-green-600"
+    // }
+
+    // // Función para obtener el color de la barra de progreso
+    // const getProgressColor = (stock: number, stockMinimo: number) => {
+    //     if (stock === 0) return "bg-red-600"
+    //     if (stock < stockMinimo) return "bg-yellow-600"
+    //     return "bg-green-600"
+    // }
+
+    const toggleButton = (active: boolean) => {
+        setHistory(active);
+        if (history === active) return;
+        if (active) {
+            setData({ allInventory: inventoryHistory, inventory: inventoryHistory })
+            setColumn((prev) => ([...prev, ...extraColumn]))
+        } else {
+            setData({ allInventory: inventory, inventory: inventory })
+            setColumn(inventoryColumns)
+        }
     }
 
-    // Función para obtener el color según el nivel de stock
-    const getStockColor = (stock: number, stockMinimo: number) => {
-        if (stock === 0) return "text-red-600"
-        if (stock < stockMinimo) return "text-yellow-600"
-        return "text-green-600"
+    useEffect(() => {
+        getInventoryApi();
+        getInventoryHistoryApi();
+    }, [])
+
+    const getInventoryHistoryApi = async () => {
+        setLoading(true)
+        const response: IInventory[] = await getInventoryHistory();
+        setInventoryHistory(response);
+        setLoading(false);
     }
 
-    // Función para obtener el color de la barra de progreso
-    const getProgressColor = (stock: number, stockMinimo: number) => {
-        if (stock === 0) return "bg-red-600"
-        if (stock < stockMinimo) return "bg-yellow-600"
-        return "bg-green-600"
+    const getInventoryApi = async () => {
+        setLoading(true)
+        const response: IInventory[] = await getInventory();
+        setInventory(response);
+        const total: number = response.reduce((acc, item) => acc + item.quantity, 0)
+        const down: number = response.filter(pro => pro.quantity < 50).length;
+        const zero: number = response.filter(pro => pro.quantity === 0).length;
+        setResumen({totalProducts: total, downProducts: down, zeroProducts: zero})
+        setData({ allInventory: response, inventory: response });
+        setLoading(false);
+    }
+
+    const setInventoryFilter = (inventoryFilter: IInventory[]) => {
+        setData((prev) => ({ ...prev, inventory: inventoryFilter }));
+    }
+
+    const actionDialog = async (data: BodyInventory) => {
+        await postInventory(data)
+        setOpenDialog(false);
+        await getInventoryApi();
     }
 
     return (
         <div className="flex flex-col">
+            {loading && (
+                <ScreenLoader />
+            )}
+
             <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Inventario</h1>
                 </div>
+
+                <div className="border rounded-lg p-1 bg-gray-500 flex items-center justify-center gap-2">
+                    <Button className={`${history ? 'bg-transparent' : 'bg-gray-700'} hover:bg-gray-600`} onClick={() => toggleButton(false)}>Inventario</Button>
+                    <Button className={`${!history ? 'bg-transparent' : 'bg-gray-700'} hover:bg-gray-600`} onClick={() => toggleButton(true)}>Historial</Button>
+                </div>
+
+                <Button onClick={() => setOpenDialog(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Actualizar inventario
+                </Button>
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight">Gestión de Inventario</h2>
+
                     <div className="flex w-full max-w-sm items-center space-x-2">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Buscar en inventario..."
-                                className="pl-8"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
+                        <Filter dataBase={data.allInventory} columns={column} setDataFilter={setInventoryFilter} />
                     </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3 mb-6">
-                    {resumenData.map((item, index) => (
-                        <Card key={index}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">{item.title}</CardTitle>
-                                <div className={`rounded-full p-2 ${item.color}`}>
-                                    <item.icon className="h-4 w-4" />
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{item.value}</div>
-                                <p className="text-xs text-muted-foreground">{item.description}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
+                    <InventoryCards
+                        title='Total de Productos'
+                        value={resumen.totalProducts}
+                        description='Productos en inventario'
+                        icon={Package}
+                        color='bg-blue-100 text-blue-800'
+                    ></InventoryCards>
+                    <InventoryCards
+                        title='Productos con Stock Bajo'
+                        value={resumen.downProducts}
+                        description='Productos en inventario'
+                        icon={ArrowUpDown}
+                        color='bg-yellow-100 text-yellow-800'
+                    ></InventoryCards>
+                    <InventoryCards
+                        title='Productos Agotados'
+                        value={resumen.zeroProducts}
+                        description='Productos en inventario'
+                        icon={Package}
+                        color='bg-red-100 text-red-800'
+                    ></InventoryCards>
                 </div>
 
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Código</TableHead>
-                                <TableHead>Producto</TableHead>
-                                <TableHead className="hidden md:table-cell">Ubicación</TableHead>
-                                <TableHead>Stock</TableHead>
-                                <TableHead className="hidden md:table-cell">Mínimo</TableHead>
-                                <TableHead className="hidden md:table-cell">Última Actualización</TableHead>
-                                <TableHead>Estado</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredInventario.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="h-24 text-center">
-                                        No se encontraron resultados.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredInventario.map((item) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell className="font-medium">{item.codigo}</TableCell>
-                                        <TableCell>{item.nombre}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{item.ubicacion}</TableCell>
-                                        <TableCell className={getStockColor(item.stock, item.stockMinimo)}>{item.stock}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{item.stockMinimo}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{item.ultimaActualizacion}</TableCell>
-                                        <TableCell>
-                                            <div className="w-full">
-                                                <Progress
-                                                    value={calcularPorcentajeStock(item.stock, item.stockMinimo)}
-                                                    className={`h-2 ${getProgressColor(item.stock, item.stockMinimo)}`}
-                                                />
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                <div>
+                    <TableComponent columns={column} dataBase={data.inventory}></TableComponent>
                 </div>
+
+                <DialogComponent
+                    open={openDialog}
+                    setOpen={setOpenDialog}
+                    className="w-[30rem]"
+                    label2="Actualizar Inventario"
+                    label1="Actualizar Inventario"
+                    isEdit={false}
+
+                >
+                    <InventoryForm onSubmit={actionDialog}></InventoryForm>
+                </DialogComponent>
             </main>
         </div>
     )

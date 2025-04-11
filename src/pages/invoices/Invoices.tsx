@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Search, Plus, MoreHorizontal, FileText, Download, Send, Eye } from "lucide-react"
 import { facturasData } from "./invoices.data"
+import { Expansible } from "@/components/expansibe/Expansible"
 
 export const Invoices = () => {
     const [searchTerm, setSearchTerm] = useState("")
@@ -74,20 +75,27 @@ export const Invoices = () => {
                     </div>
                 </div>
 
+                <Expansible text='Abrir' text2='Contenido'></Expansible>
+
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Nº Factura</TableHead>
                                 <TableHead>Cliente</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead>Total</TableHead>
                                 <TableHead className="hidden md:table-cell">Fecha</TableHead>
                                 <TableHead className="hidden md:table-cell">Vencimiento</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Estado</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            <TableRow>
+                                <TableCell colSpan={7} className="p-0">
+                                    <Expansible text='Abrir' text2='Contenido'></Expansible>
+                                </TableCell>
+                            </TableRow>
                             {filteredFacturas.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center">
@@ -104,9 +112,6 @@ export const Invoices = () => {
                                             </div>
                                         </TableCell>
                                         <TableCell>{factura.cliente}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{factura.fecha}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{factura.vencimiento}</TableCell>
-                                        <TableCell>{factura.total}</TableCell>
                                         <TableCell>
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getBadgeVariant(factura.estado)}`}
@@ -114,6 +119,9 @@ export const Invoices = () => {
                                                 {factura.estado}
                                             </span>
                                         </TableCell>
+                                        <TableCell>{factura.total}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{factura.fecha}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{factura.vencimiento}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

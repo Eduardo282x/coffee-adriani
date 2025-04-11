@@ -8,15 +8,15 @@ import { getBlocks } from '@/services/clients.service'
 import { InputSelect } from '@/components/form/InputSelect'
 import { Form } from '@/components/ui/form'
 import { FormSelect } from '@/components/form/FormSelect'
-import { IOptions } from '@/interfaces/form.interface'
+import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button'
 
-interface ClientFromProps {
-    data: IClientsForm;
-    onSubmit: (data: IClientsForm) => void;
-}
+// interface ClientFromProps {
+//     data: IClientsForm;
+//     onSubmit: (data: IClientsForm) => void;
+// }
 
-export const ClientsForm: FC<ClientFromProps> = ({ data, onSubmit }) => {
+export const ClientsForm: FC<FromProps> = ({ data, onSubmit }) => {
     const [blocks, setBlocks] = useState<IOptions[]>([]);
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export const ClientsForm: FC<ClientFromProps> = ({ data, onSubmit }) => {
 
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">
-                        Name
+                        Nombre
                     </Label>
                     <Input {...form.register('name')} />
                 </div>

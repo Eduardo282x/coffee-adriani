@@ -103,7 +103,6 @@ export const rifOptions: IOptions[] = [
     { label: 'P', value: 'P' },
 ]
 
-
 export interface IClientsForm {
     id?: number;
     name: string;

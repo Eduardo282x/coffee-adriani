@@ -6,6 +6,19 @@ export const formatDate = (dateToFormat: string | Date | number): string => {
 
     return `${day}/${month}/${year}`;
 }
+
+export const formatDateTime = (dateToFormat: string | Date): string => {
+    const date = new Date(dateToFormat);
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // la hora '0' debe ser '12'
+
+    return `${hours}:${minutes} ${ampm}`;
+}
+
 export const formatNumberWithDots = (number: number | string, prefix?: string, suffix?: string): string => {
     return `${prefix}${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}${suffix}`;
 }

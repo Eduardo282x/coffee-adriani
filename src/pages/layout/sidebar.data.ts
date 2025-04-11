@@ -23,6 +23,11 @@ export const menuItems = [
         href: "/productos",
     },
     {
+        title: "Historia de productos",
+        icon: Package,
+        href: "/productos/historial",
+    },
+    {
         title: "Inventario",
         icon: Package,
         href: "/inventario",

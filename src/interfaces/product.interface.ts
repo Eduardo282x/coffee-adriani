@@ -16,8 +16,15 @@ export interface IProducts {
     name:         string;
     presentation: string;
     price:        number;
+    priceBs:     number;
     priceUSD:     number;
     amount:       number;
     createdAt:    Date;
     updatedAt:    Date;
+}
+
+export interface IDolar {
+    id:    number;
+    dolar: string;
+    date:  Date;
 }

@@ -21,21 +21,21 @@ export const productsColumns: IColumns<IProducts>[] = [
     {
         column: 'price',
         label: 'Precio Referencia (Bs)',
-        element: (data: IProducts) => formatNumberWithDots(data.price, '',',00 $'),
+        element: (data: IProducts) => formatNumberWithDots(data.price, '', ' $'),
         orderBy: '',
         icon: false,
     },
     {
-        column: 'price',
+        column: 'priceBs',
         label: 'Precio (Bs)',
-        element: (data: IProducts) => formatNumberWithDots(data.price * 70, '',',00 Bs'),
+        element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
         orderBy: '',
         icon: false,
     },
     {
         column: 'priceUSD',
         label: 'Precio ($)',
-        element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '',',00 $'),
+        element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
         orderBy: '',
         icon: false,
     },
@@ -64,4 +64,23 @@ export const productsColumns: IColumns<IProducts>[] = [
             { label: 'Eliminar', icon: Trash2, className: 'text-red-600' },
         ]
     },
-]
+];
+
+export interface IProductsForm {
+    id?: number;
+    name: string;
+    presentation: string;
+    price: number;
+    priceUSD: number;
+    amount: number;
+}
+
+// export type TypesProductsForm = 'name' | 'rif' | 'address' | 'phone' | 'zone' | 'blockId';
+
+export const defaultValues: IProductsForm = {
+    name: '',
+    presentation: '',
+    price: 0,
+    priceUSD: 0,
+    amount: 0,
+}

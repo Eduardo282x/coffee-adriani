@@ -6,14 +6,16 @@ import { Dashboard } from './pages/dashboard/Dashboard';
 import { Clients } from './pages/clients/Clients';
 import { Invoices } from './pages/invoices/Invoices';
 import { Products } from './pages/products/Products';
-import { SidebarProvider } from './components/ui/sidebar';
-import { AppSidebar } from './pages/layout/Sidebar';
+// import { SidebarProvider } from './components/ui/sidebar';
+// import { AppSidebar } from './pages/layout/Sidebar';
 import { Inventory } from './pages/inventory/Inventory';
 import { Sales } from './pages/sales/Sales';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import io from 'socket.io-client';
 import { useAxiosInterceptor } from './services/Interceptor';
+import { Users } from './pages/users/Users';
+import { Layout } from './pages/layout/Layout';
 
 const socket = io('/');
 
@@ -33,26 +35,22 @@ function App() {
   return (
     <div className='w-screen h-screen overflow-y-auto'>
       <Toaster />
-      <SidebarProvider>
-        <BrowserRouter>
-          <div className="flex h-full w-full">
-            <AppSidebar />
-            <div className="w-full h-full ">
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/clientes" element={<Clients />} />
-                <Route path="/facturas" element={<Invoices />} />
-                <Route path="/productos" element={<Products />} />
-                <Route path="/ventas" element={<Sales />} />
-                <Route path="/inventario" element={<Inventory />} />
-              </Routes>
-            </div>
-          </div>
-        </BrowserRouter>
-      </SidebarProvider>
-{/* 
-      {interceptor} */}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/clientes" element={<Clients />} />
+            <Route path="/facturas" element={<Invoices />} />
+            <Route path="/productos" element={<Products />} />
+            <Route path="/productos/historial" element={<Products />} />
+            <Route path="/ventas" element={<Sales />} />
+            <Route path="/inventario" element={<Inventory />} />
+            <Route path="/usuarios" element={<Users />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   )
 }

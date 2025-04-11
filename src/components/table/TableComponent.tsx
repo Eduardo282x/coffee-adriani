@@ -10,12 +10,12 @@ import { Button } from "../ui/button";
 interface TableProps {
     dataBase: any[];
     columns: IColumns<any>[];
-    action: (type: string, data: any) => void;
+    action?: (type: string, data: any) => void;
 }
 
 export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) => {
     const [dataFilter, setDataFilter] = useState<any[]>(dataBase);
-    const [column, setColumn] = useState<IColumns<unknown>[]>(columns);
+    const [column, setColumn] = useState<IColumns<any>[]>(columns);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -25,6 +25,10 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
         setPage(0)
         setRowsPerPage(5)
     }, [dataBase])
+
+    useEffect(() => {
+        setColumn(columns)
+    }, [columns])
 
     const handleChangePage = (page: number, newPage: number) => {
         setPage(page);
@@ -104,7 +108,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
                                     {columns && columns.map((column: IColumns<unknown>, index: number) => (
                                         <TableCell key={index}>
                                             {!column.icon ?
-                                                <span>{column.element(data)}</span>
+                                                <span className={`${column.className ? column.className(data) : ''}`}>{column.element(data)}</span>
                                                 :
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
@@ -116,7 +120,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
 
                                                     <DropdownMenuContent align="end">
                                                         {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
-                                                            <DropdownMenuItem key={index} onClick={() => action(icon.label, data)} className={`${icon.className}`}>
+                                                            <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
                                                                 <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
                                                                 <span className={`${icon.className}`}>{icon.label}</span>
                                                             </DropdownMenuItem>
@@ -133,7 +137,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
                 </Table>
             </div>
 
-            {(Math.ceil(dataBase.length / rowsPerPage)) >= 1 && (
+            {(dataBase.length) >= 5 && (
                 <div className="flex items-center justify-end px-8">
                     <Paginator
                         page={page}

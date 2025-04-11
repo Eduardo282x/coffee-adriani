@@ -142,7 +142,6 @@ export const Clients = () => {
                 label2="Agregar Cliente"
                 label1="Editar Cliente"
                 isEdit={edit}
-
             >
                 <ClientsForm onSubmit={actionDialog} data={dataDialog}></ClientsForm>
             </DialogComponent>

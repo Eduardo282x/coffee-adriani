@@ -5,6 +5,7 @@ export interface IColumns<T> {
     orderBy: OrderBy;
     icon: boolean;
     optionActions?: IOptionActions[];
+    className?: (data: T) => string;
 }
 
 export interface IOptionActions {
