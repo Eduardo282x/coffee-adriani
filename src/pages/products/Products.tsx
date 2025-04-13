@@ -115,14 +115,14 @@ export const Products = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Productos</h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="border px-4 py-1 rounded-lg">
-                        <span className="font-semibold">Dolar:</span> {formatNumberWithDots(Number(dolar?.dolar).toFixed(2), '', ' Bs')}
+                    <div className="border border-[#ebe0d2] px-4 py-1 rounded-lg">
+                        <span className="font-semibold text-[#ebe0d2]">Dolar:</span> {formatNumberWithDots(Number(dolar?.dolar).toFixed(2), '', ' Bs')}
                     </div>
 
                     <Button onClick={() => { setOpenDialog(true); setEdit(false) }}>
@@ -134,7 +134,7 @@ export const Products = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Productos</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Productos</h2>
 
                     <div className="flex w-full max-w-sm items-center space-x-2">
                         <Filter dataBase={products.products} columns={columns} setDataFilter={setProductFilter} />

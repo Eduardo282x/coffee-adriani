@@ -3,7 +3,7 @@ export interface IColumns<T> {
     label: string;
     element: (data: T) => string;
     orderBy: OrderBy;
-    icon: boolean;
+    icon?: boolean;
     optionActions?: IOptionActions[];
     className?: (data: T) => string;
 }

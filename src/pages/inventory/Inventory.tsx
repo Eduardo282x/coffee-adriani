@@ -97,15 +97,15 @@ export const Inventory = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] text-white h-14 lg:h-[60px] items-center gap-4 border-b px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Inventario</h1>
                 </div>
 
-                <div className="border rounded-lg p-1 bg-gray-500 flex items-center justify-center gap-2">
-                    <Button className={`${history ? 'bg-transparent' : 'bg-gray-700'} hover:bg-gray-600`} onClick={() => toggleButton(false)}>Inventario</Button>
-                    <Button className={`${!history ? 'bg-transparent' : 'bg-gray-700'} hover:bg-gray-600`} onClick={() => toggleButton(true)}>Historial</Button>
+                <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
+                    <Button className={`${history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(false)}>Inventario</Button>
+                    <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
                 </div>
 
                 <Button onClick={() => setOpenDialog(true)}>
@@ -115,7 +115,7 @@ export const Inventory = () => {
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Inventario</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Inventario</h2>
 
                     <div className="flex w-full max-w-sm items-center space-x-2">
                         <Filter dataBase={data.allInventory} columns={column} setDataFilter={setInventoryFilter} />

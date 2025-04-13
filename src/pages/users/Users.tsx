@@ -81,7 +81,7 @@ export const Users = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Usuarios</h1>
@@ -97,7 +97,7 @@ export const Users = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Usuarios</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Usuarios</h2>
                     <div className="flex items-center gap-8">
 
                         <div className="flex w-full max-w-sm items-center space-x-2">
@@ -114,9 +114,9 @@ export const Users = () => {
             <DialogComponent
                 open={openDialog}
                 setOpen={setOpenDialog}
-                className="w-[45rem]"
-                label2="Agregar Cliente"
-                label1="Editar Cliente"
+                className="w-[35rem]"
+                label2="Agregar Usuario"
+                label1="Editar Usuario"
                 isEdit={edit}
             >
                 <UsersForm onSubmit={actionDialog} data={dataDialog}></UsersForm>
@@ -127,7 +127,7 @@ export const Users = () => {
                 setOpen={setOpenDeleteDialog}
                 className="w-[28rem]"
                 label2=""
-                label1="Estas seguro que deseas eliminar este cliente?"
+                label1="Estas seguro que deseas eliminar este usuario?"
                 isEdit={true}
 
             >

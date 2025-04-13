@@ -33,7 +33,7 @@ function App() {
   }, [])
 
   return (
-    <div className='w-screen h-screen overflow-y-auto'>
+    <div className='w-screen h-screen overflow-y-auto bg-[#ebe0d2]'>
       <Toaster />
       <BrowserRouter>
         <Routes>

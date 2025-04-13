@@ -1,3 +1,7 @@
+import { IColumns } from "@/components/table/table.interface"
+import { formatNumberWithDots } from "@/hooks/formaters"
+import { IInventory } from "@/interfaces/inventory.interface"
+import { Trash2 } from "lucide-react"
 
 // Datos de ejemplo para la tabla de facturas
 export const facturasData = [
@@ -64,5 +68,43 @@ export const facturasData = [
         vencimiento: "15/06/2024",
         total: "$2,740.00",
         estado: "Pendiente",
+    },
+]
+
+export const productColumns: IColumns<IInventory>[] = [
+    {
+        column: 'name',
+        label: 'Producto',
+        element: (data: IInventory) => `${data.product.name} - ${data.product.presentation}`,
+        orderBy: '',
+        className: (data: IInventory) => data.id > 1 ? 'w-[20rem]' : 'w-[20rem]'
+    },
+    {
+        column: 'name',
+        label: 'Precio',
+        element: (data: IInventory) => formatNumberWithDots(data.product.price, '', ',00 $'),
+        orderBy: '',
+    },
+    {
+        column: 'name',
+        label: 'Cantidad',
+        element: () => `0`,
+        orderBy: '',
+    },
+    {
+        column: 'name',
+        label: 'Subtotal',
+        element: () => `0`,
+        orderBy: '',
+    },
+    {
+        column: '',
+        label: 'Eliminar',
+        element: () => '',
+        orderBy: '',
+        icon: true,
+        optionActions: [
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-600' },
+        ]
     },
 ]

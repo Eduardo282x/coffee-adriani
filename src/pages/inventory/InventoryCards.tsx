@@ -10,7 +10,7 @@ interface InventoryCardProps {
 
 export const InventoryCards: FC<InventoryCardProps> = ({ title, value, description, icon: Icon, color }) => {
     return (
-        <div className="border  p-4 rounded-xl">
+        <div className="border bg-white p-4 rounded-xl">
             <div className="flex flex-row items-center justify-between">
                 <p className="text-sm font-medium">{title}</p>
                 <div className={`rounded-full p-2 ${color}`}>

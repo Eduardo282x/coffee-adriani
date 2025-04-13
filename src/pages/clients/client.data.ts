@@ -1,5 +1,5 @@
 import { IColumns } from "@/components/table/table.interface";
-import { formatDate } from "@/hooks/formaters";
+import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
 import { IClients } from "@/interfaces/clients.interface";
 import { IOptions } from "@/interfaces/form.interface";
 import { Edit, Trash2 } from "lucide-react";
@@ -15,7 +15,7 @@ export const clientsColumns: IColumns<IClients>[] = [
     {
         column: 'rif',
         label: 'Rif',
-        element: (data: IClients) => data.rif,
+        element: (data: IClients) => formatNumberWithDots(data.rif,'','',true),
         orderBy: '',
         icon: false,
     },

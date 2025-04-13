@@ -36,9 +36,9 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
     return (
         <div className=' rounded-lg p-2 flex items-center justify-center gap-8'>
             <div className="flex items-center justify-center gap-2">
-                <span className=' text-gray-600 text-sm font-medium'>Elementos por pagina: </span>
+                <span className=' text-gray-700 text-sm font-medium'>Elementos por pagina: </span>
                 <Select onValueChange={changeValueSelect} value={rowsPerPage.toString()}>
-                    <SelectTrigger className="w-auto px-4 rounded-md cursor-pointer">
+                    <SelectTrigger className="w-auto px-4 rounded-md cursor-pointer bg-gray-100">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -57,7 +57,7 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
                     <ChevronLeft />
                 </Button>
 
-                <span className=' text-gray-600 text-sm'><span className='font-medium'>Pagina:</span>  {page + 1} - {maxPage.toFixed(0)}</span>
+                <span className=' text-gray-700 text-sm'><span className='font-medium'>Pagina:</span>  {page + 1} - {maxPage.toFixed(0)}</span>
 
                 <Button variant="outline" size="icon" disabled={page >= (maxPage - 1)} className=' cursor-pointer rounded-full' onClick={() => arrowBtns('next')}>
                     <ChevronRight />
@@ -65,7 +65,7 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
             </div>
 
             <div>
-                <p><span className='font-medium'>Total:</span> {totalElements}</p>
+                <p className='text-gray-700'><span className='font-medium '>Total:</span> {totalElements}</p>
             </div>
         </div>
     )

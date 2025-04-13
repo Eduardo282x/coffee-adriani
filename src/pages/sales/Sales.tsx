@@ -1,13 +1,13 @@
 import { useState } from "react"
-import { Search, Plus, MoreHorizontal, Eye, Download, ShoppingCart, Table } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Eye, Download, ShoppingCart } from "lucide-react"
 import { ventasData } from "./sales.data"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu"
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "@/components/ui/table"
 import { SalesChart } from "../dashboard/components/Sales-chart"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export const Sales = () => {
     const [searchTerm, setSearchTerm] = useState("")
@@ -19,13 +19,15 @@ export const Sales = () => {
             venta.cliente.toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
+    // Modificar la función getBadgeVariant para usar colores que combinen con el tema marrón/café
+
     // Función para obtener el color de la insignia según el estado
     const getBadgeVariant = (estado: string) => {
         switch (estado) {
             case "Completada":
-                return "bg-green-100 text-green-800"
+                return "bg-amber-100 text-amber-800"
             case "Pendiente":
-                return "bg-yellow-100 text-yellow-800"
+                return "bg-orange-100 text-orange-800"
             case "Cancelada":
                 return "bg-red-100 text-red-800"
             default:
@@ -35,7 +37,7 @@ export const Sales = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Ventas</h1>
@@ -49,7 +51,7 @@ export const Sales = () => {
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Ventas</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Ventas</h2>
                     <div className="flex w-full max-w-sm items-center space-x-2">
                         <div className="relative flex-1">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -144,4 +146,3 @@ export const Sales = () => {
         </div>
     )
 }
-

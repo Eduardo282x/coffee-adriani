@@ -48,7 +48,7 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns }) => {
     }
 
     return (
-        <div className="relative flex-1">
+        <div className="relative flex-1 bg-white rounded-md">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
                 type="text"

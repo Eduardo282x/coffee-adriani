@@ -91,7 +91,7 @@ export const Clients = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Clientes</h1>
@@ -107,10 +107,10 @@ export const Clients = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Clientes</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Clientes</h2>
                     <div className="flex items-center gap-8">
                         <Select onValueChange={handleChangeBlock}>
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-[180px] bg-white">
                                 <SelectValue placeholder="Bloques" />
                             </SelectTrigger>
                             <SelectContent>

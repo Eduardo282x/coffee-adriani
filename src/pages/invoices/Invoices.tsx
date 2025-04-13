@@ -7,9 +7,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Search, Plus, MoreHorizontal, FileText, Download, Send, Eye } from "lucide-react"
 import { facturasData } from "./invoices.data"
 import { Expansible } from "@/components/expansibe/Expansible"
+import { DialogComponent } from "@/components/dialog/DialogComponent"
+import { InvoiceForm } from "./InvoiceForm"
 
 export const Invoices = () => {
     const [searchTerm, setSearchTerm] = useState("")
+    const [openDialog, setOpenDialog] = useState<boolean>(false);
+    // const [dataDialog, setDataDialog] = useState<IClientsForm>(defaultValues);
+    // const [edit, setEdit] = useState<boolean>(false);
 
     // Filtrar facturas según el término de búsqueda
     const filteredFacturas = facturasData.filter(
@@ -43,15 +48,19 @@ export const Invoices = () => {
     //     })
     // }, [])
 
+    // const actionDialog = async (data: unknown) => {
+    //     console.log(data);
+    // }
+
     return (
         <div className="flex flex-col">
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Facturas</h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Button>
+                    <Button onClick={() => setOpenDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nueva Factura
                     </Button>
@@ -59,9 +68,9 @@ export const Invoices = () => {
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Facturas</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Facturas</h2>
                     <div className="flex w-full max-w-sm items-center space-x-2">
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 bg-white rounded-md">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
@@ -74,8 +83,6 @@ export const Invoices = () => {
                         </div>
                     </div>
                 </div>
-
-                <Expansible text='Abrir' text2='Contenido'></Expansible>
 
                 <div className="rounded-md border">
                     <Table>
@@ -152,6 +159,17 @@ export const Invoices = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                <DialogComponent
+                    open={openDialog}
+                    setOpen={setOpenDialog}
+                    className="w-[45rem]"
+                    label2="Agregar Cliente"
+                    label1="Editar Cliente"
+                    isEdit={true}
+                >
+                    <InvoiceForm></InvoiceForm>
+                </DialogComponent>
             </main>
         </div>
     )

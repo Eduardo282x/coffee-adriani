@@ -48,11 +48,10 @@ export const SalesChart = () => {
                     <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
                     <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, "Ventas"]} />
                     <Legend />
-                    <Line type="monotone" dataKey="2024" stroke="#8884d8" strokeWidth={2} activeDot={{ r: 8 }} name="2024" />
-                    <Line type="monotone" dataKey="2023" stroke="#82ca9d" strokeWidth={2} name="2023" />
+                    <Line type="monotone" dataKey="2024" stroke="#8B4513" strokeWidth={2} activeDot={{ r: 8 }} name="2024" />
+                    <Line type="monotone" dataKey="2023" stroke="#D2B48C" strokeWidth={2} name="2023" />
                 </LineChart>
             </ResponsiveContainer>
         </div>
     )
 }
-

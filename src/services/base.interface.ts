@@ -4,5 +4,5 @@ export interface BaseResponse {
 }
 
 export interface BaseResponseLogin extends BaseResponse {
-    userData: string;
+    token: string;
 }

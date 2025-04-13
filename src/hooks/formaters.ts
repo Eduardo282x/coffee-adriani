@@ -19,6 +19,10 @@ export const formatDateTime = (dateToFormat: string | Date): string => {
     return `${hours}:${minutes} ${ampm}`;
 }
 
-export const formatNumberWithDots = (number: number | string, prefix?: string, suffix?: string): string => {
-    return `${prefix}${number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}${suffix}`;
+export const formatNumberWithDots = (number: number | string, prefix?: string, suffix?: string, isRif?: boolean): string => {
+    const text = isRif ?
+        `${number.toString().slice(0,1)}-${number.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
+        :
+        number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    return `${prefix}${text}${suffix}`;
 }

@@ -3,20 +3,21 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ArrowUpRight, ArrowDownRight, DollarSign, Users, Package, ShoppingCart, Calendar } from "lucide-react"
+import { Calendar, DollarSign, Package, ShoppingCart, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SalesChart } from "./components/Sales-chart"
 import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
 import { RecentSales } from "./components/recent-sales"
+import { CardDashboard } from "./components/CardDashboard"
 
 export const Dashboard = () => {
     const [dateRange, setDateRange] = useState("7d")
 
     return (
-        <div className="flex flex-col">
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+        <div className="flex flex-col ">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Dashboard</h1>
@@ -30,7 +31,7 @@ export const Dashboard = () => {
             </header>
             <main className="flex-1 space-y-4 p-4 md:p-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight">Resumen</h2>
+                    <h2 className="text-2xl font-bold tracking-tight ">Resumen</h2>
                     <div className="flex items-center gap-2">
                         <Select value={dateRange} onValueChange={setDateRange}>
                             <SelectTrigger className="w-[180px]">
@@ -47,70 +48,10 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">$45,231.89</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-green-500 flex items-center">
-                                    <ArrowUpRight className="mr-1 h-4 w-4" />
-                                    +20.1%
-                                </span>{" "}
-                                desde el último período
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Clientes Nuevos</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">+2,350</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-green-500 flex items-center">
-                                    <ArrowUpRight className="mr-1 h-4 w-4" />
-                                    +10.5%
-                                </span>{" "}
-                                desde el último período
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Productos Vendidos</CardTitle>
-                            <Package className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">+12,234</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-green-500 flex items-center">
-                                    <ArrowUpRight className="mr-1 h-4 w-4" />
-                                    +15.2%
-                                </span>{" "}
-                                desde el último período
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Facturas Pendientes</CardTitle>
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">+573</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-red-500 flex items-center">
-                                    <ArrowDownRight className="mr-1 h-4 w-4" />
-                                    -2.5%
-                                </span>{" "}
-                                desde el último período
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <CardDashboard title="Ventas Totales" mainNumber="$45,231.89" percent="+20.1%" icon={DollarSign} subtitle="desde el último período"></CardDashboard>
+                    <CardDashboard title="Clientes Nuevos" mainNumber="+2,350" percent="+10.5%" icon={Users} subtitle="desde el último período"></CardDashboard>
+                    <CardDashboard title="Productos Vendidos" mainNumber="+12,234" percent="+15.2%" icon={Package} subtitle="desde el último período"></CardDashboard>
+                    <CardDashboard title="Facturas Pendientes" mainNumber="+573" percent="-2.5%" icon={ShoppingCart} subtitle="desde el último período"></CardDashboard>
                 </div>
 
                 <Tabs defaultValue="ventas" className="space-y-4">

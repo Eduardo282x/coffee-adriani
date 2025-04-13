@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FC, useEffect, useState } from "react";
 import { IColumns, IOptionActions, OrderBy } from "./table.interface";
 import { Paginator } from "./Paginator";
@@ -11,9 +11,10 @@ interface TableProps {
     dataBase: any[];
     columns: IColumns<any>[];
     action?: (type: string, data: any) => void;
+    includeFooter?: boolean;
 }
 
-export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) => {
+export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter }) => {
     const [dataFilter, setDataFilter] = useState<any[]>(dataBase);
     const [column, setColumn] = useState<IColumns<any>[]>(columns);
 
@@ -110,23 +111,36 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
                                             {!column.icon ?
                                                 <span className={`${column.className ? column.className(data) : ''}`}>{column.element(data)}</span>
                                                 :
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                            <span className="sr-only">Abrir menú</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
+                                                <>
+                                                    {column.optionActions && column.optionActions?.length == 1 ?
+                                                        <div>
+                                                            {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                                                                <div key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
+                                                                    <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
+                                                                    {/* <span className={`${icon.className}`}>{icon.label}</span> */}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        :
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Abrir menú</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
 
-                                                    <DropdownMenuContent align="end">
-                                                        {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
-                                                            <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
-                                                                <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
-                                                                <span className={`${icon.className}`}>{icon.label}</span>
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                            <DropdownMenuContent align="end">
+                                                                {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                                                                    <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
+                                                                        <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
+                                                                        <span className={`${icon.className}`}>{icon.label}</span>
+                                                                    </DropdownMenuItem>
+                                                                ))}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    }
+                                                </>
                                             }
                                         </TableCell>
                                     ))}
@@ -134,6 +148,14 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action }) =>
                             ))
                         )}
                     </TableBody>
+                    {includeFooter && (
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell colSpan={columns.length - 1}>Total</TableCell>
+                                <TableCell className="text-right">$2,500.00</TableCell>
+                            </TableRow>
+                        </TableFooter>
+                    )}
                 </Table>
             </div>
 
