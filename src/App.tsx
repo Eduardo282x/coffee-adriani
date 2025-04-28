@@ -18,7 +18,9 @@ import { Users } from './pages/users/Users';
 import { Layout } from './pages/layout/Layout';
 import { Payments } from './pages/payments/Payments';
 
-const socket = io('/');
+const socket = io(import.meta.env.VITE_BACKEND_URL, {
+  transports: ['websocket']
+});
 
 function App() {
   useAxiosInterceptor();
