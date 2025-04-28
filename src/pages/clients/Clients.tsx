@@ -48,14 +48,19 @@ export const Clients = () => {
     }
 
     const getAction = (action: string, data: IClientsForm) => {
+        setDataDialog(data);
         if (action === 'Editar') {
-            setOpenDialog(true);
-            setEdit(true)
+            setEdit(true);
+            // Abrir el dialog DESPUÉS que React procese los otros cambios
+            setTimeout(() => {
+                setOpenDialog(true);
+            }, 0);
         }
         if (action === 'Eliminar') {
-            setOpenDeleteDialog(true);
+            setTimeout(() => {
+                setOpenDeleteDialog(true);
+            }, 0);
         }
-        setDataDialog(data);
     }
 
     const deleteAction = async () => {
@@ -146,20 +151,21 @@ export const Clients = () => {
                 <ClientsForm onSubmit={actionDialog} data={dataDialog}></ClientsForm>
             </DialogComponent>
 
-            <DialogComponent
-                open={openDeleteDialog}
-                setOpen={setOpenDeleteDialog}
-                className="w-[28rem]"
-                label2=""
-                label1="Estas seguro que deseas eliminar este cliente?"
-                isEdit={true}
-
-            >
-                <div className="flex items-center justify-center gap-8 mt-5">
-                    <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg ">Cancelar</Button>
-                    <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800">Eliminar</Button>
-                </div>
-            </DialogComponent>
+            {openDeleteDialog && (
+                <DialogComponent
+                    open={openDeleteDialog}
+                    setOpen={setOpenDeleteDialog}
+                    className="w-[28rem]"
+                    label2=""
+                    label1="Estas seguro que deseas eliminar este cliente?"
+                    isEdit={true}
+                >
+                    <div className="flex items-center justify-center gap-8 mt-5">
+                        <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg">Cancelar</Button>
+                        <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
+                    </div>
+                </DialogComponent>
+            )}
         </div>
     )
 }

@@ -11,11 +11,6 @@ import { FormSelect } from '@/components/form/FormSelect'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button'
 
-// interface ClientFromProps {
-//     data: IClientsForm;
-//     onSubmit: (data: IClientsForm) => void;
-// }
-
 export const ClientsForm: FC<FromProps> = ({ data, onSubmit }) => {
     const [blocks, setBlocks] = useState<IOptions[]>([]);
 

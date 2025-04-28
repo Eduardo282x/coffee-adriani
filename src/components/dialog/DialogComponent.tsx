@@ -12,8 +12,17 @@ interface DialogProps {
 }
 
 export const DialogComponent: FC<DialogProps> = ({ open, setOpen, className, isEdit, label1, label2, children }) => {
+
+    const handleOpenChange = (isOpen: boolean) => {
+        if (!isOpen) {
+            // Si el dialog se cierra, mover el foco al body
+            (document.activeElement as HTMLElement)?.blur();
+        }
+        setOpen(isOpen);
+    };
+
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange} modal>
             <DialogContent className={className}>
                 <DialogHeader>
                     <DialogTitle className='text-center'>

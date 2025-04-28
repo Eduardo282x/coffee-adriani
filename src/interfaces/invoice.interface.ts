@@ -62,7 +62,7 @@ export interface IInvoiceForm {
     details: BodyInventory[];
 }
 
-export interface IInvoiceFilter {
+export interface DateRangeFilter {
     startDate: Date;
     endDate: Date;
 }

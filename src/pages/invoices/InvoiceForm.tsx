@@ -13,6 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { FromProps } from "@/interfaces/form.interface";
 import { DatePicker } from "@/components/datepicker/DatePicker";
+import { Snackbar } from "@/components/snackbar/Snackbar";
+import toast from "react-hot-toast";
 
 
 export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
@@ -39,11 +41,6 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
 
     const getInventoryApi = async () => {
         const response: IInventory[] = await getInventory();
-        // response.map((inv) => {
-        //     inv.quantity = 1;
-        //     inv.subtotal = inv.product.price;
-        // })
-        // setInventoryData(response)
         const parseInventory = response.map((inv: IInventory) => {
             return {
                 label: `${inv.product.name} - ${inv.product.presentation}`,
@@ -119,6 +116,14 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
     }
 
     const onSubmitInvoice = () => {
+        if (controlNumber === '') {
+            toast.custom(<Snackbar success={false} message={"Por favor, complete todos los campos del formulario"} />, {
+                duration: 1500,
+                position: 'bottom-center'
+            });
+            return
+        }
+
         const bodyInvoice = {
             clientId: clientSelected?.id,
             controlNumber: controlNumber,
@@ -137,7 +142,9 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
 
     return (
         <div>
-            <div className="flex items-start justify-end w-full">
+            <div className="flex items-center justify-between w-full gap-5 my-4">
+                <DatePicker setDatePicker={setDatePicker} label="Fecha de Vencimiento" />
+
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
                     <Label className="text-right w-42">
                         Numero de factura
@@ -145,8 +152,6 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
                     <Input className="w-full" value={controlNumber} onChange={(e) => setControlNumber(e.target.value)} />
                 </div>
             </div>
-
-            <DatePicker setDatePicker={setDatePicker} label="Fecha de Vencimiento"/>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">
                 <div className="flex flex-col items-start justify-start gap-2 w-full">

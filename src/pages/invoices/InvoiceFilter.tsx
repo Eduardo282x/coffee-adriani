@@ -41,7 +41,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     }, [])
 
     return (
-        <div className="flex items-center gap-3CC">
+        <div className="flex items-center gap-3">
             <DateRangePicker setDatePicker={setDate} datePicker={date} label={'Rango de Fecha'} />
 
             <div className="min-w-32">

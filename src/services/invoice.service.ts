@@ -1,4 +1,4 @@
-import { IInvoiceFilter, IInvoiceForm } from "@/interfaces/invoice.interface";
+import { DateRangeFilter, IInvoiceForm } from "@/interfaces/invoice.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInvoice = '/invoices';
@@ -11,7 +11,7 @@ export const getInvoice = async () => {
     }
 }
 
-export const getInvoiceFilter = async (filter: IInvoiceFilter) => {
+export const getInvoiceFilter = async (filter: DateRangeFilter) => {
     try {
         return await postDataApi(`${routeInvoice}/filter`, filter);
     } catch (err) {

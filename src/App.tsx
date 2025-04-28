@@ -16,6 +16,7 @@ import io from 'socket.io-client';
 import { useAxiosInterceptor } from './services/Interceptor';
 import { Users } from './pages/users/Users';
 import { Layout } from './pages/layout/Layout';
+import { Payments } from './pages/payments/Payments';
 
 const socket = io('/');
 
@@ -48,6 +49,7 @@ function App() {
             <Route path="/ventas" element={<Sales />} />
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/usuarios" element={<Users />} />
+            <Route path="/pagos" element={<Payments />} />
           </Route>
         </Routes>
       </BrowserRouter>

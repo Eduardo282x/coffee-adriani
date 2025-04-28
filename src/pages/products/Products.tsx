@@ -61,29 +61,19 @@ export const Products = () => {
         setProducts((prev) => ({ ...prev, productsFilter: products }))
     }
 
-    // Función para obtener el color de la insignia según el estado
-    // const getBadgeVariant = (estado: string) => {
-    //     switch (estado) {
-    //         case "Disponible":
-    //             return "bg-green-100 text-green-800"
-    //         case "Bajo Stock":
-    //             return "bg-yellow-100 text-yellow-800"
-    //         case "Agotado":
-    //             return "bg-red-100 text-red-800"
-    //         default:
-    //             return "bg-gray-100 text-gray-800"
-    //     }
-    // }
-
     const getAction = (action: string, data: IProducts) => {
+        setDataDialog(data);
         if (action === 'Editar') {
-            setOpenDialog(true);
-            setEdit(true)
+            setEdit(true);
+            setTimeout(() => {
+                setOpenDialog(true);
+            }, 0);
         }
         if (action === 'Eliminar') {
-            setOpenDeleteDialog(true);
+            setTimeout(() => {
+                setOpenDeleteDialog(true);
+            }, 0);
         }
-        setDataDialog(data);
     }
 
     const deleteAction = async () => {
@@ -169,7 +159,7 @@ export const Products = () => {
             >
                 <div className="flex items-center justify-center gap-8 mt-5">
                     <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg ">Cancelar</Button>
-                    <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800">Eliminar</Button>
+                    <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                 </div>
             </DialogComponent>
         </div>

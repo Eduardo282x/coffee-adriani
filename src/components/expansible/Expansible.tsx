@@ -8,15 +8,19 @@ import { DialogComponent } from "../dialog/DialogComponent";
 import { invoiceItemsColumns } from "@/pages/invoices/invoices.data";
 import { Button } from "../ui/button";
 import { Banknote, Download } from "lucide-react";
+import { InvoicePay } from "@/pages/invoices/InvoicePay";
+import { IPaymentForm } from "@/interfaces/payment.interface";
 
 interface ExpansibleProps {
     invoice: InvoiceApi;
-    columns: IColumns<IInvoice>[]
+    columns: IColumns<IInvoice>[];
+    onSubmitForm: (payment: IPaymentForm) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openDialogPay, setOpenDialogPay] = useState<boolean>(false);
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [invoiceSelected, setInvoiceSelected] = useState<IInvoice | null>(null);
@@ -53,7 +57,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                 <span className="py-1"><IoIosArrowDown className={`ease-in-out delay-100 duration-150 transition-all text-xl ${!open ? ' rotate-0' : 'rotate-180'}`} /></span>
             </div>
             <div className="w-full mt-1">
-                <TableComponent dataBase={invoice.invoices} columns={columns} action={action} />
+                <TableComponent dataBase={invoice.invoices} columns={columns} action={action} hidePaginator={true}/>
             </div>
 
             <DialogComponent
@@ -67,7 +71,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                 <div className="w-full relative">
                     <div className="absolute -top-12 left-0 flex items-center justify-center gap-2">
                         <Button className="bg-green-700 hover:bg-green-600 text-white"><Download /> Exportar</Button>
-                        <Button className="bg-green-700 hover:bg-green-600 text-white"><Banknote /> Pagar</Button>
+                        <Button disabled={invoiceSelected?.status === 'Pagado'} className="bg-green-700 hover:bg-green-600 disabled:bg-gray-500 text-white" onClick={() => setOpenDialogPay(true)}><Banknote /> Pagar</Button>
                     </div>
                     <div className="grid grid-cols-3 w-full mb-4">
                         <div className=" ">
@@ -88,6 +92,17 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                     <div className="w-full">
                         <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
                     </div>
+
+                    <DialogComponent
+                        open={openDialogPay}
+                        setOpen={setOpenDialogPay}
+                        className="w-[20rem]"
+                        label2=""
+                        label1="Pagar Factura"
+                        isEdit={true}
+                    >
+                        <InvoicePay onSubmitForm={onSubmitForm} invoice={invoiceSelected} />
+                    </DialogComponent>
                 </div>
             </DialogComponent>
         </div>

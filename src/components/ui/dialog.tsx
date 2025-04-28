@@ -53,6 +53,8 @@ function DialogContent({
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
+      aria-hidden
+      aria-modal
       onWheel={(e) => e.stopPropagation()} // Evita que se cierre el Dialog al hacer scroll
         data-slot="dialog-content"
         className={cn(

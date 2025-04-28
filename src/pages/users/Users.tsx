@@ -133,7 +133,7 @@ export const Users = () => {
             >
                 <div className="flex items-center justify-center gap-8 mt-5">
                     <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg ">Cancelar</Button>
-                    <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg bg-red-500 hover:bg-red-800">Eliminar</Button>
+                    <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                 </div>
             </DialogComponent>
         </div>

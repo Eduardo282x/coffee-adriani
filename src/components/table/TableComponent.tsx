@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { formatNumberWithDots } from "@/hooks/formaters";
+import { ToolTip } from "../tooltip/ToolTip";
 
 interface TableProps {
     dataBase: any[];
@@ -15,9 +16,10 @@ interface TableProps {
     action?: (type: string, data: any) => void;
     includeFooter?: boolean;
     total?: number;
+    hidePaginator?: boolean;
 }
 
-export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter, total }) => {
+export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter, total, hidePaginator }) => {
     const [dataFilter, setDataFilter] = useState<any[]>(dataBase);
     const [column, setColumn] = useState<IColumns<any>[]>(columns);
 
@@ -134,7 +136,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                 </Table>
             </div>
 
-            {(dataBase.length) >= 5 && (
+            {(!hidePaginator && dataBase.length >= 5) && (
                 <div className="flex items-center justify-end px-8">
                     <Paginator
                         page={page}
@@ -186,10 +188,11 @@ const ColumnIcon: FC<ColumnProps> = ({ column, data, action }) => {
                 <div>
                     {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
                         <div key={index} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
-                            <div className="p-1 hover:bg-gray-300 rounded-md cursor-pointer">
-                                <icon.icon className={`h-4 w-4 ${icon.className}`} />
-                            </div>
-                            {/* <span className={`${icon.className}`}>{icon.label}</span> */}
+                            <ToolTip tooltip={column.label}>
+                                <div className="p-1 hover:bg-gray-300 rounded-md cursor-pointer">
+                                    <icon.icon className={`h-4 w-4 ${icon.className}`} />
+                                </div>
+                            </ToolTip>
                         </div>
                     ))}
                 </div>
