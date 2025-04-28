@@ -81,7 +81,7 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
     {
         column: 'totalAmount',
         label: 'Total',
-        element: (data: IInvoice) => formatNumberWithDots(data.totalAmount, '', ',00 $'),
+        element: (data: IInvoice) => formatNumberWithDots(data.totalAmount, '', ' $'),
         orderBy: '',
         type: 'string',
     },
@@ -138,7 +138,7 @@ export const invoiceItemsColumns: IColumns<InvoiceItems>[] = [
     {
         column: 'price',
         label: 'Precio',
-        element: (data: InvoiceItems) => formatNumberWithDots(data.product.price, '', ',00 $'),
+        element: (data: InvoiceItems) => formatNumberWithDots(Number(data.product.price).toFixed(2), '', ' $'),
         orderBy: '',
         type: 'string',
     },
@@ -152,7 +152,7 @@ export const invoiceItemsColumns: IColumns<InvoiceItems>[] = [
     {
         column: 'subtotal',
         label: 'Subtotal',
-        element: (data: InvoiceItems) => formatNumberWithDots(data.subtotal, '', ',00 $'),
+        element: (data: InvoiceItems) => formatNumberWithDots(Number(data.subtotal).toFixed(2), '', ' $'),
         orderBy: '',
         type: 'string',
     }
@@ -170,14 +170,14 @@ export const productColumns: IColumns<IInventory>[] = [
     {
         column: 'price',
         label: 'Precio',
-        element: (data: IInventory) => formatNumberWithDots(data.product.price, '', ',00 $'),
+        element: (data: IInventory) => formatNumberWithDots(data.product.price, '', ' $'),
         orderBy: '',
         type: 'string',
     },
     {
         column: 'price',
         label: 'Precio USD',
-        element: (data: IInventory) => formatNumberWithDots(data.product.priceUSD, '', ',00 $'),
+        element: (data: IInventory) => formatNumberWithDots(data.product.priceUSD, '', ' $'),
         orderBy: '',
         type: 'string',
     },
@@ -191,7 +191,7 @@ export const productColumns: IColumns<IInventory>[] = [
     {
         column: 'subtotal',
         label: 'Subtotal',
-        element: (data: IInventory) => data.subtotal ? formatNumberWithDots(data.subtotal, '', ',00 $') : '0,00 $',
+        element: (data: IInventory) => data.subtotal ? formatNumberWithDots(data.subtotal.toFixed(2), '', ' $') : '0,00 $',
         orderBy: '',
         type: 'string',
     },

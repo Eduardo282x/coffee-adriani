@@ -54,13 +54,13 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
           <Label className="text-right">
             Precio
           </Label>
-          <Input type='number' min={0} {...register('price')} />
+          <Input type='number' step="0.01" min={0} {...register('price')} />
         </div>
         <div className="flex flex-col items-start justify-start gap-4 w-full">
           <Label className="text-right">
             Precio USD
           </Label>
-          <Input type='number' min={0} {...register('priceUSD')} />
+          <Input type='number' step="0.01" min={0} {...register('priceUSD')} />
         </div>
         <div className="flex flex-col items-start justify-start gap-4 w-full">
           <Label className="text-right">

@@ -85,7 +85,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm
                         <div className="flex flex-col justify-end items-start">
 
                             <p><strong>Fecha despacho:</strong> {formatDate(String(invoiceSelected?.dispatchDate))}</p>
-                            <p><strong>Total:</strong> {formatNumberWithDots(Number(invoiceSelected?.totalAmount), '', ',00 $',)}</p>
+                            <p><strong>Total:</strong> {formatNumberWithDots(Number(invoiceSelected?.totalAmount), '', ' $',)}</p>
                         </div>
                     </div>
 

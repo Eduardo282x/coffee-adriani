@@ -71,7 +71,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
                 {
                     ...selectedProductData,
                     quantity: 1,
-                    subtotal: selectedProductData.product.price
+                    subtotal: Number(selectedProductData.product.price)
                 }
                 ])
             }
@@ -110,7 +110,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
         setInventoryData((prev) => prev.map((inv) => {
             return {
                 ...inv,
-                subtotal: inv.quantity * (!priceUSD ? inv.product.priceUSD : inv.product.price)
+                subtotal: inv.quantity * (!priceUSD ? Number(inv.product.priceUSD) : Number(inv.product.price))
             }
         }))
     }
@@ -181,7 +181,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
                 </div>
             </div>
 
-            <TableComponent columns={productColumns} total={total} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
+            <TableComponent columns={productColumns} total={total.toFixed(2)} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
 
             <div className="flex items-center justify-end mt-4">
                 <Button disabled={total === 0} onClick={onSubmitInvoice}>Generar Factura</Button>

@@ -40,7 +40,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'amount',
         label: 'Cantidad',
-        element: (data: IPayments) => formatNumberWithDots(data.amount, '', ',00 $'),
+        element: (data: IPayments) => formatNumberWithDots(data.amount, '', ' $'),
         orderBy: '',
         type: 'string',
         icon: false,

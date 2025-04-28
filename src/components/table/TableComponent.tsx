@@ -15,7 +15,7 @@ interface TableProps {
     columns: IColumns<any>[];
     action?: (type: string, data: any) => void;
     includeFooter?: boolean;
-    total?: number;
+    total?: string;
     hidePaginator?: boolean;
 }
 
@@ -128,7 +128,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={columns.length - 2}>Total</TableCell>
-                                <TableCell className="text-left">{formatNumberWithDots(Number(total), '', ',00 $')}</TableCell>
+                                <TableCell className="text-left">{formatNumberWithDots(Number(total), '', ' $')}</TableCell>
                                 <TableCell className="text-left"></TableCell>
                             </TableRow>
                         </TableFooter>
