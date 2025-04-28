@@ -38,14 +38,19 @@ export const Users = () => {
     }
 
     const getAction = (action: string, data: IUsersForm) => {
+        setDataDialog(data);
         if (action === 'Editar') {
-            setOpenDialog(true);
-            setEdit(true)
+            setEdit(true);
+            // Abrir el dialog DESPUÉS que React procese los otros cambios
+            setTimeout(() => {
+                setOpenDialog(true);
+            }, 0);
         }
         if (action === 'Eliminar') {
-            setOpenDeleteDialog(true);
+            setTimeout(() => {
+                setOpenDeleteDialog(true);
+            }, 0);
         }
-        setDataDialog(data);
     }
 
     // const deleteAction = async () => {
