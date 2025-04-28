@@ -41,7 +41,7 @@ export const postDataFileGetApi = async (endpoint: string, data: any) => {
         })
 }
 
-export const postDataApi = async (endpoint: string, data: any): Promise<BaseResponseLogin | BaseResponse> => {
+export const postDataApi = async (endpoint: string, data: any): Promise<BaseResponseLogin | BaseResponse | any> => {
     return await api.post(endpoint, data).then((response) => {
         return response.data;
     }).catch((err) => {

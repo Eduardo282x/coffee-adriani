@@ -1,3 +1,5 @@
+import { IOptions } from "./form.interface";
+
 export interface BodyClients {
     name: string;
     rif: string;
@@ -12,6 +14,10 @@ export interface BodyBlock {
     address: string;
 }
 
+export interface GroupClientsOptions {
+    allClients: IClients[];
+    clients: IOptions[];
+}
 export interface GroupClients {
     allClients: IClients[];
     clients: IClients[];

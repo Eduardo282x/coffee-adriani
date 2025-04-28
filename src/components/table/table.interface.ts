@@ -1,6 +1,7 @@
 export interface IColumns<T> {
     column: string;
     label: string;
+    type: 'string' | 'number' | 'date' | 'boolean' | 'custom' | 'editable';
     element: (data: T) => string;
     orderBy: OrderBy;
     icon?: boolean;

@@ -8,6 +8,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         column: 'product.name',
         element: (data: IInventory) => data.product.name,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -15,6 +16,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         label: 'Presentación',
         element: (data: IInventory) => data.product.presentation,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -22,6 +24,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         label: 'Precio Referencia',
         element: (data: IInventory) => formatNumberWithDots(data.product.price, '', ' $'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -29,6 +32,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         label: 'Precio (Bs)',
         element: (data: IInventory) => formatNumberWithDots(data.product.priceBs, '', ' Bs'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -36,6 +40,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         label: 'Precio ($)',
         element: (data: IInventory) => formatNumberWithDots(data.product.priceUSD, '', ' $'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -43,6 +48,7 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         label: 'Cantidad',
         element: (data: IInventory) => data.quantity.toString(),
         orderBy: '',
+        type: 'string',
         icon: false,
     }
 ]
@@ -50,25 +56,36 @@ export const inventoryColumns: IColumns<IInventory>[] = [
 export const extraColumn: IColumns<IInventory>[] = [
     {
         label: 'Movimiento',
-        column: 'product.movementType',
+        column: 'movementType',
         element: (data: IInventory) => data.movementType ? (data.movementType === 'IN' ? 'Entrada' : 'Salida') : '',
         orderBy: '',
+        type: 'string',
         className: (data: IInventory) => data.movementType ? `rounded-full px-2.5 py-0.5 text-xs font-medium ${(data.movementType === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}` : '',
-
+        icon: false,
+    },
+    {
+        label: 'Descripcion',
+        column: 'description',
+        element: (data: IInventory) => data.description,
+        orderBy: '',
+        type: 'string',
+        className: (data: IInventory) => data.movementType ? `rounded-full px-2.5 py-0.5 text-xs font-medium ${(data.movementType === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}` : '',
         icon: false,
     },
     {
         label: 'Hora',
-        column: 'product.movementDate',
+        column: 'movementDate',
         element: (data: IInventory) => data.movementDate ? formatDateTime(data.movementDate) : '',
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
         label: 'Fecha',
-        column: 'product.movementDate',
+        column: 'movementDate',
         element: (data: IInventory) => data.movementDate ? formatDate(data.movementDate) : '',
         orderBy: '',
+        type: 'string',
         icon: false,
     }
 ]

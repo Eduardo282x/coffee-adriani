@@ -110,7 +110,7 @@ export const Clients = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Clientes</h2>
                     <div className="flex items-center gap-8">
                         <Select onValueChange={handleChangeBlock}>
-                            <SelectTrigger className="w-[180px] bg-white">
+                            <SelectTrigger className="w-[180px] ">
                                 <SelectValue placeholder="Bloques" />
                             </SelectTrigger>
                             <SelectContent>

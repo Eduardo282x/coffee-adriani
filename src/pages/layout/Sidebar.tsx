@@ -28,8 +28,7 @@ export const AppSidebar = () => {
         localStorage.removeItem('token');
     }
 
-    useEffect(() => {
-
+    useEffect(() => { 
         if (validateToken()) {
             setUserData(validateToken() as ITokenExp)
         }

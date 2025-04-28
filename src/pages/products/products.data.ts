@@ -9,6 +9,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         column: 'name',
         element: (data: IProducts) => data.name,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -16,6 +17,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Presentación',
         element: (data: IProducts) => data.presentation,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -23,6 +25,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio Referencia (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.price, '', ' $'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -30,6 +33,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -37,6 +41,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio ($)',
         element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -44,6 +49,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Cantidad',
         element: (data: IProducts) => data.amount.toString(),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -51,6 +57,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Fecha Registro',
         element: (data: IProducts) => formatDate(data.createdAt),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -58,6 +65,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Acciones',
         element: () => '',
         orderBy: '',
+        type: 'string',
         icon: true,
         optionActions: [
             { label: 'Editar', icon: Edit, className: '' },

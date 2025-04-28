@@ -70,7 +70,6 @@ export const InputSelect: FC<InputSelectProps> = ({ label, options, max, type, n
                 </SelectContent>
             </Select>
 
-
             <Input
                 type="text"
                 inputMode={type === 'number' ? 'numeric' : 'text'}

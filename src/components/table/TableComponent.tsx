@@ -6,15 +6,18 @@ import { Paginator } from "./Paginator";
 import { ArrowUp, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { formatNumberWithDots } from "@/hooks/formaters";
 
 interface TableProps {
     dataBase: any[];
     columns: IColumns<any>[];
     action?: (type: string, data: any) => void;
     includeFooter?: boolean;
+    total?: number;
 }
 
-export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter }) => {
+export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter, total }) => {
     const [dataFilter, setDataFilter] = useState<any[]>(dataBase);
     const [column, setColumn] = useState<IColumns<any>[]>(columns);
 
@@ -109,38 +112,9 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                                     {columns && columns.map((column: IColumns<unknown>, index: number) => (
                                         <TableCell key={index}>
                                             {!column.icon ?
-                                                <span className={`${column.className ? column.className(data) : ''}`}>{column.element(data)}</span>
+                                                <ColumnType column={column} data={data} action={action} />
                                                 :
-                                                <>
-                                                    {column.optionActions && column.optionActions?.length == 1 ?
-                                                        <div>
-                                                            {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
-                                                                <div key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
-                                                                    <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
-                                                                    {/* <span className={`${icon.className}`}>{icon.label}</span> */}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        :
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Abrir menú</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-
-                                                            <DropdownMenuContent align="end">
-                                                                {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
-                                                                    <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
-                                                                        <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
-                                                                        <span className={`${icon.className}`}>{icon.label}</span>
-                                                                    </DropdownMenuItem>
-                                                                ))}
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    }
-                                                </>
+                                                <ColumnIcon column={column} data={data} action={action} />
                                             }
                                         </TableCell>
                                     ))}
@@ -151,8 +125,9 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                     {includeFooter && (
                         <TableFooter>
                             <TableRow>
-                                <TableCell colSpan={columns.length - 1}>Total</TableCell>
-                                <TableCell className="text-right">$2,500.00</TableCell>
+                                <TableCell colSpan={columns.length - 2}>Total</TableCell>
+                                <TableCell className="text-left">{formatNumberWithDots(Number(total), '', ',00 $')}</TableCell>
+                                <TableCell className="text-left"></TableCell>
                             </TableRow>
                         </TableFooter>
                     )}
@@ -171,6 +146,72 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                     </Paginator>
                 </div>
             )}
+        </>
+    )
+}
+
+interface ColumnProps {
+    column: IColumns<any>;
+    data: any;
+    action?: (type: string, data: any) => void;
+}
+
+const ColumnType: FC<ColumnProps> = ({ column, data, action }) => {
+    const [value, setValue] = useState<string | number>(data[column.column]);
+
+    const onChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setValue(newValue);
+        if (column.type === 'editable' && action) {
+            action('editable', { ...data, [column.column]: newValue });
+        }
+    }
+
+    return (
+        <>
+            {column.type === 'string' &&
+                <span className={`${column.className ? column.className(data) : ''}`}>{column.element(data)}</span>
+            }
+            {column.type === 'editable' &&
+                <Input type="number" value={value} onChange={onChangeValue} />
+            }
+        </>
+    )
+}
+
+const ColumnIcon: FC<ColumnProps> = ({ column, data, action }) => {
+    return (
+        <>
+            {column.optionActions && column.optionActions?.length == 1 ?
+                <div>
+                    {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                        <div key={index} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
+                            <div className="p-1 hover:bg-gray-300 rounded-md cursor-pointer">
+                                <icon.icon className={`h-4 w-4 ${icon.className}`} />
+                            </div>
+                            {/* <span className={`${icon.className}`}>{icon.label}</span> */}
+                        </div>
+                    ))}
+                </div>
+                :
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menú</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                        {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                            <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
+                                <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
+                                <span className={`${icon.className}`}>{icon.label}</span>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            }
         </>
     )
 }

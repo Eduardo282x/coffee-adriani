@@ -8,6 +8,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         column: 'name',
         element: (data: IUsers) => data.name,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -15,6 +16,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         label: 'Apellido',
         element: (data: IUsers) => data.lastName,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -22,6 +24,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         label: 'Usuario',
         element: (data: IUsers) => data.username,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -29,6 +32,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         label: 'Rol',
         element: (data: IUsers) => data.roles.rol,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -36,6 +40,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         label: 'Acciones',
         element: () => '',
         orderBy: '',
+        type: 'string',
         icon: true,
         optionActions: [
             { label: 'Editar', icon: Edit, className: '' },

@@ -10,6 +10,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         column: 'name',
         element: (data: IClients) => data.name,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -17,6 +18,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Rif',
         element: (data: IClients) => formatNumberWithDots(data.rif,'','',true),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -24,6 +26,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Dirección',
         element: (data: IClients) => data.address,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -31,6 +34,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Teléfono',
         element: (data: IClients) => data.phone,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -38,6 +42,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Zona',
         element: (data: IClients) => data.zone,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -45,6 +50,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Bloque',
         element: (data: IClients) => data.block.name,
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -52,6 +58,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Fecha Registro',
         element: (data: IClients) => formatDate(data.createdAt),
         orderBy: '',
+        type: 'string',
         icon: false,
     },
     {
@@ -59,6 +66,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         label: 'Acciones',
         element: () => '',
         orderBy: '',
+        type: 'string',
         icon: true,
         optionActions: [
             { label: 'Editar', icon: Edit, className: '' },

@@ -22,7 +22,7 @@ export const Dashboard = () => {
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Dashboard</h1>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 text-black">
                     <Button variant="outline" size="sm">
                         <Calendar className="mr-2 h-4 w-4" />
                         Hoy

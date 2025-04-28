@@ -1,3 +1,4 @@
+import { IOptions } from "./form.interface";
 import { IProducts } from "./product.interface";
 
 export interface Resume {
@@ -10,6 +11,8 @@ export interface IInventory {
     id: number;
     productId: number;
     quantity: number;
+    description: string;
+    subtotal?: number;
     createdAt: Date;
     product: IProducts;
 
@@ -22,6 +25,10 @@ export interface BodyInventory {
     quantity: number;
 }
 
+export interface GroupInventoryDate {
+    allInventory: IInventory[],
+    inventory: IOptions[]
+}
 export interface GroupInventory {
     allInventory: IInventory[],
     inventory: IInventory[]
