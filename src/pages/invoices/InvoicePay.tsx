@@ -43,8 +43,8 @@ export const InvoicePay: FC<IInvoicePay> = ({ invoice, onSubmitForm }) => {
 
     const onSubmit = (data: IPaymentForm) => {
         onSubmitForm({
-            ...data,
             invoiceId: Number(invoice?.id),
+            amount: Number(data.amount),
             methodId: Number(data.methodId),
         })
     }

@@ -19,6 +19,14 @@ export const getProductDolar = async () => {
     }
 }
 
+export const updateDolar = async () => {
+    try {
+        return await postDataApi(`${routeProduct}/dolar`, {});
+    } catch (err) {
+        return err
+    }
+}
+
 export const getProductHistory= async () => {
     try {
         return await getDataApi(`${routeProduct}/history`);

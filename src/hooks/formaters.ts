@@ -14,7 +14,7 @@ export const formatDateTime = (dateToFormat: string | Date): string => {
     const ampm = hours >= 12 ? 'PM' : 'AM';
 
     hours = hours % 12;
-    hours = hours ? hours : 12; // la hora '0' debe ser '12'
+    hours = hours ? hours : 12;
 
     return `${hours}:${minutes} ${ampm}`;
 }

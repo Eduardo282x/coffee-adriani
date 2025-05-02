@@ -1,3 +1,4 @@
+import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,7 @@ const validationSchema = z.object({
 export const Login = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const { register, handleSubmit } = useForm<ILogin>({
         defaultValues: {
@@ -33,9 +35,11 @@ export const Login = () => {
     })
 
     const onSubmit = async (login: ILogin) => {
+        setLoading(true);
         await postDataApi('/auth', login).then((res: BaseResponseLogin | BaseResponse) => {
             if (res.success) {
                 const parseResponse = res as BaseResponseLogin;
+                setLoading(false);
                 setTimeout(() => {
                     localStorage.setItem('token', parseResponse.token)
                     navigate('/')
@@ -46,6 +50,10 @@ export const Login = () => {
 
     return (
         <div className='h-full w-full bg-[#d2b082] flex items-center justify-center'>
+
+            {loading && (
+                <ScreenLoader/>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="bg-white flex flex-wrap justify-start items-start gap-4 w-1/4 border rounded-lg p-4">
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">

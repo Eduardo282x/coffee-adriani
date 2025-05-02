@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus } from "lucide-react"
-import { deleteProduct, getProduct, getProductDolar, getProductHistory, postProduct, putProduct } from "@/services/products.service"
+import { Plus, RefreshCcw } from "lucide-react"
+import { deleteProduct, getProduct, getProductDolar, getProductHistory, postProduct, putProduct, updateDolar } from "@/services/products.service"
 import { GroupProducts, IDolar, IProducts } from "@/interfaces/product.interface"
 import { TableComponent } from "@/components/table/TableComponent"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
@@ -13,6 +13,7 @@ import { ProductForm } from "./ProductForm"
 import { formatNumberWithDots } from "@/hooks/formaters"
 import { useLocation } from "react-router"
 import { IColumns } from "@/components/table/table.interface"
+import { ToolTip } from "@/components/tooltip/ToolTip"
 
 export const Products = () => {
     const location = useLocation();
@@ -98,6 +99,11 @@ export const Products = () => {
         }
     }, [openDialog])
 
+    const updateDolarApi = async () => {
+        await updateDolar();
+        await getProductDolarApi();
+    }
+
     return (
         <div className="flex flex-col">
 
@@ -111,6 +117,12 @@ export const Products = () => {
                     <h1 className="text-lg font-semibold">Productos</h1>
                 </div>
                 <div className="flex items-center gap-4">
+                    <ToolTip tooltip="Actualizar tasa dolar" position="left">
+                        <Button onClick={updateDolarApi}>
+                            <RefreshCcw />
+                        </Button>
+                    </ToolTip>
+
                     <div className="border border-[#ebe0d2] px-4 py-1 rounded-lg">
                         <span className="font-semibold text-[#ebe0d2]">Dolar:</span> {formatNumberWithDots(Number(dolar?.dolar).toFixed(2), '', ' Bs')}
                     </div>

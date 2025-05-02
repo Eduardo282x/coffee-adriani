@@ -28,7 +28,7 @@ export const usersColumns: IColumns<IUsers>[] = [
         icon: false,
     },
     {
-        column: 'roles',
+        column: 'roles.rol',
         label: 'Rol',
         element: (data: IUsers) => data.roles.rol,
         orderBy: '',

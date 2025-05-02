@@ -12,27 +12,22 @@ import { Inventory } from './pages/inventory/Inventory';
 import { Sales } from './pages/sales/Sales';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import io from 'socket.io-client';
 import { useAxiosInterceptor } from './services/Interceptor';
 import { Users } from './pages/users/Users';
 import { Layout } from './pages/layout/Layout';
 import { Payments } from './pages/payments/Payments';
+import { socket, useSocket } from './services/socket.io';
 
-const socket = io(import.meta.env.VITE_BACKEND_URL, {
-  transports: ['websocket']
-});
 
 function App() {
   useAxiosInterceptor();
 
-  useEffect(() => {
-    socket.emit('message', 'Enviando mensaje desde react')
-  }, [])
+  useSocket('message', data => {
+    console.log(data);
+  })
 
   useEffect(() => {
-    socket.on('message', data => {
-      console.log(data);
-    })
+    socket.emit('message', 'Enviando mensaje desde react')
   }, [])
 
   return (

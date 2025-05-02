@@ -7,10 +7,11 @@ import { Filter } from "@/components/table/Filter"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { getUsers, postUsers, putUsers } from "@/services/user.service"
+import { deleteUsers, getUsers, postUsers, putUsers } from "@/services/user.service"
 import { GroupUsers, IUsers } from "@/interfaces/user.interface"
 import { defaultValues, IUsersForm, usersColumns } from "./users.data"
 import { UsersForm } from "./UsersForm"
+import { BaseResponse } from "@/services/base.interface"
 // import { UsersForm } from "./UsersForm"
 
 
@@ -53,25 +54,33 @@ export const Users = () => {
         }
     }
 
-    // const deleteAction = async () => {
-    //     await deleteUsers(Number(dataDialog.id))
-    //     setOpenDeleteDialog(false);
-    //     await getUsersApi();
-    // }
+    const deleteAction = async () => {
+        await deleteUsers(Number(dataDialog.id))
+        setOpenDeleteDialog(false);
+        await getUsersApi();
+    }
 
     const actionDialog = async (data: IUsersForm) => {
         const parseData = {
             ...data,
             rolId: Number(data.rolId)
         }
-
+        let closeDialog = false;
         if (edit) {
-            await putUsers(Number(dataDialog.id), parseData)
+            await putUsers(Number(dataDialog.id), parseData).then((res) => {
+                const parseResponse: BaseResponse = res as BaseResponse;
+                closeDialog = parseResponse.success;
+            })
         } else {
-            await postUsers(parseData)
+            await postUsers(parseData).then((res: BaseResponse) => {
+                closeDialog = res.success;
+            })
         }
-        setOpenDialog(false);
-        await getUsersApi();
+
+        if (closeDialog) {
+            setOpenDialog(false);
+            await getUsersApi();
+        }
     }
 
     useEffect(() => {
@@ -105,7 +114,7 @@ export const Users = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Usuarios</h2>
                     <div className="flex items-center gap-8">
 
-                        <div className="flex w-full max-w-sm items-center space-x-2">
+                        <div className="flex w-80  items-center space-x-2">
                             <Filter dataBase={users.allUsers} columns={usersColumns} setDataFilter={setUsersFilter} />
                         </div>
                     </div>
@@ -138,7 +147,7 @@ export const Users = () => {
             >
                 <div className="flex items-center justify-center gap-8 mt-5">
                     <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg ">Cancelar</Button>
-                    <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
+                    <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                 </div>
             </DialogComponent>
         </div>

@@ -23,7 +23,6 @@ export interface IInvoice {
     totalAmount: number;
     consignment: boolean;
     status: string;
-    statusPay: string;
     createdAt: Date;
     updatedAt: Date;
     payments: Payments[];

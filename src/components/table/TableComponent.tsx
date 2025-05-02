@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IColumns, IOptionActions, OrderBy } from "./table.interface";
 import { Paginator } from "./Paginator";
 import { ArrowUp, MoreHorizontal } from "lucide-react";
@@ -10,18 +10,29 @@ import { Input } from "../ui/input";
 import { formatNumberWithDots } from "@/hooks/formaters";
 import { ToolTip } from "../tooltip/ToolTip";
 
-interface TableProps {
-    dataBase: any[];
-    columns: IColumns<any>[];
-    action?: (type: string, data: any) => void;
+interface TableProps<T> {
+    dataBase: T[];
+    columns: IColumns<T>[];
+    action?: (type: string, data: T) => void;
     includeFooter?: boolean;
     total?: string;
     hidePaginator?: boolean;
+    renderRow?: (item: T, index: number) => React.ReactNode;
+    colSpanColumns?: boolean
 }
 
-export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, includeFooter, total, hidePaginator }) => {
-    const [dataFilter, setDataFilter] = useState<any[]>(dataBase);
-    const [column, setColumn] = useState<IColumns<any>[]>(columns);
+export const TableComponent = <T,>({
+    dataBase,
+    columns,
+    action,
+    includeFooter,
+    total,
+    hidePaginator,
+    renderRow,
+    colSpanColumns,
+}: TableProps<T>) => {
+    const [dataFilter, setDataFilter] = useState<T[]>(dataBase);
+    const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -33,7 +44,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
     }, [dataBase])
 
     useEffect(() => {
-        setColumn(columns)
+        setColumnData(columns)
     }, [columns])
 
     const handleChangePage = (page: number, newPage: number) => {
@@ -41,14 +52,14 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
         setRowsPerPage(newPage);
     };
 
-    const handleChangeOrder = (col: IColumns<unknown>) => {
-        if (!col.icon) {
+    const handleChangeOrder = (col: IColumns<T>) => {
+        if (!col.icon && !renderRow) {
             let newOrderBy: OrderBy = "";
 
-            setColumn((prev) =>
+            setColumnData((prev) =>
                 prev.map((co) => {
                     if (co.column === col.column) {
-                        newOrderBy = co.orderBy === 'asc' ? 'desc' : co.orderBy === 'desc' ? '' : 'asc';
+                        newOrderBy = co.orderBy === 'asc' ? 'desc' : (co.orderBy === 'desc' ? '' : 'asc');
                         return { ...co, orderBy: newOrderBy };
                     } else {
                         return { ...co, orderBy: '' };
@@ -62,8 +73,8 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                 orderedData = dataBase;
             } else {
                 orderedData = [...dataBase].sort((a, b) => {
-                    const valA = String(a[col.column]);
-                    const valB = String(b[col.column]);
+                    const valA = getNestedValue(a, col.column);
+                    const valB = getNestedValue(b, col.column);
 
                     return newOrderBy === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
                 });
@@ -80,7 +91,7 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                 <Table>
                     <TableHeader className="shadow-md">
                         <TableRow>
-                            {column.map((col: IColumns<unknown>, index: number) => (
+                            {columnData.map((col: IColumns<T>, index: number) => (
                                 <TableHead
                                     key={index}
                                     onClick={() => handleChangeOrder(col)}
@@ -111,15 +122,20 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
                         ) : (
                             dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
                                 <TableRow key={index}>
-                                    {columns && columns.map((column: IColumns<unknown>, index: number) => (
-                                        <TableCell key={index}>
-                                            {!column.icon ?
-                                                <ColumnType column={column} data={data} action={action} />
-                                                :
-                                                <ColumnIcon column={column} data={data} action={action} />
-                                            }
+                                    {renderRow ?
+                                        <TableCell key={index} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">
+                                            {renderRow(data, index)}
                                         </TableCell>
-                                    ))}
+                                        :
+                                        (columns && columns.map((column: IColumns<T>, index: number) => (
+                                            <TableCell key={index}>
+                                                {(!column.icon
+                                                    ? <ColumnType column={column} data={data} action={action} />
+                                                    : <ColumnIcon column={column} data={data} action={action} />
+                                                )}
+                                            </TableCell>
+                                        )))
+                                    }
                                 </TableRow>
                             ))
                         )}
@@ -137,29 +153,28 @@ export const TableComponent: FC<TableProps> = ({ dataBase, columns, action, incl
             </div>
 
             {(!hidePaginator && dataBase.length >= 5) && (
-                <div className="flex items-center justify-end px-8">
-                    <Paginator
-                        page={page}
-                        rowsPerPage={rowsPerPage}
-                        changePage={handleChangePage}
-                        maxPage={Math.ceil(dataBase.length / rowsPerPage)}
-                        totalElements={dataBase.length}
-                    >
-                    </Paginator>
-                </div>
+                <Paginator
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    changePage={handleChangePage}
+                    maxPage={Math.ceil(dataBase.length / rowsPerPage)}
+                    totalElements={dataBase.length}
+                >
+                </Paginator>
             )}
         </>
     )
 }
 
-interface ColumnProps {
-    column: IColumns<any>;
-    data: any;
-    action?: (type: string, data: any) => void;
+interface ColumnProps<T> {
+    column: IColumns<T>;
+    data: T;
+    action?: (type: string, data: T) => void;
 }
 
-const ColumnType: FC<ColumnProps> = ({ column, data, action }) => {
-    const [value, setValue] = useState<string | number>(data[column.column]);
+const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
+    // const [value, setValue] = useState<string | number>(data[column.column] as string);
+    const [value, setValue] = useState<string | number>(getNestedValue(data, column.column));
 
     const onChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
@@ -181,7 +196,7 @@ const ColumnType: FC<ColumnProps> = ({ column, data, action }) => {
     )
 }
 
-const ColumnIcon: FC<ColumnProps> = ({ column, data, action }) => {
+const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
     return (
         <>
             {column.optionActions && column.optionActions?.length == 1 ?
@@ -217,4 +232,12 @@ const ColumnIcon: FC<ColumnProps> = ({ column, data, action }) => {
             }
         </>
     )
+}
+
+const getNestedValue = (obj: any, path: string): string => {
+    try {
+        return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || '';
+    } catch {
+        return '';
+    }
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
@@ -15,6 +14,7 @@ import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { IPaymentForm } from "@/interfaces/payment.interface"
 import { postPayment } from "@/services/payment.service"
+import { TableComponent } from "@/components/table/TableComponent"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -58,14 +58,14 @@ export const Invoices = () => {
     }
 
     const handleChangeBlock = (option: string) => {
-        if (option === 'all') return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }))
+        if (option === 'all') return setInvoices((prev) => ({ ...prev, invoicesFilter: invoice.allInvoices }))
         const filterClientsByBlock = invoice.allInvoices.filter(cli => cli.client.blockId === Number(option))
         setInvoices((prev) => ({ ...prev, invoices: filterClientsByBlock }))
     }
 
     const handleChangeStatusInvoice = (option: string) => {
         if (option === 'all') {
-            return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }));
+            return setInvoices((prev) => ({ ...prev, invoicesFilter: invoice.allInvoices }));
         }
 
         const filterInvoiceByStatus: InvoiceApi[] = invoice.allInvoices.map(inv => {
@@ -119,7 +119,7 @@ export const Invoices = () => {
                         handleChangeBlock={handleChangeBlock}
                         date={date}
                         setDate={setDate}
-                        invoice={invoice.invoices}
+                        invoice={invoice.invoicesFilter}
                         clientColumns={clientColumns}
                     />
                 </div>
@@ -133,34 +133,28 @@ export const Invoices = () => {
                 {!loading && (invoice.invoices.length > 0) && (
                     (
                         <>
-                            <div className="text-end px-2 mb-2">
-                                <p className="text-lg font-semibold">Total de facturas: {invoice.invoices.length + 1}</p>
-                            </div>
+
                             <div className="rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            {clientColumns && clientColumns.map((col, index: number) => (
-                                                <TableHead key={index}>
-                                                    {col.label}
-                                                </TableHead>
-                                            ))}
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {invoice && invoice.invoices.map((inv: InvoiceApi, index: number) => (
-                                            <TableRow key={index}>
-                                                <TableCell colSpan={clientColumns.length} className="p-0">
-                                                    <Expansible onSubmitForm={payInvoice} invoice={inv} columns={invoiceColumns}></Expansible>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                <TableComponent
+                                    dataBase={invoice.invoices}
+                                    columns={clientColumns}
+                                    colSpanColumns={true}
+                                    renderRow={(inv, index) => (
+                                        <Expansible
+                                            key={index}
+                                            onSubmitForm={payInvoice}
+                                            invoice={inv}
+                                            columns={invoiceColumns}
+                                        />
+                                    )} />
                             </div>
                         </>
                     )
                 )}
+
+                {/* <div className="text-end px-2 mb-2">
+                    <p className="text-lg font-semibold">Total de facturas: {invoice.invoices.length + 1}</p>
+                </div> */}
 
                 {!loading && invoice.invoices.length == 0 && (
                     <div className="text-center w-full">
@@ -179,7 +173,7 @@ export const Invoices = () => {
                     <InvoiceForm onSubmit={generateInvoice}></InvoiceForm>
                 </DialogComponent>
             </main>
-        </div>
+        </div >
     )
 }
 

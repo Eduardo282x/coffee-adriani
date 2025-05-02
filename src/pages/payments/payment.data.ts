@@ -56,7 +56,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: '',
         label: 'Confirmar pago',
-        element: (data: IPayments) => formatDate(data.createdAt),
+        element: () => '',
         orderBy: '',
         type: 'string',
         icon: true,

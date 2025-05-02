@@ -12,8 +12,8 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         icon: false,
     },
     {
-        column: 'product.presentation',
         label: 'Presentación',
+        column: 'product.presentation',
         element: (data: IInventory) => data.product.presentation,
         orderBy: '',
         type: 'string',

@@ -18,6 +18,8 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns }) => {
         setDataFilter(dataBase)
     }, [dataBase])
 
+    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
     const getNestedValue = (obj: any, path: string): string => {
         return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || ''
     }
@@ -33,7 +35,9 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns }) => {
             .map((col: IColumns<unknown>) => col.column)
 
         const filtered = dataBase.filter((item) =>
-            keys.some((key) => getNestedValue(item, key).includes(value.toLowerCase()))
+            keys.some((key) =>
+                normalize(getNestedValue(item, key)).includes(normalize(value))
+            )
         )
 
         setDataFilter(filtered)
