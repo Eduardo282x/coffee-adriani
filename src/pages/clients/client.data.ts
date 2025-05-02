@@ -46,7 +46,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         icon: false,
     },
     {
-        column: 'blockId',
+        column: 'block.name',
         label: 'Bloque',
         element: (data: IClients) => data.block.name,
         orderBy: '',
@@ -118,7 +118,7 @@ export interface IClientsForm {
     address: string;
     phone: string;
     zone: string;
-    blockId: string;
+    blockId: string | number;
 }
 
 export type TypesClientsForm = 'name' | 'rif' | 'address' | 'phone' | 'zone' | 'blockId';

@@ -47,7 +47,7 @@ export const Clients = () => {
         setClients((prev) => ({ ...prev, clientsFilter: clients }))
     }
 
-    const getAction = (action: string, data: IClientsForm) => {
+    const getAction = (action: string, data: IClients) => {
         setDataDialog(data);
         if (action === 'Editar') {
             setEdit(true);
