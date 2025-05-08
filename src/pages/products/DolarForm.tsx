@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FromProps } from '@/interfaces/form.interface'
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useForm } from 'react-hook-form'
 
 export const DolarForm: FC<FromProps> = ({ onSubmit }) => {
