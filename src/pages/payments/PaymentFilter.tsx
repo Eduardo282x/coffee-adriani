@@ -5,7 +5,7 @@ import { FC, useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter } from '@/components/table/Filter';
 import { getPaymentMethod } from '@/services/payment.service';
-import { IPaymentMethods, IPayments } from '@/interfaces/payment.interface';
+import { IPayments, Method } from '@/interfaces/payment.interface';
 import { DateRange } from 'react-day-picker';
 import { IColumns } from '@/components/table/table.interface';
 import { Download } from 'lucide-react';
@@ -31,7 +31,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     paymentsColumns
 }) => {
 
-    const [methods, setMethods] = useState<IPaymentMethods[]>([]);
+    const [methods, setMethods] = useState<Method[]>([]);
 
     const getPaymentMethodsApi = async () => {
         const response = await getPaymentMethod();
@@ -71,7 +71,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectItem value='all'>Todos</SelectItem>
-                            {methods && methods.map((met: IPaymentMethods, index: number) => (
+                            {methods && methods.map((met: Method, index: number) => (
                                 <SelectItem key={index} value={met.id.toString()}>{met.name}</SelectItem>
                             ))}
                         </SelectGroup>
