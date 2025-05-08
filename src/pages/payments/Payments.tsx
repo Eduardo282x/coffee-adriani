@@ -2,18 +2,23 @@
 import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { GroupPayments, IPayments } from '@/interfaces/payment.interface';
-import { getPaymentFilter } from '@/services/payment.service';
+import { GroupPayments, IPaymentForm, IPayments } from '@/interfaces/payment.interface';
+import { getPaymentFilter, postPayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
 import { DateRangeFilter } from '@/interfaces/invoice.interface';
 import { addDays } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { DialogComponent } from '@/components/dialog/DialogComponent';
+import { PaymentForm } from './paymentForm';
 
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
     const [loading, setLoading] = useState<boolean>(false);
+    const [openDialog, setOpenDialog] = useState<boolean>(false);
     const today = new Date();
 
     const [date, setDate] = useState<DateRange | undefined>({
@@ -34,11 +39,13 @@ export const Payments = () => {
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
         const response: IPayments[] = await getPaymentFilter(filterDate);
-        setPayments({
-            allPayments: response,
-            payments: response,
-            paymentsFilter: response
-        });
+        if(response){
+            setPayments({
+                allPayments: response,
+                payments: response,
+                paymentsFilter: response
+            });
+        }
         setLoading(false)
     }
 
@@ -61,6 +68,12 @@ export const Payments = () => {
         setPayments((prev) => ({ ...prev, paymentsFilter: filterPaymentsByMethods }))
     }
 
+    const savePayments = async (data: IPaymentForm) => {
+        await postPayment(data)
+        await getPaymentsFilterApi();
+        setOpenDialog(false);
+    }
+
     return (
         <div className="flex flex-col">
             {loading && (
@@ -72,6 +85,11 @@ export const Payments = () => {
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Pagos</h1>
                 </div>
+
+                <Button onClick={() => setOpenDialog(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Registrar Pago
+                </Button>
 
             </header>
 
@@ -94,6 +112,18 @@ export const Payments = () => {
                     <TableComponent columns={paymentsColumns} dataBase={payments.payments}></TableComponent>
                 </div>
             </main>
+
+
+            <DialogComponent
+                open={openDialog}
+                setOpen={setOpenDialog}
+                className="w-[30rem]"
+                label2="Agregar Cliente"
+                label1="Registrar Pago"
+                isEdit={false}
+            >
+                <PaymentForm  onSubmit={savePayments}/>
+            </DialogComponent>
         </div>
     )
 }

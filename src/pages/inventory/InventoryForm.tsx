@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label';
@@ -8,8 +8,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BodyInventory } from '@/interfaces/inventory.interface'
 import { FormSelect } from '@/components/form/FormSelect'
-import { IProducts } from '@/interfaces/product.interface'
-import { getProduct } from '@/services/products.service'
 import { Form } from '@/components/ui/form'
 
 const validationSchema = z.object({
@@ -17,9 +15,11 @@ const validationSchema = z.object({
     quantity: z.coerce.number().positive().min(0),
 })
 
-export const InventoryForm: FC<FromProps> = ({ onSubmit }) => {
-    const [products, setProducts] = useState<IOptions[]>([]);
+interface InventoryFormProps extends FromProps {
+    products: IOptions[]
+}
 
+export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, data, products }) => {
     const form = useForm<BodyInventory>({
         defaultValues: {
             productId: 0,
@@ -29,25 +29,17 @@ export const InventoryForm: FC<FromProps> = ({ onSubmit }) => {
     })
 
     useEffect(() => {
-        getProductsApi();
-    }, [])
-
-    const getProductsApi = async () => {
-        const response: IProducts[] = await getProduct();
-        const parseProducts = response.map(pro => {
-            return {
-                label: pro.name,
-                value: pro.id
-            }
-        })
-        setProducts(parseProducts);
-    }
+        if(data){
+            setTimeout(() => {
+                form.reset(data)
+            }, 0);
+        }
+    },[data, products])
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full  py-4">
                 <FormSelect form={form} name='productId' label='Producto' placeholder='Seleccione un producto' options={products}></FormSelect>
-
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">
                         Cantidad
@@ -58,7 +50,6 @@ export const InventoryForm: FC<FromProps> = ({ onSubmit }) => {
                     <Button type='submit' className='w-40' >Enviar</Button>
                 </div>
             </form>
-
         </Form>
     )
 }

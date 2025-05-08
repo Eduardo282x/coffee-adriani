@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { ClientsForm } from "./ClientsForm"
+import { IOptions } from "@/interfaces/form.interface"
 
 export const Clients = () => {
     const [clients, setClients] = useState<GroupClients>({ allClients: [], clients: [], clientsFilter: [] });
     const [blocks, setBlocks] = useState<Block[]>([]);
+    const [blockOptions, setBlockOptions] = useState<IOptions[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
@@ -29,13 +31,24 @@ export const Clients = () => {
     const getClientsApi = async () => {
         setLoading(true);
         const response: IClients[] = await getClients();
-        setClients({ allClients: response, clients: response, clientsFilter: response });
+        if (response) {
+            setClients({ allClients: response, clients: response, clientsFilter: response });
+        }
         setLoading(false);
     }
 
     const getBlocksApi = async () => {
         const response = await getBlocks();
-        setBlocks(response);
+        if (response) {
+            setBlocks(response);
+            const blockOptions = response.map((blo: Block) => {
+                return {
+                    label: blo.name,
+                    value: blo.id.toString()
+                }
+            })
+            setBlockOptions(blockOptions)
+        }
     }
 
     const handleChangeBlock = (option: string) => {
@@ -148,7 +161,7 @@ export const Clients = () => {
                 label1="Editar Cliente"
                 isEdit={edit}
             >
-                <ClientsForm onSubmit={actionDialog} data={dataDialog}></ClientsForm>
+                <ClientsForm onSubmit={actionDialog} data={dataDialog} blocks={blockOptions}></ClientsForm>
             </DialogComponent>
 
             {openDeleteDialog && (

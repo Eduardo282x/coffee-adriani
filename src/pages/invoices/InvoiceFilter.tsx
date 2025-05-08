@@ -33,7 +33,9 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 
     const getBlocksApi = async () => {
         const response = await getBlocks();
-        setBlocks(response);
+        if(response){
+            setBlocks(response);
+        }
     }
 
     useEffect(() => {

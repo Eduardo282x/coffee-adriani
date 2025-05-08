@@ -12,19 +12,29 @@ export interface GroupProducts {
 }
 
 export interface IProducts {
-    id:           number;
-    name:         string;
+    id: number;
+    name: string;
     presentation: string;
-    price:        number;
-    priceBs:     number;
-    priceUSD:     number;
-    amount:       number;
-    createdAt:    Date;
-    updatedAt:    Date;
+    price: number;
+    priceBs: number;
+    priceUSD: number;
+    purchasePrice: number;
+    amount: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IDolar {
-    id:    number;
+    id: number;
     dolar: string;
-    date:  Date;
+    date: Date;
+}
+
+export interface IDolarForm {
+    dolar: number
+}
+
+export interface DolarBody {
+    dolar: number;
+    date: Date;
 }

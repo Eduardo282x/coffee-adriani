@@ -2,33 +2,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
 import { clientsZones, defaultValues, IClientsForm, phoneOptions, rifOptions, TypesClientsForm } from './client.data'
-import { FC, useEffect, useState } from 'react'
-import { Block } from '@/interfaces/clients.interface'
-import { getBlocks } from '@/services/clients.service'
+import { FC, useEffect } from 'react'
 import { InputSelect } from '@/components/form/InputSelect'
 import { Form } from '@/components/ui/form'
 import { FormSelect } from '@/components/form/FormSelect'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 
-export const ClientsForm: FC<FromProps> = ({ data, onSubmit }) => {
-    const [blocks, setBlocks] = useState<IOptions[]>([]);
+interface ClientFormProps extends FromProps {
+    blocks: IOptions[]
+}
 
-    useEffect(() => {
-        getBlocksApi()
-    }, [])
-
-    const getBlocksApi = async () => {
-        const response: Block[] = await getBlocks();
-        const blockOptions = response.map(blo => {
-            return {
-                label: blo.name,
-                value: blo.id.toString()
-            }
-        })
-        setBlocks(blockOptions);
-    }
-
+export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => {
     const form = useForm<IClientsForm>({
         defaultValues
     })

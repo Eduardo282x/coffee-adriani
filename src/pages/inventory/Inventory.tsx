@@ -3,7 +3,7 @@ import { extraColumn, inventoryColumns } from "./inventory.data"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { TableComponent } from "@/components/table/TableComponent"
 import { BodyInventory, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface"
-import { getInventory, getInventoryHistory, postInventory } from "@/services/inventory.service"
+import { getInventory, getInventoryHistory, postInventory, putInventory } from "@/services/inventory.service"
 import { Filter } from "@/components/table/Filter"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Package, Plus } from "lucide-react"
@@ -12,6 +12,10 @@ import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InventoryForm } from "./InventoryForm"
 import { IColumns } from "@/components/table/table.interface"
 import { InventoryCards } from "./InventoryCards"
+import { useSocket } from "@/services/socket.io"
+import { IProducts } from "@/interfaces/product.interface"
+import { getProduct } from "@/services/products.service"
+import { IOptions } from "@/interfaces/form.interface"
 
 export const Inventory = () => {
     const [inventory, setInventory] = useState<IInventory[]>([]);
@@ -19,10 +23,15 @@ export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [products, setProducts] = useState<IOptions[]>([]);
     const [column, setColumn] = useState<IColumns<IInventory>[]>(inventoryColumns)
     const [history, setHistory] = useState<boolean>(false);
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
-
+    const [dataForm, setDataForm] = useState<BodyInventory>({
+        productId: 0,
+        quantity: 0
+    });
+    const [inventorySelected, setInventorySelected] = useState<IInventory | null>(null)
     // Filtrar inventario según el término de búsqueda
 
     // Función para calcular el porcentaje de stock
@@ -50,7 +59,7 @@ export const Inventory = () => {
         if (history === active) return;
         if (active) {
             setData({ allInventory: inventoryHistory, inventory: inventoryHistory })
-            setColumn((prev) => ([...prev, ...extraColumn]))
+            setColumn((prev) => ([...prev.filter(col => col.icon == false), ...extraColumn]))
         } else {
             setData({ allInventory: inventory, inventory: inventory })
             setColumn(inventoryColumns)
@@ -60,24 +69,40 @@ export const Inventory = () => {
     useEffect(() => {
         getInventoryApi();
         getInventoryHistoryApi();
+        getProductsApi();
     }, [])
+
+    const getProductsApi = async () => {
+        const response: IProducts[] = await getProduct();
+        if(response){
+            const parseProducts = response.map(pro => {
+                return {
+                    label: pro.name,
+                    value: pro.id
+                }
+            })
+            setProducts(parseProducts);
+        }
+    }
 
     const getInventoryHistoryApi = async () => {
         setLoading(true)
         const response: IInventory[] = await getInventoryHistory();
-        setInventoryHistory(response);
+        if(response) setInventoryHistory(response);
         setLoading(false);
     }
 
     const getInventoryApi = async () => {
         setLoading(true)
         const response: IInventory[] = await getInventory();
-        setInventory(response);
-        const total: number = response.reduce((acc, item) => acc + item.quantity, 0)
-        const down: number = response.filter(pro => pro.quantity < 50).length;
-        const zero: number = response.filter(pro => pro.quantity === 0).length;
-        setResumen({totalProducts: total, downProducts: down, zeroProducts: zero})
-        setData({ allInventory: response, inventory: response });
+        if(response) {
+            setInventory(response);
+            const total: number = response.reduce((acc, item) => acc + item.quantity, 0)
+            const down: number = response.filter(pro => pro.quantity < 50).length;
+            const zero: number = response.filter(pro => pro.quantity === 0).length;
+            setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
+            setData({ allInventory: response, inventory: response });
+        }
         setLoading(false);
     }
 
@@ -86,10 +111,38 @@ export const Inventory = () => {
     }
 
     const actionDialog = async (data: BodyInventory) => {
-        await postInventory(data)
+        if (dataForm.productId != 0 && inventorySelected) {
+            await putInventory(inventorySelected.id, data)
+        } else {
+            await postInventory(data)
+        }
         setOpenDialog(false);
         await getInventoryApi();
+        await getInventoryHistoryApi();
     }
+
+    const getAction = (action: string, data: IInventory | null) => {
+        setInventorySelected(data);
+        if (action == 'Nuevo') {
+            setDataForm({ productId: 0, quantity: 0 })
+        }
+
+        if (action == 'Editar') {
+            const historyFilter = inventoryHistory.filter(inv => inv.productId === data?.productId);
+            const historySelected = historyFilter[historyFilter.length - 1]
+            setDataForm({ productId: Number(data?.productId), quantity: historySelected.quantity })
+        }
+        setTimeout(() => {
+            setOpenDialog(true);
+        }, 0);
+        // inventoryHistory
+    }
+
+    useSocket('message', async (data) => {
+        console.log(data);
+        await getInventoryApi();
+        await getInventoryHistoryApi();
+    })
 
     return (
         <div className="flex flex-col">
@@ -108,7 +161,7 @@ export const Inventory = () => {
                     <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
                 </div>
 
-                <Button onClick={() => setOpenDialog(true)}>
+                <Button onClick={() => getAction('Nuevo', null)}>
                     <Plus className="mr-2 h-4 w-4" />
                     Actualizar inventario
                 </Button>
@@ -147,7 +200,7 @@ export const Inventory = () => {
                 </div>
 
                 <div>
-                    <TableComponent columns={column} dataBase={data.inventory}></TableComponent>
+                    <TableComponent columns={column} dataBase={data.inventory} action={getAction}></TableComponent>
                 </div>
 
                 <DialogComponent
@@ -159,7 +212,7 @@ export const Inventory = () => {
                     isEdit={false}
 
                 >
-                    <InventoryForm onSubmit={actionDialog}></InventoryForm>
+                    <InventoryForm onSubmit={actionDialog} products={products} data={dataForm}></InventoryForm>
                 </DialogComponent>
             </main>
         </div>

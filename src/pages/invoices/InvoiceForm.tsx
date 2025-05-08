@@ -15,6 +15,7 @@ import { FromProps } from "@/interfaces/form.interface";
 import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
+import { addYears } from "date-fns";
 
 
 export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
@@ -26,28 +27,33 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
     const [controlNumber, setControlNumber] = useState<string>('');
     const [priceUSD, setPriceUSD] = useState<boolean>(false);
     const [consignment, setConsignment] = useState<boolean>(false);
-    const [datePicker, setDatePicker] = useState<Date>(new Date());
+    const [dateDispatch, setDateDispatch] = useState<Date>(new Date());
+    const [dateDue, setDateDue] = useState<Date>(new Date());
 
     const getClientsApi = async () => {
         const response: IClients[] = await getClients();
-        const parseClients = response.map((cli: IClients) => {
-            return {
-                label: `${cli.name} - ${formatNumberWithDots(cli.rif, '', '', true)}`,
-                value: cli.id
-            }
-        })
-        setClients({ allClients: response, clients: parseClients });
+        if(response){
+            const parseClients = response.map((cli: IClients) => {
+                return {
+                    label: `${cli.name} - ${formatNumberWithDots(cli.rif, '', '', true)}`,
+                    value: cli.id
+                }
+            })
+            setClients({ allClients: response, clients: parseClients });
+        }
     }
 
     const getInventoryApi = async () => {
         const response: IInventory[] = await getInventory();
-        const parseInventory = response.map((inv: IInventory) => {
-            return {
-                label: `${inv.product.name} - ${inv.product.presentation}`,
-                value: inv.id
-            }
-        })
-        setInventory({ allInventory: response, inventory: parseInventory });
+        if(response){
+            const parseInventory = response.map((inv: IInventory) => {
+                return {
+                    label: `${inv.product.name} - ${inv.product.presentation}`,
+                    value: inv.id
+                }
+            })
+            setInventory({ allInventory: response, inventory: parseInventory });
+        }
     }
 
     useEffect(() => {
@@ -128,7 +134,8 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
             clientId: clientSelected?.id,
             controlNumber: controlNumber,
             consignment: consignment,
-            dueDate: datePicker,
+            dispatchDate: dateDispatch,
+            dueDate: dateDue,
             priceUSD: priceUSD,
             details: inventoryData.map((inv) => {
                 return {
@@ -142,15 +149,19 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
 
     return (
         <div>
-            <div className="flex items-center justify-between w-full gap-5 my-4">
-                <DatePicker setDatePicker={setDatePicker} label="Fecha de Vencimiento" />
-
+            <div className="flex items-center justify-end w-full gap-5 my-4">
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
                     <Label className="text-right w-42">
                         Numero de factura
                     </Label>
                     <Input className="w-full" value={controlNumber} onChange={(e) => setControlNumber(e.target.value)} />
                 </div>
+            </div>
+
+            <div className="flex items-center justify-between w-full gap-5 my-4">
+                <DatePicker setDatePicker={setDateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
+
+                <DatePicker setDatePicker={setDateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch, 5)}/>
             </div>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">

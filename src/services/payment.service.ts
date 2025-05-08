@@ -27,6 +27,13 @@ export const getPaymentMethod = async () => {
         return err
     }
 }
+export const getBanks = async () => {
+    try {
+        return await getDataApi(`${routePayment}/banks`);
+    } catch (err) {
+        return err
+    }
+}
 
 export const postPayment = async (data: IPaymentForm) => {
     try {

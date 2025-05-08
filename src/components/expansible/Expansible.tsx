@@ -7,20 +7,16 @@ import { IColumns } from "../table/table.interface";
 import { DialogComponent } from "../dialog/DialogComponent";
 import { invoiceItemsColumns } from "@/pages/invoices/invoices.data";
 import { Button } from "../ui/button";
-import { Banknote, Download } from "lucide-react";
-import { InvoicePay } from "@/pages/invoices/InvoicePay";
-import { IPaymentForm } from "@/interfaces/payment.interface";
-
+import { Download } from "lucide-react";
+import { MdOutlineEdit } from "react-icons/md";
 interface ExpansibleProps {
     invoice: InvoiceApi;
     columns: IColumns<IInvoice>[];
-    onSubmitForm: (payment: IPaymentForm) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [openDialogPay, setOpenDialogPay] = useState<boolean>(false);
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [invoiceSelected, setInvoiceSelected] = useState<IInvoice | null>(null);
@@ -71,7 +67,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm
                 <div className="w-full relative">
                     <div className="absolute -top-12 left-0 flex items-center justify-center gap-2">
                         <Button className="bg-green-700 hover:bg-green-600 text-white"><Download /> Exportar</Button>
-                        <Button disabled={invoiceSelected?.status === 'Pagado'} className="bg-green-700 hover:bg-green-600 disabled:bg-gray-500 text-white" onClick={() => setOpenDialogPay(true)}><Banknote /> Pagar</Button>
+                        <Button ><MdOutlineEdit /> Editar</Button>
                     </div>
                     <div className="grid grid-cols-3 w-full mb-4">
                         <div className=" ">
@@ -83,8 +79,8 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm
                             <p><strong>Consignación:</strong> {invoiceSelected?.consignment ? 'Si' : 'No'}</p>
                         </div>
                         <div className="flex flex-col justify-end items-start">
-
                             <p><strong>Fecha despacho:</strong> {formatDate(String(invoiceSelected?.dispatchDate))}</p>
+                            <p><strong>Fecha vencimiento:</strong> {formatDate(String(invoiceSelected?.dueDate))}</p>
                             <p><strong>Total:</strong> {formatNumberWithDots(Number(invoiceSelected?.totalAmount), '', ' $',)}</p>
                         </div>
                     </div>
@@ -92,17 +88,6 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, onSubmitForm
                     <div className="w-full">
                         <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
                     </div>
-
-                    <DialogComponent
-                        open={openDialogPay}
-                        setOpen={setOpenDialogPay}
-                        className="w-[20rem]"
-                        label2=""
-                        label1="Pagar Factura"
-                        isEdit={true}
-                    >
-                        <InvoicePay onSubmitForm={onSubmitForm} invoice={invoiceSelected} />
-                    </DialogComponent>
                 </div>
             </DialogComponent>
         </div>

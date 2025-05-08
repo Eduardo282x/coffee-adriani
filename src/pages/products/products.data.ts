@@ -21,8 +21,24 @@ export const productsColumns: IColumns<IProducts>[] = [
         icon: false,
     },
     {
+        column: 'purchasePrice',
+        label: 'Precio Compra',
+        element: (data: IProducts) => formatNumberWithDots(data.purchasePrice, '', ' $'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'priceUSD',
+        label: 'Precio ($)',
+        element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'price',
-        label: 'Precio Referencia (Bs)',
+        label: 'Precio',
         element: (data: IProducts) => formatNumberWithDots(data.price, '', ' $'),
         orderBy: '',
         type: 'string',
@@ -32,14 +48,6 @@ export const productsColumns: IColumns<IProducts>[] = [
         column: 'priceBs',
         label: 'Precio (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
-    {
-        column: 'priceUSD',
-        label: 'Precio ($)',
-        element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
         orderBy: '',
         type: 'string',
         icon: false,
@@ -80,6 +88,7 @@ export interface IProductsForm {
     presentation: string;
     price: number;
     priceUSD: number;
+    purchasePrice: number;
     amount: number;
 }
 
@@ -90,5 +99,47 @@ export const defaultValues: IProductsForm = {
     presentation: '',
     price: 0,
     priceUSD: 0,
+    purchasePrice: 0,
     amount: 0,
 }
+
+export interface FormDataProduct {
+    label: string;
+    type: string;
+    name: KeysFormProducts;
+}
+
+type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'amount';
+
+    export const formDataProduct: FormDataProduct[] = [
+        {
+            label: 'Nombre',
+            type: 'text',
+            name: 'name'
+        },
+        {
+            label: 'Presentación',
+            type: 'text',
+            name: 'presentation'
+        },
+        {
+            label: 'Precio de Compra',
+            type: 'text',
+            name: 'purchasePrice'
+        },
+        {
+            label: 'Precio',
+            type: 'text',
+            name: 'price'
+        },
+        {
+            label: 'Precio USD',
+            type: 'text',
+            name: 'priceUSD'
+        },
+        {
+            label: 'Cantidad',
+            type: 'text',
+            name: 'amount'
+        }
+    ]

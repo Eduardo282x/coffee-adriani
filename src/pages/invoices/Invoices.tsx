@@ -12,9 +12,8 @@ import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
 import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
-import { IPaymentForm } from "@/interfaces/payment.interface"
-import { postPayment } from "@/services/payment.service"
 import { TableComponent } from "@/components/table/TableComponent"
+import { socket, useSocket } from "@/services/socket.io"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -33,12 +32,14 @@ export const Invoices = () => {
             startDate: date?.from ? date.from : new Date(),
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
-        const response: InvoiceApi[] = await getInvoiceFilter(filterDate)
-        setInvoices({
-            allInvoices: response,
-            invoices: response,
-            invoicesFilter: response
-        });
+        const response: InvoiceApi[] = await getInvoiceFilter(filterDate);
+        if(response){
+            setInvoices({
+                allInvoices: response,
+                invoices: response,
+                invoicesFilter: response
+            });
+        }
         setLoading(false)
     }
 
@@ -51,6 +52,9 @@ export const Invoices = () => {
     const generateInvoice = async (data: IInvoiceForm) => {
         await postInvoice(data);
         setOpenDialog(false);
+
+        socket.emit('message', 'Actualice inventario')
+
         setDate({
             from: new Date(2025, today.getMonth(), 1),
             to: new Date(2025, today.getMonth() + 1, 1),
@@ -87,11 +91,13 @@ export const Invoices = () => {
         setInvoices((prev) => ({ ...prev, invoices: invoices }))
     }
 
-    const payInvoice = async (payment: IPaymentForm) => {
-        await postPayment(payment);
-        setOpenDialog(false);
-        await getInvoicesFilterApi();
-    }
+    useSocket('message', data => {
+        console.log(data);
+    })
+
+    useEffect(() => {
+        socket.emit('message', 'Entre a las facturas')
+    },[])
 
     return (
         <div className="flex flex-col">
@@ -142,7 +148,6 @@ export const Invoices = () => {
                                     renderRow={(inv, index) => (
                                         <Expansible
                                             key={index}
-                                            onSubmitForm={payInvoice}
                                             invoice={inv}
                                             columns={invoiceColumns}
                                         />

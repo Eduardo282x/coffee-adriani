@@ -2,14 +2,25 @@
 import axios from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 
-const getToken = localStorage.getItem('token');
-
 export const api = axios.create({
     baseURL: `${import.meta.env.VITE_BASE_URL_API}/api`
 })
 
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = token;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export const getDataApi = (endpoint: string) => {
-    return api.get(endpoint, { headers: { Authorization: getToken } }).then((response) => {
+    return api.get(endpoint).then((response) => {
         return response.data;
     }).catch(err => {
         return err.response.data;
@@ -19,7 +30,6 @@ export const getDataApi = (endpoint: string) => {
 export const getDataFileApi = (endpoint: string) => {
     return api.get(endpoint, {
         responseType: 'blob',
-        headers: { Authorization: getToken }
     },).then((response) => {
         return response.data;
     }).catch(err => {
@@ -45,7 +55,7 @@ export const postDataFileGetApi = async (endpoint: string, data: any) => {
 }
 
 export const postDataApi = async (endpoint: string, data: any): Promise<BaseResponseLogin | BaseResponse | any> => {
-    return await api.post(endpoint, data, { headers: { Authorization: getToken } }).then((response) => {
+    return await api.post(endpoint, data).then((response) => {
         return response.data;
     }).catch((err) => {
         return err.response.data;
@@ -56,7 +66,6 @@ export const postFilesDataApi = async (endpoint: string, formData: FormData): Pr
     return await api.put(endpoint, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: getToken
         },
     }).then((response) => {
         return response.data;
@@ -73,7 +82,7 @@ export const postDataFileApi = async (endpoint: string, data: any): Promise<Base
 }
 
 export const putDataApi = async (endpoint: string, data: any): Promise<BaseResponse> => {
-    return await api.put(endpoint, data, { headers: { Authorization: getToken } }).then((response) => {
+    return await api.put(endpoint, data).then((response) => {
         return response.data;
     }).catch((err) => {
         return err.response.data;
@@ -81,7 +90,7 @@ export const putDataApi = async (endpoint: string, data: any): Promise<BaseRespo
 }
 
 export const deleteDataApi = async (endpoint: string): Promise<BaseResponse> => {
-    return await api.delete(endpoint, { headers: { Authorization: getToken } }).then((response) => {
+    return await api.delete(endpoint).then((response) => {
         return response.data;
     }).catch((err) => {
         return err.response.data;

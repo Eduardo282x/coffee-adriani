@@ -11,9 +11,11 @@ import { es } from 'date-fns/locale';
 interface DatePickerProps {
     setDatePicker: (date: Date) => void;
     label: string;
+    maxDate: Date;
+    minDate: Date;
 }
 
-export const DatePicker: FC<DatePickerProps> = ({ setDatePicker, label }) => {
+export const DatePicker: FC<DatePickerProps> = ({ setDatePicker, label, maxDate, minDate }) => {
     const [date, setDate] = useState<Date>();
 
     useEffect(() => {
@@ -21,30 +23,32 @@ export const DatePicker: FC<DatePickerProps> = ({ setDatePicker, label }) => {
     }, [date])
 
     return (
-        <div>
+        <div className='w-full'>
             <Label className="mb-2">
                 {label}
             </Label>
             <Popover modal={true}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger asChild className='w-full'>
                     <Button
                         variant={"outline"}
                         className={cn(
-                            "w-[240px] justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal",
                             !date && "text-muted-foreground"
                         )}
                     >
                         <CalendarIcon />
-                        {date ? format(date, "PPP", {locale: es}) : <span>Selecciona una fecha</span>}
+                        {date ? format(date, "PPP", { locale: es }) : <span>Selecciona una fecha</span>}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-full p-0" align="start">
                     <Calendar
+                        className='w-full'
                         locale={es}
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        fromDate={new Date()}
+                        fromDate={minDate}
+                        toDate={maxDate}
                         initialFocus
                     />
                 </PopoverContent>

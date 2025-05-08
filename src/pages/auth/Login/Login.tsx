@@ -39,12 +39,12 @@ export const Login = () => {
         await postDataApi('/auth', login).then((res: BaseResponseLogin | BaseResponse) => {
             if (res.success) {
                 const parseResponse = res as BaseResponseLogin;
-                setLoading(false);
                 setTimeout(() => {
                     localStorage.setItem('token', parseResponse.token)
                     navigate('/')
                 }, 1500);
             }
+            setLoading(false);
         })
     }
 

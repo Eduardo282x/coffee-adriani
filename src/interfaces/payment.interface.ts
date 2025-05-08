@@ -1,4 +1,3 @@
-import { IInvoice } from "./invoice.interface";
 
 export interface GroupPayments {
     allPayments: IPayments[];
@@ -6,27 +5,45 @@ export interface GroupPayments {
     paymentsFilter: IPayments[];
 }
 
+
 export interface IPayments {
-    id: number;
-    invoiceId: number;
-    amount: number;
-    methodId: number;
-    method: IPaymentMethods
-    exchangeRate: null;
+    id:          number;
+    amount:      string;
+    currency:    string;
+    reference:   string;
+    bank:        string;
+    dolarId:     number;
+    methodId:    number;
     paymentDate: Date;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-    invoice: IInvoice;
+    status:      string;
+    createdAt:   Date;
+    updatedAt:   Date;
+    method:      Method;
+    dolar:       Dolar;
+    amountUSD:   string;
+    amountBs:    string;
+}
+
+export interface Dolar {
+    id:    number;
+    dolar: string;
+    date:  Date;
+}
+
+export interface Method {
+    id:   number;
+    name: string;
+    currency: string;
+}
+
+export interface IBank {
+    bank: string
 }
 
 export interface IPaymentForm {
-    invoiceId: number
-    amount: number
-    methodId: number
-}
-
-export interface IPaymentMethods {
-    id: number;
-    name: string;
+    amount: number;
+    currency: string;
+    reference: string;
+    bank: string;
+    methodId: number;
 }

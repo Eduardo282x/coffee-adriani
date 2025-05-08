@@ -5,17 +5,9 @@ import { FaRegCheckCircle } from "react-icons/fa";
 
 export const paymentsColumns: IColumns<IPayments>[] = [
     {
-        label: 'Numero de factura',
-        column: 'invoice.controlNumber',
-        element: (data: IPayments) => data.invoice.controlNumber,
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
-    {
-        column: 'invoice.client.name',
-        label: 'Cliente',
-        element: (data: IPayments) => data.invoice.client ? data.invoice.client.name : '',
+        label: 'Banco',
+        column: 'bank',
+        element: (data: IPayments) => data.bank,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -39,11 +31,36 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     },
     {
         column: 'amount',
-        label: 'Cantidad',
-        element: (data: IPayments) => formatNumberWithDots(data.amount, '', ' $'),
+        label: 'Cantidad ($)',
+        element: (data: IPayments) => formatNumberWithDots(data.amountUSD, '', ' $'),
         orderBy: '',
         type: 'string',
         icon: false,
+    },
+    {
+        column: 'amount',
+        label: 'Cantidad (Bs)',
+        element: (data: IPayments) => formatNumberWithDots(data.amountBs, '', ' Bs'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'dolar.dolar',
+        label: 'Tasa Dolar',
+        element: (data: IPayments) => formatNumberWithDots(data.dolar.dolar, '', ' Bs'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'reference',
+        label: 'Referencia',
+        element: (data: IPayments) => `# ${data.reference}`,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+        className: () => 'font-semibold text-blue-600'
     },
     {
         column: 'createdAt',

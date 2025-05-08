@@ -49,13 +49,15 @@ export const UsersForm: FC<FromProps> = ({ data, onSubmit }) => {
 
     const getRolesApi = async () => {
         const response: Roles[] = await getRoles();
-        const parseRoles = response.map(rol => {
-            return {
-                label: rol.rol,
-                value: rol.id
-            }
-        })
-        setRoles(parseRoles);
+        if(response){
+            const parseRoles = response.map(rol => {
+                return {
+                    label: rol.rol,
+                    value: rol.id
+                }
+            })
+            setRoles(parseRoles);
+        }
     }
 
     return (

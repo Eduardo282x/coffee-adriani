@@ -30,7 +30,9 @@ export const Users = () => {
     const getUsersApi = async () => {
         setLoading(true);
         const response: IUsers[] = await getUsers();
-        setUsers({ allUsers: response, users: response });
+        if(response){
+            setUsers({ allUsers: response, users: response });
+        }
         setLoading(false);
     }
 
