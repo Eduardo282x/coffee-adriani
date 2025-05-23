@@ -95,7 +95,7 @@ export const TableComponent = <T,>({
                                 <TableHead
                                     key={index}
                                     onClick={() => handleChangeOrder(col)}
-                                    className="cursor-pointer bg-white "
+                                    className="cursor-pointer bg-white z-50"
                                 >
                                     <div className="flex items-center gap-2">
                                         {col.label}

@@ -1,4 +1,4 @@
-import { IPaymentForm } from "@/interfaces/payment.interface";
+import { IPaymentForm, IPayInvoiceForm } from "@/interfaces/payment.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 import { DateRangeFilter } from "@/interfaces/invoice.interface";
 
@@ -43,9 +43,25 @@ export const postPayment = async (data: IPaymentForm) => {
     }
 }
 
+export const postAssociatePayment = async (data: IPayInvoiceForm) => {
+    try {
+        return await postDataApi(`${routePayment}/associate`, data);
+    } catch (err) {
+        return err
+    }
+}
+
 export const putPayment = async (id: number, data: IPaymentForm) => {
     try {
         return await putDataApi(`${routePayment}/${id}`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const putConfirmPayment = async (id: number) => {
+    try {
+        return await putDataApi(`${routePayment}/zelle/${id}`, {});
     } catch (err) {
         return err
     }

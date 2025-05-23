@@ -3,7 +3,7 @@ import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { GroupPayments, IPaymentForm, IPayments } from '@/interfaces/payment.interface';
-import { getPaymentFilter, postPayment } from '@/services/payment.service';
+import { getPaymentFilter, postPayment, putConfirmPayment, postAssociatePayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -14,11 +14,18 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DialogComponent } from '@/components/dialog/DialogComponent';
 import { PaymentForm } from './paymentForm';
+import toast from 'react-hot-toast';
+import { Snackbar } from '@/components/snackbar/Snackbar';
+import { PayInvoiceForm } from './PayInvoiceForm';
+import { AssociatePayInvoice, IPayInvoiceForm } from '@/interfaces/payment.interface';
 
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
+    const [paymentSelected, setPaymentSelected] = useState<IPayments>();
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
+    const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const today = new Date();
 
     const [date, setDate] = useState<DateRange | undefined>({
@@ -39,7 +46,7 @@ export const Payments = () => {
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
         const response: IPayments[] = await getPaymentFilter(filterDate);
-        if(response){
+        if (response) {
             setPayments({
                 allPayments: response,
                 payments: response,
@@ -72,6 +79,51 @@ export const Payments = () => {
         await postPayment(data)
         await getPaymentsFilterApi();
         setOpenDialog(false);
+    }
+
+    const getActions = (action: string, data: IPayments) => {
+        setPaymentSelected(data);
+
+        if (action === 'Confirmar' && data.method.name !== 'Zelle') {
+            toast.custom(<Snackbar success={false} message='Solo puede confirmar pagos por zelle'></Snackbar>,
+                { position: 'bottom-center', duration: 1500 }
+            )
+        }
+        if (action === 'Confirmar' && data.method.name === 'Zelle' && data.status !== 'PENDING') {
+            toast.custom(<Snackbar success={false} message='Solo puede confirmar pagos que estén pendientes'></Snackbar>,
+                { position: 'bottom-center', duration: 1500 }
+            )
+        }
+        if (action === 'Confirmar' && data.method.name === 'Zelle' && data.status === 'PENDING') {
+            setOpenConfirmDialog(true)
+        }
+
+        if (action === 'Pagar' && data.status === 'PENDING') {
+            toast.custom(<Snackbar success={false} message='Solo puede asociar pagos que estén confirmados'></Snackbar>,
+                { position: 'bottom-center', duration: 1500 }
+            )
+        }
+
+        if (action === 'Pagar' && data.status !== 'PENDING') {
+            setOpenPayDialog(true);
+        }
+    }
+
+    const confirmPayment = async () => {
+        await putConfirmPayment(paymentSelected ? paymentSelected.id : 0);
+        await getPaymentsFilterApi();
+        setOpenConfirmDialog(false)
+    }
+
+    const payInvoice = async (data: AssociatePayInvoice) => {
+        const parseDat: IPayInvoiceForm = {
+            paymentId: Number(paymentSelected?.id),
+            invoiceId: data.invoice,
+            amount: Number(paymentSelected?.amount)
+        }
+        
+        await postAssociatePayment(parseDat);
+        setOpenPayDialog(false)
     }
 
     return (
@@ -109,7 +161,7 @@ export const Payments = () => {
                 </div>
 
                 <div>
-                    <TableComponent columns={paymentsColumns} dataBase={payments.payments}></TableComponent>
+                    <TableComponent columns={paymentsColumns} dataBase={payments.payments} action={getActions}></TableComponent>
                 </div>
             </main>
 
@@ -122,7 +174,33 @@ export const Payments = () => {
                 label1="Registrar Pago"
                 isEdit={false}
             >
-                <PaymentForm  onSubmit={savePayments}/>
+                <PaymentForm onSubmit={savePayments} />
+            </DialogComponent>
+
+            <DialogComponent
+                open={openPayDialog}
+                setOpen={setOpenPayDialog}
+                className="w-[28rem]"
+                label2=""
+                label1="Asociar pago a factura"
+                isEdit={true}
+            >
+                <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} />
+            </DialogComponent>
+
+            <DialogComponent
+                open={openConfirmDialog}
+                setOpen={setOpenConfirmDialog}
+                className="w-[28rem]"
+                label2=""
+                label1="Deseas confirmar el pago ?"
+                isEdit={true}
+
+            >
+                <div className="flex items-center justify-center gap-8 mt-5">
+                    <Button onClick={() => setOpenConfirmDialog(false)} className="text-lg ">Cancelar</Button>
+                    <Button onClick={confirmPayment} className="text-lg bg-blue-500 hover:bg-blue-800 text-white">Confirmar</Button>
+                </div>
             </DialogComponent>
         </div>
     )

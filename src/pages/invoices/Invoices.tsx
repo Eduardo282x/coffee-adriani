@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
-import { DateRangeFilter, GroupInvoices, IInvoiceForm, InvoiceApi } from "@/interfaces/invoice.interface"
+import { DateRangeFilter, GroupInvoices, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
 import { getInvoiceFilter, postInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
@@ -14,10 +14,12 @@ import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
+import { formatNumberWithDots } from "@/hooks/formaters"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [invoice, setInvoices] = useState<GroupInvoices>({ allInvoices: [], invoices: [], invoicesFilter: [] });
+    const [packages, setPackages] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const today = new Date();
 
@@ -32,12 +34,13 @@ export const Invoices = () => {
             startDate: date?.from ? date.from : new Date(),
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
-        const response: InvoiceApi[] = await getInvoiceFilter(filterDate);
+        const response: NewInvoiceApiPackage = await getInvoiceFilter(filterDate);
         if(response){
+            setPackages(response.package);
             setInvoices({
-                allInvoices: response,
-                invoices: response,
-                invoicesFilter: response
+                allInvoices: response.invoices,
+                invoices: response.invoices,
+                invoicesFilter: response.invoices
             });
         }
         setLoading(false)
@@ -139,7 +142,9 @@ export const Invoices = () => {
                 {!loading && (invoice.invoices.length > 0) && (
                     (
                         <>
-
+                            <div className="mb-2 text-lg">
+                                <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages,'','')} bultos</p>
+                            </div>
                             <div className="rounded-md border">
                                 <TableComponent
                                     dataBase={invoice.invoices}

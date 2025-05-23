@@ -72,13 +72,6 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         className: (data: IInvoice) => getBadgeVariant(data.status)
     },
     {
-        column: 'dueDate',
-        label: 'Fecha de vencimiento',
-        element: (data: IInvoice) => formatDate(data.dueDate),
-        orderBy: '',
-        type: 'string',
-    },
-    {
         column: 'totalAmount',
         label: 'Total',
         element: (data: IInvoice) => formatNumberWithDots(data.totalAmount, '', ' $'),
@@ -93,9 +86,9 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         type: 'string',
     },
     {
-        column: 'createdAt',
-        label: 'Registro',
-        element: (data: IInvoice) => formatDate(data.createdAt),
+        column: 'dueDate',
+        label: 'Fecha de vencimiento',
+        element: (data: IInvoice) => formatDate(data.dueDate),
         orderBy: '',
         type: 'string',
     },

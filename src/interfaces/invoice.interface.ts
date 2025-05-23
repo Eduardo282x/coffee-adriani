@@ -8,6 +8,11 @@ export interface GroupInvoices {
     invoicesFilter: InvoiceApi[];
 }
 
+export interface NewInvoiceApiPackage {
+    invoices: InvoiceApi[];
+    package: number;
+}
+
 export interface InvoiceApi {
     client: IClients;
     invoices: IInvoice[];

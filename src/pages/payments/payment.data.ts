@@ -2,6 +2,7 @@ import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
 import { IPayments } from "@/interfaces/payment.interface";
 import { FaRegCheckCircle } from "react-icons/fa";
+import { HiOutlineCash } from "react-icons/hi";
 
 export const paymentsColumns: IColumns<IPayments>[] = [
     {
@@ -29,6 +30,14 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         type: 'string',
         icon: false,
     },
+    // {
+    //     column: 'remaining',
+    //     label: 'Restante',
+    //     element: (data: IPayments) => formatNumberWithDots(data.remaining, '', ' $'),
+    //     orderBy: '',
+    //     type: 'string',
+    //     icon: false,
+    // },
     {
         column: 'amount',
         label: 'Cantidad ($)',
@@ -72,13 +81,24 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     },
     {
         column: '',
-        label: 'Confirmar pago',
+        label: 'Confirmar',
         element: () => '',
         orderBy: '',
         type: 'string',
         icon: true,
         optionActions: [
             { label: 'Confirmar', icon: FaRegCheckCircle , className: 'text-blue-400' },
+        ]
+    },
+    {
+        column: '',
+        label: 'Pagar factura',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Pagar', icon: HiOutlineCash, className: 'text-green-400' },
         ]
     }
 ];

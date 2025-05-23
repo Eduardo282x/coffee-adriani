@@ -7,31 +7,32 @@ export interface GroupPayments {
 
 
 export interface IPayments {
-    id:          number;
-    amount:      string;
-    currency:    string;
-    reference:   string;
-    bank:        string;
-    dolarId:     number;
-    methodId:    number;
+    id: number;
+    amount: string;
+    remaining: string;
+    currency: string;
+    reference: string;
+    bank: string;
+    dolarId: number;
+    methodId: number;
     paymentDate: Date;
-    status:      string;
-    createdAt:   Date;
-    updatedAt:   Date;
-    method:      Method;
-    dolar:       Dolar;
-    amountUSD:   string;
-    amountBs:    string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    method: Method;
+    dolar: Dolar;
+    amountUSD: string;
+    amountBs: string;
 }
 
 export interface Dolar {
-    id:    number;
+    id: number;
     dolar: string;
-    date:  Date;
+    date: Date;
 }
 
 export interface Method {
-    id:   number;
+    id: number;
     name: string;
     currency: string;
 }
@@ -46,4 +47,15 @@ export interface IPaymentForm {
     reference: string;
     bank: string;
     methodId: number;
+}
+
+
+export interface AssociatePayInvoice {
+    invoice: string;
+}
+
+export interface IPayInvoiceForm {
+    invoiceId: string;
+    paymentId: number;
+    amount: number;
 }

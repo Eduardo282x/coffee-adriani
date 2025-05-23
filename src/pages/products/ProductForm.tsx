@@ -39,7 +39,7 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full  py-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full py-4">
         {formDataProduct && formDataProduct.map((data: FormDataProduct, index: number) => (
           <div key={index} className="flex flex-col items-start justify-start gap-4 w-full">
             <Label className="text-right">

@@ -82,7 +82,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                 </Select>
             </div>
 
-            <div className="w-60">
+            <div className="w-40">
                 <Label className="mb-2">Buscar</Label>
                 <Filter dataBase={invoice} columns={clientColumns} setDataFilter={setInvoicesFilter} />
             </div>

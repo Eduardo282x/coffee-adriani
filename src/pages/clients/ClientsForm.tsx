@@ -20,7 +20,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
 
     useEffect(() => {
         if (data) {
-            const findZone = data.zone !== '' ? clientsZones.find(zone => zone.label.toLowerCase().includes(data.zone.toLowerCase())) : ''
+            const findZone = data.zone !== '' ? clientsZones.find(zone => zone.label.toLowerCase().trim().includes(data.zone.toLowerCase().trim())) : ''
             const parseBodyData: IClientsForm = {
                 name: data.name,
                 rif: data.rif,
