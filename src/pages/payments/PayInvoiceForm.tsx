@@ -8,7 +8,7 @@ import { AssociatePayInvoice, IPayments } from '@/interfaces/payment.interface';
 import { formatNumberWithDots } from '@/hooks/formaters';
 
 export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
-    const [infoPayment, setInforPayment] = useState<IPayments>(data)
+    const [infoPayment, setInfoPayment] = useState<IPayments>(data)
 
     const { register, handleSubmit } = useForm<AssociatePayInvoice>({
         defaultValues: {
@@ -26,7 +26,8 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
 
     useEffect(() => {
         console.log(data);
-    }, [])
+        setInfoPayment(data);
+    }, [data])
 
     return (
         <div>
