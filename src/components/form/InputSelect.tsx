@@ -41,20 +41,20 @@ export const InputSelect: FC<InputSelectProps> = ({ label, options, max, type, n
     }, [optionSelected, inputValue]);
 
     useEffect(() => {
-        const fullValue = `${optionSelected}${inputValue}`;
-        
-        if (value !== '' && value !== fullValue) {
+        if (value) {
             const split = name === 'phone' ? 4 : 1;
-            const prefix = value.slice(0, split);
-            const input = value.slice(split);
-            setOptionSelected(prefix);
-            setInputValue(input);
+            const prefix = value.slice(0, split).toString();
+            const input = value.slice(split).toString();
+            setTimeout(() => {
+                setOptionSelected(prefix);
+                setInputValue(input);
+            }, 0);
         }
     }, [value]);
 
     return (
         <div className="flex items-center justify-center gap-2 w-full">
-            <Select onValueChange={setOptionSelected} value={optionSelected} defaultValue={optionSelected}>
+            <Select onValueChange={setOptionSelected} value={optionSelected}>
                 <SelectTrigger className="w-[40%]">
                     <SelectValue placeholder="" />
                 </SelectTrigger>
@@ -79,7 +79,6 @@ export const InputSelect: FC<InputSelectProps> = ({ label, options, max, type, n
                 className="w-full"
                 maxLength={max}
             />
-            {/* <Input type="text" onChange={(e) => changeInput(e.target.value)} className="w-full" maxLength={max} /> */}
         </div>
     )
 }
