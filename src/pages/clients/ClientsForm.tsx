@@ -29,7 +29,9 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                 zone: findZone ? findZone.value.toString() : '',
                 blockId: data.blockId.toString(),
             }
-            form.reset(parseBodyData)
+            setTimeout(() => {
+                form.reset(parseBodyData)
+            }, 0);
         }
     }, [data, blocks])
 
