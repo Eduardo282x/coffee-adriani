@@ -1,3 +1,4 @@
+import { DatePicker } from '@/components/datepicker/DatePicker'
 import { FormSelect } from '@/components/form/FormSelect'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
@@ -12,12 +13,14 @@ import { useForm } from 'react-hook-form'
 
 export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
+    const [paymentDate, setDateDispatch] = useState<Date>(new Date());
 
     useEffect(() => {
         if (data) {
             const formData = {
                 reference: data.reference,
                 amount: data.amount,
+                paymentDate: paymentDate,
                 accountId: data.accountId.toString(),
             }
             form.reset(formData)
@@ -26,7 +29,7 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
 
     useEffect(() => {
         getAccountsApi()
-    },[])
+    }, [])
 
     const getAccountsApi = async () => {
         const response: AccountPay[] = await getPaymentAccounts()
@@ -65,6 +68,9 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
                     label='Cuenta de pago'
                     placeholder='Seleccione cuenta'
                     options={accountsOptions}></FormSelect>
+
+                <DatePicker setDatePicker={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
+
 
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">

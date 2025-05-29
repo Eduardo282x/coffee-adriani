@@ -17,12 +17,13 @@ import { PaymentForm } from './paymentForm';
 import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { PayInvoiceForm } from './PayInvoiceForm';
+import { formatNumberWithDots } from '@/hooks/formaters';
 
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
     const [paymentSelected, setPaymentSelected] = useState<IPayments | null>(null);
+    const [totalPayments, setTotalPayments] = useState<number>(0)
 
-    
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
@@ -49,6 +50,8 @@ export const Payments = () => {
         }
         const response: IPayments[] = await getPaymentFilter(filterDate);
         if (response) {
+            const total = response.reduce((acc, pay) => acc + Number(pay.amountUSD), 0)
+            setTotalPayments(total);
             setPayments({
                 allPayments: response,
                 payments: response,
@@ -182,6 +185,7 @@ export const Payments = () => {
                 </div>
 
                 <div>
+                    <p className='mb-2 text-xl'><span className='font-semibold'>Total:</span> {formatNumberWithDots(totalPayments,'', ' $')}</p>
                     <TableComponent columns={paymentsColumns} dataBase={payments.payments} action={getActions}></TableComponent>
                 </div>
             </main>

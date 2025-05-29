@@ -64,8 +64,8 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
         const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (currencyBs ? Number(inv.totalPaid) / dolar : Number(inv.totalPaid)), 0);
 
         const totalAvailable = currencyBs
-            ? Number(infoPayment.amountBs) / dolar
-            : Number(infoPayment.amountUSD);
+            ? Number(infoPayment.remaining) / dolar
+            : Number(infoPayment.remaining);
 
         const remaining = totalAvailable - alreadyUsedUSD;
 
