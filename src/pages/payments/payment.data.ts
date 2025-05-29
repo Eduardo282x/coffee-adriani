@@ -1,22 +1,24 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
+import { IInvoiceForPay } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
+import { Trash2 } from "lucide-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineCash } from "react-icons/hi";
 
 export const paymentsColumns: IColumns<IPayments>[] = [
     {
-        label: 'Banco',
-        column: 'bank',
-        element: (data: IPayments) => data.bank,
+        label: 'Cuenta',
+        column: 'account.name',
+        element: (data: IPayments) => `${data.account.name} ${data.account.bank}`,
         orderBy: '',
         type: 'string',
         icon: false,
     },
     {
-        column: 'method.name',
+        column: 'account.method.name',
         label: 'Tipo de pago',
-        element: (data: IPayments) => data.method.name,
+        element: (data: IPayments) => data.account.method.name,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -74,30 +76,21 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'createdAt',
         label: 'Fecha de pago',
-        element: (data: IPayments) => formatDate(data.createdAt),
+        element: (data: IPayments) => formatDate(data.paymentDate),
         orderBy: '',
         type: 'string',
         icon: false,
     },
     {
         column: '',
-        label: 'Confirmar',
+        label: 'Acción',
         element: () => '',
         orderBy: '',
         type: 'string',
         icon: true,
         optionActions: [
-            { label: 'Confirmar', icon: FaRegCheckCircle , className: 'text-blue-400' },
-        ]
-    },
-    {
-        column: '',
-        label: 'Pagar factura',
-        element: () => '',
-        orderBy: '',
-        type: 'string',
-        icon: true,
-        optionActions: [
+            { label: 'Editar', icon: HiOutlineCash, className: 'text-blue-800' },
+            { label: 'Confirmar', icon: FaRegCheckCircle, className: 'text-blue-400' },
             { label: 'Pagar', icon: HiOutlineCash, className: 'text-green-400' },
         ]
     }
@@ -113,3 +106,51 @@ const getBadgeVariant = (estado: string) => {
             return "rounded-lg px-2 bg-gray-100 text-gray-800"
     }
 }
+
+export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
+    {
+        label: 'Factura',
+        column: 'controlNumber',
+        element: (element: IInvoiceForPay) => element.controlNumber.toString(),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Cliente',
+        column: 'client.name',
+        element: (element: IInvoiceForPay) => element.client ? element.client.name.toString() : '',
+        orderBy: '',
+        className: (element: IInvoiceForPay) => element.client ? 'w-[12rem] block text-ellipsis overflow-hidden' : 'w-[12rem] block text-ellipsis overflow-hidden',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Total',
+        column: 'totalAmount',
+        element: (element: IInvoiceForPay) => element.currency == 'BS' ? formatNumberWithDots(element.totalAmountBs, '',' Bs') : String(Number(element.totalAmount).toFixed(2)),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'A pagar',
+        column: 'totalPaid',
+        element: (element: IInvoiceForPay) => element.totalPaid.toString(),
+        orderBy: '',
+        type: 'editable',
+        icon: false,
+    },
+    {
+        column: '',
+        label: 'Eliminar',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
+        ]
+    },
+
+]

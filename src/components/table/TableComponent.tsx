@@ -31,16 +31,16 @@ export const TableComponent = <T,>({
     renderRow,
     colSpanColumns,
 }: TableProps<T>) => {
-    const [dataFilter, setDataFilter] = useState<T[]>(dataBase);
+    const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
         setDataFilter(dataBase)
         setPage(0)
-        setRowsPerPage(5)
+        setRowsPerPage(10)
     }, [dataBase])
 
     useEffect(() => {
@@ -113,14 +113,14 @@ export const TableComponent = <T,>({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {dataFilter.length === 0 ? (
+                        {dataFilter && dataFilter.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No se encontraron resultados.
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
+                            dataFilter && dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
                                 <TableRow key={index}>
                                     {renderRow ?
                                         <TableCell key={index} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">

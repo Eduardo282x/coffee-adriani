@@ -16,9 +16,10 @@ import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
 import { addYears } from "date-fns";
+import { IInvoice } from "@/interfaces/invoice.interface";
 
 
-export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
+export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
     const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
@@ -30,9 +31,35 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
     const [dateDispatch, setDateDispatch] = useState<Date>(new Date());
     const [dateDue, setDateDue] = useState<Date>(new Date());
 
+    useEffect(() => {
+        const parseData: IInvoice = data as IInvoice;
+        if (data) {
+            const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
+            setConsignment(parseData.consignment);
+            setControlNumber(parseData.controlNumber);
+            setDateDispatch(new Date(parseData.dispatchDate));
+            setDateDue(new Date(parseData.dueDate));
+            setClientSelected(findClient || null);
+
+            const inventoryData = parseData.invoiceItems.map((inv) => {
+                const findInventory = inventory.allInventory.find((invData) => invData.id === inv.productId) as IInventory;
+                if (!findInventory) {
+                    return undefined;
+                }
+                return {
+                    ...findInventory,
+                    quantity: inv.quantity,
+                    subtotal: inv.quantity * findInventory?.product.price || 0
+                };
+            })
+            
+            setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
+        }
+    }, [data, inventory, clients])
+
     const getClientsApi = async () => {
         const response: IClients[] = await getClients();
-        if(response){
+        if (response) {
             const parseClients = response.map((cli: IClients) => {
                 return {
                     label: `${cli.name} - ${formatNumberWithDots(cli.rif, '', '', true)}`,
@@ -45,7 +72,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
 
     const getInventoryApi = async () => {
         const response: IInventory[] = await getInventory();
-        if(response){
+        if (response) {
             const parseInventory = response.map((inv: IInventory) => {
                 return {
                     label: `${inv.product.name} - ${inv.product.presentation}`,
@@ -161,7 +188,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
             <div className="flex items-center justify-between w-full gap-5 my-4">
                 <DatePicker setDatePicker={setDateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
 
-                <DatePicker setDatePicker={setDateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch, 5)}/>
+                <DatePicker setDatePicker={setDateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch, 5)} />
             </div>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">
@@ -169,7 +196,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit }) => {
                     <Label className="text-right w-42">
                         Cliente
                     </Label>
-                    <Autocomplete placeholder="Seleccione un cliente" data={clients.clients} onChange={selectClient}></Autocomplete>
+                    <Autocomplete placeholder="Seleccione un cliente" data={clients.clients} onChange={selectClient} valueDefault={clientSelected?.id}></Autocomplete>
                 </div>
 
                 <div className="flex items-center justify-between w-full translate-y-2 border rounded-md px-2 py-1">

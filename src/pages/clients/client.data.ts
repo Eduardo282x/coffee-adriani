@@ -25,6 +25,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         column: 'address',
         label: 'Dirección',
         element: (data: IClients) => data.address,
+        className: () => 'max-w-[12rem] block text-ellipsis',
         orderBy: '',
         type: 'string',
         icon: false,

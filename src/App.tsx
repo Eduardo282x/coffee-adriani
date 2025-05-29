@@ -17,6 +17,7 @@ import { Users } from './pages/users/Users';
 import { Layout } from './pages/layout/Layout';
 import { Payments } from './pages/payments/Payments';
 import { socket, useSocket } from './services/socket.io';
+import { Accounts } from './pages/accounts/Accounts';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/usuarios" element={<Users />} />
             <Route path="/pagos" element={<Payments />} />
+            <Route path="/cuentas-pago" element={<Accounts />} />
           </Route>
         </Routes>
       </BrowserRouter>

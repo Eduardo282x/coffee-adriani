@@ -5,8 +5,8 @@ import { Plus } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
-import { DateRangeFilter, GroupInvoices, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
-import { getInvoiceFilter, postInvoice } from "@/services/invoice.service"
+import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
+import { deleteInvoice, getInvoiceFilter, postInvoice, putInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -15,10 +15,13 @@ import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
 import { formatNumberWithDots } from "@/hooks/formaters"
+import { DetailsPackage } from "./DetailsPackage"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [selectInvoice, setSelectInvoice] = useState<IInvoice | null>(null);
     const [invoice, setInvoices] = useState<GroupInvoices>({ allInvoices: [], invoices: [], invoicesFilter: [] });
+    const [detPackage, setDetPackage] = useState<DetPackage[]>([])
     const [packages, setPackages] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const today = new Date();
@@ -35,7 +38,8 @@ export const Invoices = () => {
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
         const response: NewInvoiceApiPackage = await getInvoiceFilter(filterDate);
-        if(response){
+        if (response) {
+            setDetPackage(response.detPackage)
             setPackages(response.package);
             setInvoices({
                 allInvoices: response.invoices,
@@ -53,7 +57,12 @@ export const Invoices = () => {
     }, [date?.to])
 
     const generateInvoice = async (data: IInvoiceForm) => {
-        await postInvoice(data);
+
+        if (selectInvoice) {
+            await updateInvoiceApi(selectInvoice.id, data)
+        } else {
+            await postInvoice(data);
+        }
         setOpenDialog(false);
 
         socket.emit('message', 'Actualice inventario')
@@ -65,14 +74,14 @@ export const Invoices = () => {
     }
 
     const handleChangeBlock = (option: string) => {
-        if (option === 'all') return setInvoices((prev) => ({ ...prev, invoicesFilter: invoice.allInvoices }))
+        if (option === 'all') return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }))
         const filterClientsByBlock = invoice.allInvoices.filter(cli => cli.client.blockId === Number(option))
         setInvoices((prev) => ({ ...prev, invoices: filterClientsByBlock }))
     }
 
     const handleChangeStatusInvoice = (option: string) => {
         if (option === 'all') {
-            return setInvoices((prev) => ({ ...prev, invoicesFilter: invoice.allInvoices }));
+            return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }));
         }
 
         const filterInvoiceByStatus: InvoiceApi[] = invoice.allInvoices.map(inv => {
@@ -100,7 +109,25 @@ export const Invoices = () => {
 
     useEffect(() => {
         socket.emit('message', 'Entre a las facturas')
-    },[])
+    }, [])
+
+    const deleteInvoiceApi = async (id: number) => {
+        await deleteInvoice(id)
+        await getInvoicesFilterApi();
+    }
+
+    const editInvoice = (invoice: IInvoice) => {
+        setSelectInvoice(invoice);
+        setOpenDialog(true);
+    }
+
+    const updateInvoiceApi = async (id: number, data: IInvoiceForm) => {
+        await putInvoice(id, data);
+        setOpenDialog(false);
+
+        socket.emit('message', 'Actualice inventario')
+        await getInvoicesFilterApi();
+    }
 
     return (
         <div className="flex flex-col">
@@ -139,11 +166,12 @@ export const Invoices = () => {
                     </div>
                 )}
 
-                {!loading && (invoice.invoices.length > 0) && (
+                {!loading && (invoice.invoices && invoice.invoices.length > 0) && (
                     (
                         <>
-                            <div className="mb-2 text-lg">
-                                <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages,'','')} bultos</p>
+                            <div className="mb-2 text-lg flex items-center justify-start gap-2">
+                                <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
+                                <DetailsPackage detPackage={detPackage}/>
                             </div>
                             <div className="rounded-md border">
                                 <TableComponent
@@ -155,6 +183,8 @@ export const Invoices = () => {
                                             key={index}
                                             invoice={inv}
                                             columns={invoiceColumns}
+                                            editInvoice={editInvoice}
+                                            deleteInvoice={deleteInvoiceApi}
                                         />
                                     )} />
                             </div>
@@ -175,12 +205,12 @@ export const Invoices = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[45rem]"
+                    className="w-[46rem] px-4"
                     label2="Agregar Cliente"
                     label1="Editar Cliente"
                     isEdit={true}
                 >
-                    <InvoiceForm onSubmit={generateInvoice}></InvoiceForm>
+                    <InvoiceForm onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
                 </DialogComponent>
             </main>
         </div >

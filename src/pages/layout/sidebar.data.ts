@@ -1,5 +1,6 @@
 import { BarChart3, Users, FileText, Package, ShoppingCart, User } from "lucide-react"
 import { BsCash } from "react-icons/bs";
+import { MdAccountBalance } from "react-icons/md";
 
 // Definición de los elementos del menú
 export const menuItems = [
@@ -22,6 +23,11 @@ export const menuItems = [
         title: "Pagos",
         icon: BsCash ,
         href: "/pagos",
+    },
+    {
+        title: "Cuentas de pago",
+        icon: MdAccountBalance,
+        href: "/cuentas-pago",
     },
     {
         title: "Productos",

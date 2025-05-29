@@ -11,6 +11,14 @@ export const getInvoice = async () => {
     }
 }
 
+export const getInvoiceUnordered = async () => {
+    try {
+        return await getDataApi(`${routeInvoice}/unordered`);
+    } catch (err) {
+        return err
+    }
+}
+
 export const getInvoiceFilter = async (filter: DateRangeFilter) => {
     try {
         return await postDataApi(`${routeInvoice}/filter`, filter);

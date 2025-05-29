@@ -4,6 +4,7 @@ import { IInventory } from "@/interfaces/inventory.interface"
 import { IInvoice, InvoiceApi, InvoiceItems } from "@/interfaces/invoice.interface";
 import { Trash2 } from "lucide-react";
 import { IoDocumentTextOutline } from "react-icons/io5";
+import { MdOutlineDeleteOutline } from "react-icons/md";
 
 export const clientColumns: IColumns<InvoiceApi>[] = [
     {
@@ -79,6 +80,13 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         type: 'string',
     },
     {
+        column: 'totalAmountBs',
+        label: 'Total Bs',
+        element: (data: IInvoice) => formatNumberWithDots(data.totalAmountBs, '', ' Bs'),
+        orderBy: '',
+        type: 'string',
+    },
+    {
         column: 'dispatchDate',
         label: 'Despacho',
         element: (data: IInvoice) => formatDate(data.dispatchDate),
@@ -103,6 +111,17 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
             { label: 'Detalles', icon: IoDocumentTextOutline, className: 'text-blue-600' },
         ]
     },
+    {
+        column: '',
+        label: 'Eliminar',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Eliminar', icon: MdOutlineDeleteOutline  , className: 'text-red-600' },
+        ]
+    },
 ]
 
 const getBadgeVariant = (estado: string) => {
@@ -114,6 +133,8 @@ const getBadgeVariant = (estado: string) => {
         case "Pendiente":
             return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
         case "Vencida":
+            return "rounded-lg px-2 bg-red-100 text-red-800"
+        case "Cancelada":
             return "rounded-lg px-2 bg-red-100 text-red-800"
         default:
             return "rounded-lg px-2 bg-gray-100 text-gray-800"
@@ -158,7 +179,7 @@ export const productColumns: IColumns<IInventory>[] = [
         element: (data: IInventory) => `${data.product.name} - ${data.product.presentation}`,
         orderBy: '',
         type: 'string',
-        className: (data: IInventory) => data.id > 1 ? 'w-[20rem]' : 'w-[20rem]'
+        className: (data: IInventory) => data.id > 1 ? 'w-[12rem] block text-ellipsis' : 'w-[12rem] block text-ellipsis'
     },
     {
         column: 'price',

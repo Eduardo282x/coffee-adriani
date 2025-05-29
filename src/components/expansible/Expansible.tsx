@@ -12,11 +12,14 @@ import { MdOutlineEdit } from "react-icons/md";
 interface ExpansibleProps {
     invoice: InvoiceApi;
     columns: IColumns<IInvoice>[];
+    editInvoice: (data: IInvoice) => void;
+    deleteInvoice: (id: number) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [invoiceSelected, setInvoiceSelected] = useState<IInvoice | null>(null);
@@ -41,6 +44,22 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
         if (action === 'Detalles') {
             setOpenDialog(true)
         }
+
+        if (action === 'Eliminar') {
+            setOpenDialogDelete(true)
+        }
+    }
+
+    const handleEditInvoice = () => {
+        if (invoiceSelected) {
+            editInvoice(invoiceSelected);
+            setOpenDialog(false);
+        }
+    }
+
+    const deleteInvoices = () => {
+        deleteInvoice(invoiceSelected?.id || 0);
+        setOpenDialogDelete(false);
     }
 
     return (
@@ -53,7 +72,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                 <span className="py-1"><IoIosArrowDown className={`ease-in-out delay-100 duration-150 transition-all text-xl ${!open ? ' rotate-0' : 'rotate-180'}`} /></span>
             </div>
             <div className="w-full mt-1">
-                <TableComponent dataBase={invoice.invoices} columns={columns} action={action} hidePaginator={true}/>
+                <TableComponent dataBase={invoice.invoices} columns={columns} action={action} hidePaginator={true} />
             </div>
 
             <DialogComponent
@@ -67,7 +86,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                 <div className="w-full relative">
                     <div className="absolute -top-12 left-0 flex items-center justify-center gap-2">
                         <Button className="bg-green-700 hover:bg-green-600 text-white"><Download /> Exportar</Button>
-                        <Button ><MdOutlineEdit /> Editar</Button>
+                        <Button onClick={handleEditInvoice} ><MdOutlineEdit /> Editar</Button>
                     </div>
                     <div className="grid grid-cols-3 w-full mb-4">
                         <div className=" ">
@@ -88,6 +107,22 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns }) => {
                     <div className="w-full">
                         <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
                     </div>
+                </div>
+            </DialogComponent>
+
+
+            <DialogComponent
+                open={openDialogDelete}
+                setOpen={setOpenDialogDelete}
+                className="w-[28rem]"
+                label2=""
+                label1="Estas seguro que deseas eliminar esta factura?"
+                isEdit={true}
+
+            >
+                <div className="flex items-center justify-center gap-8 mt-5">
+                    <Button onClick={() => setOpenDialogDelete(false)} className="text-lg ">Cancelar</Button>
+                    <Button onClick={deleteInvoices} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                 </div>
             </DialogComponent>
         </div>

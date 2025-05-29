@@ -11,6 +11,11 @@ export interface GroupInvoices {
 export interface NewInvoiceApiPackage {
     invoices: InvoiceApi[];
     package: number;
+    detPackage: DetPackage[]
+}
+export interface DetPackage {
+    product:       IProducts;
+    totalQuantity: number;
 }
 
 export interface InvoiceApi {
@@ -26,6 +31,8 @@ export interface IInvoice {
     controlNumber: string;
     exchangeRate: null;
     totalAmount: number;
+    remaining: number | string;
+    totalAmountBs: number | string;
     consignment: boolean;
     status: string;
     createdAt: Date;
@@ -33,6 +40,12 @@ export interface IInvoice {
     payments: Payments[];
     client?: IClients;
     invoiceItems: InvoiceItems[]
+}
+
+export interface IInvoiceForPay extends IInvoice {
+    totalPaid: number | string;
+    totalAmountBs: number | string;
+    currency: string;
 }
 
 export interface Payments {

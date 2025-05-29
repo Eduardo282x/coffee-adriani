@@ -1,12 +1,21 @@
 import { IPaymentForm, IPayInvoiceForm } from "@/interfaces/payment.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 import { DateRangeFilter } from "@/interfaces/invoice.interface";
+import { AccountForm } from "@/pages/accounts/accounts.data";
 
 const routePayment = '/payments';
 
 export const getPayment = async () => {
     try {
         return await getDataApi(routePayment);
+    } catch (err) {
+        return err
+    }
+}
+
+export const getPaymentAccounts = async () => {
+    try {
+        return await getDataApi(`${routePayment}/accounts`);
     } catch (err) {
         return err
     }
@@ -34,6 +43,31 @@ export const getBanks = async () => {
         return err
     }
 }
+
+export const postPaymentAccounts = async (data: AccountForm) => {
+    try {
+        return await postDataApi(`${routePayment}/accounts`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const putPaymentAccounts = async (id: number, data: AccountForm) => {
+    try {
+        return await putDataApi(`${routePayment}/accounts/${id}`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const deletePaymentAccounts = async (id: number) => {
+    try {
+        return await deleteDataApi(`${routePayment}/accounts/${id}`);
+    } catch (err) {
+        return err
+    }
+}
+
 
 export const postPayment = async (data: IPaymentForm) => {
     try {

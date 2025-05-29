@@ -7,18 +7,28 @@ interface AutoCompleteProps {
     data: IOptions[];
     placeholder: string;
     onChange: (value: string) => void;
+    valueDefault?: string | number;
+    resetValues?: boolean
 }
 
-export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChange }) => {
+export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChange, valueDefault, resetValues }) => {
     const [open, setOpen] = useState<boolean>(false);
-    const [value, setValue] = useState<string | number>("");
+    const [value, setValue] = useState<string | number>(valueDefault ? valueDefault : "");
     const [inputValue, setInputValue] = useState<string>("");
     const [dataFiltered, setDataFiltered] = useState<IOptions[]>(data);
     const ref = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        setValue(valueDefault ? valueDefault.toString() : "");
+    }, [valueDefault])
+
     const handleSelect = (currentValue: string) => {
         setValue(currentValue);
         onChange(currentValue);
+
+        if(resetValues){
+            setValue('')
+        }
         setOpen(false);
     };
 

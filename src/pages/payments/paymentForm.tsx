@@ -4,79 +4,53 @@ import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
-import { IBank, IPaymentForm, Method } from '@/interfaces/payment.interface'
-import { getBanks, getPaymentMethod } from '@/services/payment.service'
+import { AccountPay, IPaymentForm } from '@/interfaces/payment.interface'
+import { getPaymentAccounts } from '@/services/payment.service'
 import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 
 export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
-    const [methods, setMethods] = useState<Method[]>([]);
-    const [methodOptions, setMethodOptions] = useState<IOptions[]>([]);
-    const [bank, setBanks] = useState<IOptions[]>([]);
+    const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
 
     useEffect(() => {
-        if(data){
-            console.log(data);
+        if (data) {
+            const formData = {
+                reference: data.reference,
+                amount: data.amount,
+                accountId: data.accountId.toString(),
+            }
+            form.reset(formData)
         }
+    }, [data, accountsOptions])
+
+    useEffect(() => {
+        getAccountsApi()
     },[])
+
+    const getAccountsApi = async () => {
+        const response: AccountPay[] = await getPaymentAccounts()
+        setAccountsOptions(response.map(data => {
+            return {
+                label: `${data.bank} - ${data.name}`,
+                value: data.id
+            }
+        }))
+    }
 
     const form = useForm<IPaymentForm>({
         defaultValues: {
-            amount: 0,
-            currency: '',
             reference: '',
-            bank: '',
-            methodId: 0,
+            amount: 0,
+            accountId: 0,
         }
     })
-
-    useEffect(() => {
-        getMethodsApi();
-        getBanksApi();
-    }, [])
-
-    const getBanksApi = async () => {
-        const response = await getBanks();
-        if(response){
-            const parseBank = response.map((bank: IBank) => {
-                return {
-                    label: bank.bank,
-                    value: bank.bank
-                }
-            })
-            setBanks(parseBank)
-        }
-    }
-
-    const getMethodsApi = async () => {
-        const response = await getPaymentMethod();
-        if(response){
-            const parseMethods = response.map((met: Method) => {
-                return {
-                    label: met.name,
-                    value: met.id
-                }
-            })
-            setMethodOptions(parseMethods)
-            setMethods(response)
-        }
-    }
-
-    useEffect(() => {
-        const changeMethod = form.watch('methodId')
-        const findMethod = methods.find(me => me.id === Number(changeMethod));
-        if (findMethod) {
-            form.setValue('bank', findMethod.name === 'Efectivo' ? '' : form.getValues().bank)
-            form.setValue('currency', findMethod.currency)
-        }
-    }, [form.watch('methodId')])
 
     const onSubmitForm = (data: IPaymentForm) => {
         const parseData = {
             ...data,
             amount: Number(data.amount),
-            methodId: Number(data.methodId),
+            accountId: Number(data.accountId),
         }
         onSubmit(parseData)
     }
@@ -85,14 +59,12 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitForm)} className="flex flex-col items-start justify-start gap-5 w-full py-4">
 
-                <FormSelect form={form} name='bank' label='Banco' placeholder='Seleccione un banco' options={bank}></FormSelect>
-
                 <FormSelect
                     form={form}
-                    name='methodId'
-                    label='Método de pago'
-                    placeholder='Seleccione método'
-                    options={methodOptions}></FormSelect>
+                    name='accountId'
+                    label='Cuenta de pago'
+                    placeholder='Seleccione cuenta'
+                    options={accountsOptions}></FormSelect>
 
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">

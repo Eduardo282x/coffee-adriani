@@ -5,30 +5,31 @@ export interface GroupPayments {
     paymentsFilter: IPayments[];
 }
 
-
 export interface IPayments {
     id: number;
     amount: string;
     remaining: string;
-    currency: string;
+    accountId: number;
     reference: string;
-    bank: string;
     dolarId: number;
-    methodId: number;
     paymentDate: Date;
     status: string;
     createdAt: Date;
     updatedAt: Date;
-    method: Method;
     dolar: Dolar;
+    account: Account;
     amountUSD: string;
     amountBs: string;
 }
 
-export interface Dolar {
+export interface Account {
     id: number;
-    dolar: string;
-    date: Date;
+    name: string;
+    bank: string;
+    methodId: number;
+    createdAt: Date;
+    updatedAt: Date;
+    method: Method;
 }
 
 export interface Method {
@@ -37,16 +38,22 @@ export interface Method {
     currency: string;
 }
 
+export interface Dolar {
+    id: number;
+    dolar: string;
+    date: Date;
+}
+
+
+
 export interface IBank {
     bank: string
 }
 
 export interface IPaymentForm {
     amount: number;
-    currency: string;
     reference: string;
-    bank: string;
-    methodId: number;
+    accountId: number;
 }
 
 
@@ -55,7 +62,32 @@ export interface AssociatePayInvoice {
 }
 
 export interface IPayInvoiceForm {
-    invoiceId: string;
     paymentId: number;
+    details: IPayInvoiceFormDetails[];
+}
+
+export interface IPayInvoiceFormDetails {
+    invoiceId: number;
     amount: number;
+}
+
+
+export interface GroupAccounts {
+    accounts: AccountPay[]
+    allAccounts: AccountPay[]
+}
+export interface AccountPay {
+    id: number;
+    name: string;
+    bank: string;
+    methodId: number;
+    createdAt: Date;
+    updatedAt: Date;
+    method: Method;
+}
+
+export interface Method {
+    id: number;
+    name: string;
+    currency: string;
 }

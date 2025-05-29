@@ -1,46 +1,50 @@
-import { useEffect, useState } from "react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ScreenLoader } from "@/components/loaders/ScreenLoader"
-import { TableComponent } from "@/components/table/TableComponent"
-// import { UsersColumns, defaultValues, IUsersForm } from "./client.data"
-import { Filter } from "@/components/table/Filter"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { deleteUsers, getUsers, postUsers, putUsers } from "@/services/user.service"
-import { GroupUsers, IUsers } from "@/interfaces/user.interface"
-import { defaultValues, IUsersForm, usersColumns } from "./users.data"
-import { UsersForm } from "./UsersForm"
-import { BaseResponse } from "@/services/base.interface"
-// import { UsersForm } from "./UsersForm"
+import { DialogComponent } from '@/components/dialog/DialogComponent';
+import { ScreenLoader } from '@/components/loaders/ScreenLoader';
+import { Filter } from '@/components/table/Filter';
+import { TableComponent } from '@/components/table/TableComponent';
+import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { GroupAccounts, AccountPay } from '@/interfaces/payment.interface';
+import { deletePaymentAccounts, getPaymentAccounts, postPaymentAccounts, putPaymentAccounts } from '@/services/payment.service';
+import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react'
+import { AccountForm, accountsColumns, defaultValues } from './accounts.data';
+import { AccountsForm } from './AccountsForm';
+import { BaseResponse } from '@/services/base.interface';
 
-
-export const Users = () => {
-    const [users, setUsers] = useState<GroupUsers>({ allUsers: [], users: [] });
+export const Accounts = () => {
+    const [accounts, setAccounts] = useState<GroupAccounts>({ accounts: [], allAccounts: [] })
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-    const [dataDialog, setDataDialog] = useState<IUsersForm>(defaultValues);
     const [edit, setEdit] = useState<boolean>(false);
+    const [dataDialog, setDataDialog] = useState<AccountForm>(defaultValues);
 
     useEffect(() => {
-        getUsersApi()
+        getAccountsApi()
     }, [])
 
-    const getUsersApi = async () => {
+    const getAccountsApi = async () => {
         setLoading(true);
-        const response: IUsers[] = await getUsers();
-        if (response && response.length > 0) {
-            setUsers({ allUsers: response, users: response });
-        }
+        const response: AccountPay[] = await getPaymentAccounts()
+        setAccounts({ accounts: response, allAccounts: response })
         setLoading(false);
     }
 
-    const setUsersFilter = (users: IUsers[]) => {
-        setUsers((prev) => ({ ...prev, users: users }))
+    const deleteAction = async () => {
+        await deletePaymentAccounts(Number(dataDialog?.id))
+        setOpenDeleteDialog(false);
+        await getAccountsApi();
     }
 
-    const getAction = (action: string, data: IUsersForm) => {
+    const setAccountsFilters = (data: AccountPay[]) => {
+        setAccounts({
+            allAccounts: accounts.allAccounts,
+            accounts: data
+        })
+    }
+
+    const getActions = (action: string, data: AccountPay) => {
         setDataDialog(data);
         if (action === 'Editar') {
             setEdit(true);
@@ -55,40 +59,24 @@ export const Users = () => {
         }
     }
 
-    const deleteAction = async () => {
-        await deleteUsers(Number(dataDialog.id))
-        setOpenDeleteDialog(false);
-        await getUsersApi();
-    }
-
-    const actionDialog = async (data: IUsersForm) => {
-        const parseData = {
-            ...data,
-            rolId: Number(data.rolId)
-        }
+    const actionDialog = async (data: AccountForm) => {
         let closeDialog = false;
         if (edit) {
-            await putUsers(Number(dataDialog.id), parseData).then((res) => {
+            await putPaymentAccounts(Number(dataDialog.id), data).then((res) => {
                 const parseResponse: BaseResponse = res as BaseResponse;
                 closeDialog = parseResponse.success;
             })
         } else {
-            await postUsers(parseData).then((res: BaseResponse) => {
+            await postPaymentAccounts(data).then((res: BaseResponse) => {
                 closeDialog = res.success;
             })
         }
 
         if (closeDialog) {
             setOpenDialog(false);
-            await getUsersApi();
+            await getAccountsApi();
         }
     }
-
-    useEffect(() => {
-        if (!openDialog) {
-            setDataDialog(defaultValues)
-        }
-    }, [openDialog])
 
     return (
         <div className="flex flex-col">
@@ -99,13 +87,13 @@ export const Users = () => {
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
-                    <h1 className="text-lg font-semibold">Usuarios</h1>
+                    <h1 className="text-lg font-semibold">Cuentas de pago</h1>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <Button onClick={() => { setOpenDialog(true); setEdit(false) }}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Usuario
+                        Nueva cuenta
                     </Button>
                 </div>
             </header>
@@ -116,13 +104,13 @@ export const Users = () => {
                     <div className="flex items-center gap-8">
 
                         <div className="flex w-80  items-center space-x-2">
-                            <Filter dataBase={users.allUsers} columns={usersColumns} setDataFilter={setUsersFilter} />
+                            <Filter dataBase={accounts.allAccounts} columns={accountsColumns} setDataFilter={setAccountsFilters} />
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <TableComponent columns={usersColumns} dataBase={users.users} action={getAction}></TableComponent>
+                    <TableComponent columns={accountsColumns} dataBase={accounts.accounts} action={getActions}></TableComponent>
                 </div>
             </main>
 
@@ -130,11 +118,12 @@ export const Users = () => {
                 open={openDialog}
                 setOpen={setOpenDialog}
                 className="w-[35rem]"
-                label2="Agregar Usuario"
-                label1="Editar Usuario"
+                label2="Agregar Cuenta"
+                label1="Editar Cuenta"
                 isEdit={edit}
             >
-                <UsersForm onSubmit={actionDialog} data={dataDialog}></UsersForm>
+                <AccountsForm onSubmit={actionDialog} data={dataDialog} />
+                {/* <UsersForm onSubmit={actionDialog} data={dataDialog}></UsersForm> */}
             </DialogComponent>
 
             <DialogComponent
@@ -142,7 +131,7 @@ export const Users = () => {
                 setOpen={setOpenDeleteDialog}
                 className="w-[28rem]"
                 label2=""
-                label1="Estas seguro que deseas eliminar este usuario?"
+                label1="Estas seguro que deseas eliminar este Cuenta?"
                 isEdit={true}
 
             >
@@ -154,4 +143,3 @@ export const Users = () => {
         </div>
     )
 }
-
