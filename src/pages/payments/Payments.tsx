@@ -31,6 +31,11 @@ export const Payments = () => {
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const today = new Date();
 
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [associatedFilter, setAssociatedFilter] = useState<string>('all');
+    const [methodFilter, setMethodFilter] = useState<string>('all');
+
+
     const [date, setDate] = useState<DateRange | undefined>({
         from: new Date(2025, today.getMonth(), 1),
         to: new Date(2025, today.getMonth() + 1, 1),
@@ -68,23 +73,41 @@ export const Payments = () => {
         })
     }
 
-    const handleChangeStatusAssociated = (option: string) => {
-        if (option === 'all') return setPayments((prev) => ({ ...prev, payments: payments.allPayments }))
-        const filterPaymentsByStatus = payments.allPayments.filter(pay => pay.associated === (option == 'associated'))
-        setPayments((prev) => ({ ...prev, paymentsFilter: filterPaymentsByStatus }))
-    }
-
     const handleChangeStatusPay = (option: string) => {
-        if (option === 'all') return setPayments((prev) => ({ ...prev, payments: payments.allPayments }))
-        const filterPaymentsByStatus = payments.allPayments.filter(pay => pay.status === option)
-        setPayments((prev) => ({ ...prev, paymentsFilter: filterPaymentsByStatus }))
-    }
+        setStatusFilter(option);
+    };
+
+    const handleChangeStatusAssociated = (option: string) => {
+        setAssociatedFilter(option);
+    };
 
     const handleChangeMethods = (option: string) => {
-        if (option === 'all') return setPayments((prev) => ({ ...prev, payments: payments.allPayments }))
-        const filterPaymentsByMethods = payments.allPayments.filter(pay => pay.account.method.id === Number(option))
-        setPayments((prev) => ({ ...prev, paymentsFilter: filterPaymentsByMethods }))
-    }
+        setMethodFilter(option);
+    };
+
+
+    useEffect(() => {
+        let filtered = [...payments.allPayments];
+
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(pay => pay.status === statusFilter);
+        }
+
+        if (associatedFilter !== 'all') {
+            filtered = filtered.filter(pay => pay.associated === (associatedFilter === 'associated'));
+        }
+
+        if (methodFilter !== 'all') {
+            filtered = filtered.filter(pay => pay.account.method.id === Number(methodFilter));
+        }
+
+        setPayments(prev => ({
+            ...prev,
+            payments: filtered
+        }));
+    }, [statusFilter, associatedFilter, methodFilter, payments.allPayments]);
+
+
 
     const savePayments = async (data: IPaymentForm) => {
         if (paymentSelected) {

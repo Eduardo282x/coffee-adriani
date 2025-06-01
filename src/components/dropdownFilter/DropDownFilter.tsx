@@ -32,7 +32,7 @@ export const DropDownFilter: FC<DropDownFilterProps> = ({ contentMenu }) => {
             <div ref={triggerRef}>
                 <Button
                     onClick={() => setOpen(!open)}
-                    className='border border-white text-white mt-6'
+                    className='bg-[#6f4e37] hover:bg-[#7c5a43] text-white mt-6'
                 >
                     <FaFilter />
                 </Button>
