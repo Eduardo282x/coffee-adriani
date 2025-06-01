@@ -5,6 +5,15 @@ export interface GroupPayments {
     paymentsFilter: IPayments[];
 }
 
+export interface PaymentAPI extends TotalPay {
+    payments: IPayments[];
+}
+
+export interface TotalPay {
+    totalBs: number;
+    totalUSD: number;
+}
+
 export interface IPayments {
     id: number;
     amount: string;
@@ -13,6 +22,7 @@ export interface IPayments {
     reference: string;
     dolarId: number;
     paymentDate: Date;
+    associated: boolean;
     status: string;
     createdAt: Date;
     updatedAt: Date;

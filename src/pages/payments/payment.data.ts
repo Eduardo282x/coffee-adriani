@@ -24,6 +24,15 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         icon: false,
     },
     {
+        column: 'associated',
+        label: 'Asociado',
+        element: (data: IPayments) => data.associated ? 'Asociado' : 'Sin asociar',
+        orderBy: '',
+        className: (data: IPayments) => getBadgeVariantAssociated(data.associated),
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'status',
         label: 'Estado',
         element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
@@ -92,10 +101,18 @@ export const paymentsColumns: IColumns<IPayments>[] = [
             { label: 'Editar', icon: HiOutlineCash, className: 'text-blue-800' },
             { label: 'Confirmar', icon: FaRegCheckCircle, className: 'text-blue-400' },
             { label: 'Pagar', icon: HiOutlineCash, className: 'text-green-400' },
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
         ]
     }
 ];
 
+const getBadgeVariantAssociated = (status: boolean) => {
+    if (status) {
+        return "rounded-lg px-2 bg-blue-100 text-blue-800"
+    } else {
+        return "rounded-lg px-2 bg-gray-200 text-gray-800"
+    }
+}
 const getBadgeVariant = (estado: string) => {
     switch (estado) {
         case "CONFIRMED":
@@ -128,7 +145,7 @@ export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     {
         label: 'Total',
         column: 'totalAmount',
-        element: (element: IInvoiceForPay) => element.currency == 'BS' ? formatNumberWithDots(element.totalAmountBs, '',' Bs') : String(Number(element.totalAmount).toFixed(2)),
+        element: (element: IInvoiceForPay) => element.currency == 'BS' ? formatNumberWithDots(element.totalAmountBs, '', ' Bs') : String(Number(element.totalAmount).toFixed(2)),
         orderBy: '',
         type: 'string',
         icon: false,

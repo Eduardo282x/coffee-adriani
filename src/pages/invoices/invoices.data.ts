@@ -179,7 +179,7 @@ export const productColumns: IColumns<IInventory>[] = [
         element: (data: IInventory) => `${data.product.name} - ${data.product.presentation}`,
         orderBy: '',
         type: 'string',
-        className: (data: IInventory) => data.id > 1 ? 'w-[12rem] block text-ellipsis' : 'w-[12rem] block text-ellipsis'
+        className: (data: IInventory) => data.id > 1 ? 'w-[12rem] block text-ellipsis overflow-hidden' : 'w-[12rem] block text-ellipsis overflow-hidden'
     },
     {
         column: 'price',

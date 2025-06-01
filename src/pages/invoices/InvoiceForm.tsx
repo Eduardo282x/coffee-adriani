@@ -28,8 +28,8 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [controlNumber, setControlNumber] = useState<string>('');
     const [priceUSD, setPriceUSD] = useState<boolean>(false);
     const [consignment, setConsignment] = useState<boolean>(false);
-    const [dateDispatch, setDateDispatch] = useState<Date>(new Date());
-    const [dateDue, setDateDue] = useState<Date>(new Date());
+    const [dateDispatch, setDateDispatch] = useState<Date | undefined>(new Date());
+    const [dateDue, setDateDue] = useState<Date | undefined>(new Date());
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
@@ -52,7 +52,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
                     subtotal: inv.quantity * findInventory?.product.price || 0
                 };
             })
-            
+
             setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
         }
     }, [data, inventory, clients])
@@ -186,9 +186,9 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
             </div>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">
-                <DatePicker setDatePicker={setDateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
+                <DatePicker setDate={setDateDispatch} date={dateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
 
-                <DatePicker setDatePicker={setDateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch, 5)} />
+                <DatePicker setDate={setDateDue} date={dateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch as Date, 5)} />
             </div>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">

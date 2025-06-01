@@ -16,6 +16,7 @@ import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
 import { formatNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage } from "./DetailsPackage"
+import { BaseResponse } from "@/services/base.interface"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -112,8 +113,10 @@ export const Invoices = () => {
     }, [])
 
     const deleteInvoiceApi = async (id: number) => {
-        await deleteInvoice(id)
-        await getInvoicesFilterApi();
+        const res: BaseResponse = await deleteInvoice(id);
+        if(res.success) {
+            await getInvoicesFilterApi();
+        }
     }
 
     const editInvoice = (invoice: IInvoice) => {

@@ -5,23 +5,18 @@ import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Label } from '../ui/label';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { es } from 'date-fns/locale';
 
 interface DatePickerProps {
-    setDatePicker: (date: Date) => void;
+    setDate: (date: Date | undefined) => void;
     label: string;
-    maxDate: Date;
-    minDate: Date;
+    maxDate: Date | undefined;
+    minDate: Date | undefined;
+    date: Date | undefined
 }
 
-export const DatePicker: FC<DatePickerProps> = ({ setDatePicker, label, maxDate, minDate }) => {
-    const [date, setDate] = useState<Date>();
-
-    useEffect(() => {
-        setDatePicker(date as Date)
-    }, [date])
-
+export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate, minDate }) => {
     return (
         <div className='w-full'>
             <Label className="mb-2">

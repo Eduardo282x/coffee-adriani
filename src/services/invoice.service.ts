@@ -1,5 +1,6 @@
 import { DateRangeFilter, IInvoiceForm } from "@/interfaces/invoice.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
+import { BaseResponse } from "./base.interface";
 
 const routeInvoice = '/invoices';
 
@@ -51,10 +52,15 @@ export const putInvoice = async (id: number, data: IInvoiceForm) => {
     }
 }
 
-export const deleteInvoice = async (id: number) => {
+export const deleteInvoice = async (id: number): Promise<BaseResponse> => {
     try {
-        return await deleteDataApi(`${routeInvoice}/${id}`);
+        return await deleteDataApi(`${routeInvoice}/${id}`) as BaseResponse;
     } catch (err) {
-        return err
+        console.log(err);
+
+        return {
+            message: '',
+            success: false
+        }
     }
 }

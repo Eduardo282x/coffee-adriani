@@ -2,8 +2,8 @@
 import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { GroupPayments, IPayInvoiceForm, IPaymentForm, IPayments } from '@/interfaces/payment.interface';
-import { getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment } from '@/services/payment.service';
+import { GroupPayments, IPayInvoiceForm, IPaymentForm, IPayments, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
+import { deletePayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putPayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -22,10 +22,11 @@ import { formatNumberWithDots } from '@/hooks/formaters';
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
     const [paymentSelected, setPaymentSelected] = useState<IPayments | null>(null);
-    const [totalPayments, setTotalPayments] = useState<number>(0)
+    const [totalPayments, setTotalPayments] = useState<TotalPay>({ totalBs: 0, totalUSD: 0 })
 
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const today = new Date();
@@ -48,14 +49,13 @@ export const Payments = () => {
             startDate: date?.from ? date.from : new Date(),
             endDate: date?.to ? addDays(date.to, 1) : new Date(),
         }
-        const response: IPayments[] = await getPaymentFilter(filterDate);
+        const response: PaymentAPI = await getPaymentFilter(filterDate);
         if (response) {
-            const total = response.reduce((acc, pay) => acc + Number(pay.amountUSD), 0)
-            setTotalPayments(total);
+            setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
             setPayments({
-                allPayments: response,
-                payments: response,
-                paymentsFilter: response
+                allPayments: response.payments,
+                payments: response.payments,
+                paymentsFilter: response.payments
             });
         }
         setLoading(false)
@@ -66,6 +66,12 @@ export const Payments = () => {
             ...payments,
             payments: data
         })
+    }
+
+    const handleChangeStatusAssociated = (option: string) => {
+        if (option === 'all') return setPayments((prev) => ({ ...prev, payments: payments.allPayments }))
+        const filterPaymentsByStatus = payments.allPayments.filter(pay => pay.associated === (option == 'associated'))
+        setPayments((prev) => ({ ...prev, paymentsFilter: filterPaymentsByStatus }))
     }
 
     const handleChangeStatusPay = (option: string) => {
@@ -81,7 +87,11 @@ export const Payments = () => {
     }
 
     const savePayments = async (data: IPaymentForm) => {
-        await postPayment(data)
+        if (paymentSelected) {
+            await putPayment(paymentSelected.id, data)
+        } else {
+            await postPayment(data)
+        }
         await getPaymentsFilterApi();
         setOpenDialog(false);
     }
@@ -130,6 +140,12 @@ export const Payments = () => {
                 setOpenDialog(true);
             }, 0);
         }
+
+        if (action === 'Eliminar') {
+            setTimeout(() => {
+                setOpenDialogDelete(true);
+            }, 0);
+        }
     }
 
     const handleNewPayments = () => {
@@ -143,6 +159,12 @@ export const Payments = () => {
         await putConfirmPayment(paymentSelected ? paymentSelected.id : 0);
         await getPaymentsFilterApi();
         setOpenConfirmDialog(false)
+    }
+
+    const deletePaymentApi = async () => {
+        await deletePayment(paymentSelected ? paymentSelected.id : 0);
+        await getPaymentsFilterApi();
+        setOpenDialogDelete(false)
     }
 
     const payInvoice = async (data: IPayInvoiceForm) => {
@@ -170,7 +192,7 @@ export const Payments = () => {
             </header>
 
             <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Pagos</h2>
 
                     <PaymentFilter
@@ -181,11 +203,15 @@ export const Payments = () => {
                         setDate={setDate}
                         handleChangeMethods={handleChangeMethods}
                         handleChangeStatusPay={handleChangeStatusPay}
+                        handleChangeStatusAssociated={handleChangeStatusAssociated}
                     />
                 </div>
 
-                <div>
-                    <p className='mb-2 text-xl'><span className='font-semibold'>Total:</span> {formatNumberWithDots(totalPayments,'', ' $')}</p>
+                <div className=''>
+                    <div className="flex items-center justify-start gap-2">
+                        <p className='mb-2 text-lg'><span className='font-semibold'>Total Bs:</span> {formatNumberWithDots(totalPayments.totalBs.toFixed(2), '', ' Bs')}</p>
+                        <p className='mb-2 text-lg'><span className='font-semibold'>Total $:</span> {formatNumberWithDots(totalPayments.totalUSD.toFixed(2), '', ' $')}</p>
+                    </div>
                     <TableComponent columns={paymentsColumns} dataBase={payments.payments} action={getActions}></TableComponent>
                 </div>
             </main>
@@ -230,6 +256,22 @@ export const Payments = () => {
                     <div className="flex items-center justify-center gap-8 mt-5">
                         <Button onClick={() => setOpenConfirmDialog(false)} className="text-lg ">Cancelar</Button>
                         <Button onClick={confirmPayment} className="text-lg bg-blue-500 hover:bg-blue-800 text-white">Confirmar</Button>
+                    </div>
+                </DialogComponent>
+            )}
+
+            {openDialogDelete && (
+                <DialogComponent
+                    open={openDialogDelete}
+                    setOpen={setOpenDialogDelete}
+                    className="w-[28rem]"
+                    label2=""
+                    label1="Deseas eliminar el pago ?"
+                    isEdit={true}
+                >
+                    <div className="flex items-center justify-center gap-8 mt-5">
+                        <Button onClick={() => setOpenDialogDelete(false)} className="text-lg ">Cancelar</Button>
+                        <Button onClick={deletePaymentApi} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                     </div>
                 </DialogComponent>
             )}

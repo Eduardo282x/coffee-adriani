@@ -13,16 +13,16 @@ import { useForm } from 'react-hook-form'
 
 export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
-    const [paymentDate, setDateDispatch] = useState<Date>(new Date());
+    const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
 
     useEffect(() => {
         if (data) {
             const formData = {
                 reference: data.reference,
                 amount: data.amount,
-                paymentDate: paymentDate,
                 accountId: data.accountId.toString(),
             }
+            setDateDispatch(data.paymentDate)
             form.reset(formData)
         }
     }, [data, accountsOptions])
@@ -54,6 +54,7 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
             ...data,
             amount: Number(data.amount),
             accountId: Number(data.accountId),
+            paymentDate: paymentDate
         }
         onSubmit(parseData)
     }
@@ -69,7 +70,7 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
                     placeholder='Seleccione cuenta'
                     options={accountsOptions}></FormSelect>
 
-                <DatePicker setDatePicker={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
+                <DatePicker date={paymentDate} setDate={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
 
 
                 <div className="flex flex-col items-start justify-start gap-4 w-full">

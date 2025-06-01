@@ -22,7 +22,7 @@ export const Layout = () => {
                 <AppSidebar />
                 {/* <div className="w-full h-full bg-[#6f4e37]"> */}
                 {/* <div className="w-full h-full bg-[#ebe0d2]"> */}
-                <div className="w-full h-full bg-[#ebe0d2]">
+                <div className="w-full h-full bg-[#ebe0d2] overflow-hidden">
                     <Outlet />
                 </div>
             </SidebarProvider>
