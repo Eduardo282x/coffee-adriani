@@ -54,7 +54,7 @@ export const Login = () => {
             {loading && (
                 <ScreenLoader/>
             )}
-            <form onSubmit={handleSubmit(onSubmit)} className="bg-white flex flex-wrap justify-start items-start gap-4 w-1/4 border rounded-lg p-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="bg-white flex flex-wrap justify-start items-start gap-4 w-3/4 lg:w-1/4 border rounded-lg p-4">
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">
                         Usuario
