@@ -1,30 +1,25 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, RefreshCcw } from "lucide-react"
-import { deleteProduct, getProduct, getProductDolar, getProductHistory, postProduct, putProduct, updateDolar, updateDolarAutomatic } from "@/services/products.service"
-import { DolarBody, GroupProducts, IDolar, IDolarForm, IProducts } from "@/interfaces/product.interface"
+import { Plus } from "lucide-react"
+import { deleteProduct, getProduct, getProductHistory, postProduct, putProduct } from "@/services/products.service"
+import { GroupProducts, IProducts } from "@/interfaces/product.interface"
 import { TableComponent } from "@/components/table/TableComponent"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { Filter } from "@/components/table/Filter"
 import { defaultValues, IProductsForm, productsColumns } from "./products.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { ProductForm } from "./ProductForm"
-import { formatDateWithDateTime, formatNumberWithDots } from "@/hooks/formaters"
 import { useLocation } from "react-router"
 import { IColumns } from "@/components/table/table.interface"
-import { ToolTip } from "@/components/tooltip/ToolTip"
-import { MdOutlineCurrencyExchange } from "react-icons/md"
-import { DolarForm } from "./DolarForm"
+import { DolarComponents } from "@/components/dolar/DolarComponents"
 
 export const Products = () => {
     const location = useLocation();
     const [products, setProducts] = useState<GroupProducts>({ products: [], productsFilter: [] });
-    const [dolar, setDolar] = useState<IDolar>();
     const [columns, setColumns] = useState<IColumns<IProducts>[]>(productsColumns);
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [openDolar, setOpenDolar] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [dataDialog, setDataDialog] = useState<IProductsForm>(defaultValues);
     const [edit, setEdit] = useState<boolean>(false);
@@ -39,13 +34,12 @@ export const Products = () => {
             getProductHistoryApi();
             setColumns((prev) => (prev.filter(col => col.icon === false)))
         }
-        getProductDolarApi();
     }, [location])
 
     const getProductsApi = async () => {
         setLoading(true);
-        const response: IProducts[]= await getProduct();
-        if(response){
+        const response: IProducts[] = await getProduct();
+        if (response) {
             setProducts({ products: response, productsFilter: response });
         }
         setLoading(false);
@@ -54,15 +48,10 @@ export const Products = () => {
     const getProductHistoryApi = async () => {
         setLoading(true);
         const response: IProducts[] = await getProductHistory();
-        if(response){
+        if (response) {
             setProducts({ products: response, productsFilter: response });
         }
         setLoading(false);
-    }
-
-    const getProductDolarApi = async () => {
-        const response: IDolar = await getProductDolar();
-        setDolar(response)
     }
 
     const setProductFilter = (products: IProducts[]) => {
@@ -100,27 +89,11 @@ export const Products = () => {
         await getProductsApi();
     }
 
-    const updateDolarManual = async (data: IDolarForm) => {
-        const dataDolar: DolarBody = {
-            dolar: Number(data.dolar),
-            date: new Date()
-        };
-        await updateDolar(dataDolar);
-        await getProductDolarApi();
-        setOpenDolar(false);
-        console.log(data);
-    }
-
     useEffect(() => {
         if (!openDialog) {
             setDataDialog(defaultValues)
         }
     }, [openDialog])
-
-    const updateDolarApi = async () => {
-        await updateDolarAutomatic();
-        await getProductDolarApi();
-    }
 
     return (
         <div className="flex flex-col">
@@ -135,21 +108,7 @@ export const Products = () => {
                     <h1 className="text-lg font-semibold">Productos</h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <ToolTip tooltip="Actualizar manual" position="left">
-                        <Button onClick={() => setOpenDolar(true)}>
-                            <MdOutlineCurrencyExchange />
-                        </Button>
-                    </ToolTip>
-                    <ToolTip tooltip="Actualizar tasa dolar" position="left">
-                        <Button onClick={updateDolarApi}>
-                            <RefreshCcw />
-                        </Button>
-                    </ToolTip>
-
-                    <div className="border border-[#ebe0d2] px-4 py-1 rounded-lg relative">
-                        <span className="font-semibold text-[#ebe0d2]">Dolar:</span> {dolar ? formatNumberWithDots(Number(dolar?.dolar).toFixed(2), '', ' Bs') : '00,0 Bs'}
-                        <span className=" absolute -bottom-6 -left-32 text-sm w-80">Ultima actualización: {formatDateWithDateTime(dolar ? dolar.date as Date : new Date())}</span>
-                    </div>
+                    <DolarComponents />
 
                     <Button onClick={() => { setOpenDialog(true); setEdit(false) }}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -183,18 +142,6 @@ export const Products = () => {
 
             >
                 <ProductForm onSubmit={actionDialog} data={dataDialog}></ProductForm>
-            </DialogComponent>
-
-            <DialogComponent
-                open={openDolar}
-                setOpen={setOpenDolar}
-                className="w-[30rem]"
-                label2="Agregar Producto"
-                label1="Actualizar Dolar"
-                isEdit={true}
-
-            >
-                <DolarForm onSubmit={updateDolarManual}></DolarForm>
             </DialogComponent>
 
             <DialogComponent

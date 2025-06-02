@@ -21,8 +21,11 @@ export const DetailsPackage = ({ detPackage }: DetailsPackageProps) => {
                 {detPackage && detPackage.map((item: DetPackage, index: number) => (
                     <DropdownMenuItem key={index}>{item.product.name}: {item.totalQuantity}</DropdownMenuItem>
                 ))}
+
+                {detPackage.length == 0 && (
+                    <p className="text-center">Sin detalles</p>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
-
     )
 }

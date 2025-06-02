@@ -11,20 +11,28 @@ import { TableComponent } from '@/components/table/TableComponent';
 import { paymentsFilterColumns } from './payment.data';
 import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
+import { IDolar } from '@/interfaces/product.interface';
 
-export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
+interface PayInvoiceFormProps extends FromProps {
+    dolar: IDolar | undefined
+}
+
+export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar }) => {
     const [infoPayment, setInfoPayment] = useState<IPayments>(data);
     const [allInvoices, setAllInvoices] = useState<IOptions[]>([]);
     const [currencyBs, setCurrencyBs] = useState<boolean>(false);
-    const [dolar, setDolar] = useState<number>(0);
     const [invoicesForPay, setInvoicesForPay] = useState<IInvoiceForPay[]>([]);
     const [invoices, setInvoices] = useState<IInvoice[]>([]);
     const [restPayment, setRestPayment] = useState<number>(0);
 
     useEffect(() => {
         setCurrencyBs(data.account.method.currency === 'BS');
-        setDolar(Number(Number(infoPayment.dolar.dolar).toFixed(2)))
-        setInfoPayment(data);
+        setInfoPayment({
+            ...data,
+            amountUSD: data.account.method.currency === 'BS' 
+            ? Number(data.amount / Number(dolar?.dolar)).toFixed(2)
+            : data.amountUSD
+        });
         setRestPayment(Number(data.remaining))
     }, [data])
 
@@ -61,11 +69,13 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
             return;
         }
 
-        const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (currencyBs ? Number(inv.totalPaid) / dolar : Number(inv.totalPaid)), 0);
+        // const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (currencyBs ? Number(inv.totalPaid) / dolar : Number(inv.totalPaid)), 0);
+        const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (Number(inv.totalPaid)), 0);
 
-        const totalAvailable = currencyBs
-            ? Number(infoPayment.remaining) / dolar
-            : Number(infoPayment.remaining);
+        // const totalAvailable = currencyBs
+        //     ? Number(infoPayment.remaining) / dolar
+        //     : Number(infoPayment.remaining);
+        const totalAvailable = Number(infoPayment.remaining);
 
         const remaining = totalAvailable - alreadyUsedUSD;
 
@@ -78,15 +88,18 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
             return;
         }
 
+        const parseRemaining = Number(remaining / Number(dolar?.dolar)).toFixed(2)
         // Cuánto se puede pagar a esta factura sin pasarse
-        const totalPaid = Math.min(Number(findInvoice.remaining), remaining);
-        const setCurrencyPay = currencyBs ? Number(totalPaid * dolar).toFixed(2) : totalPaid.toFixed(2);
+        const totalPaid = Math.min(Number(findInvoice.remaining), Number(parseRemaining));
+        
+        // const setCurrencyPay = currencyBs ? Number(totalPaid * dolar).toFixed(2) : totalPaid.toFixed(2);
+        const setCurrencyPay = totalPaid.toFixed(2);
 
         const newItem = {
             ...findInvoice,
             totalPaid: setCurrencyPay,
             currency: infoPayment.account.method.currency,
-            totalAmountBs: Number(dolar * Number(findInvoice.totalAmount)).toFixed(2)
+            totalAmountBs: Number(Number(dolar?.dolar) * Number(findInvoice.totalAmount)).toFixed(2)
         }
 
         setInvoicesForPay(prev => [
@@ -105,7 +118,7 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
                         ...inv,
                         totalPaid: data.totalPaid,
                         currency: infoPayment.account.method.currency,
-                        totalAmountBs: Number(dolar * data.totalAmount).toFixed(2)
+                        totalAmountBs: Number(Number(dolar?.dolar) * data.totalAmount).toFixed(2)
                     }
                 }
                 return inv;

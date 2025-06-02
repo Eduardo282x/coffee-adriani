@@ -6,7 +6,7 @@ import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoiceFilter, postInvoice, putInvoice } from "@/services/invoice.service"
+import { deleteInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -17,6 +17,7 @@ import { socket, useSocket } from "@/services/socket.io"
 import { formatNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage } from "./DetailsPackage"
 import { BaseResponse } from "@/services/base.interface"
+import { DolarComponents } from "@/components/dolar/DolarComponents"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -114,7 +115,7 @@ export const Invoices = () => {
 
     const deleteInvoiceApi = async (id: number) => {
         const res: BaseResponse = await deleteInvoice(id);
-        if(res.success) {
+        if (res.success) {
             await getInvoicesFilterApi();
         }
     }
@@ -122,6 +123,10 @@ export const Invoices = () => {
     const editInvoice = (invoice: IInvoice) => {
         setSelectInvoice(invoice);
         setOpenDialog(true);
+    }
+
+    const payInvoices = (invoice: IInvoice) => {
+        putPayInvoice(invoice.id);
     }
 
     const updateInvoiceApi = async (id: number, data: IInvoiceForm) => {
@@ -134,19 +139,21 @@ export const Invoices = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Facturas</h1>
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <DolarComponents />
                     <Button onClick={() => setOpenDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nueva Factura
                     </Button>
                 </div>
             </header>
+            <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -174,7 +181,7 @@ export const Invoices = () => {
                         <>
                             <div className="mb-2 text-lg flex items-center justify-start gap-2">
                                 <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
-                                <DetailsPackage detPackage={detPackage}/>
+                                <DetailsPackage detPackage={detPackage} />
                             </div>
                             <div className="rounded-md border">
                                 <TableComponent
@@ -186,6 +193,7 @@ export const Invoices = () => {
                                             key={index}
                                             invoice={inv}
                                             columns={invoiceColumns}
+                                            payInvoices={payInvoices}
                                             editInvoice={editInvoice}
                                             deleteInvoice={deleteInvoiceApi}
                                         />

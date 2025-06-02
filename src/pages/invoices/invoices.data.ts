@@ -79,13 +79,13 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
     },
-    {
-        column: 'totalAmountBs',
-        label: 'Total Bs',
-        element: (data: IInvoice) => formatNumberWithDots(data.totalAmountBs, '', ' Bs'),
-        orderBy: '',
-        type: 'string',
-    },
+    // {
+    //     column: 'totalAmountBs',
+    //     label: 'Total Bs',
+    //     element: (data: IInvoice) => formatNumberWithDots(data.totalAmountBs, '', ' Bs'),
+    //     orderBy: '',
+    //     type: 'string',
+    // },
     {
         column: 'dispatchDate',
         label: 'Despacho',

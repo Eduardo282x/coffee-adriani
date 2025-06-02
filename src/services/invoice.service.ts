@@ -51,6 +51,13 @@ export const putInvoice = async (id: number, data: IInvoiceForm) => {
         return err
     }
 }
+export const putPayInvoice = async (id: number) => {
+    try {
+        return await putDataApi(`${routeInvoice}/pay/${id}`, {});
+    } catch (err) {
+        return err
+    }
+}
 
 export const deleteInvoice = async (id: number): Promise<BaseResponse> => {
     try {

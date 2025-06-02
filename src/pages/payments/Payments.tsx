@@ -1,4 +1,3 @@
-// import { DialogComponent } from '@/components/dialog/DialogComponent';
 import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -18,12 +17,15 @@ import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { formatNumberWithDots } from '@/hooks/formaters';
+import { DolarComponents } from '@/components/dolar/DolarComponents';
+import { getProductDolar } from '@/services/products.service';
+import { IDolar } from '@/interfaces/product.interface';
 
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
     const [paymentSelected, setPaymentSelected] = useState<IPayments | null>(null);
     const [totalPayments, setTotalPayments] = useState<TotalPay>({ totalBs: 0, totalUSD: 0 })
-
+    const [dolar, setDolar] = useState<IDolar>();
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -34,6 +36,15 @@ export const Payments = () => {
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [associatedFilter, setAssociatedFilter] = useState<string>('all');
     const [methodFilter, setMethodFilter] = useState<string>('all');
+
+    useEffect(() => {
+        getProductDolarApi();
+    }, [])
+
+    const getProductDolarApi = async () => {
+        const response: IDolar = await getProductDolar();
+        setDolar(response)
+    }
 
 
     const [date, setDate] = useState<DateRange | undefined>({
@@ -201,18 +212,23 @@ export const Payments = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Pagos</h1>
                 </div>
 
-                <Button onClick={handleNewPayments}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Registrar Pago
-                </Button>
+                <div className="flex items-center gap-4">
+                    <DolarComponents />
 
+                    <Button onClick={handleNewPayments}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Registrar Pago
+                    </Button>
+                </div>
             </header>
+            <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
+
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between">
@@ -262,7 +278,7 @@ export const Payments = () => {
                     label1="Asociar pago a factura"
                     isEdit={true}
                 >
-                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} />
+                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} dolar={dolar} />
                 </DialogComponent>
             )}
 

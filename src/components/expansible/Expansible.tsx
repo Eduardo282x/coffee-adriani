@@ -8,15 +8,16 @@ import { DialogComponent } from "../dialog/DialogComponent";
 import { invoiceItemsColumns } from "@/pages/invoices/invoices.data";
 import { Button } from "../ui/button";
 import { Download } from "lucide-react";
-import { MdOutlineEdit } from "react-icons/md";
+import { MdOutlineEdit, MdPayments } from "react-icons/md";
 interface ExpansibleProps {
     invoice: InvoiceApi;
     columns: IColumns<IInvoice>[];
     editInvoice: (data: IInvoice) => void;
+    payInvoices: (data: IInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -50,9 +51,21 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         }
     }
 
+    const remainingPay = (invoice: IInvoice | null): number => {
+        if (!invoice) return 0;
+        return invoice.totalAmount - Number(invoice.remaining)
+    }
+
     const handleEditInvoice = () => {
         if (invoiceSelected) {
             editInvoice(invoiceSelected);
+            setOpenDialog(false);
+        }
+    }
+
+    const handlePayInvoice = () => {
+        if (invoiceSelected) {
+            payInvoices(invoiceSelected);
             setOpenDialog(false);
         }
     }
@@ -83,31 +96,47 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                 label1="Información Factura"
                 isEdit={true}
             >
-                <div className="w-full relative">
-                    <div className="absolute -top-12 left-0 flex items-center justify-center gap-2">
-                        <Button className="bg-green-700 hover:bg-green-600 text-white"><Download /> Exportar</Button>
-                        <Button onClick={handleEditInvoice} ><MdOutlineEdit /> Editar</Button>
+                <div className="w-full relative space-y-6">
+                    {/* Botones de acciones */}
+                    <div className="absolute -top-11 left-0 flex justify-end gap-3">
+                        <Button className="bg-green-700 hover:bg-green-600 text-white">
+                            <Download /> Exportar
+                        </Button>
+                        <Button onClick={handleEditInvoice}>
+                            <MdOutlineEdit /> Editar
+                        </Button>
+                        <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
+                            <MdPayments /> Marcar Pagada
+                        </Button>
                     </div>
-                    <div className="grid grid-cols-3 w-full mb-4">
-                        <div className=" ">
-                            <p><strong>N Factura:</strong> {invoiceSelected?.controlNumber}</p>
+
+                    {/* Información de factura */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 border p-4 rounded-lg shadow-sm bg-gray-50">
+                        <div className="space-y-1">
+                            <p><strong>N° Factura:</strong> {invoiceSelected?.controlNumber}</p>
                             <p><strong>Cliente:</strong> {invoice.client.name}</p>
-                            <p><strong>Rif:</strong> {formatNumberWithDots(invoice.client.rif, '', '', true)}</p>
+                            <p><strong>RIF:</strong> {formatNumberWithDots(invoice.client.rif, '', '', true)}</p>
                         </div>
-                        <div>
-                            <p><strong>Consignación:</strong> {invoiceSelected?.consignment ? 'Si' : 'No'}</p>
-                        </div>
-                        <div className="flex flex-col justify-end items-start">
+
+                        <div className="space-y-1">
+                            <p><strong>Consignación:</strong> {invoiceSelected?.consignment ? 'Sí' : 'No'}</p>
                             <p><strong>Fecha despacho:</strong> {formatDate(String(invoiceSelected?.dispatchDate))}</p>
                             <p><strong>Fecha vencimiento:</strong> {formatDate(String(invoiceSelected?.dueDate))}</p>
-                            <p><strong>Total:</strong> {formatNumberWithDots(Number(invoiceSelected?.totalAmount), '', '.00 $',)}</p>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p><strong>Total:</strong> {formatNumberWithDots(Number(Number(invoiceSelected?.totalAmount).toFixed(2)), '', ' $')}</p>
+                            <p><strong>Pagado:</strong> {formatNumberWithDots(Number(remainingPay(invoiceSelected)), '', ' $')}</p>
+                            <p><strong>Debe:</strong> {formatNumberWithDots(Number(invoiceSelected?.remaining), '', ' $')}</p>
                         </div>
                     </div>
 
+                    {/* Tabla de productos o servicios */}
                     <div className="w-full">
                         <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
                     </div>
                 </div>
+
             </DialogComponent>
 
 
