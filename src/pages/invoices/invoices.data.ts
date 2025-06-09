@@ -152,7 +152,7 @@ export const invoiceItemsColumns: IColumns<InvoiceItems>[] = [
     {
         column: 'price',
         label: 'Precio',
-        element: (data: InvoiceItems) => formatNumberWithDots(Number(data.product.price).toFixed(2), '', ' $'),
+        element: (data: InvoiceItems) => formatNumberWithDots(Number(data.unitPrice).toFixed(2), '', ' $'),
         orderBy: '',
         type: 'string',
     },

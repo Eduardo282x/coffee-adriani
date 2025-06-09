@@ -14,7 +14,7 @@ export interface NewInvoiceApiPackage {
     detPackage: DetPackage[]
 }
 export interface DetPackage {
-    product:       IProducts;
+    product: IProducts;
     totalQuantity: number;
 }
 
@@ -46,6 +46,7 @@ export interface IInvoiceForPay extends IInvoice {
     totalPaid: number | string;
     totalAmountBs: number | string;
     currency: string;
+    specialPrice: string | number;
 }
 
 export interface Payments {

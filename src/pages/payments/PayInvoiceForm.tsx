@@ -20,6 +20,7 @@ interface PayInvoiceFormProps extends FromProps {
 export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar }) => {
     const [infoPayment, setInfoPayment] = useState<IPayments>(data);
     const [allInvoices, setAllInvoices] = useState<IOptions[]>([]);
+    // const [cash, setCash] = useState<boolean>(false);
     const [currencyBs, setCurrencyBs] = useState<boolean>(false);
     const [invoicesForPay, setInvoicesForPay] = useState<IInvoiceForPay[]>([]);
     const [invoices, setInvoices] = useState<IInvoice[]>([]);
@@ -27,6 +28,7 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
 
     useEffect(() => {
         setCurrencyBs(data.account.method.currency === 'BS');
+        // setCash(data.account.method.currency === 'USD' && data.account.method.name === 'Efectivo $')
         setInfoPayment({
             ...data,
             amountUSD: data.account.method.currency === 'BS' 
@@ -64,17 +66,14 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
         const findInvoice: IInvoiceForPay = invoices.find((inv) => inv.id.toString() === value)as IInvoiceForPay ;
         if (!findInvoice) return;
 
-        const findInvoices = invoicesForPay.find(item => item.id.toString() == value);
-        if (findInvoices) {
+        const duplicateInvoice = invoicesForPay.find(item => item.id.toString() == value);
+        if (duplicateInvoice) {
             return;
         }
 
         // const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (currencyBs ? Number(inv.totalPaid) / dolar : Number(inv.totalPaid)), 0);
         const alreadyUsedUSD = invoicesForPay.reduce((acc, inv) => acc + (Number(inv.totalPaid)), 0);
 
-        // const totalAvailable = currencyBs
-        //     ? Number(infoPayment.remaining) / dolar
-        //     : Number(infoPayment.remaining);
         const totalAvailable = Number(infoPayment.remaining);
 
         const remaining = totalAvailable - alreadyUsedUSD;
@@ -88,7 +87,7 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
             return;
         }
 
-        const parseRemaining = Number(remaining / Number(dolar?.dolar)).toFixed(2)
+        const parseRemaining = currencyBs ? Number(remaining / Number(dolar?.dolar)).toFixed(2) : remaining;
         // Cuánto se puede pagar a esta factura sin pasarse
         const totalPaid = Math.min(Number(findInvoice.remaining), Number(parseRemaining));
         
@@ -99,7 +98,12 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
             ...findInvoice,
             totalPaid: setCurrencyPay,
             currency: infoPayment.account.method.currency,
-            totalAmountBs: Number(Number(dolar?.dolar) * Number(findInvoice.totalAmount)).toFixed(2)
+            // totalAmountBs: Number(Number(dolar?.dolar) * Number(findInvoice.totalAmount)).toFixed(2)
+        }
+
+        if(!currencyBs){
+            newItem.totalAmount = Number(findInvoice.specialPrice);
+            newItem.remaining = Number(findInvoice.specialPrice);
         }
 
         setInvoicesForPay(prev => [
