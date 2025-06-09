@@ -1,5 +1,5 @@
 import { DateRangePicker } from '@/components/datepicker/DateRangePicker';
-import { Button } from '@/components/ui/button'
+// import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label';
 import { FC, useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -8,7 +8,7 @@ import { getPaymentMethod } from '@/services/payment.service';
 import { IPayments, Method } from '@/interfaces/payment.interface';
 import { DateRange } from 'react-day-picker';
 import { IColumns } from '@/components/table/table.interface';
-import { Download } from 'lucide-react';
+// import { Download } from 'lucide-react';
 import { DropDownFilter } from '@/components/dropdownFilter/DropDownFilter';
 
 // import { FaFilter } from 'react-icons/fa';
@@ -70,7 +70,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                 />
             } />
 
-            <Button className="bg-green-700 hover:bg-green-600 text-white translate-y-3"><Download /> Exportar</Button>
+            {/* <Button className="bg-green-700 hover:bg-green-600 text-white translate-y-3"><Download /> Exportar</Button> */}
         </div>
     )
 }

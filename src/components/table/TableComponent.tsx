@@ -11,6 +11,7 @@ import { formatNumberWithDots } from "@/hooks/formaters";
 import { ToolTip } from "../tooltip/ToolTip";
 
 interface TableProps<T> {
+    className?: string;
     dataBase: T[];
     columns: IColumns<T>[];
     action?: (type: string, data: T) => void;
@@ -22,6 +23,7 @@ interface TableProps<T> {
 }
 
 export const TableComponent = <T,>({
+    className,
     dataBase,
     columns,
     action,
@@ -87,7 +89,7 @@ export const TableComponent = <T,>({
 
     return (
         <>
-            <div className="rounded-md border">
+            <div className={`rounded-md border ${className}`}>
                 <Table>
                     <TableHeader className="shadow-md">
                         <TableRow>

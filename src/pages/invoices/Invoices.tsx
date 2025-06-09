@@ -6,7 +6,7 @@ import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice } from "@/services/invoice.service"
+import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -26,18 +26,32 @@ export const Invoices = () => {
     const [detPackage, setDetPackage] = useState<DetPackage[]>([])
     const [packages, setPackages] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-    const today = new Date();
+    const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined)
+    const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
+    const [selectedBlock, setSelectedBlock] = useState<string>('all');
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: new Date(2025, today.getMonth(), 1),
-        to: new Date(2025, today.getMonth() + 1, 1),
-    })
+
+    const getAllInvoicesApi = async () => {
+        setLoading(true);
+        const response: NewInvoiceApiPackage = await getInvoice();
+        if (response) {
+            setDetPackage(response.detPackage)
+            setPackages(response.package);
+            setInvoices({
+                allInvoices: response.invoices,
+                invoices: response.invoices,
+                invoicesFilter: response.invoices
+            });
+        }
+        setLoading(false)
+    }
 
     const getInvoicesFilterApi = async () => {
         setLoading(true);
         const filterDate: DateRangeFilter = {
-            startDate: date?.from ? date.from : new Date(),
-            endDate: date?.to ? addDays(date.to, 1) : new Date(),
+            startDate: dateStart?.from ? dateStart.from : new Date(),
+            endDate: dateStart?.to ? addDays(dateStart.to, 1) : new Date(),
         }
         const response: NewInvoiceApiPackage = await getInvoiceFilter(filterDate);
         if (response) {
@@ -53,13 +67,16 @@ export const Invoices = () => {
     }
 
     useEffect(() => {
-        if (date?.to) {
+        getAllInvoicesApi()
+    }, [])
+
+    useEffect(() => {
+        if (dateStart?.to) {
             getInvoicesFilterApi()
         }
-    }, [date?.to])
+    }, [dateStart?.to])
 
     const generateInvoice = async (data: IInvoiceForm) => {
-
         if (selectInvoice) {
             await updateInvoiceApi(selectInvoice.id, data)
         } else {
@@ -69,37 +86,49 @@ export const Invoices = () => {
 
         socket.emit('message', 'Actualice inventario')
 
-        setDate({
-            from: new Date(2025, today.getMonth(), 1),
-            to: new Date(2025, today.getMonth() + 1, 1),
-        })
+        if (dateStart?.to) {
+            getInvoicesFilterApi()
+        }
     }
 
     const handleChangeBlock = (option: string) => {
-        if (option === 'all') return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }))
-        const filterClientsByBlock = invoice.allInvoices.filter(cli => cli.client.blockId === Number(option))
-        setInvoices((prev) => ({ ...prev, invoices: filterClientsByBlock }))
-    }
+        setSelectedBlock(option);
+        applyInvoiceFilters(option, selectedStatus);
+    };
 
     const handleChangeStatusInvoice = (option: string) => {
-        if (option === 'all') {
-            return setInvoices((prev) => ({ ...prev, invoices: invoice.allInvoices }));
+        setSelectedStatus(option);
+        applyInvoiceFilters(selectedBlock, option);
+    };
+
+
+    const applyInvoiceFilters = (blockId: string, status: string) => {
+        let filtered = invoice.allInvoices;
+
+        // Filtro por bloque
+        if (blockId !== 'all') {
+            filtered = filtered.filter(inv => inv.client.blockId === Number(blockId));
         }
 
-        const filterInvoiceByStatus: InvoiceApi[] = invoice.allInvoices.map(inv => {
-            const filteredInvoices = inv.invoices.filter(invoice => invoice.status === option);
-            if (filteredInvoices.length > 0) {
-                return {
-                    client: inv.client,
-                    invoices: filteredInvoices,
-                };
-            }
-            return null;
-        })
-            .filter((item): item is InvoiceApi => item !== null);
+        // Filtro por estado
+        if (status !== 'all') {
+            const filteredByStatus: InvoiceApi[] = filtered.map(inv => {
+                const filteredInvoices = inv.invoices.filter(invoice => invoice.status === status);
+                if (filteredInvoices.length > 0) {
+                    return {
+                        client: inv.client,
+                        invoices: filteredInvoices,
+                    };
+                }
+                return null;
+            }).filter((item): item is InvoiceApi => item !== null);
 
-        setInvoices((prev) => ({ ...prev, invoices: filterInvoiceByStatus }));
-    }
+            filtered = filteredByStatus;
+        }
+
+        setInvoices(prev => ({ ...prev, invoices: filtered }));
+    };
+
 
     const setInvoicesFilter = (invoices: InvoiceApi[]) => {
         setInvoices((prev) => ({ ...prev, invoices: invoices }))
@@ -155,16 +184,18 @@ export const Invoices = () => {
             </header>
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
-            <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
+            <main className="flex-1 p-4 md:p-6 min-h-[80vh]">
+                <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Facturas</h2>
 
                     <InvoiceFilter
                         setInvoicesFilter={setInvoicesFilter}
                         handleChangeStatusInvoice={handleChangeStatusInvoice}
                         handleChangeBlock={handleChangeBlock}
-                        date={date}
-                        setDate={setDate}
+                        dateStart={dateStart}
+                        setDateStart={setDateStart}
+                        dateEnd={dateEnd}
+                        setDateEnd={setDateEnd}
                         invoice={invoice.invoicesFilter}
                         clientColumns={clientColumns}
                     />
@@ -216,7 +247,7 @@ export const Invoices = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[46rem] px-4"
+                    className="w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
                     label2="Agregar Cliente"
                     label1="Editar Cliente"
                     isEdit={true}

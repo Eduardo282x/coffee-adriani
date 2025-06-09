@@ -10,37 +10,44 @@ import { Filter } from "@/components/table/Filter"
 import { defaultValues, IProductsForm, productsColumns } from "./products.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { ProductForm } from "./ProductForm"
-import { useLocation } from "react-router"
 import { IColumns } from "@/components/table/table.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 
 export const Products = () => {
-    const location = useLocation();
-    const [products, setProducts] = useState<GroupProducts>({ products: [], productsFilter: [] });
+    const [products, setProducts] = useState<IProducts[]>([]);
+    const [productsHistory, setProductsHistory] = useState<IProducts[]>([]);
+    const [data, setData] = useState<GroupProducts>({ products: [], productsFilter: [], });
     const [columns, setColumns] = useState<IColumns<IProducts>[]>(productsColumns);
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [dataDialog, setDataDialog] = useState<IProductsForm>(defaultValues);
     const [edit, setEdit] = useState<boolean>(false);
+    const [history, setHistory] = useState<boolean>(false);
 
     useEffect(() => {
-        if (location.pathname === '/productos') {
-            getProductsApi();
+        getProductsApi();
+        getProductHistoryApi();
+    }, [])
+
+    const toggleButton = (active: boolean) => {
+        setHistory(active);
+        if (history === active) return;
+        if (active) {
+            setData({ productsFilter: productsHistory, products: productsHistory })
+            setColumns((prev) => (prev.filter(col => col.icon === false)))
+        } else {
+            setData({ productsFilter: products, products: products })
             setColumns(productsColumns)
         }
-
-        if (location.pathname === '/productos/historial') {
-            getProductHistoryApi();
-            setColumns((prev) => (prev.filter(col => col.icon === false)))
-        }
-    }, [location])
+    }
 
     const getProductsApi = async () => {
         setLoading(true);
         const response: IProducts[] = await getProduct();
         if (response) {
-            setProducts({ products: response, productsFilter: response });
+            setProducts(response);
+            setData({ productsFilter: response, products: response })
         }
         setLoading(false);
     }
@@ -49,13 +56,13 @@ export const Products = () => {
         setLoading(true);
         const response: IProducts[] = await getProductHistory();
         if (response) {
-            setProducts({ products: response, productsFilter: response });
+            setProductsHistory(response);
         }
         setLoading(false);
     }
 
     const setProductFilter = (products: IProducts[]) => {
-        setProducts((prev) => ({ ...prev, productsFilter: products }))
+        setData((prev) => ({ ...prev, productsFilter: products }))
     }
 
     const getAction = (action: string, data: IProducts) => {
@@ -108,6 +115,11 @@ export const Products = () => {
                     <h1 className="text-lg font-semibold">Productos</h1>
                 </div>
                 <div className="flex items-center gap-4">
+                    <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2 mx-4">
+                        <Button className={`${history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(false)}>Productos</Button>
+                        <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
+                    </div>
+
                     <DolarComponents />
 
                     <Button onClick={() => { setOpenDialog(true); setEdit(false) }}>
@@ -123,12 +135,12 @@ export const Products = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Productos</h2>
 
                     <div className="flex w-full max-w-sm items-center space-x-2">
-                        <Filter dataBase={products.products} columns={columns} setDataFilter={setProductFilter} />
+                        <Filter dataBase={data.products} columns={columns} setDataFilter={setProductFilter} />
                     </div>
                 </div>
 
                 <div>
-                    <TableComponent columns={columns} dataBase={products.productsFilter} action={getAction}></TableComponent>
+                    <TableComponent columns={columns} dataBase={data.productsFilter} action={getAction}></TableComponent>
                 </div>
             </main>
 

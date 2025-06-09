@@ -175,7 +175,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
     }
 
     return (
-        <div>
+        <div className="">
             <div className="flex items-center justify-end w-full gap-5 my-4">
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
                     <Label className="text-right w-42">
@@ -224,6 +224,12 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
             <div className="flex items-center justify-end mt-4">
                 <Button disabled={total === 0} onClick={onSubmitInvoice}>Generar Factura</Button>
             </div>
+
+            {/* <div className="fixed bottom-0 left-0 w-full border-t bg-white px-6 py-4 flex justify-end z-10">
+                <Button disabled={total === 0} onClick={onSubmitInvoice}>
+                    Generar Factura
+                </Button>
+            </div> */}
         </div>
     )
 }

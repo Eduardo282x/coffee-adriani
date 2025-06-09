@@ -2,7 +2,7 @@ import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { GroupPayments, IPayInvoiceForm, IPaymentForm, IPayments, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
-import { deletePayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putPayment } from '@/services/payment.service';
+import { deletePayment, getPayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putPayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -31,13 +31,16 @@ export const Payments = () => {
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
-    const today = new Date();
+    // const today = new Date();
+
+    const [date, setDate] = useState<DateRange | undefined>(undefined)
 
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [associatedFilter, setAssociatedFilter] = useState<string>('all');
     const [methodFilter, setMethodFilter] = useState<string>('all');
 
     useEffect(() => {
+        getAllPaymentsApi();
         getProductDolarApi();
     }, [])
 
@@ -46,18 +49,26 @@ export const Payments = () => {
         setDolar(response)
     }
 
-
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: new Date(2025, today.getMonth(), 1),
-        to: new Date(2025, today.getMonth() + 1, 1),
-    })
-
     useEffect(() => {
         if (date?.to) {
             getPaymentsFilterApi()
         }
     }, [date?.to])
 
+
+    const getAllPaymentsApi = async () => {
+        setLoading(true);
+        const response: PaymentAPI = await getPayment();
+        if (response) {
+            setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
+            setPayments({
+                allPayments: response.payments,
+                payments: response.payments,
+                paymentsFilter: response.payments
+            });
+        }
+        setLoading(false)
+    }
 
     const getPaymentsFilterApi = async () => {
         setLoading(true);

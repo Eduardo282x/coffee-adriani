@@ -18,6 +18,7 @@ import { Layout } from './pages/layout/Layout';
 import { Payments } from './pages/payments/Payments';
 import { socket, useSocket } from './services/socket.io';
 import { Accounts } from './pages/accounts/Accounts';
+import { Administration } from './pages/administration/Administration';
 
 
 function App() {
@@ -43,10 +44,11 @@ function App() {
             <Route path="/clientes" element={<Clients />} />
             <Route path="/facturas" element={<Invoices />} />
             <Route path="/productos" element={<Products />} />
-            <Route path="/productos/historial" element={<Products />} />
+            {/* <Route path="/productos/historial" element={<Products />} /> */}
             <Route path="/ventas" element={<Sales />} />
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/usuarios" element={<Users />} />
+            <Route path="/administracion" element={<Administration />} />
             <Route path="/pagos" element={<Payments />} />
             <Route path="/cuentas-pago" element={<Accounts />} />
           </Route>

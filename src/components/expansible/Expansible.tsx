@@ -7,7 +7,7 @@ import { IColumns } from "../table/table.interface";
 import { DialogComponent } from "../dialog/DialogComponent";
 import { invoiceItemsColumns } from "@/pages/invoices/invoices.data";
 import { Button } from "../ui/button";
-import { Download } from "lucide-react";
+// import { Download } from "lucide-react";
 import { MdOutlineEdit, MdPayments } from "react-icons/md";
 interface ExpansibleProps {
     invoice: InvoiceApi;
@@ -99,9 +99,9 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                 <div className="w-full relative space-y-6">
                     {/* Botones de acciones */}
                     <div className="absolute -top-11 left-0 flex justify-end gap-3">
-                        <Button className="bg-green-700 hover:bg-green-600 text-white">
+                        {/* <Button className="bg-green-700 hover:bg-green-600 text-white">
                             <Download /> Exportar
-                        </Button>
+                        </Button> */}
                         <Button onClick={handleEditInvoice}>
                             <MdOutlineEdit /> Editar
                         </Button>

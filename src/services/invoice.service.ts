@@ -62,11 +62,9 @@ export const putPayInvoice = async (id: number) => {
 export const deleteInvoice = async (id: number): Promise<BaseResponse> => {
     try {
         return await deleteDataApi(`${routeInvoice}/${id}`) as BaseResponse;
-    } catch (err) {
-        console.log(err);
-
+    } catch (err: unknown) {
         return {
-            message: '',
+            message: String(err),
             success: false
         }
     }
