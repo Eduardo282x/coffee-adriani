@@ -43,7 +43,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 
             <div className="w-60">
                 <Label className="mb-2">Buscar</Label>
-                <Filter dataBase={invoice} columns={clientColumns} setDataFilter={setInvoicesFilter} />
+                <Filter dataBase={invoice} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} />
             </div>
 
             <DropDownFilter contentMenu={

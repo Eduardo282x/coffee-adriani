@@ -31,7 +31,6 @@ export const Invoices = () => {
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-
     const getAllInvoicesApi = async () => {
         setLoading(true);
         const response: NewInvoiceApiPackage = await getInvoice();

@@ -4,14 +4,16 @@ import { IColumns } from "./table.interface";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { debounce } from "@/lib/debounce";
+import { InvoiceApi } from "@/interfaces/invoice.interface";
 
 interface IFilter {
     dataBase: any[];
     setDataFilter: (value: any) => void;
     columns: IColumns<any>[];
+    filterInvoices?: boolean;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns }) => {
+export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns, filterInvoices }) => {
     const [filter, setFilter] = useState<string>('');
 
     useEffect(() => {
@@ -40,7 +42,27 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns }) => {
             )
         )
 
-        setDataFilter(filtered)
+        setDataFilter(filtered);
+
+        if (filterInvoices) {
+            const normalizedValue = normalize(value);
+
+            const filtered = dataBase.filter((item: InvoiceApi) => {
+                // 1. Filtro por columnas (cliente)
+                const matchesClient = keys.some((key) =>
+                    normalize(getNestedValue(item, key)).includes(normalizedValue)
+                );
+
+                // 2. Filtro por facturas (controlNumber)
+                const matchesControlNumber = item.invoices.some(inv =>
+                    normalize(inv.controlNumber).includes(normalizedValue)
+                );
+
+                return matchesClient || matchesControlNumber;
+            });
+
+            setDataFilter(filtered);
+        }
     }
 
     const debouncedFilter = debounce(handleFilter, 200)
