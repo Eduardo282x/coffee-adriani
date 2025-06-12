@@ -29,9 +29,13 @@ export const Users = () => {
 
     const getUsersApi = async () => {
         setLoading(true);
-        const response: IUsers[] = await getUsers();
-        if (response && response.length > 0) {
-            setUsers({ allUsers: response, users: response });
+        try {
+            const response: IUsers[] = await getUsers();
+            if (response && response.length > 0) {
+                setUsers({ allUsers: response, users: response });
+            }
+        } catch (err) {
+            console.log(err);
         }
         setLoading(false);
     }

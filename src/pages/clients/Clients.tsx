@@ -1,26 +1,34 @@
 import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { deleteClients, getBlocks, getClients, postClients, putClients } from "@/services/clients.service"
-import { Block, GroupClients, IClients } from "@/interfaces/clients.interface"
+import { deleteBlocks, deleteClients, getBlocks, getClients, postBlocks, postClients, putBlocks, putClients } from "@/services/clients.service"
+import { Block, BodyBlock, GroupBlock, GroupClients, IClients } from "@/interfaces/clients.interface"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
-import { clientsColumns, defaultValues, IClientsForm } from "./client.data"
+import { blockColumns, clientsColumns, defaultValues, IClientsForm } from "./client.data"
 import { Filter } from "@/components/table/Filter"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { ClientsForm } from "./ClientsForm"
+import { BlockForm, ClientsForm } from "./ClientsForm"
 import { IOptions } from "@/interfaces/form.interface"
 
 export const Clients = () => {
     const [clients, setClients] = useState<GroupClients>({ allClients: [], clients: [], clientsFilter: [] });
-    const [blocks, setBlocks] = useState<Block[]>([]);
+    const [blocks, setBlocks] = useState<GroupBlock>({ allBlocks: [], blocks: [] });
     const [blockOptions, setBlockOptions] = useState<IOptions[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [showBlocks, setShowBlocks] = useState<boolean>(false);
+
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openDialogBlock, setOpenDialogBlock] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+    const [openDeleteDialogBlock, setOpenDeleteDialogBlock] = useState<boolean>(false);
+
     const [dataDialog, setDataDialog] = useState<IClientsForm>(defaultValues);
+    const [dataDialogBlock, setDataDialogBlock] = useState<Block | null>(null);
+
     const [edit, setEdit] = useState<boolean>(false);
 
     useEffect(() => {
@@ -40,7 +48,7 @@ export const Clients = () => {
     const getBlocksApi = async () => {
         const response = await getBlocks();
         if (response) {
-            setBlocks(response);
+            setBlocks({ allBlocks: response, blocks: response });
             const blockOptions = response.map((blo: Block) => {
                 return {
                     label: blo.name,
@@ -60,6 +68,36 @@ export const Clients = () => {
         setClients((prev) => ({ ...prev, clientsFilter: clients }))
     }
 
+    const setBlocksFilter = (block: Block[]) => {
+        setBlocks((prev) => ({ ...prev, blocks: block }))
+    }
+
+    const addNew = () => {
+        setEdit(false);
+        setDataDialogBlock(null)
+        if (showBlocks) {
+            setOpenDialogBlock(true);
+        } else {
+            setOpenDialog(true);
+        }
+    }
+
+    const getActionBlocks = (action: string, data: Block) => {
+        setDataDialogBlock(data);
+        if (action === 'Editar') {
+            setEdit(true);
+            // Abrir el dialog DESPUÉS que React procese los otros cambios
+            setTimeout(() => {
+                setOpenDialogBlock(true);
+            }, 0);
+        }
+        if (action === 'Eliminar') {
+            setTimeout(() => {
+                setOpenDeleteDialogBlock(true);
+            }, 0);
+        }
+    }
+
     const getAction = (action: string, data: IClients) => {
         setDataDialog(data);
         if (action === 'Editar') {
@@ -77,9 +115,25 @@ export const Clients = () => {
     }
 
     const deleteAction = async () => {
-        await deleteClients(Number(dataDialog.id))
-        setOpenDeleteDialog(false);
-        await getClientsApi();
+        if (showBlocks) {
+            await deleteBlocks(Number(dataDialogBlock?.id))
+            setOpenDeleteDialogBlock(false);
+            await getBlocksApi();
+        } else {
+            await deleteClients(Number(dataDialog.id))
+            setOpenDeleteDialog(false);
+            await getClientsApi();
+        }
+    }
+
+    const actionDialogBlock = async (data: BodyBlock) => {
+        if (edit) {
+            await putBlocks(Number(dataDialogBlock?.id), data)
+        } else {
+            await postBlocks(data)
+        }
+        setOpenDialogBlock(false);
+        await getBlocksApi();
     }
 
     const actionDialog = async (data: IClientsForm) => {
@@ -116,9 +170,14 @@ export const Clients = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Button onClick={() => { setOpenDialog(true); setEdit(false) }}>
+                    <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2 mx-4">
+                        <Button className={`${showBlocks ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setShowBlocks(false)}>Clientes</Button>
+                        <Button className={`${!showBlocks ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setShowBlocks(true)}>Bloques</Button>
+                    </div>
+
+                    <Button onClick={addNew}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Cliente
+                        {showBlocks ? 'Nuevo Bloque' : 'Nuevo Cliente'}
                     </Button>
                 </div>
             </header>
@@ -127,42 +186,64 @@ export const Clients = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Clientes</h2>
                     <div className="flex items-center gap-8">
-                        <Select onValueChange={handleChangeBlock}>
-                            <SelectTrigger className="w-[180px] ">
-                                <SelectValue placeholder="Bloques" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value='all'>Todos</SelectItem>
-                                    {blocks && blocks.map((blo: Block, index: number) => (
-                                        <SelectItem key={index} value={blo.id.toString()}>{blo.name}</SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-
+                        {!showBlocks && (
+                            <Select onValueChange={handleChangeBlock}>
+                                <SelectTrigger className="w-[180px] ">
+                                    <SelectValue placeholder="Bloques" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value='all'>Todos</SelectItem>
+                                        {blocks && blocks.allBlocks.map((blo: Block, index: number) => (
+                                            <SelectItem key={index} value={blo.id.toString()}>{blo.name}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        )}
 
                         <div className="flex w-full max-w-sm items-center space-x-2">
-                            <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} />
+                            {showBlocks
+                                ? <Filter dataBase={blocks.allBlocks} columns={blockColumns} setDataFilter={setBlocksFilter} />
+                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} />
+                            }
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <TableComponent columns={clientsColumns} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
+                    {showBlocks
+                        ? <TableComponent columns={blockColumns} dataBase={blocks.blocks} action={getActionBlocks}></TableComponent>
+                        : <TableComponent columns={clientsColumns} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
+                    }
                 </div>
             </main>
 
-            <DialogComponent
-                open={openDialog}
-                setOpen={setOpenDialog}
-                className="w-[45rem]"
-                label2="Agregar Cliente"
-                label1="Editar Cliente"
-                isEdit={edit}
-            >
-                <ClientsForm onSubmit={actionDialog} data={dataDialog} blocks={blockOptions}></ClientsForm>
-            </DialogComponent>
+            {openDialog && (
+                <DialogComponent
+                    open={openDialog}
+                    setOpen={setOpenDialog}
+                    className="w-[45rem]"
+                    label2="Agregar Cliente"
+                    label1="Editar Cliente"
+                    isEdit={edit}
+                >
+                    <ClientsForm onSubmit={actionDialog} data={dataDialog} blocks={blockOptions}></ClientsForm>
+                </DialogComponent>
+            )}
+
+            {openDialogBlock && (
+                <DialogComponent
+                    open={openDialogBlock}
+                    setOpen={setOpenDialogBlock}
+                    className="w-[45rem]"
+                    label2="Agregar Bloque"
+                    label1="Editar Bloque"
+                    isEdit={edit}
+                >
+                    <BlockForm onSubmit={actionDialogBlock} data={dataDialogBlock}></BlockForm>
+                </DialogComponent>
+            )}
 
             {openDeleteDialog && (
                 <DialogComponent
@@ -175,6 +256,22 @@ export const Clients = () => {
                 >
                     <div className="flex items-center justify-center gap-8 mt-5">
                         <Button onClick={() => setOpenDeleteDialog(false)} className="text-lg">Cancelar</Button>
+                        <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
+                    </div>
+                </DialogComponent>
+            )}
+
+            {openDeleteDialogBlock && (
+                <DialogComponent
+                    open={openDeleteDialogBlock}
+                    setOpen={setOpenDeleteDialogBlock}
+                    className="w-[28rem]"
+                    label2=""
+                    label1="Estas seguro que deseas eliminar este bloque?"
+                    isEdit={true}
+                >
+                    <div className="flex items-center justify-center gap-8 mt-5">
+                        <Button onClick={() => setOpenDeleteDialogBlock(false)} className="text-lg">Cancelar</Button>
                         <Button onClick={deleteAction} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
                     </div>
                 </DialogComponent>

@@ -1,6 +1,6 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { IClients } from "@/interfaces/clients.interface";
+import { Block, IClients } from "@/interfaces/clients.interface";
 import { IOptions } from "@/interfaces/form.interface";
 import { Edit, Trash2 } from "lucide-react";
 
@@ -16,7 +16,7 @@ export const clientsColumns: IColumns<IClients>[] = [
     {
         column: 'rif',
         label: 'Rif',
-        element: (data: IClients) => formatNumberWithDots(data.rif,'','',true),
+        element: (data: IClients) => data.rif ? formatNumberWithDots(data.rif, '', '', true) : '-',
         orderBy: '',
         type: 'string',
         icon: false,
@@ -49,7 +49,7 @@ export const clientsColumns: IColumns<IClients>[] = [
     {
         column: 'block.name',
         label: 'Bloque',
-        element: (data: IClients) => data.block.name,
+        element: (data: IClients) => data.block ? data.block.name : '-',
         orderBy: '',
         type: 'string',
         icon: false,
@@ -58,6 +58,37 @@ export const clientsColumns: IColumns<IClients>[] = [
         column: 'createdAt',
         label: 'Fecha Registro',
         element: (data: IClients) => formatDate(data.createdAt),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: '',
+        label: 'Acciones',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Editar', icon: Edit, className: '' },
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-600' },
+        ]
+    },
+];
+
+export const blockColumns: IColumns<Block>[] = [
+    {
+        label: 'Bloque',
+        column: 'name',
+        element: (data: Block) => data.name,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'address',
+        label: 'Dirección',
+        element: (data: Block) => data.address,
         orderBy: '',
         type: 'string',
         icon: false,

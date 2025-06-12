@@ -38,6 +38,11 @@ export interface IClients {
     block:     Block;
 }
 
+export interface GroupBlock { 
+    allBlocks: Block[]
+    blocks: Block[]
+}
+
 export interface Block {
     id:      number;
     name:    string;

@@ -19,7 +19,7 @@ interface TableProps<T> {
     total?: string;
     hidePaginator?: boolean;
     renderRow?: (item: T, index: number) => React.ReactNode;
-    colSpanColumns?: boolean
+    colSpanColumns?: boolean;
 }
 
 export const TableComponent = <T,>({

@@ -8,6 +8,7 @@ import { Form } from '@/components/ui/form'
 import { FormSelect } from '@/components/form/FormSelect'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button';
+import { BodyBlock } from '@/interfaces/clients.interface'
 
 interface ClientFormProps extends FromProps {
     blocks: IOptions[]
@@ -77,5 +78,50 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                 <Button type='submit'>Enviar</Button>
             </form>
         </Form>
+    )
+}
+
+
+export const BlockForm: FC<FromProps> = ({ data, onSubmit }) => {
+    const { reset, register, handleSubmit } = useForm<BodyBlock>({
+        defaultValues: {
+            address: '',
+            name: ''
+        }
+    })
+
+    useEffect(() => {
+        if (data) {
+            const parseBodyData: BodyBlock = {
+                name: data.name,
+                address: data.address,
+            }
+            setTimeout(() => {
+                reset(parseBodyData)
+            }, 0);
+        }
+    }, [data])
+
+    return (
+        <div>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col justify-start items-start gap-4 w-full py-4">
+                <div className="flex flex-col items-start justify-start gap-4 w-full">
+                    <Label className="text-right">
+                        Nombre
+                    </Label>
+                    <Input {...register('name')} />
+                </div>
+                <div className="flex flex-col items-start justify-start gap-4 w-full">
+                    <Label className="text-right">
+                        Dirección
+                    </Label>
+                    <Input {...register('address')} />
+                </div>
+
+                <div className='w-full flex items-center justify-center'>
+                    <Button type='submit' className='w-40' >Enviar</Button>
+                </div>
+            </form>
+        </div>
     )
 }
