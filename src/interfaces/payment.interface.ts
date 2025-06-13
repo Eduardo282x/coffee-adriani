@@ -23,6 +23,7 @@ export interface IPayments {
     dolarId: number;
     paymentDate: Date;
     associated: boolean;
+    credit: boolean;
     status: string;
     createdAt: Date;
     updatedAt: Date;
