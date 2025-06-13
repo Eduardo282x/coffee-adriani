@@ -8,14 +8,24 @@ export interface GroupInvoices {
     invoicesFilter: InvoiceApi[];
 }
 
+export interface PaymentsInvoices {
+    total: number;
+    remaining: number;
+    debt: number;
+    totalPending: number;
+}
+
 export interface NewInvoiceApiPackage {
     invoices: InvoiceApi[];
     package: number;
-    detPackage: DetPackage[]
+    detPackage: DetPackage[];
+    payments: PaymentsInvoices;
 }
 export interface DetPackage {
     product: IProducts;
     totalQuantity: number;
+    paidQuantity: number;
+    total: number;
 }
 
 export interface InvoiceApi {

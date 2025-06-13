@@ -144,54 +144,52 @@ export const Payments = () => {
     const getActions = (action: string, data: IPayments) => {
         setPaymentSelected(data);
 
-        if (action === 'Confirmar' && data.account.method.name !== 'Zelle') {
-            toast.custom(<Snackbar success={false} message='Solo puede confirmar pagos por zelle'></Snackbar>,
-                { position: 'bottom-center', duration: 1500 }
-            )
-        }
-        if (action === 'Confirmar' && data.account.method.name === 'Zelle' && data.status !== 'PENDING') {
-            toast.custom(<Snackbar success={false} message='Solo puede confirmar pagos que estén pendientes'></Snackbar>,
-                { position: 'bottom-center', duration: 1500 }
-            )
-        }
-        if (action === 'Confirmar' && data.account.method.name === 'Zelle' && data.status === 'PENDING') {
-            setTimeout(() => {
-                setOpenConfirmDialog(true);
-            }, 0);
-        }
+        const method = data.account.method.name;
+        const status = data.status;
+        const remaining = Number(data.remaining);
 
-        if (action === 'Pagar' && data.status === 'PENDING') {
-            toast.custom(<Snackbar success={false} message='Solo puede asociar pagos que estén confirmados'></Snackbar>,
-                { position: 'bottom-center', duration: 1500 }
-            )
-        }
+        const notify = (message: string) => {
+            toast.custom(<Snackbar success={false} message={message} />, {
+                position: 'bottom-center',
+                duration: 1500,
+            });
+        };
 
-        if (action === 'Pagar' && Number(data.remaining) === 0) {
-            toast.custom(<Snackbar success={false} message='Este pago ya no posee fondos'></Snackbar>,
-                { position: 'bottom-center', duration: 1500 }
-            )
+        switch (action) {
+            case 'Confirmar':
+                if (method !== 'Zelle') {
+                    return notify('Solo puede confirmar pagos por Zelle');
+                }
 
-            return;
-        }
+                if (status !== 'PENDING') {
+                    return notify('Solo puede confirmar pagos que estén pendientes');
+                }
 
-        if (action === 'Pagar' && data.status !== 'PENDING') {
-            setTimeout(() => {
-                setOpenPayDialog(true);
-            }, 0);
-        }
+                return setTimeout(() => setOpenConfirmDialog(true), 0);
 
-        if (action === 'Editar') {
-            setTimeout(() => {
-                setOpenDialog(true);
-            }, 0);
-        }
+            case 'Pagar':
+                if (status === 'PENDING') {
+                    return notify('Solo puede asociar pagos que estén confirmados');
+                }
 
-        if (action === 'Eliminar') {
-            setTimeout(() => {
-                setOpenDialogDelete(true);
-            }, 0);
+                if (remaining === 0) {
+                    return notify('Este pago ya no posee fondos');
+                }
+
+                return setTimeout(() => setOpenPayDialog(true), 0);
+
+            case 'Editar':
+                return setTimeout(() => setOpenDialog(true), 0);
+
+            case 'Eliminar':
+                return setTimeout(() => setOpenDialogDelete(true), 0);
+
+            default:
+                console.warn(`Acción no reconocida: ${action}`);
+                break;
         }
-    }
+    };
+
 
     const handleNewPayments = () => {
         setPaymentSelected(null);
@@ -213,6 +211,17 @@ export const Payments = () => {
     }
 
     const payInvoice = async (data: IPayInvoiceForm) => {
+        setPayments((prev) => {
+            return {
+                ...prev,
+                payments: prev.payments.map(item => {
+                    return  {
+                        ...item,
+                        associated: item.id === data.paymentId ? true : item.associated
+                    }
+                })
+            }
+        })
         await postAssociatePayment(data);
         setOpenPayDialog(false)
     }

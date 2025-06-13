@@ -23,7 +23,7 @@ export const getDataApi = (endpoint: string) => {
     return api.get(endpoint).then((response) => {
         return response.data;
     }).catch(err => {
-        return err.response.data;
+        return err;
     })
 }
 

@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
-import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage } from "@/interfaces/invoice.interface"
+import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
 import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
@@ -15,7 +15,7 @@ import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
 import { formatNumberWithDots } from "@/hooks/formaters"
-import { DetailsPackage } from "./DetailsPackage"
+import { DetailsPackage, DetailsPayments } from "./DetailsPackage"
 import { BaseResponse } from "@/services/base.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 
@@ -23,8 +23,10 @@ export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [selectInvoice, setSelectInvoice] = useState<IInvoice | null>(null);
     const [invoice, setInvoices] = useState<GroupInvoices>({ allInvoices: [], invoices: [], invoicesFilter: [] });
+    const [payedInvoice, setPayedInvoices] = useState<PaymentsInvoices>({ total: 0, remaining: 0, debt: 0, totalPending: 0 });
     const [detPackage, setDetPackage] = useState<DetPackage[]>([])
     const [packages, setPackages] = useState<number>(0);
+    const [packageRest, setPackageRest] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined)
     const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
@@ -37,10 +39,12 @@ export const Invoices = () => {
         if (response) {
             setDetPackage(response.detPackage)
             setPackages(response.package);
+            setPackageRest(response.detPackage.reduce((acc, item) => acc + item.total, 0))
+            setPayedInvoices(response.payments);
             setInvoices({
                 allInvoices: response.invoices,
                 invoices: response.invoices,
-                invoicesFilter: response.invoices
+                invoicesFilter: response.invoices,
             });
         }
         setLoading(false)
@@ -56,6 +60,8 @@ export const Invoices = () => {
         if (response) {
             setDetPackage(response.detPackage)
             setPackages(response.package);
+            setPackageRest(response.detPackage.reduce((acc, item) => acc + item.total, 0))
+            setPayedInvoices(response.payments);
             setInvoices({
                 allInvoices: response.invoices,
                 invoices: response.invoices,
@@ -154,6 +160,22 @@ export const Invoices = () => {
     }
 
     const payInvoices = (invoice: IInvoice) => {
+        setInvoices((prev) => {
+            return {
+                ...prev,
+                invoices: prev.invoices.map(item => {
+                    return {
+                        client: item.client,
+                        invoices: item.invoices.map(data => {
+                            return {
+                                ...data,
+                                status: data.id == invoice.id ? 'Pagado' : data.status
+                            }
+                        })
+                    }
+                })
+            }
+        })
         putPayInvoice(invoice.id);
     }
 
@@ -209,9 +231,16 @@ export const Invoices = () => {
                 {!loading && (invoice.invoices && invoice.invoices.length > 0) && (
                     (
                         <>
-                            <div className="mb-2 text-lg flex items-center justify-start gap-2">
-                                <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
-                                <DetailsPackage detPackage={detPackage} />
+                            <div className="my-2 text-md flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                    <div>
+                                        <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
+                                        <p><span className="font-bold">Bultos restantes:</span> {formatNumberWithDots(packageRest.toFixed(2), '', '')} bultos</p>
+                                    </div>
+                                    <DetailsPackage detPackage={detPackage} />
+                                </div>
+
+                                <DetailsPayments payments={payedInvoice} />
                             </div>
                             <div className="rounded-md border">
                                 <TableComponent

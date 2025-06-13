@@ -83,7 +83,7 @@ const FilterSelect = ({
     handleChangeStatusAssociated
 }: PaymentSelectsProps) => {
     return (
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2 p-1'>
             <div className="flex items-center justify-between w-auto">
                 <Label className="mb-2">Estado Pago</Label>
                 <Select onValueChange={handleChangeStatusPay} >

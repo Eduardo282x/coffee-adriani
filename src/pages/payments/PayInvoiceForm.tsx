@@ -61,6 +61,14 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
             return formatNumberWithDots(remaining ? data.remaining : data.amountBs, '', ' Bs');
         }
     }
+    
+    const setPaymentRest = (payment: IPayments, remaining: boolean): string => {
+        if (payment.account.method.currency === 'USD') {
+            return formatNumberWithDots(remaining ? data.remaining : data.amountUSD, '', ' $')
+        } else {
+            return formatNumberWithDots(remaining ? data.remaining : data.amountBs, '', ' Bs');
+        }
+    }
 
     const selectInvoice = (value: string) => {
         const findInvoice: IInvoiceForPay = invoices.find((inv) => inv.id.toString() === value)as IInvoiceForPay ;
@@ -134,9 +142,9 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
         }
     }
 
-    const setCurrency = (currency: string): string => {
-        return currency === 'USD' ? ' $' : ' Bs';
-    }
+    // const setCurrency = (currency: string): string => {
+    //     return currency === 'USD' ? ' $' : ' Bs';
+    // }
 
     const sendPaymentInvoices = () => {
         const dataPay: IPayInvoiceForm = {
@@ -159,13 +167,15 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, dolar 
                     <span className="font-medium text-gray-600">Total:</span>
                     <span className="text-black">{setPayment(infoPayment, false)}</span>
                     {currencyBs && (
-                        <span className="text-black"> = {infoPayment.amountUSD}$</span>
+                        <span className="text-black"> = {infoPayment.amountUSD} $</span>
                     )}
                 </div>
 
                 <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-600">Restante:</span>
-                    <span className="text-black">{restPayment.toFixed(2)} {setCurrency(infoPayment.account.method.currency)}</span>
+                    <span className="text-black">
+                        {setPaymentRest(infoPayment, true)} = {Number((restPayment) / Number(dolar?.dolar)).toFixed(2)} $
+                    </span>
                 </div>
             </div>
 
