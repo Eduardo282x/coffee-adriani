@@ -8,7 +8,6 @@ import { getClients } from "@/services/clients.service";
 import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useState } from "react";
 import { productColumns } from "./invoices.data";
-import { formatNumberWithDots } from "@/hooks/formaters";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { FromProps } from "@/interfaces/form.interface";
@@ -62,7 +61,7 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
         if (response) {
             const parseClients = response.map((cli: IClients) => {
                 return {
-                    label: `${cli.name} - ${formatNumberWithDots(cli.rif, '', '', true)}`,
+                    label: `${cli.name} - ${cli.address}`,
                     value: cli.id
                 }
             })

@@ -32,15 +32,15 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         type: 'string',
         icon: false,
     },
-    {
-        column: 'status',
-        label: 'Estado',
-        element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
-        orderBy: '',
-        className: (data: IPayments) => getBadgeVariant(data.status),
-        type: 'string',
-        icon: false,
-    },
+    // {
+    //     column: 'status',
+    //     label: 'Estado',
+    //     element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
+    //     orderBy: '',
+    //     className: (data: IPayments) => getBadgeVariant(data.status),
+    //     type: 'string',
+    //     icon: false,
+    // },
     // {
     //     column: 'remaining',
     //     label: 'Restante',
@@ -113,16 +113,16 @@ const getBadgeVariantAssociated = (status: boolean) => {
         return "rounded-lg px-2 bg-gray-200 text-gray-800"
     }
 }
-const getBadgeVariant = (estado: string) => {
-    switch (estado) {
-        case "CONFIRMED":
-            return "rounded-lg px-2 bg-green-100 text-green-800"
-        case "PENDING":
-            return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
-        default:
-            return "rounded-lg px-2 bg-gray-100 text-gray-800"
-    }
-}
+// const getBadgeVariant = (estado: string) => {
+//     switch (estado) {
+//         case "CONFIRMED":
+//             return "rounded-lg px-2 bg-green-100 text-green-800"
+//         case "PENDING":
+//             return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
+//         default:
+//             return "rounded-lg px-2 bg-gray-100 text-gray-800"
+//     }
+// }
 
 export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     {

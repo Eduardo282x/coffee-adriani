@@ -14,9 +14,10 @@ import { DropDownFilter } from '@/components/dropdownFilter/DropDownFilter';
 // import { FaFilter } from 'react-icons/fa';
 
 interface PaymentsFilterProps {
-    handleChangeStatusPay: (value: string) => void;
+    // handleChangeStatusPay: (value: string) => void;
     handleChangeMethods: (value: string) => void;
     handleChangeStatusAssociated: (value: string) => void;
+    handleChangeCredit: (value: string) => void;
     date: DateRange | undefined;
     setDate: (date: DateRange | undefined) => void;
     payments: IPayments[];
@@ -25,9 +26,9 @@ interface PaymentsFilterProps {
 }
 
 interface PaymentSelectsProps {
-    handleChangeStatusPay: (value: string) => void;
     handleChangeMethods: (value: string) => void;
     handleChangeStatusAssociated: (value: string) => void;
+    handleChangeCredit: (value: string) => void;
     methods: Method[];
 }
 
@@ -36,7 +37,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     setDate,
     handleChangeMethods,
     handleChangeStatusAssociated,
-    handleChangeStatusPay,
+    handleChangeCredit,
     payments,
     setPaymentsFilter,
     paymentsColumns
@@ -65,7 +66,8 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                 <FilterSelect
                     handleChangeMethods={handleChangeMethods}
                     handleChangeStatusAssociated={handleChangeStatusAssociated}
-                    handleChangeStatusPay={handleChangeStatusPay}
+                    // handleChangeStatusPay={handleChangeStatusPay}
+                    handleChangeCredit={handleChangeCredit}
                     methods={methods}
                 />
             } />
@@ -77,14 +79,15 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
 
 
 const FilterSelect = ({
-    handleChangeStatusPay,
+    // handleChangeStatusPay,
     handleChangeMethods,
+    handleChangeCredit,
     methods,
     handleChangeStatusAssociated
 }: PaymentSelectsProps) => {
     return (
         <div className='flex flex-col gap-2 p-1'>
-            <div className="flex items-center justify-between w-auto">
+            {/* <div className="flex items-center justify-between w-auto">
                 <Label className="mb-2">Estado Pago</Label>
                 <Select onValueChange={handleChangeStatusPay} >
                     <SelectTrigger className="w-40">
@@ -98,7 +101,7 @@ const FilterSelect = ({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-            </div>
+            </div> */}
 
             <div className="flex items-center justify-between w-80">
                 <Label className="mb-2">Métodos de pago</Label>
@@ -128,6 +131,22 @@ const FilterSelect = ({
                             <SelectItem value='all'>Todos</SelectItem>
                             <SelectItem value='associated'>Asociados</SelectItem>
                             <SelectItem value='noAssociated'>Sin Asociar</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="flex items-center justify-between w-80">
+                <Label className="mb-2">Pagos con abonos</Label>
+                <Select onValueChange={handleChangeCredit}>
+                    <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Estado Pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value='all'>Todos</SelectItem>
+                            <SelectItem value='credit'>Abonos</SelectItem>
+                            <SelectItem value='noCredit'>Sin Abonos</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>

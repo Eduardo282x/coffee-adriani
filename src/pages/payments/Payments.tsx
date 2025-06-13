@@ -35,9 +35,10 @@ export const Payments = () => {
 
     const [date, setDate] = useState<DateRange | undefined>(undefined)
 
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    // const [statusFilter, setStatusFilter] = useState<string>('all');
     const [associatedFilter, setAssociatedFilter] = useState<string>('all');
     const [methodFilter, setMethodFilter] = useState<string>('all');
+    const [creditFilter, setCreditFilter] = useState<string>('all');
 
     useEffect(() => {
         getAllPaymentsApi();
@@ -95,9 +96,13 @@ export const Payments = () => {
         })
     }
 
-    const handleChangeStatusPay = (option: string) => {
-        setStatusFilter(option);
+    const handleChangeCredit = (option: string) => {
+        setCreditFilter(option);
     };
+
+    // const handleChangeStatusPay = (option: string) => {
+    //     setStatusFilter(option);
+    // };
 
     const handleChangeStatusAssociated = (option: string) => {
         setAssociatedFilter(option);
@@ -111,9 +116,9 @@ export const Payments = () => {
     useEffect(() => {
         let filtered = [...payments.allPayments];
 
-        if (statusFilter !== 'all') {
-            filtered = filtered.filter(pay => pay.status === statusFilter);
-        }
+        // if (statusFilter !== 'all') {
+        //     filtered = filtered.filter(pay => pay.status === statusFilter);
+        // }
 
         if (associatedFilter !== 'all') {
             filtered = filtered.filter(pay => pay.associated === (associatedFilter === 'associated'));
@@ -123,11 +128,15 @@ export const Payments = () => {
             filtered = filtered.filter(pay => pay.account.method.id === Number(methodFilter));
         }
 
+        if (creditFilter !== 'all') {
+            filtered = filtered.filter(pay => pay.credit == (creditFilter == 'credit'));
+        }
+
         setPayments(prev => ({
             ...prev,
             payments: filtered
         }));
-    }, [statusFilter, associatedFilter, methodFilter, payments.allPayments]);
+    }, [associatedFilter, methodFilter, creditFilter, payments.allPayments]);
 
 
 
@@ -261,8 +270,9 @@ export const Payments = () => {
                         date={date}
                         setDate={setDate}
                         handleChangeMethods={handleChangeMethods}
-                        handleChangeStatusPay={handleChangeStatusPay}
+                        // handleChangeStatusPay={handleChangeStatusPay}
                         handleChangeStatusAssociated={handleChangeStatusAssociated}
+                        handleChangeCredit={handleChangeCredit}
                     />
                 </div>
 
