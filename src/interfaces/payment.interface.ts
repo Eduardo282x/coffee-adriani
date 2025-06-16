@@ -17,6 +17,7 @@ export interface TotalPay {
 export interface IPayments {
     id: number;
     amount: string;
+    remainingUSD: string;
     remaining: string;
     accountId: number;
     reference: string;

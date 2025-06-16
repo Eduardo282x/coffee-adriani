@@ -22,7 +22,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     },
     {
         column: 'purchasePrice',
-        label: 'Precio Compra',
+        label: 'Precio Compra (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.purchasePrice, '', ' $'),
         orderBy: '',
         type: 'string',
@@ -44,14 +44,14 @@ export const productsColumns: IColumns<IProducts>[] = [
         type: 'string',
         icon: false,
     },
-    {
-        column: 'priceBs',
-        label: 'Precio (Bs)',
-        element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
+    // {
+    //     column: 'priceBs',
+    //     label: 'Precio (Bs)',
+    //     element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
+    //     orderBy: '',
+    //     type: 'string',
+    //     icon: false,
+    // },
     {
         column: 'amount',
         label: 'Cantidad',
