@@ -18,6 +18,7 @@ interface DateRangePickerProps {
 
 export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDatePicker, label }) => {
     const [date, setDate] = useState<DateRange | undefined>(datePicker)
+    const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
         setDatePicker(date as DateRange | undefined)
@@ -28,7 +29,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
             <Label className="mb-2">
                 {label}
             </Label>
-            <Popover modal={true}>
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant={"outline"}
