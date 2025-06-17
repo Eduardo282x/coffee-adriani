@@ -1,6 +1,6 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { IInvoiceForPay } from "@/interfaces/invoice.interface";
+import { IInvoice, IInvoiceForPay } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
 import { Trash2 } from "lucide-react";
 import { FaRegCheckCircle } from "react-icons/fa";
@@ -177,5 +177,41 @@ export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
             { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
         ]
     },
-
 ]
+
+
+export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
+    {
+        label: 'Factura',
+        column: 'controlNumber',
+        element: (data: IInvoice) => data.controlNumber,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Cliente',
+        column: 'client.name',
+        element: (data: IInvoice) => data.client ? data.client.name : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Pago',
+        column: 'amountPayed',
+        element: (data: IInvoice) => formatNumberWithDots(Number(data.amountPayed).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Fecha de asociación',
+        column: 'client.name',
+        element: (data: IInvoice) => formatDate(data.createdAtPayed),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+
+];

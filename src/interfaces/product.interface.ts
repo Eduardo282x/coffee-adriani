@@ -19,6 +19,7 @@ export interface IProducts {
     priceBs: number;
     priceUSD: number;
     purchasePrice: number;
+    purchasePriceUSD: number;
     amount: number;
     createdAt: Date;
     updatedAt: Date;

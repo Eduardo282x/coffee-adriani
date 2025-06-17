@@ -49,7 +49,9 @@ export interface IInvoice {
     updatedAt: Date;
     payments: Payments[];
     client?: IClients;
-    invoiceItems: InvoiceItems[]
+    invoiceItems: InvoiceItems[];
+    amountPayed: number | string;
+    createdAtPayed: Date;
 }
 
 export interface IInvoiceForPay extends IInvoice {

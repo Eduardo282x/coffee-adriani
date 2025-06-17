@@ -18,14 +18,13 @@ import { Snackbar } from '@/components/snackbar/Snackbar';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { formatNumberWithDots } from '@/hooks/formaters';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
-import { getProductDolar } from '@/services/products.service';
-import { IDolar } from '@/interfaces/product.interface';
+import { PaymentExpandible } from './PaymentExpandible';
+// import { PaymentExpandible } from './PaymentExpandible';
 
 export const Payments = () => {
     const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
     const [paymentSelected, setPaymentSelected] = useState<IPayments | null>(null);
     const [totalPayments, setTotalPayments] = useState<TotalPay>({ totalBs: 0, totalUSD: 0 })
-    const [dolar, setDolar] = useState<IDolar>();
     const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -42,13 +41,7 @@ export const Payments = () => {
 
     useEffect(() => {
         getAllPaymentsApi();
-        getProductDolarApi();
     }, [])
-
-    const getProductDolarApi = async () => {
-        const response: IDolar = await getProductDolar();
-        setDolar(response)
-    }
 
     useEffect(() => {
         if (date?.to) {
@@ -224,7 +217,7 @@ export const Payments = () => {
             return {
                 ...prev,
                 payments: prev.payments.map(item => {
-                    return  {
+                    return {
                         ...item,
                         associated: item.id === data.paymentId ? true : item.associated
                     }
@@ -281,7 +274,15 @@ export const Payments = () => {
                         <p className='mb-2 text-lg'><span className='font-semibold'>Total Bs:</span> {formatNumberWithDots(totalPayments.totalBs.toFixed(2), '', ' Bs')}</p>
                         <p className='mb-2 text-lg'><span className='font-semibold'>Total $:</span> {formatNumberWithDots(totalPayments.totalUSD.toFixed(2), '', ' $')}</p>
                     </div>
-                    <TableComponent columns={paymentsColumns} dataBase={payments.payments} action={getActions}></TableComponent>
+                    <TableComponent
+                        columns={paymentsColumns}
+                        dataBase={payments.payments}
+                        isExpansible={true}
+                        renderRow={(pay, index) => (
+                            <PaymentExpandible key={index} payment={pay} />
+                        )}
+                        action={getActions}
+                    />
                 </div>
             </main>
 
@@ -308,7 +309,7 @@ export const Payments = () => {
                     label1="Asociar pago a factura"
                     isEdit={true}
                 >
-                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} dolar={dolar} />
+                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} />
                 </DialogComponent>
             )}
 

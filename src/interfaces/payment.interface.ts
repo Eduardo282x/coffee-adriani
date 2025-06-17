@@ -1,3 +1,4 @@
+import { IInvoice } from "./invoice.interface";
 
 export interface GroupPayments {
     allPayments: IPayments[];
@@ -32,6 +33,16 @@ export interface IPayments {
     account: Account;
     amountUSD: string;
     amountBs: string;
+    InvoicePayment: InvoicePayment[];
+}
+
+export interface InvoicePayment {
+    id: number;
+    invoiceId: number;
+    paymentId: number;
+    amount: string;
+    invoice: IInvoice;
+    createdAt: Date;
 }
 
 export interface Account {

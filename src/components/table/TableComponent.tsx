@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IColumns, IOptionActions, OrderBy } from "./table.interface";
 import { Paginator } from "./Paginator";
 import { ArrowUp, MoreHorizontal } from "lucide-react";
@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { formatNumberWithDots } from "@/hooks/formaters";
 import { ToolTip } from "../tooltip/ToolTip";
+import { IoIosArrowDown } from "react-icons/io";
 
 interface TableProps<T> {
     className?: string;
@@ -20,6 +21,8 @@ interface TableProps<T> {
     hidePaginator?: boolean;
     renderRow?: (item: T, index: number) => React.ReactNode;
     colSpanColumns?: boolean;
+    hideColumns?: boolean;
+    isExpansible?: boolean;
 }
 
 export const TableComponent = <T,>({
@@ -32,6 +35,8 @@ export const TableComponent = <T,>({
     hidePaginator,
     renderRow,
     colSpanColumns,
+    hideColumns,
+    isExpansible
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
@@ -91,7 +96,7 @@ export const TableComponent = <T,>({
         <>
             <div className={`rounded-md border ${className}`}>
                 <Table>
-                    <TableHeader className="shadow-md">
+                    <TableHeader className={`shadow-md ${hideColumns && 'hidden'}`}>
                         <TableRow>
                             {columnData.map((col: IColumns<T>, index: number) => (
                                 <TableHead
@@ -112,6 +117,11 @@ export const TableComponent = <T,>({
                                     </div>
                                 </TableHead>
                             ))}
+                            {isExpansible && (
+                                <TableHead className="cursor-pointer bg-white z-50">
+                                    Abrir
+                                </TableHead>
+                            )}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -123,22 +133,13 @@ export const TableComponent = <T,>({
                             </TableRow>
                         ) : (
                             dataFilter && dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
-                                <TableRow key={index}>
-                                    {renderRow ?
-                                        <TableCell key={index} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">
-                                            {renderRow(data, index)}
-                                        </TableCell>
+                                <>
+                                    {isExpansible ?
+                                        <TableRowExpansible index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                                         :
-                                        (columns && columns.map((column: IColumns<T>, index: number) => (
-                                            <TableCell key={index}>
-                                                {(!column.icon
-                                                    ? <ColumnType column={column} data={data} action={action} />
-                                                    : <ColumnIcon column={column} data={data} action={action} />
-                                                )}
-                                            </TableCell>
-                                        )))
+                                        <TableRowNormal index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                                     }
-                                </TableRow>
+                                </>
                             ))
                         )}
                     </TableBody>
@@ -164,6 +165,91 @@ export const TableComponent = <T,>({
                 >
                 </Paginator>
             )}
+        </>
+    )
+}
+
+interface TableRowNormalProps<T> {
+    index: number;
+    columns: IColumns<T>[];
+    columnData: IColumns<T>[];
+    data: T;
+    colSpanColumns?: boolean;
+    action?: (type: string, data: T) => void;
+    renderRow?: (item: T, index: number) => React.ReactNode;
+}
+
+const TableRowNormal = <T,>({ index, columns, data, colSpanColumns, columnData, action, renderRow }: TableRowNormalProps<T>) => {
+    return (
+        <TableRow key={index}>
+            {renderRow ?
+                <TableCell key={index} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">
+                    {renderRow(data, index)}
+                </TableCell>
+                :
+                (columns && columns.map((column: IColumns<T>, index: number) => (
+                    <TableCell key={index}>
+                        {(!column.icon
+                            ? <ColumnType column={column} data={data} action={action} />
+                            : <ColumnIcon column={column} data={data} action={action} />
+                        )}
+                    </TableCell>
+                )))
+            }
+        </TableRow>
+    )
+}
+
+const TableRowExpansible = <T,>({ index, columns, data, action, renderRow }: TableRowNormalProps<T>) => {
+    const [open, setOpen] = useState<boolean>(false);
+    const rowRef = useRef<HTMLTableRowElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (rowRef.current && !rowRef.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <>
+            <TableRow
+                key={`main-${index}`}
+                ref={rowRef}
+                onClick={() => setOpen(!open)}
+                className="cursor-pointer transition-all"
+            >
+                {columns.map((column: IColumns<T>, idx: number) => (
+                    <TableCell key={idx}>
+                        {!column.icon
+                            ? <ColumnType column={column} data={data} action={action} />
+                            : <ColumnIcon column={column} data={data} action={action} />}
+                    </TableCell>
+                ))}
+                <TableCell>
+                    <IoIosArrowDown
+                        className={`transition-transform text-xl ${open ? 'rotate-180' : 'rotate-0'}`}
+                    />
+                </TableCell>
+            </TableRow>
+
+            {/* Fila expandida */}
+            <TableRow key={`expand-${index}`} className="bg-muted">
+                <TableCell colSpan={columns.length + 1} className="p-0">
+                    <div
+                        className={`transition-all duration-300 ease-in-out w-full ${open ? 'h-auto px-4 py-2' : '!h-0'} interpolate overflow-hidden`}
+                    >
+                        {/* {renderExpandableContent(data)} */}
+                        <p>{renderRow && renderRow(data, index)}</p>
+                    </div>
+                </TableCell>
+            </TableRow>
         </>
     )
 }
