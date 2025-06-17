@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { GroupClientsOptions, IClients } from "@/interfaces/clients.interface";
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
 import { getClients } from "@/services/clients.service";
-import { getInventory } from "@/services/inventory.service";
+// import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useState } from "react";
 import { productColumns } from "./invoices.data";
 import { Switch } from "@/components/ui/switch";
@@ -17,11 +17,14 @@ import toast from "react-hot-toast";
 import { addYears } from "date-fns";
 import { IInvoice } from "@/interfaces/invoice.interface";
 
+interface InvoiceFormProps extends FromProps { 
+    inventory: GroupInventoryDate
+}
 
-export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
+export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory }) => {
     const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
-    const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
+
     const [inventoryData, setInventoryData] = useState<IInventory[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [controlNumber, setControlNumber] = useState<string>('');
@@ -32,8 +35,6 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
-        console.log(parseData);
-        
         if (data) {
             const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
             setConsignment(parseData.consignment);
@@ -54,7 +55,6 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
                 };
             })
 
-            console.log(inventoryData);
             setTimeout(() => {
                 setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
             }, 0);
@@ -74,22 +74,8 @@ export const InvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
         }
     }
 
-    const getInventoryApi = async () => {
-        const response: IInventory[] = await getInventory();
-        if (response) {
-            const parseInventory = response.map((inv: IInventory) => {
-                return {
-                    label: `${inv.product.name} - ${inv.product.presentation}`,
-                    value: inv.id
-                }
-            })
-            setInventory({ allInventory: response, inventory: parseInventory });
-        }
-    }
-
     useEffect(() => {
         getClientsApi();
-        getInventoryApi();
     }, [])
 
     const selectClient = (client: string) => {

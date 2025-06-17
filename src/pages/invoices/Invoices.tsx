@@ -18,6 +18,8 @@ import { formatNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage, DetailsPayments } from "./DetailsPackage"
 import { BaseResponse } from "@/services/base.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
+import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface"
+import { getInventory } from "@/services/inventory.service"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -32,6 +34,8 @@ export const Invoices = () => {
     const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
+    const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
 
     const getAllInvoicesApi = async () => {
         setLoading(true);
@@ -48,6 +52,19 @@ export const Invoices = () => {
             });
         }
         setLoading(false)
+    }
+
+    const getInventoryApi = async () => {
+        const response: IInventory[] = await getInventory();
+        if (response) {
+            const parseInventory = response.map((inv: IInventory) => {
+                return {
+                    label: `${inv.product.name} - ${inv.product.presentation}`,
+                    value: inv.id
+                }
+            })
+            setInventory({ allInventory: response, inventory: parseInventory });
+        }
     }
 
     const getInvoicesFilterApi = async () => {
@@ -72,6 +89,7 @@ export const Invoices = () => {
     }
 
     useEffect(() => {
+        getInventoryApi()
         getAllInvoicesApi()
     }, [])
 
@@ -280,7 +298,7 @@ export const Invoices = () => {
                     label1="Editar Cliente"
                     isEdit={true}
                 >
-                    <InvoiceForm onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
+                    <InvoiceForm inventory={inventory} onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
                 </DialogComponent>
             </main>
         </div >
