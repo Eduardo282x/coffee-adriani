@@ -15,6 +15,7 @@ const validationSchema = z.object({
   amount: z.coerce.number().positive().min(0),
   priceUSD: z.coerce.number().positive().min(0),
   purchasePrice: z.coerce.number().positive().min(0),
+  purchasePriceUSD: z.coerce.number().positive().min(0),
 })
 
 export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
@@ -32,6 +33,7 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
         priceUSD: data.priceUSD,
         amount: data.amount,
         purchasePrice: data.purchasePrice,
+        purchasePriceUSD: data.purchasePriceUSD,
       }
       reset(parseBodyData)
     }

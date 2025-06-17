@@ -147,7 +147,7 @@ export const Products = () => {
             <DialogComponent
                 open={openDialog}
                 setOpen={setOpenDialog}
-                className="w-[30rem]"
+                className="w-[30rem] max-h-screen overflow-y-auto"
                 label2="Agregar Producto"
                 label1="Actualizar Producto"
                 isEdit={edit}

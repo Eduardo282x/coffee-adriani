@@ -21,6 +21,14 @@ export const productsColumns: IColumns<IProducts>[] = [
         icon: false,
     },
     {
+        column: 'purchasePriceUSD',
+        label: 'Precio Compra ($)',
+        element: (data: IProducts) => formatNumberWithDots(data.purchasePriceUSD, '', ' $'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'purchasePrice',
         label: 'Precio Compra (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.purchasePrice, '', ' $'),
@@ -89,6 +97,7 @@ export interface IProductsForm {
     price: number;
     priceUSD: number;
     purchasePrice: number;
+    purchasePriceUSD: number;
     amount: number;
 }
 
@@ -100,6 +109,7 @@ export const defaultValues: IProductsForm = {
     price: 0,
     priceUSD: 0,
     purchasePrice: 0,
+    purchasePriceUSD: 0,
     amount: 0,
 }
 
@@ -109,7 +119,7 @@ export interface FormDataProduct {
     name: KeysFormProducts;
 }
 
-type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'amount';
+type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'purchasePriceUSD' | 'amount';
 
     export const formDataProduct: FormDataProduct[] = [
         {
@@ -123,9 +133,14 @@ type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purcha
             name: 'presentation'
         },
         {
-            label: 'Precio de Compra',
+            label: 'Precio de Compra (Bs)',
             type: 'text',
             name: 'purchasePrice'
+        },
+        {
+            label: 'Precio de Compra ($)',
+            type: 'text',
+            name: 'purchasePriceUSD'
         },
         {
             label: 'Precio',
