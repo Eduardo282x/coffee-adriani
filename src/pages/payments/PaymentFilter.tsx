@@ -59,7 +59,13 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
 
             <div className="w-60">
                 <Label className="mb-2">Buscar</Label>
-                <Filter dataBase={payments} columns={paymentsColumns} setDataFilter={setPaymentsFilter} />
+                <Filter
+                    dataBase={payments}
+                    columns={paymentsColumns}
+                    setDataFilter={setPaymentsFilter}
+                    filterInvoices={true}
+                    filterInvoicesPayments={true}
+                />
             </div>
 
             <DropDownFilter contentMenu={

@@ -5,15 +5,17 @@ import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { debounce } from "@/lib/debounce";
 import { InvoiceApi } from "@/interfaces/invoice.interface";
+import { IPayments } from "@/interfaces/payment.interface";
 
 interface IFilter {
     dataBase: any[];
     setDataFilter: (value: any) => void;
     columns: IColumns<any>[];
     filterInvoices?: boolean;
+    filterInvoicesPayments?: boolean;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns, filterInvoices }) => {
+export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns, filterInvoices, filterInvoicesPayments }) => {
     const [filter, setFilter] = useState<string>('');
 
     useEffect(() => {
@@ -47,18 +49,30 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns, filterIn
         if (filterInvoices) {
             const normalizedValue = normalize(value);
 
-            const filtered = dataBase.filter((item: InvoiceApi) => {
+            const filtered = dataBase.filter((item: InvoiceApi | IPayments) => {
+
                 // 1. Filtro por columnas (cliente)
                 const matchesClient = keys.some((key) =>
                     normalize(getNestedValue(item, key)).includes(normalizedValue)
                 );
 
-                // 2. Filtro por facturas (controlNumber)
-                const matchesControlNumber = item.invoices.some(inv =>
-                    normalize(inv.controlNumber).includes(normalizedValue)
-                );
+                if (filterInvoicesPayments) {
+                    const parseData = item as IPayments;
+                    // 2. Filtro por facturas (controlNumber)
+                    const matchesControlNumber = parseData.InvoicePayment.some(inv =>
+                        normalize(inv.invoice.controlNumber).includes(normalizedValue)
+                    );
 
-                return matchesClient || matchesControlNumber;
+                    return matchesClient || matchesControlNumber;
+                } else {
+                    const parseData = item as InvoiceApi;
+                    // 2. Filtro por facturas (controlNumber)
+                    const matchesControlNumber = parseData.invoices.some(inv =>
+                        normalize(inv.controlNumber).includes(normalizedValue)
+                    );
+
+                    return matchesClient || matchesControlNumber;
+                }
             });
 
             setDataFilter(filtered);

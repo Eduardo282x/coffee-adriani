@@ -35,9 +35,6 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
-        console.log(parseData);
-        console.log(inventory);
-        
         if (data) {
             const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
             setConsignment(parseData.consignment);
@@ -58,8 +55,6 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 };
             })
 
-            console.log(inventoryData);
-            
             setTimeout(() => {
                 setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
             }, 0);
