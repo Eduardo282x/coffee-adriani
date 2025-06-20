@@ -104,10 +104,11 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
             // totalAmountBs: Number(Number(dolar?.dolar) * Number(findInvoice.totalAmount)).toFixed(2)
         }
 
-        if (!currencyBs) {
+        if (!currencyBs && findInvoice.totalAmount == findInvoice.remaining) {
+            const totalPaidSpecial = Math.min(Number(findInvoice.specialPrice), restPayment);
             newItem.totalAmount = Number(findInvoice.specialPrice);
             newItem.remaining = Number(findInvoice.specialPrice);
-            newItem.totalPaid = Number(findInvoice.specialPrice).toFixed(2);
+            newItem.totalPaid = totalPaidSpecial.toFixed(2);
         }
 
         setInvoicesForPay(prev => [

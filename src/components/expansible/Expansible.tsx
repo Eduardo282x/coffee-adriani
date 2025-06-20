@@ -51,9 +51,9 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         }
     }
 
-    const remainingPay = (invoice: IInvoice | null): number => {
-        if (!invoice) return 0;
-        return invoice.totalAmount - Number(invoice.remaining)
+    const remainingPay = (invoice: IInvoice | null): string => {
+        if (!invoice) return '0.00';
+        return Number(invoice.totalAmount - Number(invoice.remaining)).toFixed(2);
     }
 
     const handleEditInvoice = () => {
