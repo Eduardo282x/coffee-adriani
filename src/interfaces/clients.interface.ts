@@ -10,8 +10,14 @@ export interface BodyClients {
 }
 
 export interface BodyBlock {
-    name:    string;
+    name: string;
     address: string;
+}
+
+export interface BodyReport {
+    zone: string;
+    blockId: number;
+    status: string;
 }
 
 export interface GroupClientsOptions {
@@ -25,26 +31,26 @@ export interface GroupClients {
 }
 
 export interface IClients {
-    id:        number;
-    name:      string;
-    rif:       string;
-    address:   string;
-    phone:     string;
-    zone:      string;
-    blockId:   number;
-    active:    boolean;
+    id: number;
+    name: string;
+    rif: string;
+    address: string;
+    phone: string;
+    zone: string;
+    blockId: number;
+    active: boolean;
     createdAt: Date;
     updatedAt: Date;
-    block:     Block;
+    block: Block;
 }
 
-export interface GroupBlock { 
+export interface GroupBlock {
     allBlocks: Block[]
     blocks: Block[]
 }
 
 export interface Block {
-    id:      number;
-    name:    string;
+    id: number;
+    name: string;
     address: string;
 }
