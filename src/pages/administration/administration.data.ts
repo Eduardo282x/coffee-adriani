@@ -29,6 +29,14 @@ export const expendePaymentsColumns: IColumns<IPayments>[] = [
         icon: false,
     },
     {
+        column: 'reference',
+        label: 'Descripción',
+        element: (data: IPayments) => data.reference,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'createdAt',
         label: 'Fecha de pago',
         element: (data: IPayments) => formatDate(data.paymentDate),

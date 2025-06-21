@@ -4,8 +4,8 @@ import { Label } from '@/components/ui/label';
 import { FC, useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter } from '@/components/table/Filter';
-import { getPaymentMethod } from '@/services/payment.service';
-import { IPayments, Method } from '@/interfaces/payment.interface';
+import { getPaymentMethod, getPaymentAccounts } from '@/services/payment.service';
+import { Account, IPayments, Method } from '@/interfaces/payment.interface';
 import { DateRange } from 'react-day-picker';
 import { IColumns } from '@/components/table/table.interface';
 // import { Download } from 'lucide-react';
@@ -23,12 +23,15 @@ interface PaymentsFilterProps {
     payments: IPayments[];
     setPaymentsFilter: (value: IPayments[]) => void;
     paymentsColumns: IColumns<IPayments>[];
+    handleChangeAccount: (value: string) => void;
 }
 
 interface PaymentSelectsProps {
     handleChangeMethods: (value: string) => void;
     handleChangeStatusAssociated: (value: string) => void;
     handleChangeCredit: (value: string) => void;
+    handleChangeAccount: (value: string) => void;
+    accounts: Account[];
     methods: Method[];
 }
 
@@ -38,12 +41,18 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     handleChangeMethods,
     handleChangeStatusAssociated,
     handleChangeCredit,
+    handleChangeAccount,
     payments,
     setPaymentsFilter,
     paymentsColumns
 }) => {
     const [methods, setMethods] = useState<Method[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
 
+    const getPaymentAccountsApi = async () => {
+        const response = await getPaymentAccounts();
+        setAccounts(response);
+    }
     const getPaymentMethodsApi = async () => {
         const response = await getPaymentMethod();
         setMethods(response);
@@ -51,6 +60,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
 
     useEffect(() => {
         getPaymentMethodsApi();
+        getPaymentAccountsApi();
     }, [])
 
     return (
@@ -72,9 +82,11 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                 <FilterSelect
                     handleChangeMethods={handleChangeMethods}
                     handleChangeStatusAssociated={handleChangeStatusAssociated}
+                    handleChangeAccount={handleChangeAccount}
                     // handleChangeStatusPay={handleChangeStatusPay}
                     handleChangeCredit={handleChangeCredit}
                     methods={methods}
+                    accounts={accounts}
                 />
             } />
 
@@ -89,7 +101,9 @@ const FilterSelect = ({
     handleChangeMethods,
     handleChangeCredit,
     methods,
-    handleChangeStatusAssociated
+    accounts,
+    handleChangeStatusAssociated,
+    handleChangeAccount
 }: PaymentSelectsProps) => {
     return (
         <div className='flex flex-col gap-2 p-1'>
@@ -110,6 +124,23 @@ const FilterSelect = ({
             </div> */}
 
             <div className="flex items-center justify-between w-80">
+                <Label className="mb-2">Cuentas de pago</Label>
+                <Select onValueChange={handleChangeAccount}>
+                    <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Métodos de pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value='all'>Todos</SelectItem>
+                            {accounts && accounts.map((acc: Account, index: number) => (
+                                <SelectItem key={index} value={acc.id.toString()}>{acc.name} {acc.bank}</SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="flex items-center justify-between w-80">
                 <Label className="mb-2">Métodos de pago</Label>
                 <Select onValueChange={handleChangeMethods}>
                     <SelectTrigger className="w-40">
@@ -117,7 +148,7 @@ const FilterSelect = ({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value='all'>Todos</SelectItem>
+                            <SelectItem value='all'>Todas</SelectItem>
                             {methods && methods.map((met: Method, index: number) => (
                                 <SelectItem key={index} value={met.id.toString()}>{met.name}</SelectItem>
                             ))}

@@ -6,7 +6,7 @@ import { IExpenses } from "@/interfaces/adminitration.interface";
 import { getExpenses } from "@/services/expenses.service";
 import { useEffect, useState } from "react";
 import { expendePaymentsColumns, expenseInvoiceColumns } from "./administration.data";
-
+import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 
 type OptionAdministration = 'pay' | 'invoices' | 'earns';
 
@@ -15,6 +15,7 @@ export const Administration = () => {
     const [option, setOption] = useState<OptionAdministration>('earns')
     const [loading, setLoading] = useState<boolean>(false);
     const [expenses, setExpenses] = useState<IExpenses>({ invoices: [], payments: [] });
+    const [totals, setTotals] = useState<{ totalInvoice: string; totalPayments: string }>({ totalInvoice: '0', totalPayments: '0' });
 
     useEffect(() => {
         getExpensesApi()
@@ -23,9 +24,12 @@ export const Administration = () => {
     const getExpensesApi = async () => {
         setLoading(true);
         try {
-            const response = await getExpenses();
+            const response: IExpenses = await getExpenses();
             if (response) {
                 setExpenses(response);
+                const totalInvoice = response.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);
+                const totalPayments = response.payments.reduce((acc, pay) => acc + Number(pay.amount), 0);
+                setTotals({ totalInvoice: formatOnlyNumberWithDots(totalInvoice), totalPayments: formatOnlyNumberWithDots(totalPayments) })
             }
         } catch (err) {
             console.log(err);
@@ -57,10 +61,16 @@ export const Administration = () => {
                     <TableComponent dataBase={[]} columns={[]} />
                 )}
                 {option == 'invoices' && (
-                    <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns} />
+                    <div>
+                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
+                        <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns} />
+                    </div>
                 )}
                 {option == 'pay' && (
-                    <TableComponent dataBase={expenses.payments} columns={expendePaymentsColumns} />
+                    <div>
+                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalPayments} $</p>
+                        <TableComponent dataBase={expenses.payments} columns={expendePaymentsColumns} />
+                    </div>
                 )}
             </main>
         </div>
