@@ -1,5 +1,5 @@
-import { BodyClients, BodyBlock } from "@/interfaces/clients.interface";
-import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
+import { BodyClients, BodyBlock, BodyReport } from "@/interfaces/clients.interface";
+import { deleteDataApi, getDataApi, postDataApi, putDataApi, postDataFileApi } from "./base.service";
 
 const routeClients = '/clients';
 const routeBlocks = `${routeClients}/blocks`;
@@ -63,6 +63,14 @@ export const putBlocks = async (id: number, data: BodyBlock) => {
 export const deleteBlocks = async (id: number,) => {
     try {
         return await deleteDataApi(`${routeBlocks}/${id}`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const generateReportPDF = async (data: BodyReport) => {
+    try {
+        return await postDataFileApi(`${routeClients}/report`, data);
     } catch (err) {
         return err
     }

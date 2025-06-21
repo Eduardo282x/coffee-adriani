@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { deleteBlocks, deleteClients, getBlocks, getClients, postBlocks, postClients, putBlocks, putClients } from "@/services/clients.service"
-import { Block, BodyBlock, GroupBlock, GroupClients, IClients } from "@/interfaces/clients.interface"
+import { deleteBlocks, deleteClients, getBlocks, getClients, postBlocks, postClients, putBlocks, putClients, generateReportPDF } from "@/services/clients.service"
+import { Block, BodyBlock, BodyReport, GroupBlock, GroupClients, IClients } from "@/interfaces/clients.interface"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
 import { blockColumns, clientsColumns, defaultValues, IClientsForm } from "./client.data"
@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { BlockForm, ClientsForm } from "./ClientsForm"
-import { IOptions } from "@/interfaces/form.interface"
+import { BlockForm, ClientsForm, ReportForm } from "./ClientsForm"
+import { IOptions } from "@/interfaces/form.interface";
+import { Download } from "lucide-react";
+import { formatDate } from "@/hooks/formaters"
 
 export const Clients = () => {
     const [clients, setClients] = useState<GroupClients>({ allClients: [], clients: [], clientsFilter: [] });
@@ -22,6 +24,7 @@ export const Clients = () => {
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
 
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [openDialogReport, setOpenDialogReport] = useState<boolean>(false);
     const [openDialogBlock, setOpenDialogBlock] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [openDeleteDialogBlock, setOpenDeleteDialogBlock] = useState<boolean>(false);
@@ -126,6 +129,23 @@ export const Clients = () => {
         }
     }
 
+    const generateReport = async (data: BodyReport) => {
+        const parseData = {
+            ...data,
+            blockId: Number(data.blockId)
+        }
+        const response = await generateReportPDF(parseData) as Blob;
+        const url = URL.createObjectURL(response)
+        const link = window.document.createElement("a")
+        link.href = url
+        link.download = `Reporte de Clientes - ${formatDate(new Date())}.pdf`
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        setOpenDialogReport(false);
+    }
+
     const actionDialogBlock = async (data: BodyBlock) => {
         if (edit) {
             await putBlocks(Number(dataDialogBlock?.id), data)
@@ -185,10 +205,10 @@ export const Clients = () => {
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Clientes</h2>
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-2">
                         {!showBlocks && (
                             <Select onValueChange={handleChangeBlock}>
-                                <SelectTrigger className="w-[180px] ">
+                                <SelectTrigger className="w-32 ">
                                     <SelectValue placeholder="Bloques" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -202,12 +222,16 @@ export const Clients = () => {
                             </Select>
                         )}
 
-                        <div className="flex w-full max-w-sm items-center space-x-2">
+                        <div className="flex w-72 items-center space-x-2">
                             {showBlocks
                                 ? <Filter dataBase={blocks.allBlocks} columns={blockColumns} setDataFilter={setBlocksFilter} />
                                 : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} />
                             }
                         </div>
+
+                        <Button onClick={() => setOpenDialogReport(true)} className="bg-green-700 hover:bg-green-600 text-white">
+                            <Download /> Exportar
+                        </Button>
                     </div>
                 </div>
 
@@ -242,6 +266,19 @@ export const Clients = () => {
                     isEdit={edit}
                 >
                     <BlockForm onSubmit={actionDialogBlock} data={dataDialogBlock}></BlockForm>
+                </DialogComponent>
+            )}
+
+            {openDialogReport && (
+                <DialogComponent
+                    open={openDialogReport}
+                    setOpen={setOpenDialogReport}
+                    className="w-[20rem]"
+                    label2="Generar Reporte"
+                    label1="Generar Reporte"
+                    isEdit={false}
+                >
+                    <ReportForm onSubmit={generateReport} data={null} blocks={blockOptions}></ReportForm>
                 </DialogComponent>
             )}
 

@@ -8,7 +8,7 @@ import { Form } from '@/components/ui/form'
 import { FormSelect } from '@/components/form/FormSelect'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button';
-import { BodyBlock } from '@/interfaces/clients.interface'
+import { BodyBlock, BodyReport } from '@/interfaces/clients.interface'
 
 interface ClientFormProps extends FromProps {
     blocks: IOptions[]
@@ -123,5 +123,35 @@ export const BlockForm: FC<FromProps> = ({ data, onSubmit }) => {
                 </div>
             </form>
         </div>
+    )
+}
+
+export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
+    const form = useForm<BodyReport>({
+        defaultValues: {
+            status: 'all',
+            zone: '',
+            blockId: 0
+        }
+    })
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col justify-start items-start gap-4 w-full">
+                <FormSelect form={form} name='status' label='Estado' placeholder='Seleccione un estado' options={
+                    [
+                        { label: 'Todos', value: 'all' },
+                        { label: 'Con deuda', value: 'pending' },
+                        { label: 'Sin deuda', value: 'clean' },
+                    ]
+                } />
+                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks} />
+                <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones} />
+
+                <div className='w-full flex items-center justify-center'>
+                    <Button type='submit' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
+                </div>
+            </form>
+        </Form>
     )
 }
