@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-export const socket = io(import.meta.env.VITE_BACKEND_URL, {
+export const socket = io(import.meta.env.VITE_BASE_URL_API, {
     transports: ['websocket']
 });
 
