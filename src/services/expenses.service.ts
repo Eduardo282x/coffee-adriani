@@ -1,10 +1,11 @@
-import { getDataApi } from "./base.service";
+import { postDataApi } from "./base.service";
+import { DateRangeFilter } from "@/interfaces/invoice.interface";
 
 const routeExpenses = '/expenses';
 
-export const getExpenses = async () => {
+export const getExpenses = async (filter: DateRangeFilter) => {
     try {
-        return await getDataApi(routeExpenses);
+        return await postDataApi(routeExpenses, filter);
     } catch (err) {
         return err;
     }

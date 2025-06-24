@@ -19,6 +19,7 @@ import { Payments } from './pages/payments/Payments';
 import { socket, useSocket } from './services/socket.io';
 import { Accounts } from './pages/accounts/Accounts';
 import { Administration } from './pages/administration/Administration';
+import { Collections } from './pages/collections/Collections';
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/usuarios" element={<Users />} />
             <Route path="/administracion" element={<Administration />} />
+            <Route path="/cobranza" element={<Collections />} />
             <Route path="/pagos" element={<Payments />} />
             <Route path="/cuentas-pago" element={<Accounts />} />
           </Route>

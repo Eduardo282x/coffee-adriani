@@ -4,9 +4,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { InvoiceForm } from "./InvoiceForm"
+import { InvoiceForm } from "./InvoiceForm";
+import { MdUpdate } from "react-icons/md";
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice } from "@/services/invoice.service"
+import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -197,6 +198,10 @@ export const Invoices = () => {
         putPayInvoice(invoice.id);
     }
 
+    const checkInvoicesApi = async () => {
+        await checkInvoices()
+    }
+
     const updateInvoiceApi = async (id: number, data: IInvoiceForm) => {
         await putInvoice(id, data);
         setOpenDialog(false);
@@ -214,6 +219,10 @@ export const Invoices = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <Button onClick={checkInvoicesApi}>
+                        <MdUpdate  className="mr-2 h-4 w-4" />
+                        Validar facturas 
+                    </Button>
                     <DolarComponents />
                     <Button onClick={() => setOpenDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />

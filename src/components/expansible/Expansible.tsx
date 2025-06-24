@@ -1,11 +1,11 @@
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { IInvoice, InvoiceApi, InvoiceItems } from "@/interfaces/invoice.interface";
+import { IInvoice, InvoiceApi, InvoiceItems, IInvoicePayment } from "@/interfaces/invoice.interface";
 import { FC, useEffect, useRef, useState } from "react"
 import { IoIosArrowDown } from "react-icons/io";
 import { TableComponent } from "../table/TableComponent";
 import { IColumns } from "../table/table.interface";
 import { DialogComponent } from "../dialog/DialogComponent";
-import { invoiceItemsColumns } from "@/pages/invoices/invoices.data";
+import { invoiceItemsColumns, invoiceItemsPaymentColumns } from "@/pages/invoices/invoices.data";
 import { Button } from "../ui/button";
 // import { Download } from "lucide-react";
 import { MdOutlineEdit, MdPayments } from "react-icons/md";
@@ -23,7 +23,9 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
+    const [dataDetailsPay, setDataDetailsPay] = useState<IInvoicePayment[]>([]);
     const [invoiceSelected, setInvoiceSelected] = useState<IInvoice | null>(null);
+    const [showDetails, setShowDetails] = useState<boolean>(true);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -40,7 +42,8 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
 
     const action = (action: string, data: IInvoice) => {
         setInvoiceSelected(data);
-        setDataDetails(data.invoiceItems)
+        setDataDetails(data.invoiceItems);
+        setDataDetailsPay(data.InvoicePayment);
 
         if (action === 'Detalles') {
             setOpenDialog(true)
@@ -98,16 +101,25 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
             >
                 <div className="w-full relative space-y-6">
                     {/* Botones de acciones */}
-                    <div className="absolute -top-11 left-0 flex justify-end gap-3">
-                        {/* <Button className="bg-green-700 hover:bg-green-600 text-white">
+                    <div className="absolute -top-11 left-0 flex justify-between w-full gap-3">
+                        <div className="flex gap-2">
+                            {/* <Button className="bg-green-700 hover:bg-green-600 text-white">
                             <Download /> Exportar
                         </Button> */}
-                        <Button onClick={handleEditInvoice}>
-                            <MdOutlineEdit /> Editar
-                        </Button>
-                        <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
-                            <MdPayments /> Marcar Pagada
-                        </Button>
+                            <Button onClick={handleEditInvoice}>
+                                <MdOutlineEdit /> Editar
+                            </Button>
+                            <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
+                                <MdPayments /> Marcar Pagada
+                            </Button>
+                        </div>
+
+                        <div className="mr-10">
+                            <div className=" border rounded-lg flex items-center justify-start gap-1 w-fit">
+                                <Button className={`${!showDetails ? 'bg-transparent' : 'bg-[#6f4e37] text-white'} hover:text-white hover:bg-[#6f4e37]/90`} onClick={() => setShowDetails(true)}>Detalles</Button>
+                                <Button className={`${showDetails ? 'bg-transparent' : 'bg-[#6f4e37] text-white'} hover:text-white hover:bg-[#6f4e37]/90`} onClick={() => setShowDetails(false)}>Pagos</Button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Información de factura */}
@@ -131,9 +143,11 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                         </div>
                     </div>
 
-                    {/* Tabla de productos o servicios */}
                     <div className="w-full">
-                        <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
+                        {showDetails
+                            ? <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
+                            : <TableComponent dataBase={dataDetailsPay} columns={invoiceItemsPaymentColumns} />
+                        }
                     </div>
                 </div>
 

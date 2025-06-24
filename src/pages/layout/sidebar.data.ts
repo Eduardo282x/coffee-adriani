@@ -1,6 +1,6 @@
 import { BarChart3, Users, FileText, Package, ShoppingCart, User } from "lucide-react"
 import { BsCash } from "react-icons/bs";
-import { MdAccountBalance, MdOutlineInventory2 } from "react-icons/md";
+import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md";
 import { RiAdminLine } from "react-icons/ri";
 
 // Definición de los elementos del menú
@@ -49,6 +49,11 @@ export const menuItems = [
         title: "Administración",
         icon: RiAdminLine ,
         href: "/administracion",
+    },
+    {
+        title: "Cobranza",
+        icon: MdOutlineMessage  ,
+        href: "/cobranza",
     },
     {
         title: "Usuarios",

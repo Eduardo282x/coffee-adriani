@@ -24,7 +24,14 @@ export const Administration = () => {
     const getExpensesApi = async () => {
         setLoading(true);
         try {
-            const response: IExpenses = await getExpenses();
+            const now = new Date();
+            const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            const response: IExpenses = await getExpenses({
+                startDate,
+                endDate,
+            });
             if (response) {
                 setExpenses(response);
                 const totalInvoice = response.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);

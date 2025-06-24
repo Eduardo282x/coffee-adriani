@@ -20,6 +20,22 @@ export const getInvoiceUnordered = async () => {
     }
 }
 
+export const getInvoiceExpired = async () => {
+    try {
+        return await getDataApi(`${routeInvoice}/expired`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const checkInvoices = async () => {
+    try {
+        return await postDataApi(`${routeInvoice}/check`, {});
+    } catch (err) {
+        return err
+    }
+}
+
 export const getInvoiceFilter = async (filter: DateRangeFilter) => {
     try {
         return await postDataApi(`${routeInvoice}/filter`, filter);

@@ -1,7 +1,7 @@
 import { IColumns } from "@/components/table/table.interface"
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters"
 import { IInventory } from "@/interfaces/inventory.interface"
-import { IInvoice, InvoiceApi, InvoiceItems } from "@/interfaces/invoice.interface";
+import { IInvoice, InvoiceApi, InvoiceItems, IInvoicePayment } from "@/interfaces/invoice.interface";
 import { Trash2 } from "lucide-react";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdOutlineDeleteOutline } from "react-icons/md";
@@ -52,7 +52,7 @@ export const clientColumns: IColumns<InvoiceApi>[] = [
 export const invoiceColumns: IColumns<IInvoice>[] = [
     {
         column: 'controlNumber',
-        label: 'Numero de factura',
+        label: 'Numero factura',
         element: (data: IInvoice) => data.controlNumber,
         orderBy: '',
         type: 'string',
@@ -71,6 +71,14 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
         className: (data: IInvoice) => getBadgeVariant(data.status)
+    },
+    {
+        column: 'totalAmount',
+        label: 'Fecha pago',
+        element: (data: IInvoice) => data.InvoicePayment.length > 0 ? formatDate(data.InvoicePayment[data.InvoicePayment.length - 1].createdAt) : '-',
+        orderBy: '',
+        type: 'string',
+        // className: (data: IInvoice) => getBadgeVariant(data.status)
     },
     {
         column: 'totalAmount',
@@ -95,7 +103,7 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
     },
     {
         column: 'dueDate',
-        label: 'Fecha de vencimiento',
+        label: 'Vencimiento',
         element: (data: IInvoice) => formatDate(data.dueDate),
         orderBy: '',
         type: 'string',
@@ -119,7 +127,7 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         type: 'string',
         icon: true,
         optionActions: [
-            { label: 'Eliminar', icon: MdOutlineDeleteOutline  , className: 'text-red-600' },
+            { label: 'Eliminar', icon: MdOutlineDeleteOutline, className: 'text-red-600' },
         ]
     },
 ]
@@ -145,7 +153,7 @@ export const invoiceItemsColumns: IColumns<InvoiceItems>[] = [
     {
         column: 'name',
         label: 'Producto',
-        element: (data: InvoiceItems) => `${data.product.name} - ${data.product.presentation}`,
+        element: (data: InvoiceItems) => data.product ? `${data.product.name} - ${data.product.presentation}` : '',
         orderBy: '',
         type: 'string',
     },
@@ -159,18 +167,42 @@ export const invoiceItemsColumns: IColumns<InvoiceItems>[] = [
     {
         column: 'quantity',
         label: 'Cantidad',
-        element: (data: InvoiceItems) => data.quantity.toString(),
+        element: (data: InvoiceItems) => data.quantity ? data.quantity.toString() : '',
         orderBy: '',
         type: 'string',
     },
     {
         column: 'subtotal',
         label: 'Subtotal',
-        element: (data: InvoiceItems) => formatNumberWithDots(Number(data.subtotal).toFixed(2), '', ' $'),
+        element: (data: InvoiceItems) => data.subtotal ? formatNumberWithDots(Number(data.subtotal).toFixed(2), '', ' $') : '',
         orderBy: '',
         type: 'string',
     }
-]
+];
+
+export const invoiceItemsPaymentColumns: IColumns<IInvoicePayment>[] = [
+    {
+        column: 'payment.account.name',
+        label: 'Cuenta',
+        element: (data: IInvoicePayment) => data.payment ? `${data.payment.account.name} - ${data.payment.account.bank}` : '',
+        orderBy: '',
+        type: 'string',
+    },
+    {
+        column: 'amount',
+        label: 'Pagado',
+        element: (data: IInvoicePayment) => formatNumberWithDots(Number(data.amount).toFixed(2), '', ' $'),
+        orderBy: '',
+        type: 'string',
+    },
+    {
+        column: 'createdAt',
+        label: 'Fecha',
+        element: (data: IInvoicePayment) => formatDate(data.createdAt),
+        orderBy: '',
+        type: 'string',
+    }
+];
 
 export const productColumns: IColumns<IInventory>[] = [
     {

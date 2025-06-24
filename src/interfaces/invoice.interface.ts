@@ -1,5 +1,6 @@
 import { IClients } from "./clients.interface";
 import { BodyInventory } from "./inventory.interface";
+import { IPayments } from "./payment.interface";
 import { IProducts } from "./product.interface";
 
 export interface GroupInvoices {
@@ -50,9 +51,20 @@ export interface IInvoice {
     payments: Payments[];
     client?: IClients;
     invoiceItems: InvoiceItems[];
+    InvoicePayment: IInvoicePayment[];
     amountPayed: number | string;
     createdAtPayed: Date;
 }
+
+export interface IInvoicePayment {
+    id: number;
+    invoiceId: number;
+    paymentId: number;
+    payment: IPayments;
+    amount: string;
+    createdAt: Date;
+}
+
 
 export interface IInvoiceForPay extends IInvoice {
     totalPaid: number | string;
