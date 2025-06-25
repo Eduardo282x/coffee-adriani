@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { deleteBlocks, deleteClients, getBlocks, getClients, postBlocks, postClients, putBlocks, putClients, generateReportPDF } from "@/services/clients.service"
-import { Block, BodyBlock, BodyReport, GroupBlock, GroupClients, IClients } from "@/interfaces/clients.interface"
+import { postClients, putClients, generateReportPDF } from "@/services/clients.service"
+import { Block, BodyBlock, BodyReport, IClients } from "@/interfaces/clients.interface"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
 import { blockColumns, clientsColumns, defaultValues, IClientsForm } from "./client.data"
@@ -11,16 +11,11 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { BlockForm, ClientsForm, ReportForm } from "./ClientsForm"
-import { IOptions } from "@/interfaces/form.interface";
 import { Download } from "lucide-react";
 import { formatDate } from "@/hooks/formaters"
+import { clientStore, blockStore } from "@/store/clientStore"
 
 export const Clients = () => {
-    const [clients, setClients] = useState<GroupClients>({ allClients: [], clients: [], clientsFilter: [] });
-    const [blocks, setBlocks] = useState<GroupBlock>({ allBlocks: [], blocks: [] });
-    const [blockOptions, setBlockOptions] = useState<IOptions[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
 
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -34,45 +29,34 @@ export const Clients = () => {
 
     const [edit, setEdit] = useState<boolean>(false);
 
+    const { clients, loading, setLoading, setClients, getClientsApi, deleteClient, } = clientStore();
+
+    const { blocks, setBlocks, blockOptions, getBlocksApi, deleteBlock, manipulateBlock } = blockStore();
+
     useEffect(() => {
-        getClientsApi()
-        getBlocksApi()
+        getClientDataStore();
     }, [])
 
-    const getClientsApi = async () => {
-        setLoading(true);
-        const response: IClients[] = await getClients();
-        if (response) {
-            setClients({ allClients: response, clients: response, clientsFilter: response });
+    const getClientDataStore = async () => {
+        if (!clients || !blocks || clients.allClients.length == 0 || blocks.allBlocks.length == 0) {
+            setLoading(true);
+            await getBlocksApi();
+            await getClientsApi();
         }
         setLoading(false);
     }
 
-    const getBlocksApi = async () => {
-        const response = await getBlocks();
-        if (response) {
-            setBlocks({ allBlocks: response, blocks: response });
-            const blockOptions = response.map((blo: Block) => {
-                return {
-                    label: blo.name,
-                    value: blo.id.toString()
-                }
-            })
-            setBlockOptions(blockOptions)
-        }
-    }
-
     const handleChangeBlock = (option: string) => {
         const filterClientsByBlock = option !== 'all' ? clients.allClients.filter(cli => cli.blockId === Number(option)) : clients.allClients
-        setClients((prev) => ({ ...prev, clients: filterClientsByBlock }))
+        setClients({ allClients: clients.allClients, clients: filterClientsByBlock, clientsFilter: filterClientsByBlock })
     }
 
-    const setClientsFilter = (clients: IClients[]) => {
-        setClients((prev) => ({ ...prev, clientsFilter: clients }))
+    const setClientsFilter = (clientsFilter: IClients[]) => {
+        setClients({ allClients: clients.allClients, clients: clients.clients, clientsFilter: clientsFilter })
     }
 
     const setBlocksFilter = (block: Block[]) => {
-        setBlocks((prev) => ({ ...prev, blocks: block }))
+        setBlocks({ allBlocks: blocks.allBlocks, blocks: block })
     }
 
     const addNew = () => {
@@ -89,7 +73,6 @@ export const Clients = () => {
         setDataDialogBlock(data);
         if (action === 'Editar') {
             setEdit(true);
-            // Abrir el dialog DESPUÉS que React procese los otros cambios
             setTimeout(() => {
                 setOpenDialogBlock(true);
             }, 0);
@@ -105,7 +88,6 @@ export const Clients = () => {
         setDataDialog(data);
         if (action === 'Editar') {
             setEdit(true);
-            // Abrir el dialog DESPUÉS que React procese los otros cambios
             setTimeout(() => {
                 setOpenDialog(true);
             }, 0);
@@ -119,13 +101,11 @@ export const Clients = () => {
 
     const deleteAction = async () => {
         if (showBlocks) {
-            await deleteBlocks(Number(dataDialogBlock?.id))
+            await deleteBlock(Number(dataDialogBlock?.id))
             setOpenDeleteDialogBlock(false);
-            await getBlocksApi();
         } else {
-            await deleteClients(Number(dataDialog.id))
+            await deleteClient(Number(dataDialog.id))
             setOpenDeleteDialog(false);
-            await getClientsApi();
         }
     }
 
@@ -147,13 +127,8 @@ export const Clients = () => {
     }
 
     const actionDialogBlock = async (data: BodyBlock) => {
-        if (edit) {
-            await putBlocks(Number(dataDialogBlock?.id), data)
-        } else {
-            await postBlocks(data)
-        }
+        await manipulateBlock(data, edit, Number(dataDialogBlock?.id))
         setOpenDialogBlock(false);
-        await getBlocksApi();
     }
 
     const actionDialog = async (data: IClientsForm) => {
@@ -225,7 +200,7 @@ export const Clients = () => {
                         <div className="flex w-72 items-center space-x-2">
                             {showBlocks
                                 ? <Filter dataBase={blocks.allBlocks} columns={blockColumns} setDataFilter={setBlocksFilter} />
-                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} />
+                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter}  disabledEffect={true}/>
                             }
                         </div>
 

@@ -2,9 +2,8 @@ import { Autocomplete } from "@/components/autocomplete/Autocomplete";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GroupClientsOptions, IClients } from "@/interfaces/clients.interface";
+import { IClients } from "@/interfaces/clients.interface";
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
-import { getClients } from "@/services/clients.service";
 // import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useState } from "react";
 import { productColumns } from "./invoices.data";
@@ -16,15 +15,14 @@ import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
 import { addYears } from "date-fns";
 import { IInvoice } from "@/interfaces/invoice.interface";
-
-interface InvoiceFormProps extends FromProps { 
+import { clientStore } from "@/store/clientStore";
+interface InvoiceFormProps extends FromProps {
     inventory: GroupInventoryDate
 }
 
 export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory }) => {
-    const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
+    // const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
-
     const [inventoryData, setInventoryData] = useState<IInventory[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [controlNumber, setControlNumber] = useState<string>('');
@@ -32,6 +30,9 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const [consignment, setConsignment] = useState<boolean>(false);
     const [dateDispatch, setDateDispatch] = useState<Date | undefined>(new Date());
     const [dateDue, setDateDue] = useState<Date | undefined>(new Date());
+
+    const { clients, clientOptions, getClientsApi } = clientStore();
+
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
@@ -61,21 +62,14 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         }
     }, [data, inventory, clients])
 
-    const getClientsApi = async () => {
-        const response: IClients[] = await getClients();
-        if (response) {
-            const parseClients = response.map((cli: IClients) => {
-                return {
-                    label: `${cli.name} - ${cli.address}`,
-                    value: cli.id
-                }
-            })
-            setClients({ allClients: response, clients: parseClients });
+    const getClientStoreApi = async () => {
+        if (!clients || clients.allClients.length == 0) {
+            await getClientsApi();
         }
     }
 
     useEffect(() => {
-        getClientsApi();
+        getClientStoreApi();
     }, [])
 
     const selectClient = (client: string) => {
@@ -186,7 +180,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                     <Label className="text-right w-42">
                         Cliente
                     </Label>
-                    <Autocomplete placeholder="Seleccione un cliente" data={clients.clients} onChange={selectClient} valueDefault={clientSelected?.id}></Autocomplete>
+                    <Autocomplete placeholder="Seleccione un cliente" data={clientOptions} onChange={selectClient} valueDefault={clientSelected?.id}></Autocomplete>
                 </div>
 
                 <div className="flex items-center justify-between w-full translate-y-2 border rounded-md px-2 py-1">

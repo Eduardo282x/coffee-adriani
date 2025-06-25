@@ -11,15 +11,18 @@ interface IFilter {
     dataBase: any[];
     setDataFilter: (value: any) => void;
     columns: IColumns<any>[];
+    disabledEffect?: boolean;
     filterInvoices?: boolean;
     filterInvoicesPayments?: boolean;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, columns, filterInvoices, filterInvoicesPayments }) => {
+export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments }) => {
     const [filter, setFilter] = useState<string>('');
 
     useEffect(() => {
-        setDataFilter(dataBase)
+        if (!disabledEffect){
+            setDataFilter(dataBase)
+        }
     }, [dataBase])
 
     const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

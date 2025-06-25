@@ -7,41 +7,45 @@ import { Filter } from "@/components/table/Filter"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { deleteUsers, getUsers, postUsers, putUsers } from "@/services/user.service"
-import { GroupUsers, IUsers } from "@/interfaces/user.interface"
+import { postUsers, putUsers } from "@/services/user.service"
+import { IUsers } from "@/interfaces/user.interface"
 import { defaultValues, IUsersForm, usersColumns } from "./users.data"
 import { UsersForm } from "./UsersForm"
 import { BaseResponse } from "@/services/base.interface"
+import { userStore } from "@/store/userStore"
 // import { UsersForm } from "./UsersForm"
 
 
 export const Users = () => {
-    const [users, setUsers] = useState<GroupUsers>({ allUsers: [], users: [] });
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [users, setUsers] = useState<GroupUsers>({ allUsers: [], users: [] });
+    // const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [dataDialog, setDataDialog] = useState<IUsersForm>(defaultValues);
     const [edit, setEdit] = useState<boolean>(false);
+    const {
+        users,
+        getUsersApi,
+        loading,
+        setLoading,
+        setUsers,
+        deleteUser
+    } = userStore();
 
     useEffect(() => {
-        getUsersApi()
+        getUsersStore()
     }, [])
 
-    const getUsersApi = async () => {
-        setLoading(true);
-        try {
-            const response: IUsers[] = await getUsers();
-            if (response && response.length > 0) {
-                setUsers({ allUsers: response, users: response });
-            }
-        } catch (err) {
-            console.log(err);
+    const getUsersStore = async () => {
+        if (!users || users.allUsers.length == 0) {
+            setLoading(true);
+            await getUsersApi();
         }
         setLoading(false);
     }
 
-    const setUsersFilter = (users: IUsers[]) => {
-        setUsers((prev) => ({ ...prev, users: users }))
+    const setUsersFilter = (usersFilter: IUsers[]) => {
+        setUsers({ allUsers: users.allUsers, users: usersFilter })
     }
 
     const getAction = (action: string, data: IUsersForm) => {
@@ -59,10 +63,9 @@ export const Users = () => {
         }
     }
 
-    const deleteAction = async () => {
-        await deleteUsers(Number(dataDialog.id))
+    const deleteAction = () => {
+        deleteUser(Number(dataDialog.id))
         setOpenDeleteDialog(false);
-        await getUsersApi();
     }
 
     const actionDialog = async (data: IUsersForm) => {

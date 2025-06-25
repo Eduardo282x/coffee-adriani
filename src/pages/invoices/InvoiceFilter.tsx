@@ -5,8 +5,8 @@ import { Filter } from "@/components/table/Filter"
 // import { Button } from "@/components/ui/button"
 // import { Download } from "lucide-react"
 import { Block } from "@/interfaces/clients.interface"
-import { FC, useEffect, useState } from "react"
-import { getBlocks } from "@/services/clients.service"
+import { FC, useEffect } from "react"
+import { blockStore } from "@/store/clientStore"
 import { DateRange } from "react-day-picker"
 import { InvoiceApi } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
@@ -71,18 +71,16 @@ const FiltersGroups = ({
     setDateStart,
     setDateEnd
 }: FilterGroupsProps) => {
+    const { blocks, getBlocksApi} = blockStore();
 
-    const [blocks, setBlocks] = useState<Block[]>([]);
-
-    const getBlocksApi = async () => {
-        const response = await getBlocks();
-        if (response) {
-            setBlocks(response);
+    const getBlockStoreApi = async () => {
+        if(!blocks || blocks.allBlocks.length == 0){
+            await getBlocksApi();
         }
     }
 
     useEffect(() => {
-        getBlocksApi();
+        getBlockStoreApi();
     }, [])
 
     return (
@@ -118,7 +116,7 @@ const FiltersGroups = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectItem value='all'>Todos</SelectItem>
-                            {blocks && blocks.map((blo: Block, index: number) => (
+                            {blocks && blocks.allBlocks.map((blo: Block, index: number) => (
                                 <SelectItem key={index} value={blo.id.toString()}>{blo.name}</SelectItem>
                             ))}
                         </SelectGroup>
