@@ -132,7 +132,7 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
     },
 ]
 
-const getBadgeVariant = (estado: string) => {
+export const getBadgeVariant = (estado: string) => {
     switch (estado) {
         case "Creada":
             return "rounded-lg px-2 bg-blue-100 text-blue-800"

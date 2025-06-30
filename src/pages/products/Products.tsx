@@ -12,6 +12,7 @@ import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { ProductForm } from "./ProductForm"
 import { IColumns } from "@/components/table/table.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
+import { DropdownColumnFilter } from "@/components/table/DropdownColumnFilter"
 
 export const Products = () => {
     const [products, setProducts] = useState<IProducts[]>([]);
@@ -134,13 +135,14 @@ export const Products = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Productos</h2>
 
-                    <div className="flex w-full max-w-sm items-center space-x-2">
+                    <div className="flex w-full max-w-sm items-center gap-2 space-x-2">
+                        <DropdownColumnFilter columns={columns} setColumns={setColumns} />
                         <Filter dataBase={data.products} columns={columns} setDataFilter={setProductFilter} />
                     </div>
                 </div>
 
                 <div>
-                    <TableComponent columns={columns} dataBase={data.productsFilter} action={getAction}></TableComponent>
+                    <TableComponent columns={columns.filter(col => col.visible == true)} dataBase={data.productsFilter} action={getAction}></TableComponent>
                 </div>
             </main>
 

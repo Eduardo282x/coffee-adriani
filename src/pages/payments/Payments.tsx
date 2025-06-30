@@ -19,6 +19,8 @@ import { PayInvoiceForm } from './PayInvoiceForm';
 import { formatNumberWithDots } from '@/hooks/formaters';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
+import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
+import { IColumns } from '@/components/table/table.interface';
 // import { PaymentExpandible } from './PaymentExpandible';
 
 export const Payments = () => {
@@ -30,6 +32,8 @@ export const Payments = () => {
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
+
+    const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     // const today = new Date();
 
     const [date, setDate] = useState<DateRange | undefined>(undefined)
@@ -264,18 +268,21 @@ export const Payments = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Pagos</h2>
 
-                    <PaymentFilter
-                        paymentsColumns={paymentsColumns}
-                        setPaymentsFilter={setPaymentsFilter}
-                        payments={payments.paymentsFilter}
-                        date={date}
-                        setDate={setDate}
-                        handleChangeMethods={handleChangeMethods}
-                        handleChangeAccount={handleChangeAccount}
-                        // handleChangeStatusPay={handleChangeStatusPay}
-                        handleChangeStatusAssociated={handleChangeStatusAssociated}
-                        handleChangeCredit={handleChangeCredit}
-                    />
+                    <div className="flex items-end gap-2">
+                        <DropdownColumnFilter columns={columns} setColumns={setColumns} />
+                        <PaymentFilter
+                            paymentsColumns={paymentsColumns}
+                            setPaymentsFilter={setPaymentsFilter}
+                            payments={payments.paymentsFilter}
+                            date={date}
+                            setDate={setDate}
+                            handleChangeMethods={handleChangeMethods}
+                            handleChangeAccount={handleChangeAccount}
+                            // handleChangeStatusPay={handleChangeStatusPay}
+                            handleChangeStatusAssociated={handleChangeStatusAssociated}
+                            handleChangeCredit={handleChangeCredit}
+                        />
+                    </div>
                 </div>
 
                 <div className=''>
@@ -284,7 +291,7 @@ export const Payments = () => {
                         <p className='mb-2 text-lg'><span className='font-semibold'>Total $:</span> {formatNumberWithDots(totalPayments.totalUSD.toFixed(2), '', ' $')}</p>
                     </div>
                     <TableComponent
-                        columns={paymentsColumns}
+                        columns={columns.filter(col => col.visible == true)}
                         dataBase={payments.payments}
                         isExpansible={true}
                         renderRow={(pay, index) => (

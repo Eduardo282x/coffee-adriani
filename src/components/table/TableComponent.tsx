@@ -271,6 +271,12 @@ const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
         }
     }
 
+    const sendAction = () => {
+        if (column.type === 'custom' && action) {
+            action(column.column, data);
+        }
+    }
+
     return (
         <>
             {column.type === 'string' &&
@@ -278,6 +284,11 @@ const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
             }
             {column.type === 'editable' &&
                 <Input type="number" value={value} onChange={onChangeValue} />
+            }
+            {column.type === 'custom' &&
+                <div onClick={sendAction}>
+                    {column.element(data)}
+                </div>
             }
         </>
     )

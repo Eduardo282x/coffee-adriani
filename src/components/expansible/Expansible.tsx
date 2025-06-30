@@ -150,7 +150,6 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                         }
                     </div>
                 </div>
-
             </DialogComponent>
 
 

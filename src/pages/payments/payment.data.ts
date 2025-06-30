@@ -12,6 +12,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         column: 'account.name',
         element: (data: IPayments) => `${data.account.name} ${data.account.bank}`,
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -20,6 +21,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         label: 'Tipo de pago',
         element: (data: IPayments) => data.account.method.name,
         orderBy: '',
+        visible: false,
         type: 'string',
         icon: false,
     },
@@ -28,40 +30,45 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         label: 'Asociado',
         element: (data: IPayments) => data.associated ? 'Asociado' : 'Sin asociar',
         orderBy: '',
+        visible: true,
         className: (data: IPayments) => getBadgeVariantAssociated(data.associated),
         type: 'string',
         icon: false,
     },
-    // {
-    //     column: 'status',
-    //     label: 'Estado',
-    //     element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
-    //     orderBy: '',
-    //     className: (data: IPayments) => getBadgeVariant(data.status),
-    //     type: 'string',
-    //     icon: false,
-    // },
+    {
+        column: 'status',
+        label: 'Estado',
+        element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
+        orderBy: '',
+        visible: false,
+        className: (data: IPayments) => getBadgeVariant(data.status),
+        type: 'string',
+        icon: false,
+    },
     // {
     //     column: 'remaining',
     //     label: 'Restante',
     //     element: (data: IPayments) => formatNumberWithDots(data.remaining, '', ' $'),
     //     orderBy: '',
+    // visible: true,
     //     type: 'string',
     //     icon: false,
     // },
     {
-        column: 'amount',
+        column: 'amountUSD',
         label: 'Cantidad ($)',
         element: (data: IPayments) => formatNumberWithDots(data.amountUSD, '', ' $'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
     {
-        column: 'amount',
+        column: 'amountBs',
         label: 'Cantidad (Bs)',
         element: (data: IPayments) => formatNumberWithDots(data.amountBs, '', ' Bs'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -70,6 +77,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         label: 'Tasa Dolar',
         element: (data: IPayments) => formatNumberWithDots(data.dolar.dolar, '', ' Bs'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -78,15 +86,17 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         label: 'Referencia',
         element: (data: IPayments) => `# ${data.reference}`,
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
         className: () => 'font-semibold text-blue-600'
     },
     {
-        column: 'createdAt',
+        column: 'paymentDate',
         label: 'Fecha de pago',
         element: (data: IPayments) => formatDate(data.paymentDate),
         orderBy: '',
+        visible: false,
         type: 'string',
         icon: false,
     },
@@ -95,6 +105,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         label: 'Acción',
         element: () => '',
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: true,
         optionActions: [
@@ -113,16 +124,16 @@ const getBadgeVariantAssociated = (status: boolean) => {
         return "rounded-lg px-2 bg-gray-200 text-gray-800"
     }
 }
-// const getBadgeVariant = (estado: string) => {
-//     switch (estado) {
-//         case "CONFIRMED":
-//             return "rounded-lg px-2 bg-green-100 text-green-800"
-//         case "PENDING":
-//             return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
-//         default:
-//             return "rounded-lg px-2 bg-gray-100 text-gray-800"
-//     }
-// }
+const getBadgeVariant = (estado: string) => {
+    switch (estado) {
+        case "CONFIRMED":
+            return "rounded-lg px-2 bg-green-100 text-green-800"
+        case "PENDING":
+            return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
+        default:
+            return "rounded-lg px-2 bg-gray-100 text-gray-800"
+    }
+}
 
 export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     {

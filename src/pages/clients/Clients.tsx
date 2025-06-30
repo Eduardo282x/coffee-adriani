@@ -110,8 +110,9 @@ export const Clients = () => {
     }
 
     const generateReport = async (data: BodyReport) => {
+        setLoading(true)
         const parseData = {
-            ...data,
+        ...data,
             blockId: Number(data.blockId)
         }
         const response = await generateReportPDF(parseData) as Blob;
@@ -124,6 +125,7 @@ export const Clients = () => {
         window.document.body.removeChild(link)
         URL.revokeObjectURL(url)
         setOpenDialogReport(false);
+        setLoading(false);
     }
 
     const actionDialogBlock = async (data: BodyBlock) => {

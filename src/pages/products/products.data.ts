@@ -9,6 +9,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         column: 'name',
         element: (data: IProducts) => data.name,
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -17,6 +18,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Presentación',
         element: (data: IProducts) => data.presentation,
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -25,6 +27,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio Compra ($)',
         element: (data: IProducts) => formatNumberWithDots(data.purchasePriceUSD, '', ' $'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -33,6 +36,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio Compra (Bs)',
         element: (data: IProducts) => formatNumberWithDots(data.purchasePrice, '', ' $'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -41,6 +45,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio ($)',
         element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -49,6 +54,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Precio',
         element: (data: IProducts) => formatNumberWithDots(data.price, '', ' $'),
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: false,
     },
@@ -57,6 +63,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     //     label: 'Precio (Bs)',
     //     element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
     //     orderBy: '',
+    // visible: true,
     //     type: 'string',
     //     icon: false,
     // },
@@ -65,6 +72,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Cantidad',
         element: (data: IProducts) => data.amount.toString(),
         orderBy: '',
+        visible: false,
         type: 'string',
         icon: false,
     },
@@ -73,6 +81,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Fecha Registro',
         element: (data: IProducts) => formatDate(data.createdAt),
         orderBy: '',
+        visible: false,
         type: 'string',
         icon: false,
     },
@@ -81,6 +90,7 @@ export const productsColumns: IColumns<IProducts>[] = [
         label: 'Acciones',
         element: () => '',
         orderBy: '',
+        visible: true,
         type: 'string',
         icon: true,
         optionActions: [
@@ -121,40 +131,40 @@ export interface FormDataProduct {
 
 type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'purchasePriceUSD' | 'amount';
 
-    export const formDataProduct: FormDataProduct[] = [
-        {
-            label: 'Nombre',
-            type: 'text',
-            name: 'name'
-        },
-        {
-            label: 'Presentación',
-            type: 'text',
-            name: 'presentation'
-        },
-        {
-            label: 'Precio de Compra (Bs)',
-            type: 'text',
-            name: 'purchasePrice'
-        },
-        {
-            label: 'Precio de Compra ($)',
-            type: 'text',
-            name: 'purchasePriceUSD'
-        },
-        {
-            label: 'Precio',
-            type: 'text',
-            name: 'price'
-        },
-        {
-            label: 'Precio USD',
-            type: 'text',
-            name: 'priceUSD'
-        },
-        {
-            label: 'Cantidad',
-            type: 'text',
-            name: 'amount'
-        }
-    ]
+export const formDataProduct: FormDataProduct[] = [
+    {
+        label: 'Nombre',
+        type: 'text',
+        name: 'name'
+    },
+    {
+        label: 'Presentación',
+        type: 'text',
+        name: 'presentation'
+    },
+    {
+        label: 'Precio de Compra (Bs)',
+        type: 'text',
+        name: 'purchasePrice'
+    },
+    {
+        label: 'Precio de Compra ($)',
+        type: 'text',
+        name: 'purchasePriceUSD'
+    },
+    {
+        label: 'Precio',
+        type: 'text',
+        name: 'price'
+    },
+    {
+        label: 'Precio USD',
+        type: 'text',
+        name: 'priceUSD'
+    },
+    {
+        label: 'Cantidad',
+        type: 'text',
+        name: 'amount'
+    }
+]
