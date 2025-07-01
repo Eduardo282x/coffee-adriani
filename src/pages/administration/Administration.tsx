@@ -144,12 +144,11 @@ export const Administration = () => {
                     <div className="flex gap-2 items-center">
                         <Select value={month} onValueChange={(val) => {
                             setMonth(val);
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
                             const [year, m] = val.split('-').map(Number);
                             setFiltersDate(prev => ({
                                 ...prev,
-                                startDate: new Date(prev.startDate.getFullYear(), m - 1, 1),
-                                endDate: new Date(prev.endDate.getFullYear(), m, 0),
+                                startDate: new Date(year, m - 1, 1),
+                                endDate: new Date(year, m, 0),
                             }));
                             getExpensesApi(); // Si quieres recargar los datos al cambiar el mes
                         }}>
