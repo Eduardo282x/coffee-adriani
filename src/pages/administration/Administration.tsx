@@ -12,6 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { PiCoffeeBeanFill } from "react-icons/pi";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const coffeeColors = {
     darkRoast: "#5D4037",
@@ -24,32 +31,58 @@ const coffeeColors = {
 type OptionAdministration = 'pay' | 'invoices' | 'earns';
 
 export const Administration = () => {
+    const now = new Date();
+
     const [option, setOption] = useState<OptionAdministration>('earns')
     const [loading, setLoading] = useState<boolean>(false);
     const [expenses, setExpenses] = useState<IExpenses | null>(null);
     const [cardEarnsData, setCardEarnsData] = useState<CardEarnsProps[]>([]);
     const [productSales, setProductSales] = useState<ProductSale[]>([]);
     const [totals, setTotals] = useState<{ totalInvoice: string; totalPayments: string, total: string }>({ totalInvoice: '0', totalPayments: '0', total: '0' });
+    const [filtersDate, setFiltersDate] = useState({
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+        endDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+    });
+
+    function getMonthsFrom2025() {
+        const months = [];
+        const now = new Date();
+        const startYear = 2025;
+        const startMonth = 0; // Enero
+        const endYear = now.getFullYear();
+        const endMonth = now.getMonth(); // 0-indexed
+
+        for (let year = startYear; year <= endYear; year++) {
+            const firstMonth = year === startYear ? startMonth : 0;
+            const lastMonth = year === endYear ? endMonth : 11;
+            for (let month = firstMonth; month <= lastMonth; month++) {
+                months.push({
+                    value: `${year}-${month + 1}`,
+                    label: `${new Date(year, month).toLocaleString('es-ES', { month: 'long' })} ${year}`,
+                    year,
+                    month
+                });
+            }
+        }
+        return months;
+    }
+
+    const [month, setMonth] = useState(() => {
+        const months = getMonthsFrom2025();
+        return months[months.length - 1]?.value; // mes actual por defecto
+    });
+    const monthsList = getMonthsFrom2025();
 
     useEffect(() => {
         getExpensesApi()
-    }, [])
+    }, [filtersDate])
 
     const getExpensesApi = async () => {
         setLoading(true);
         try {
-            const now = new Date();
-            const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-            const response: IExpenses = await getExpenses({
-                startDate,
-                endDate,
-            });
+            const response: IExpenses = await getExpenses(filtersDate);
             if (response) {
                 setExpenses(response);
-                console.log(response.invoicesEarns);
-
                 setProductSales(response.invoicesEarns.resumen.productPercentage);
                 const totalInvoice = response.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);
                 const totalPayments = response.payments.reduce((acc, pay) => acc + Number(pay.amount), 0);
@@ -107,7 +140,33 @@ export const Administration = () => {
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Administración</h2>
-                    <TabsAdministration option={option} setOption={setOption} />
+
+                    <div className="flex gap-2 items-center">
+                        <Select value={month} onValueChange={(val) => {
+                            setMonth(val);
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            const [year, m] = val.split('-').map(Number);
+                            setFiltersDate(prev => ({
+                                ...prev,
+                                startDate: new Date(prev.startDate.getFullYear(), m - 1, 1),
+                                endDate: new Date(prev.endDate.getFullYear(), m, 0),
+                            }));
+                            getExpensesApi(); // Si quieres recargar los datos al cambiar el mes
+                        }}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Fecha" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {monthsList.map((m) => (
+                                    <SelectItem key={m.value} value={m.value}>
+                                        {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <TabsAdministration option={option} setOption={setOption} />
+                    </div>
                 </div>
 
 
