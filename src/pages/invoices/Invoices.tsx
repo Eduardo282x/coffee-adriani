@@ -101,13 +101,15 @@ export const Invoices = () => {
     }, [dateStart?.to])
 
     const generateInvoice = async (data: IInvoiceForm) => {
+        setLoading(true)
         if (selectInvoice) {
             await updateInvoiceApi(selectInvoice.id, data)
         } else {
             await postInvoice(data);
         }
         setOpenDialog(false);
-
+        
+        setLoading(false)
         socket.emit('message', 'Actualice inventario')
 
         if (dateStart?.to) {
@@ -303,8 +305,8 @@ export const Invoices = () => {
                     open={openDialog}
                     setOpen={setOpenDialog}
                     className="w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
-                    label2="Agregar Cliente"
-                    label1="Editar Cliente"
+                    label2="Agregar Factura"
+                    label1="Editar Factura"
                     isEdit={true}
                 >
                     <InvoiceForm inventory={inventory} onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
