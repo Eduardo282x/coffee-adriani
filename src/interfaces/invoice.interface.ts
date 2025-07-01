@@ -45,7 +45,7 @@ export interface IInvoice {
     remaining: number | string;
     totalAmountBs: number | string;
     consignment: boolean;
-    status: string;
+    status: InvoiceStatus;
     createdAt: Date;
     updatedAt: Date;
     payments: Payments[];
@@ -55,6 +55,15 @@ export interface IInvoice {
     amountPayed: number | string;
     createdAtPayed: Date;
 }
+
+export type InvoiceStatus =
+    'all' |
+    'Creada' |
+    'Pendiente' |
+    'Pagado' |
+    'Abonadas' |
+    'Vencida' |
+    'Cancelada'
 
 export interface IInvoicePayment {
     id: number;

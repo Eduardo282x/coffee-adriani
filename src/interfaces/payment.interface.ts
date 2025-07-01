@@ -76,9 +76,9 @@ export interface IBank {
 export interface IPaymentForm {
     amount: number;
     reference: string;
+    time?: string;
     accountId: number;
 }
-
 
 export interface AssociatePayInvoice {
     invoice: string;

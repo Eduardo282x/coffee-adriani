@@ -81,6 +81,14 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         // className: (data: IInvoice) => getBadgeVariant(data.status)
     },
     {
+        column: 'remaining',
+        label: 'Pagado',
+        element: (data: IInvoice) => `${formatOnlyNumberWithDots(data.totalAmount - Number(data.remaining))} $`,
+        orderBy: '',
+        type: 'string',
+        // className: (data: IInvoice) => getBadgeVariant(data.status)
+    },
+    {
         column: 'totalAmount',
         label: 'Fecha pago',
         element: (data: IInvoice) => data.InvoicePayment.length > 0 ? formatDate(data.InvoicePayment[data.InvoicePayment.length - 1].createdAt) : '-',

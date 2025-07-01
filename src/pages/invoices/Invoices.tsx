@@ -6,7 +6,7 @@ import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm";
 import { MdUpdate } from "react-icons/md";
-import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
+import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, InvoiceStatus, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
 import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
@@ -34,7 +34,7 @@ export const Invoices = () => {
     const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined)
     const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
-    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
 
     const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
 
@@ -108,7 +108,7 @@ export const Invoices = () => {
             await postInvoice(data);
         }
         setOpenDialog(false);
-        
+
         setLoading(false)
         socket.emit('message', 'Actualice inventario')
 
@@ -122,13 +122,13 @@ export const Invoices = () => {
         applyInvoiceFilters(option, selectedStatus);
     };
 
-    const handleChangeStatusInvoice = (option: string) => {
+    const handleChangeStatusInvoice = (option: InvoiceStatus) => {
         setSelectedStatus(option);
         applyInvoiceFilters(selectedBlock, option);
     };
 
 
-    const applyInvoiceFilters = (blockId: string, status: string) => {
+    const applyInvoiceFilters = (blockId: string, status: InvoiceStatus) => {
         let filtered = invoice.allInvoices;
 
         // Filtro por bloque
@@ -139,15 +139,28 @@ export const Invoices = () => {
         // Filtro por estado
         if (status !== 'all') {
             const filteredByStatus: InvoiceApi[] = filtered.map(inv => {
-                const filteredInvoices = inv.invoices.filter(invoice => invoice.status === status);
-                if (filteredInvoices.length > 0) {
-                    return {
-                        client: inv.client,
-                        invoices: filteredInvoices,
-                    };
+
+                if (status === 'Abonadas') {
+                    const filteredInvoices = inv.invoices.filter(invoice => (invoice.status === 'Pendiente' || invoice.status === 'Vencida') && (invoice.totalAmount != invoice.remaining));
+                    if (filteredInvoices.length > 0) {
+                        return {
+                            client: inv.client,
+                            invoices: filteredInvoices,
+                        };
+                    }
+                    return null;
+                } else {
+                    const filteredInvoices = inv.invoices.filter(invoice => invoice.status === status);
+                    if (filteredInvoices.length > 0) {
+                        return {
+                            client: inv.client,
+                            invoices: filteredInvoices,
+                        };
+                    }
+                    return null;
                 }
-                return null;
             }).filter((item): item is InvoiceApi => item !== null);
+
 
             filtered = filteredByStatus;
         }
@@ -222,8 +235,8 @@ export const Invoices = () => {
 
                 <div className="flex items-center gap-4">
                     <Button onClick={checkInvoicesApi}>
-                        <MdUpdate  className="mr-2 h-4 w-4" />
-                        Validar facturas 
+                        <MdUpdate className="mr-2 h-4 w-4" />
+                        Validar facturas
                     </Button>
                     <DolarComponents />
                     <Button onClick={() => setOpenDialog(true)}>

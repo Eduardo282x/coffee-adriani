@@ -8,7 +8,7 @@ import { Block } from "@/interfaces/clients.interface"
 import { FC, useEffect } from "react"
 import { blockStore } from "@/store/clientStore"
 import { DateRange } from "react-day-picker"
-import { InvoiceApi } from "@/interfaces/invoice.interface"
+import { InvoiceApi, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 
@@ -19,7 +19,7 @@ interface IInvoiceFilter extends FilterGroupsProps {
 }
 
 interface FilterGroupsProps {
-    handleChangeStatusInvoice: (value: string) => void;
+    handleChangeStatusInvoice: (value: InvoiceStatus) => void;
     handleChangeBlock: (value: string) => void;
     dateStart: DateRange | undefined;
     dateEnd: DateRange | undefined;
@@ -97,11 +97,12 @@ const FiltersGroups = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectItem value='all'>Todos</SelectItem>
-                            <SelectItem value='Creada'>Creada</SelectItem>
-                            <SelectItem value='Pendiente'>Pendiente</SelectItem>
+                            {/* <SelectItem value='Creada'>Creada</SelectItem> */}
                             <SelectItem value='Pagado'>Pagado</SelectItem>
+                            <SelectItem value='Pendiente'>Pendiente</SelectItem>
+                            <SelectItem value='Abonadas'>Abonadas</SelectItem>
                             <SelectItem value='Vencida'>Vencida</SelectItem>
-                            <SelectItem value='Cancelada'>Cancelada</SelectItem>
+                            {/* <SelectItem value='Cancelada'>Cancelada</SelectItem> */}
                         </SelectGroup>
                     </SelectContent>
                 </Select>
