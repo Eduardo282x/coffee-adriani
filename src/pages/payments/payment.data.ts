@@ -1,5 +1,5 @@
 import { IColumns } from "@/components/table/table.interface";
-import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
+import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IInvoice, IInvoiceForPay } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
 import { Trash2 } from "lucide-react";
@@ -36,6 +36,15 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         icon: false,
     },
     {
+        column: 'remainingUSD',
+        label: 'Sobrante',
+        element: (data: IPayments) => `${formatOnlyNumberWithDots(data.remainingUSD)} $`,
+        orderBy: '',
+        visible: true,
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'status',
         label: 'Estado',
         element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
@@ -48,7 +57,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     // {
     //     column: 'remaining',
     //     label: 'Restante',
-    //     element: (data: IPayments) => formatNumberWithDots(data.remaining, '', ' $'),
+    //     element: (data: IPayments) => `${formatOnlyNumberWithDots(data.remaining)} $`,
     //     orderBy: '',
     // visible: true,
     //     type: 'string',
@@ -57,7 +66,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'amountUSD',
         label: 'Cantidad ($)',
-        element: (data: IPayments) => formatNumberWithDots(data.amountUSD, '', ' $'),
+        element: (data: IPayments) => `${formatOnlyNumberWithDots(data.amountUSD)} $`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -66,7 +75,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'amountBs',
         label: 'Cantidad (Bs)',
-        element: (data: IPayments) => formatNumberWithDots(data.amountBs, '', ' Bs'),
+        element: (data: IPayments) => `${formatOnlyNumberWithDots(data.amountBs)} Bs`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -75,7 +84,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'dolar.dolar',
         label: 'Tasa Dolar',
-        element: (data: IPayments) => formatNumberWithDots(data.dolar.dolar, '', ' Bs'),
+        element: (data: IPayments) => `${formatOnlyNumberWithDots(data.dolar.dolar)} Bs`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -156,7 +165,7 @@ export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     {
         label: 'Total',
         column: 'totalAmount',
-        element: (element: IInvoiceForPay) => formatNumberWithDots(Number((element.totalAmount)).toFixed(2), '', ' $'),
+        element: (element: IInvoiceForPay) => `${formatOnlyNumberWithDots(element.totalAmount)} $`,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -164,7 +173,7 @@ export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     {
         label: 'Debe',
         column: 'remaining',
-        element: (element: IInvoiceForPay) => formatNumberWithDots(Number((element.remaining)).toFixed(2), '', ' $'),
+        element: (element: IInvoiceForPay) => `${formatOnlyNumberWithDots(element.remaining)} $`,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -211,7 +220,7 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
     {
         label: 'Pago',
         column: 'amountPayed',
-        element: (data: IInvoice) => formatNumberWithDots(Number(data.amountPayed).toFixed(2), '', '$'),
+        element: (data: IInvoice) => `${formatOnlyNumberWithDots(data.amountPayed)} $`,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -223,6 +232,5 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
         icon: false,
-    },
-
-];
+    }
+]

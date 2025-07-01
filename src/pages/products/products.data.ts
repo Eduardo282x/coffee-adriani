@@ -1,5 +1,5 @@
 import { IColumns } from "@/components/table/table.interface";
-import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
+import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IProducts } from "@/interfaces/product.interface";
 import { Edit, Trash2 } from "lucide-react";
 
@@ -25,7 +25,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     {
         column: 'purchasePriceUSD',
         label: 'Precio Compra ($)',
-        element: (data: IProducts) => formatNumberWithDots(data.purchasePriceUSD, '', ' $'),
+        element: (data: IProducts) => `${formatOnlyNumberWithDots(data.purchasePriceUSD)}$`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -34,7 +34,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     {
         column: 'purchasePrice',
         label: 'Precio Compra (Bs)',
-        element: (data: IProducts) => formatNumberWithDots(data.purchasePrice, '', ' $'),
+        element: (data: IProducts) => `${formatOnlyNumberWithDots(data.purchasePrice)}$`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -43,7 +43,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     {
         column: 'priceUSD',
         label: 'Precio ($)',
-        element: (data: IProducts) => formatNumberWithDots(data.priceUSD, '', ' $'),
+        element: (data: IProducts) => `${formatOnlyNumberWithDots(data.priceUSD)}$`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -52,7 +52,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     {
         column: 'price',
         label: 'Precio',
-        element: (data: IProducts) => formatNumberWithDots(data.price, '', ' $'),
+        element: (data: IProducts) => `${formatOnlyNumberWithDots(data.price)}$`,
         orderBy: '',
         visible: true,
         type: 'string',
@@ -61,7 +61,7 @@ export const productsColumns: IColumns<IProducts>[] = [
     // {
     //     column: 'priceBs',
     //     label: 'Precio (Bs)',
-    //     element: (data: IProducts) => formatNumberWithDots(data.priceBs, '', ' Bs'),
+    //     element: (data: IProducts) => formatOnlyNumberWithDots(data.priceBs, '', ' Bs'),
     //     orderBy: '',
     // visible: true,
     //     type: 'string',

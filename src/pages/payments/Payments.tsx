@@ -16,7 +16,7 @@ import { PaymentForm } from './paymentForm';
 import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { PayInvoiceForm } from './PayInvoiceForm';
-import { formatNumberWithDots } from '@/hooks/formaters';
+import { formatOnlyNumberWithDots } from '@/hooks/formaters';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
@@ -33,6 +33,7 @@ export const Payments = () => {
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
 
+    const [totalize, setTotalize] = useState({ remaining: 0, total: 0 })
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     // const today = new Date();
 
@@ -60,6 +61,9 @@ export const Payments = () => {
         const response: PaymentAPI = await getPayment();
         if (response) {
             setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
+            const calculateRemaining = response.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
+            const calculateTotal = response.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
+            setTotalize({ remaining: calculateRemaining, total: calculateTotal });
             setPayments({
                 allPayments: response.payments,
                 payments: response.payments,
@@ -78,6 +82,9 @@ export const Payments = () => {
         const response: PaymentAPI = await getPaymentFilter(filterDate);
         if (response) {
             setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
+            const calculateRemaining = response.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
+            const calculateTotal = response.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
+            setTotalize({ remaining: calculateRemaining, total: calculateTotal });
             setPayments({
                 allPayments: response.payments,
                 payments: response.payments,
@@ -286,9 +293,16 @@ export const Payments = () => {
                 </div>
 
                 <div className=''>
-                    <div className="flex items-center justify-start gap-2">
-                        <p className='mb-2 text-lg'><span className='font-semibold'>Total Bs:</span> {formatNumberWithDots(totalPayments.totalBs.toFixed(2), '', ' Bs')}</p>
-                        <p className='mb-2 text-lg'><span className='font-semibold'>Total $:</span> {formatNumberWithDots(totalPayments.totalUSD.toFixed(2), '', ' $')}</p>
+                    <div className='w-full flex items-center justify-between my-2'>
+                        <div className="flex items-center justify-start gap-2">
+                            <p className='text-lg'><span className='font-semibold'>Total Bs:</span> {formatOnlyNumberWithDots(totalPayments.totalBs)} Bs</p>
+                            <p className='text-lg'><span className='font-semibold'>Total $:</span> {formatOnlyNumberWithDots(totalPayments.totalUSD)} $</p>
+                        </div>
+
+                        <div className='flex items-center justify-start gap-2'>
+                            <p className=''><span className='font-semibold'>Total:</span> {formatOnlyNumberWithDots(totalize.total)} $</p>
+                            <p className=''><span className='font-semibold'>Sobrante:</span> {formatOnlyNumberWithDots(totalize.remaining)} $</p>
+                        </div>
                     </div>
                     <TableComponent
                         columns={columns.filter(col => col.visible == true)}

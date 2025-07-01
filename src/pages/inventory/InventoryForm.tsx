@@ -29,7 +29,13 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, data, products
     })
 
     useEffect(() => {
-        if(data){
+        if (data) {
+
+            console.log({
+                productId: data.productId,
+                quantity: data.quantity
+            });
+
             setTimeout(() => {
                 form.reset({
                     productId: data.productId,
@@ -37,7 +43,7 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, data, products
                 })
             }, 0);
         }
-    },[data, products])
+    }, [data, products])
 
     return (
         <Form {...form}>
