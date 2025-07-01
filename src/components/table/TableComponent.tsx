@@ -23,6 +23,7 @@ interface TableProps<T> {
     colSpanColumns?: boolean;
     hideColumns?: boolean;
     isExpansible?: boolean;
+    shortSpaces?: boolean;
 }
 
 export const TableComponent = <T,>({
@@ -36,7 +37,8 @@ export const TableComponent = <T,>({
     renderRow,
     colSpanColumns,
     hideColumns,
-    isExpansible
+    isExpansible,
+    shortSpaces
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
@@ -60,7 +62,7 @@ export const TableComponent = <T,>({
     };
 
     const handleChangeOrder = (col: IColumns<T>) => {
-        if (!col.icon && !renderRow) {
+        if (!col.icon) {
             let newOrderBy: OrderBy = "";
 
             setColumnData((prev) =>
@@ -104,7 +106,7 @@ export const TableComponent = <T,>({
                                     onClick={() => handleChangeOrder(col)}
                                     className="cursor-pointer bg-white z-50"
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className={`flex items-center ${!shortSpaces && 'gap-2'}`}>
                                         {col.label}
                                         {!col.icon && (
                                             <span
