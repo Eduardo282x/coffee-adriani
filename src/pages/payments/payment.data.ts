@@ -18,7 +18,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     },
     {
         column: 'account.method.name',
-        label: 'Tipo de pago',
+        label: 'Tipo pago',
         element: (data: IPayments) => data.account.method.name,
         orderBy: '',
         visible: false,
@@ -102,8 +102,17 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     },
     {
         column: 'paymentDate',
-        label: 'Fecha de pago',
+        label: 'Fecha pago',
         element: (data: IPayments) => formatDate(data.paymentDate),
+        orderBy: '',
+        visible: false,
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'paymentDate',
+        label: 'Hora pago',
+        element: (data: IPayments) => formatTimeRange(data.paymentDate.toString()),
         orderBy: '',
         visible: false,
         type: 'string',
@@ -226,11 +235,33 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
         icon: false,
     },
     {
-        label: 'Fecha de asociación',
-        column: 'client.name',
+        label: 'Fecha asociación',
+        column: 'createdAtPayed',
         element: (data: IInvoice) => formatDate(data.createdAtPayed),
         orderBy: '',
         type: 'string',
         icon: false,
     }
 ]
+
+
+export const formatTimeToAMPM = (time: string): string => {
+    if (!time) return ""
+
+    const getTime: string = time.split("T")[1];
+
+    const [hours, minutes] = getTime.split(":").map(Number)
+    const period = hours >= 12 ? "pm" : "am"
+    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+
+    return `${displayHours}:${minutes.toString().padStart(2, "0")}${period}`
+}
+
+export const formatTimeRange = (startTime: string): string => {
+    if (!startTime) return ""
+
+    const formattedStart = formatTimeToAMPM(startTime)
+    // const formattedEnd = formatTimeToAMPM(endTime)
+
+    return `${formattedStart}`
+}

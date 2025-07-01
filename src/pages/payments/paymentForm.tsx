@@ -8,18 +8,25 @@ import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { AccountPay, IPaymentForm } from '@/interfaces/payment.interface'
 import { getPaymentAccounts } from '@/services/payment.service'
 import { FC, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
+
+// import TimePicker from 'react-time-picker';
+
 
 
 export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
+    const today = new Date();
+    // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
 
     useEffect(() => {
         if (data) {
             const formData = {
                 reference: data.reference,
                 amount: data.amount,
+                time: new Date(data.paymentDate).toISOString().split('T')[1].slice(0, 5),
                 accountId: data.accountId.toString(),
             }
             setDateDispatch(data.paymentDate)
@@ -45,17 +52,22 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
         defaultValues: {
             reference: '',
             amount: 0,
+            time: defaultTime,
             accountId: 0,
         }
     })
 
     const onSubmitForm = (data: IPaymentForm) => {
+        const parseDate = (paymentDate as Date).toISOString();
+        const newPaymentDate = `${parseDate.toString().split('T')[0]}T${data.time}:00.000Z`
+
         const parseData = {
-            ...data,
+            reference: data.reference,
             amount: Number(data.amount),
             accountId: Number(data.accountId),
-            paymentDate: paymentDate
+            paymentDate: newPaymentDate
         }
+
         onSubmit(parseData)
     }
 
@@ -72,6 +84,26 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
 
                 <DatePicker date={paymentDate} setDate={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
 
+
+                <div className="flex flex-col items-start justify-start gap-4 w-full">
+                    <Label className="text-right">
+                        Hora
+                    </Label>
+                    <Input {...form.register('time')} type='time' />
+                </div>
+
+                {/* <div className="flex flex-col items-start justify-start gap-4 w-full">
+                    <Label className="text-right">
+                        Hora
+                    </Label>
+                    <TimePicker
+                        onChange={(value) => console.log(value)}
+                        // value={form.watch('time')}
+                        format="hh:mm a"
+                        disableClock
+                        clearIcon={null}
+                    />
+                </div> */}
 
                 <div className="flex flex-col items-start justify-start gap-4 w-full">
                     <Label className="text-right">
