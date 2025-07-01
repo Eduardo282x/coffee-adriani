@@ -1,5 +1,5 @@
 import { IColumns } from "@/components/table/table.interface"
-import { formatDate, formatNumberWithDots } from "@/hooks/formaters"
+import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { IInventory } from "@/interfaces/inventory.interface"
 import { IInvoice, InvoiceApi, InvoiceItems, IInvoicePayment } from "@/interfaces/invoice.interface";
 import { Trash2 } from "lucide-react";
@@ -71,6 +71,14 @@ export const invoiceColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
         className: (data: IInvoice) => getBadgeVariant(data.status)
+    },
+    {
+        column: 'remaining',
+        label: 'Debe',
+        element: (data: IInvoice) => `${formatOnlyNumberWithDots(data.remaining)} $`,
+        orderBy: '',
+        type: 'string',
+        // className: (data: IInvoice) => getBadgeVariant(data.status)
     },
     {
         column: 'totalAmount',
