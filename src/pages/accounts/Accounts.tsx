@@ -4,37 +4,45 @@ import { Filter } from '@/components/table/Filter';
 import { TableComponent } from '@/components/table/TableComponent';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { GroupAccounts, AccountPay } from '@/interfaces/payment.interface';
-import { deletePaymentAccounts, getPaymentAccounts, postPaymentAccounts, putPaymentAccounts } from '@/services/payment.service';
+import { AccountPay } from '@/interfaces/payment.interface';
+import { postPaymentAccounts, putPaymentAccounts } from '@/services/payment.service';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react'
 import { AccountForm, accountsColumns, defaultValues } from './accounts.data';
 import { AccountsForm } from './AccountsForm';
 import { BaseResponse } from '@/services/base.interface';
+import { accountStore } from '@/store/paymentStore';
 
 export const Accounts = () => {
-    const [accounts, setAccounts] = useState<GroupAccounts>({ accounts: [], allAccounts: [] })
-    const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [edit, setEdit] = useState<boolean>(false);
     const [dataDialog, setDataDialog] = useState<AccountForm>(defaultValues);
 
+    const {
+        loading,
+        setLoading,
+        accounts,
+        setAccounts,
+        getAccountsApi,
+        deleteAccount
+    } = accountStore();
+
     useEffect(() => {
-        getAccountsApi()
+        getAccountStore()
     }, [])
 
-    const getAccountsApi = async () => {
-        setLoading(true);
-        const response: AccountPay[] = await getPaymentAccounts()
-        setAccounts({ accounts: response, allAccounts: response })
+    const getAccountStore = async () => {
+        if (!accounts || accounts.allAccounts.length == 0) {
+            setLoading(true);
+            await getAccountsApi();
+        }
         setLoading(false);
     }
 
     const deleteAction = async () => {
-        await deletePaymentAccounts(Number(dataDialog?.id))
+        await deleteAccount(Number(dataDialog?.id))
         setOpenDeleteDialog(false);
-        await getAccountsApi();
     }
 
     const setAccountsFilters = (data: AccountPay[]) => {
@@ -100,7 +108,7 @@ export const Accounts = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Usuarios</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Cuentas</h2>
                     <div className="flex items-center gap-8">
 
                         <div className="flex w-80  items-center space-x-2">
