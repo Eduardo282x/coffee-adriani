@@ -3,7 +3,7 @@ import { extraColumn, inventoryColumns } from "./inventory.data"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { TableComponent } from "@/components/table/TableComponent"
 import { BodyInventory, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface"
-import { getInventory, getInventoryHistory, postInventory, putInventory } from "@/services/inventory.service"
+import { postInventory, putInventory } from "@/services/inventory.service"
 import { Filter } from "@/components/table/Filter"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Package, Plus } from "lucide-react"
@@ -13,17 +13,12 @@ import { InventoryForm } from "./InventoryForm"
 import { IColumns } from "@/components/table/table.interface"
 import { InventoryCards } from "./InventoryCards"
 import { useSocket } from "@/services/socket.io"
-import { IProducts } from "@/interfaces/product.interface"
-import { getProduct } from "@/services/products.service"
-import { IOptions } from "@/interfaces/form.interface"
+import { inventoryStore } from "@/store/inventoryStore"
+import { productStore } from "@/store/productStore"
 
 export const Inventory = () => {
-    const [inventory, setInventory] = useState<IInventory[]>([]);
-    const [inventoryHistory, setInventoryHistory] = useState<IInventory[]>([]);
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [products, setProducts] = useState<IOptions[]>([]);
     const [column, setColumn] = useState<IColumns<IInventory>[]>(inventoryColumns)
     const [history, setHistory] = useState<boolean>(false);
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
@@ -32,27 +27,16 @@ export const Inventory = () => {
         quantity: 0
     });
     const [inventorySelected, setInventorySelected] = useState<IInventory | null>(null)
-    // Filtrar inventario según el término de búsqueda
 
-    // Función para calcular el porcentaje de stock
-    // const calcularPorcentajeStock = (stock: number, stockMinimo: number) => {
-    //     const porcentaje = (stock / (stockMinimo * 2)) * 100
-    //     return Math.min(porcentaje, 100)
-    // }
+    const {
+        loading,
+        setLoading,
+        inventory,
+        inventoryHistory,
+        getInventoryApi
+    } = inventoryStore();
 
-    // // Función para obtener el color según el nivel de stock
-    // const getStockColor = (stock: number, stockMinimo: number) => {
-    //     if (stock === 0) return "text-red-600"
-    //     if (stock < stockMinimo) return "text-yellow-600"
-    //     return "text-green-600"
-    // }
-
-    // // Función para obtener el color de la barra de progreso
-    // const getProgressColor = (stock: number, stockMinimo: number) => {
-    //     if (stock === 0) return "bg-red-600"
-    //     if (stock < stockMinimo) return "bg-yellow-600"
-    //     return "bg-green-600"
-    // }
+    const { productOptions, products, getProductsApi } = productStore();
 
     const toggleButton = (active: boolean) => {
         setHistory(active);
@@ -67,44 +51,28 @@ export const Inventory = () => {
     }
 
     useEffect(() => {
-        getInventoryApi();
-        getInventoryHistoryApi();
-        getProductsApi();
+        getInventoryStore();
     }, [])
 
-    const getProductsApi = async () => {
-        const response: IProducts[] = await getProduct();
-        if(response){
-            const parseProducts = response.map(pro => {
-                return {
-                    label: pro.name,
-                    value: pro.id
-                }
-            })
-            setProducts(parseProducts);
+    const getInventoryStore = async () => {
+        if (!inventory || inventory.length == 0) {
+            setLoading(true);
+            await getInventoryApi();
         }
-    }
-
-    const getInventoryHistoryApi = async () => {
-        setLoading(true)
-        const response: IInventory[] = await getInventoryHistory();
-        if(response) setInventoryHistory(response);
-        setLoading(false);
-    }
-
-    const getInventoryApi = async () => {
-        setLoading(true)
-        const response: IInventory[] = await getInventory();
-        if(response) {
-            setInventory(response);
-            const total: number = response.reduce((acc, item) => acc + item.quantity, 0)
-            const down: number = response.filter(pro => pro.quantity < 50).length;
-            const zero: number = response.filter(pro => pro.quantity === 0).length;
-            setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
-            setData({ allInventory: response, inventory: response });
+        if (!products || products.products.length == 0) {
+            await getProductsApi();
         }
         setLoading(false);
     }
+
+    useEffect(() => {
+        const total: number = inventory.reduce((acc, item) => acc + item.quantity, 0)
+        const down: number = inventory.filter(pro => pro.quantity < 50).length;
+        const zero: number = inventory.filter(pro => pro.quantity === 0).length;
+        setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
+        setData({ allInventory: inventory, inventory: inventory });
+    }, [inventory])
+
 
     const setInventoryFilter = (inventoryFilter: IInventory[]) => {
         setData((prev) => ({ ...prev, inventory: inventoryFilter }));
@@ -118,7 +86,6 @@ export const Inventory = () => {
         }
         setOpenDialog(false);
         await getInventoryApi();
-        await getInventoryHistoryApi();
     }
 
     const getAction = (action: string, data: IInventory | null) => {
@@ -141,7 +108,6 @@ export const Inventory = () => {
     useSocket('message', async (data) => {
         console.log(data);
         await getInventoryApi();
-        await getInventoryHistoryApi();
     })
 
     return (
@@ -212,7 +178,7 @@ export const Inventory = () => {
                     isEdit={false}
 
                 >
-                    <InventoryForm onSubmit={actionDialog} products={products} data={dataForm}></InventoryForm>
+                    <InventoryForm onSubmit={actionDialog} products={productOptions} data={dataForm}></InventoryForm>
                 </DialogComponent>
             </main>
         </div>

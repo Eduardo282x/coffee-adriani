@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
-import { deleteProduct, getProduct, getProductHistory, postProduct, putProduct } from "@/services/products.service"
+import { postProduct, putProduct } from "@/services/products.service"
 import { GroupProducts, IProducts } from "@/interfaces/product.interface"
 import { TableComponent } from "@/components/table/TableComponent"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
@@ -13,23 +13,44 @@ import { ProductForm } from "./ProductForm"
 import { IColumns } from "@/components/table/table.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 import { DropdownColumnFilter } from "@/components/table/DropdownColumnFilter"
+import { productStore } from "@/store/productStore"
 
 export const Products = () => {
-    const [products, setProducts] = useState<IProducts[]>([]);
-    const [productsHistory, setProductsHistory] = useState<IProducts[]>([]);
+    // const [products, setProducts] = useState<IProducts[]>([]);
+    // const [productsHistory, setProductsHistory] = useState<IProducts[]>([]);
     const [data, setData] = useState<GroupProducts>({ products: [], productsFilter: [], });
     const [columns, setColumns] = useState<IColumns<IProducts>[]>(productsColumns);
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [dataDialog, setDataDialog] = useState<IProductsForm>(defaultValues);
     const [edit, setEdit] = useState<boolean>(false);
     const [history, setHistory] = useState<boolean>(false);
 
+    const {
+        loading,
+        setLoading,
+        products,
+        getProductsApi,
+        productsHistory,
+        deleteProducts
+    } = productStore();
+
     useEffect(() => {
-        getProductsApi();
-        getProductHistoryApi();
+        getProductsStore();
     }, [])
+
+    const getProductsStore = async () => {
+        if (!products || products.products.length == 0) {
+            setLoading(true);
+            await getProductsApi();
+        }
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setData({ productsFilter: products.productsFilter, products: products.products })
+    }, [products])
 
     const toggleButton = (active: boolean) => {
         setHistory(active);
@@ -38,28 +59,9 @@ export const Products = () => {
             setData({ productsFilter: productsHistory, products: productsHistory })
             setColumns((prev) => (prev.filter(col => col.icon === false)))
         } else {
-            setData({ productsFilter: products, products: products })
+            setData({ productsFilter: products.productsFilter, products: products.products })
             setColumns(productsColumns)
         }
-    }
-
-    const getProductsApi = async () => {
-        setLoading(true);
-        const response: IProducts[] = await getProduct();
-        if (response) {
-            setProducts(response);
-            setData({ productsFilter: response, products: response })
-        }
-        setLoading(false);
-    }
-
-    const getProductHistoryApi = async () => {
-        setLoading(true);
-        const response: IProducts[] = await getProductHistory();
-        if (response) {
-            setProductsHistory(response);
-        }
-        setLoading(false);
     }
 
     const setProductFilter = (products: IProducts[]) => {
@@ -82,9 +84,9 @@ export const Products = () => {
     }
 
     const deleteAction = async () => {
-        await deleteProduct(Number(dataDialog.id))
+        await deleteProducts(Number(dataDialog.id))
         setOpenDeleteDialog(false);
-        await getProductsApi();
+        // await getProductsApi();
     }
 
     const actionDialog = async (data: IProducts) => {
