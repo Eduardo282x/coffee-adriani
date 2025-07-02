@@ -5,6 +5,12 @@ export interface IExpenses {
     invoices: IInvoice[];
     payments: IPayments[];
     invoicesEarns: InvoiceEarns;
+    paymentsNoAssociated: IPaymentsNoAssociated;
+}
+
+export interface IPaymentsNoAssociated {
+    payments: IPayments[];
+    total: number;
 }
 
 export interface InvoiceEarns {

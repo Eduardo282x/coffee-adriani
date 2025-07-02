@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { PiCoffeeBeanFill } from "react-icons/pi";
+import { LuEqualApproximately } from "react-icons/lu";
+
 import {
     Select,
     SelectContent,
@@ -113,6 +115,13 @@ export const Administration = () => {
                         text: `${formatOnlyNumberWithDots(totalInvoice + totalPayments)}$`,
                         subtitle: 'Gastos',
                         classNameCard: 'text-red-800'
+                    },
+                    {
+                        title: 'Pagos sin asociar',
+                        Icon: LuEqualApproximately,
+                        text: `${formatOnlyNumberWithDots(response.paymentsNoAssociated.total)}$`,
+                        subtitle: 'Pagos no asociados',
+                        classNameCard: ''
                     },
                 ];
                 setCardEarnsData(setCard)
