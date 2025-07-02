@@ -58,9 +58,9 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
     })
 
     const onSubmitForm = (data: IPaymentForm) => {
-        const parseDate = (paymentDate as Date).toISOString();
+        const dateObj = typeof paymentDate === 'string' ? new Date(paymentDate) : paymentDate;
+        const parseDate = dateObj?.toISOString() as string;
         const newPaymentDate = `${parseDate.toString().split('T')[0]}T${data.time}:00.000Z`
-
         const parseData = {
             reference: data.reference,
             amount: Number(data.amount),
