@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus } from "lucide-react"
+import { Download, Plus } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm";
 import { MdUpdate } from "react-icons/md";
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, InvoiceStatus, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices } from "@/services/invoice.service"
+import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -225,6 +225,30 @@ export const Invoices = () => {
         await getInvoicesFilterApi();
     }
 
+    const generateExcel = async () => {
+        setLoading(true)
+        let response: Blob;
+        if (dateStart) {
+            // Puedes adaptar el formato según lo que espera tu backend
+            const filterDate: DateRangeFilter = {
+                startDate: dateStart.from ? dateStart.from : new Date(),
+                endDate: dateStart.to ? addDays(dateStart.to, 1) : new Date(),
+            };
+            response = await getInvoiceExcelFilter(filterDate) as Blob;
+        } else {
+            response = await getInvoiceExcelFilter() as Blob;
+        }
+        const url = URL.createObjectURL(response)
+        const link = window.document.createElement("a")
+        link.href = url
+        link.download = `Reporte de Facturas.xlsx`
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        setLoading(false);
+    }
+
     return (
         <div className="flex flex-col">
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
@@ -251,17 +275,22 @@ export const Invoices = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Facturas</h2>
 
-                    <InvoiceFilter
-                        setInvoicesFilter={setInvoicesFilter}
-                        handleChangeStatusInvoice={handleChangeStatusInvoice}
-                        handleChangeBlock={handleChangeBlock}
-                        dateStart={dateStart}
-                        setDateStart={setDateStart}
-                        dateEnd={dateEnd}
-                        setDateEnd={setDateEnd}
-                        invoice={invoice.invoicesFilter}
-                        clientColumns={clientColumns}
-                    />
+                    <div className='flex items-end justify-center gap-2'>
+                        <Button onClick={generateExcel} className="bg-green-700 hover:bg-green-600 text-white">
+                            <Download /> Exportar
+                        </Button>
+                        <InvoiceFilter
+                            setInvoicesFilter={setInvoicesFilter}
+                            handleChangeStatusInvoice={handleChangeStatusInvoice}
+                            handleChangeBlock={handleChangeBlock}
+                            dateStart={dateStart}
+                            setDateStart={setDateStart}
+                            dateEnd={dateEnd}
+                            setDateEnd={setDateEnd}
+                            invoice={invoice.invoicesFilter}
+                            clientColumns={clientColumns}
+                        />
+                    </div>
                 </div>
 
                 {loading && (
