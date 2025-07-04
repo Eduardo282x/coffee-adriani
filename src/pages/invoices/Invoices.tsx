@@ -141,7 +141,7 @@ export const Invoices = () => {
             const filteredByStatus: InvoiceApi[] = filtered.map(inv => {
 
                 if (status === 'Abonadas') {
-                    const filteredInvoices = inv.invoices.filter(invoice => (invoice.status === 'Pendiente' || invoice.status === 'Vencida') && (invoice.totalAmount != invoice.remaining));
+                    const filteredInvoices = inv.invoices.filter(invoice => (invoice.status === 'Pendiente' || invoice.status === 'Vencida') && invoice.InvoicePayment.length > 0);
                     if (filteredInvoices.length > 0) {
                         return {
                             client: inv.client,
