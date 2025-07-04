@@ -5,7 +5,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatNumberWithDots } from "@/hooks/formaters";
+import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { DetPackage, PaymentsInvoices } from "@/interfaces/invoice.interface";
 
 interface DetailsPackageProps {
@@ -28,10 +28,10 @@ export const DetailsPackage = ({ detPackage }: DetailsPackageProps) => {
                 {detPackage && detPackage.map((item: DetPackage, index: number) => (
                     <DropdownMenuItem className="grid grid-cols-5 gap-1" key={index} onSelect={(e) => e.preventDefault()}>
                         <p className=" col-span-2">{item.product.name} {item.product.presentation}</p>
-                        <p className="">{item.totalQuantity.toFixed(4)}</p>
-                        <p className="">{item.paidQuantity.toFixed(4)}</p>
-                        <p className="">{item.total.toFixed(4)}</p>
-                        </DropdownMenuItem>
+                        <p className="">{formatOnlyNumberWithDots(item.totalQuantity, 4)}</p>
+                        <p className="">{formatOnlyNumberWithDots(item.paidQuantity, 4)}</p>
+                        <p className="">{formatOnlyNumberWithDots(item.total, 4)}</p>
+                    </DropdownMenuItem>
                 ))}
                 {detPackage.length == 0 && (
                     <p className="text-center">Sin detalles</p>
@@ -52,10 +52,10 @@ export const DetailsPayments = ({ payments }: DetailsPaymentsProps) => {
                 <Button className="bg-[#6f4e37] text-white hover:bg-[#7c5a43]">Dinero</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" className="mr-6">
-                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Total:</span> {formatNumberWithDots(payments.total.toFixed(2), '','$')}</DropdownMenuItem>
-                {/* <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatNumberWithDots(payments.totalPending.toFixed(2), '','$')}</DropdownMenuItem> */}
-                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pagado:</span> {formatNumberWithDots(payments.debt.toFixed(2), '','$')}</DropdownMenuItem>
-                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatNumberWithDots(payments.remaining.toFixed(2), '','$')}</DropdownMenuItem>
+                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Total:</span> {formatOnlyNumberWithDots(payments.total, 4)} $</DropdownMenuItem>
+                {/* <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.totalPendingtotal, 4)} $</DropdownMenuItem> */}
+                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pagado:</span> {formatOnlyNumberWithDots(payments.debt, 4)} $</DropdownMenuItem>
+                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.remaining, 4)} $</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )
