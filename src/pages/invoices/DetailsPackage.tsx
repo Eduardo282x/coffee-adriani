@@ -28,9 +28,9 @@ export const DetailsPackage = ({ detPackage }: DetailsPackageProps) => {
                 {detPackage && detPackage.map((item: DetPackage, index: number) => (
                     <DropdownMenuItem className="grid grid-cols-5 gap-1" key={index} onSelect={(e) => e.preventDefault()}>
                         <p className=" col-span-2">{item.product.name} {item.product.presentation}</p>
-                        <p className="">{item.totalQuantity.toFixed(2)}</p>
-                        <p className="">{item.paidQuantity.toFixed(2)}</p>
-                        <p className="">{item.total.toFixed(2)}</p>
+                        <p className="">{item.totalQuantity.toFixed(4)}</p>
+                        <p className="">{item.paidQuantity.toFixed(4)}</p>
+                        <p className="">{item.total.toFixed(4)}</p>
                         </DropdownMenuItem>
                 ))}
                 {detPackage.length == 0 && (

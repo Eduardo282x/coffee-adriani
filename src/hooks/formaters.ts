@@ -43,11 +43,11 @@ export const formatNumberWithDots = (number: number | string, prefix?: string, s
     return `${prefix}${text}${suffix}`;
 }
 
-export const formatOnlyNumberWithDots = (number: number | string): string => {
+export const formatOnlyNumberWithDots = (number: number | string, digits?: number): string => {
     const parsed = typeof number === 'string' ? parseFloat(number) : number;
 
     return new Intl.NumberFormat('es-VE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: digits ? digits : 2,
+        maximumFractionDigits: digits ? digits : 2,
     }).format(parsed);
 };

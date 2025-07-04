@@ -15,7 +15,7 @@ import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
-import { formatNumberWithDots } from "@/hooks/formaters"
+import { formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage, DetailsPayments } from "./DetailsPackage"
 import { BaseResponse } from "@/services/base.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
@@ -306,7 +306,7 @@ export const Invoices = () => {
                                 <div className="flex items-center gap-2">
                                     <div>
                                         <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
-                                        <p><span className="font-bold">Bultos restantes:</span> {formatNumberWithDots(packageRest.toFixed(2), '', '')} bultos</p>
+                                        <p><span className="font-bold">Bultos restantes:</span> {formatOnlyNumberWithDots(packageRest, 4)} bultos</p>
                                     </div>
                                     <DetailsPackage detPackage={detPackage} />
                                 </div>
