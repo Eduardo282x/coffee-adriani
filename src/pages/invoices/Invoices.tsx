@@ -21,6 +21,7 @@ import { BaseResponse } from "@/services/base.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface"
 import { getInventory } from "@/services/inventory.service"
+import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 
 export const Invoices = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -31,6 +32,7 @@ export const Invoices = () => {
     const [packages, setPackages] = useState<number>(0);
     const [packageRest, setPackageRest] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
+    const [loadingFile, setLoadingFile] = useState<boolean>(false);
     const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined)
     const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
@@ -226,7 +228,7 @@ export const Invoices = () => {
     }
 
     const generateExcel = async () => {
-        setLoading(true)
+        setLoadingFile(true)
         let response: Blob;
         if (dateStart) {
             // Puedes adaptar el formato según lo que espera tu backend
@@ -246,11 +248,12 @@ export const Invoices = () => {
         link.click()
         window.document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        setLoading(false);
+        setLoadingFile(false);
     }
 
     return (
         <div className="flex flex-col">
+            {loadingFile && <ScreenLoader/>}
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
