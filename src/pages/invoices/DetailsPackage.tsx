@@ -53,9 +53,9 @@ export const DetailsPayments = ({ payments }: DetailsPaymentsProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" className="mr-6">
                 <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Total:</span> {formatOnlyNumberWithDots(payments.total, 4)} $</DropdownMenuItem>
-                {/* <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.totalPendingtotal, 4)} $</DropdownMenuItem> */}
-                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pagado:</span> {formatOnlyNumberWithDots(payments.debt, 4)} $</DropdownMenuItem>
-                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.remaining, 4)} $</DropdownMenuItem>
+                {/* <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.totalPending, 4)} $</DropdownMenuItem> */}
+                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pagado:</span> {formatOnlyNumberWithDots(payments.remaining, 4)} $</DropdownMenuItem>
+                <DropdownMenuItem className="flex justify-between" onSelect={(e) => e.preventDefault()}><span className="font-bold">Pendiente:</span> {formatOnlyNumberWithDots(payments.totalPending, 4)} $</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )
