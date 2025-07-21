@@ -88,21 +88,24 @@ export const Inventory = () => {
         await getInventoryApi();
     }
 
-    const getAction = (action: string, data: IInventory | null) => {
+    const newElement = () => {
+        setDataForm({ productId: 0, quantity: 0 });
+        setInventorySelected(null)
+        setOpenDialog(true);
+    }
+
+    const getAction = (action: string, data: IInventory) => {
         setInventorySelected(data);
         if (action == 'Nuevo') {
             setDataForm({ productId: 0, quantity: 0 })
         }
 
         if (action == 'Editar') {
-            const historyFilter = inventoryHistory.filter(inv => inv.productId === data?.productId);
-            const historySelected = historyFilter[historyFilter.length - 1]
-            setDataForm({ productId: Number(data?.productId), quantity: historySelected.quantity })
+            setDataForm({ productId: data.productId, quantity: data.quantity })
         }
         setTimeout(() => {
             setOpenDialog(true);
         }, 0);
-        // inventoryHistory
     }
 
     useSocket('message', async (data) => {
@@ -127,7 +130,7 @@ export const Inventory = () => {
                     <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
                 </div>
 
-                <Button onClick={() => getAction('Nuevo', null)}>
+                <Button onClick={newElement}>
                     <Plus className="mr-2 h-4 w-4" />
                     Actualizar inventario
                 </Button>

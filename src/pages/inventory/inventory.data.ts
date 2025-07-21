@@ -54,13 +54,13 @@ export const inventoryColumns: IColumns<IInventory>[] = [
     },
     {
         column: '',
-        label: 'Acciones',
+        label: 'Editar',
         element: () => '',
         orderBy: '',
         type: 'string',
         icon: true,
         optionActions: [
-            { label: 'Editar', icon: MdEdit, className: 'text-[$#6f4e37]' },
+            { label: 'Editar', icon: MdEdit, className: 'text-[#6f4e37]' },
         ]
     },
 ]

@@ -33,8 +33,8 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, disabledEffect = 
 
     const handleFilter = (value: string) => {
         if (!value) {
-            setDataFilter(dataBase)
-            return
+            setDataFilter(dataBase);
+            return;
         }
 
         const keys = columns
