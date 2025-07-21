@@ -1,8 +1,8 @@
 import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { GroupPayments, IPayInvoiceForm, IPaymentForm, IPayments, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
-import { deletePayment, getPayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putPayment } from '@/services/payment.service';
+import { GroupPayments, InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
+import { deletePayment, getPayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putDisassociatePayment, putPayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -12,7 +12,7 @@ import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DialogComponent } from '@/components/dialog/DialogComponent';
-import { PaymentForm } from './paymentForm';
+import { AlertDialogPayment, PaymentForm } from './paymentForm';
 import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { PayInvoiceForm } from './PayInvoiceForm';
@@ -32,6 +32,8 @@ export const Payments = () => {
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
+    const [openDisassociate, setOpenDisassociate] = useState<boolean>(false);
+    const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
 
     const [totalize, setTotalize] = useState({ remaining: 0, total: 0 })
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
@@ -211,6 +213,24 @@ export const Payments = () => {
         }
     };
 
+    const getActionExpansiblePayment = async (data: InvoicePayment) => {
+        setPaymentDisassociate(data);
+        setOpenDisassociate(true)
+    }
+
+    const disassociatePayment = async (data: boolean) => {
+        if (data == true && paymentDisassociate) {
+            // await postAssociatePayment(paymentDisassociate)
+            const parseBody: PayDisassociateBody = {
+                id: paymentDisassociate.id,
+                invoiceId: paymentDisassociate.invoiceId,
+                paymentId: paymentDisassociate.paymentId
+            }
+            await putDisassociatePayment(parseBody)
+            console.log('Pago desasociado');
+        }
+        setOpenDisassociate(false)
+    }
 
     const handleNewPayments = () => {
         setPaymentSelected(null);
@@ -309,7 +329,7 @@ export const Payments = () => {
                         dataBase={payments.payments}
                         isExpansible={true}
                         renderRow={(pay, index) => (
-                            <PaymentExpandible key={index} payment={pay} />
+                            <PaymentExpandible key={index} payment={pay} actionPayment={getActionExpansiblePayment} />
                         )}
                         action={getActions}
                     />
@@ -340,6 +360,19 @@ export const Payments = () => {
                     isEdit={true}
                 >
                     <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} />
+                </DialogComponent>
+            )}
+
+            {openDisassociate && (
+                <DialogComponent
+                    open={openDisassociate}
+                    setOpen={setOpenDisassociate}
+                    className="w-[30%]"
+                    label2=""
+                    label1="Desasociar pago"
+                    isEdit={true}
+                >
+                    <AlertDialogPayment onSubmit={disassociatePayment} />
                 </DialogComponent>
             )}
 

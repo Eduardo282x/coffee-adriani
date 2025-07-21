@@ -1,4 +1,4 @@
-import { IPaymentForm, IPayInvoiceForm } from "@/interfaces/payment.interface";
+import { IPaymentForm, IPayInvoiceForm, PayDisassociateBody } from "@/interfaces/payment.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 import { DateRangeFilter } from "@/interfaces/invoice.interface";
 import { AccountForm } from "@/pages/accounts/accounts.data";
@@ -80,6 +80,14 @@ export const postPayment = async (data: IPaymentForm) => {
 export const postAssociatePayment = async (data: IPayInvoiceForm) => {
     try {
         return await postDataApi(`${routePayment}/associate`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const putDisassociatePayment = async (data: PayDisassociateBody) => {
+    try {
+        return await putDataApi(`${routePayment}/disassociate`, data);
     } catch (err) {
         return err
     }

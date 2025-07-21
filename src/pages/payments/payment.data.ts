@@ -5,6 +5,7 @@ import { IPayments } from "@/interfaces/payment.interface";
 import { Trash2 } from "lucide-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineCash } from "react-icons/hi";
+import { MdOutlinePlaylistRemove } from "react-icons/md";
 
 export const paymentsColumns: IColumns<IPayments>[] = [
     {
@@ -241,7 +242,18 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
         icon: false,
-    }
+    },
+    {
+        label: 'Desasociar',
+        column: '',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Desasociar', icon: MdOutlinePlaylistRemove, className: 'text-red-400' },
+        ]
+    },
 ]
 
 

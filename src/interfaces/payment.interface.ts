@@ -94,6 +94,12 @@ export interface IPayInvoiceFormDetails {
     amount: number;
 }
 
+export interface PayDisassociateBody {
+    paymentId: number;
+    invoiceId: number;
+    id: number;
+}
+
 
 export interface GroupAccounts {
     accounts: AccountPay[]

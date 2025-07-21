@@ -126,3 +126,25 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
         </Form>
     )
 }
+
+
+export const AlertDialogPayment: FC<FromProps> = ({ onSubmit }) => {
+
+    const handleClose = () => {
+        onSubmit(false);
+    }
+
+    const handleSubmit = () => {
+        onSubmit(true);
+    }
+
+    return (
+        <div>
+            <p>Estas seguro que deseas desasociar este pago?</p>
+            <div className="flex items-center justify-end gap-4 mt-4">
+                <Button onClick={handleClose}>Cancelar</Button>
+                <Button onClick={handleSubmit} className='bg-[#6f4e37] text-white hover:bg-[#a3795b] hover:text-white'>Desasociar</Button>
+            </div>
+        </div>
+    )
+}
