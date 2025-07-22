@@ -5,6 +5,9 @@ export interface CollectionBody {
     messageId: number;
     send: boolean;
 }
+export interface MarkBody {
+    send: boolean;
+}
 export interface CollectionMessageBody {
     title: string;
     content: string;

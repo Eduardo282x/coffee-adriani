@@ -3,8 +3,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
-import { getCollection, getMessageCollection, postMessageCollection, putCollection, putMessageCollection } from "@/services/collection.service"
-import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages } from "@/interfaces/collection.interface"
+import { getCollection, getMessageCollection, postMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
+import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody } from "@/interfaces/collection.interface"
 import { clientCollectionColumns, getSendVariant, messageCollectionColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
@@ -182,6 +182,31 @@ export const Collections = () => {
         await getMessageCollectionApi();
     }
 
+    const sendMessage = () => {
+        console.log('Prueba de mensaje enviado');
+    }
+    const markNoSend = () => {
+        markCollections({ send: false })
+    }
+    const markSend = () => {
+        markCollections({ send: true })
+    }
+
+    const markCollections = async (mark: MarkBody) => {
+        setCollections(prev => {
+            return {
+                ...prev,
+                collections: prev.collections.map(colle => {
+                    return {
+                        ...colle,
+                        send: mark.send
+                    }
+                })
+            }
+        })
+        await putMarkCollection(mark)
+    }
+
     return (
         <div className="flex flex-col">
             {loading && (
@@ -215,7 +240,9 @@ export const Collections = () => {
                                 : <Filter dataBase={messages.allMessages} columns={messageCollectionColumns} setDataFilter={setFilterMessage} />
                             }
                         </div>
-                        <Button className="bg-[#6f4e37] text-white hover:bg-[#7a5b45]">Enviar mensajes</Button>
+                        <Button onClick={sendMessage} className="bg-[#6f4e37] text-white hover:bg-[#7a5b45]">Enviar mensajes</Button>
+                        <Button onClick={markNoSend} className="bg-[#9e673f] text-white hover:bg-[#7a5b45]">No Enviar a todos</Button>
+                        <Button onClick={markSend} className="bg-[#b27245] text-white hover:bg-[#7a5b45]">Enviar a todos</Button>
                     </div>
                 </div>
 
