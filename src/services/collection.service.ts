@@ -39,6 +39,13 @@ export const postMessageCollection = async (data: CollectionMessageBody) => {
         return err
     }
 }
+export const postSendMessageCollection = async () => {
+    try {
+        return await postDataApi(`${routeCollection}/send-messages`, {});
+    } catch (err) {
+        return err
+    }
+}
 export const putMessageCollection = async (id: number, data: CollectionMessageBody) => {
     try {
         return await putDataApi(`${routeCollection}/messages/${id}`, data);

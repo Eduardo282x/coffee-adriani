@@ -3,7 +3,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
-import { getCollection, getMessageCollection, postMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
+import { getCollection, getMessageCollection, postMessageCollection, postSendMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
 import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody } from "@/interfaces/collection.interface"
 import { clientCollectionColumns, getSendVariant, messageCollectionColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
@@ -182,8 +182,11 @@ export const Collections = () => {
         await getMessageCollectionApi();
     }
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
+        setLoading(true)
+        await postSendMessageCollection()
         console.log('Prueba de mensaje enviado');
+        setLoading(false)
     }
     const markNoSend = () => {
         markCollections({ send: false })
