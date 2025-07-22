@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
-import { clientsZones, defaultValues, IClientsForm, phoneOptions, rifOptions, TypesClientsForm } from './client.data'
+import { clientsZones, defaultValues, IClientsForm, rifOptions, TypesClientsForm } from './client.data'
 import { FC, useEffect } from 'react'
 import { InputSelect } from '@/components/form/InputSelect'
 import { Form } from '@/components/ui/form'
@@ -69,7 +69,8 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                     <Label className="text-right">
                         Teléfono
                     </Label>
-                    <InputSelect value={form.getValues().phone} onChange={setValueInput} name='phone' label='' options={phoneOptions} max={7} type='number'></InputSelect>
+                    <Input type='phone' {...form.register('phone')} />
+                    {/* <InputSelect value={form.getValues().phone} onChange={setValueInput} name='phone' label='' options={phoneOptions} max={7} type='number'></InputSelect> */}
                 </div>
 
                 <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones}></FormSelect>
