@@ -9,15 +9,17 @@ import { invoiceItemsColumns, invoiceItemsPaymentColumns } from "@/pages/invoice
 import { Button } from "../ui/button";
 // import { Download } from "lucide-react";
 import { MdOutlineEdit, MdPayments } from "react-icons/md";
+import { CgRemove } from "react-icons/cg";
 interface ExpansibleProps {
     invoice: InvoiceApi;
     columns: IColumns<IInvoice>[];
     editInvoice: (data: IInvoice) => void;
     payInvoices: (data: IInvoice) => void;
+    pendingInvoices: (data: IInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -73,6 +75,13 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         }
     }
 
+    const handlePendingInvoice = () => {
+        if (invoiceSelected) {
+            pendingInvoices(invoiceSelected);
+            setOpenDialog(false);
+        }
+    }
+
     const deleteInvoices = () => {
         deleteInvoice(invoiceSelected?.id || 0);
         setOpenDialogDelete(false);
@@ -114,6 +123,9 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                         </Button> */}
                             <Button onClick={handleEditInvoice}>
                                 <MdOutlineEdit /> Editar
+                            </Button>
+                            <Button onClick={handlePendingInvoice}>
+                                <CgRemove /> Pendiente
                             </Button>
                             <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
                                 <MdPayments /> Marcar Pagada

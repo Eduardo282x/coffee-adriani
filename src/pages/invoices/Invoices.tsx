@@ -7,7 +7,7 @@ import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm";
 import { MdUpdate } from "react-icons/md";
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, InvoiceStatus, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter } from "@/services/invoice.service"
+import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter, putPendingInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -215,6 +215,26 @@ export const Invoices = () => {
         putPayInvoice(invoice.id);
     }
 
+    const pendingInvoices = (invoice: IInvoice) => {
+        setInvoices((prev) => {
+            return {
+                ...prev,
+                invoices: prev.invoices.map(item => {
+                    return {
+                        client: item.client,
+                        invoices: item.invoices.map(data => {
+                            return {
+                                ...data,
+                                status: data.id == invoice.id ? 'Pendiente' : data.status
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        putPendingInvoice(invoice.id);
+    }
+
     const checkInvoicesApi = async () => {
         await checkInvoices()
     }
@@ -327,6 +347,7 @@ export const Invoices = () => {
                                             invoice={inv}
                                             columns={invoiceColumns}
                                             payInvoices={payInvoices}
+                                            pendingInvoices={pendingInvoices}
                                             editInvoice={editInvoice}
                                             deleteInvoice={deleteInvoiceApi}
                                         />
