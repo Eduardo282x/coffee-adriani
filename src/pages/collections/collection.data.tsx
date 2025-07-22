@@ -47,9 +47,9 @@ export const clientCollectionColumns: IColumns<ICollection>[] = [
         icon: false,
     },
     {
-        column: 'client.rif',
-        label: 'Rif',
-        element: (data: ICollection) => data.client ? formatNumberWithDots(data.client.rif, '', '', true) : '',
+        column: 'client.phone',
+        label: 'Teléfono',
+        element: (data: ICollection) => data.client ? data.client.phone : '',
         orderBy: '',
         type: 'string',
         icon: false,
