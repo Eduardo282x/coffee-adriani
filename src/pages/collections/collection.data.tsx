@@ -19,6 +19,7 @@ export const messageCollectionColumns: IColumns<IMessages>[] = [
         column: 'content',
         label: 'Mensaje',
         element: (data: IMessages) => data.content,
+        className: () => 'max-w-[32rem] text-ellipsis overflow-hidden block',
         orderBy: '',
         type: 'string',
         icon: false,
