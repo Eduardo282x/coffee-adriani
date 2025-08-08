@@ -73,6 +73,71 @@ export const clientCollectionColumns: IColumns<ICollection>[] = [
     }
 ];
 
+export const normalColumns: IColumns<ICollection>[] = [
+    {
+        column: 'client.name',
+        label: 'Cliente',
+        element: (data: ICollection) => data.client ? data.client.name : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'client.phone',
+        label: 'Teléfono',
+        element: (data: ICollection) => data.client ? data.client.phone : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'message.title',
+        label: 'Mensaje',
+        element: (data: ICollection) => data.message.title,
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    },
+    {
+        column: 'sentAt',
+        label: 'Enviado',
+        element: (data: ICollection) => sendedAt(data.sentAt),
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    }
+]
+
+function sendedAt(sentAt?: string | Date | null): string {
+    if (!sentAt) return "No enviado.";
+
+    const sentDate = new Date(sentAt);
+    const now = new Date();
+
+    const diffMs = now.getTime() - sentDate.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Enviado hoy"
+    if (diffDays === 1) return "Enviado ayer";
+    if (diffDays < 7) return `Enviado hace ${diffDays} días.`;
+
+    return `Enviado el ${sentDate.toLocaleDateString()}`;
+}
+
+
+
+export const isToday = (dateString: string | Date | null) => {
+    if (!dateString) return false; // si sentAt es null
+    const date = new Date(dateString);
+    const today = new Date();
+    return (
+        date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth() &&
+        date.getDate() === today.getDate()
+    );
+}
 export const getSendVariant = (send: boolean): string => {
     switch (send) {
         case true:

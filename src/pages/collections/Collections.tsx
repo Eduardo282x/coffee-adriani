@@ -5,7 +5,7 @@ import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
 import { deleteMessageCollection, getCollection, getMessageCollection, postMessageCollection, postSendMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
 import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody } from "@/interfaces/collection.interface"
-import { clientCollectionColumns, getSendVariant, messageCollectionColumns } from "./collection.data.tsx"
+import { clientCollectionColumns, getSendVariant, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
 import { IColumns } from "@/components/table/table.interface.ts";
@@ -285,6 +285,28 @@ export const Collections = () => {
                         <TableComponent
                             columns={columns}
                             dataBase={collections.collections}
+                            isExpansible={true}
+                            renderRow={(collec, index) => (
+                                <CollectionExpandible key={index} collection={collec} />
+                            )}
+                            action={getActions}
+                        />
+                    )}
+                    {view == 'sended' && (
+                        <TableComponent
+                            columns={normalColumns}
+                            dataBase={collections.collections.filter(item => isToday(item.sentAt))}
+                            isExpansible={true}
+                            renderRow={(collec, index) => (
+                                <CollectionExpandible key={index} collection={collec} />
+                            )}
+                            action={getActions}
+                        />
+                    )}
+                    {view == 'no-sended' && (
+                        <TableComponent
+                            columns={normalColumns}
+                            dataBase={collections.collections.filter(item => !isToday(item.sentAt))}
                             isExpansible={true}
                             renderRow={(collec, index) => (
                                 <CollectionExpandible key={index} collection={collec} />
