@@ -3,7 +3,7 @@ import { TableComponent } from "@/components/table/TableComponent";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IClients } from "@/interfaces/clients.interface";
-import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
+import { BodyInventory, GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
 // import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useState } from "react";
 import { productColumns } from "./invoices.data";
@@ -24,6 +24,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     // const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
     const [inventoryData, setInventoryData] = useState<IInventory[]>([]);
+    const [gifData, setGiftData] = useState<BodyInventory[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [controlNumber, setControlNumber] = useState<string>('');
     const [priceUSD, setPriceUSD] = useState<boolean>(false);
@@ -32,6 +33,10 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const [dateDue, setDateDue] = useState<Date | undefined>(new Date());
 
     const { clients, clientOptions, getClientsApi } = clientStore();
+
+    const newGift = () => {
+        setGiftData(prev => [...prev, { productId: 0, quantity: 0 }])
+    }
 
 
     useEffect(() => {
@@ -77,6 +82,18 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         if (findClient) {
             setClientSelected(findClient)
         }
+    }
+
+    const onChangeGift = (data: string) => {
+        const selectedProductData = inventory.allInventory.find((inv) => inv.id === Number(data));
+        if (selectedProductData) {
+            console.log(selectedProductData);
+        }
+    }
+
+    const onChangeQuantityGift = (quantity: string) => {
+        console.log(`Cambie cantidad ${quantity}`);
+
     }
 
     const selectProduct = (data: string) => {
@@ -160,7 +177,21 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
 
     return (
         <div className="">
-            <div className="flex items-center justify-end w-full gap-5 my-4">
+            <div className="flex items-center justify-between w-full gap-5 my-4">
+                <div className="flex flex-col items-start justify-start gap-2 w-80">
+                    <Button onClick={newGift} className="bg-[#6f4e37]" type="button">
+                        Agregar regalo
+                    </Button>
+
+                    {gifData && gifData.map((item, index: number) => (
+                        <div key={index} className="flex items-center justify-between gap-2 w-full">
+                            <Autocomplete placeholder="Seleccione un producto" data={inventory.inventory} onChange={onChangeGift}></Autocomplete>
+                            <Input className="w-1/2" value={item.quantity} onChange={(e) => onChangeQuantityGift(e.target.value)} type="number" />
+                        </div>
+                    ))}
+                    {/* <Input className="w-full" value={controlNumber} onChange={(e) => setControlNumber(e.target.value)} /> */}
+                </div>
+
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
                     <Label className="text-right w-42">
                         Numero de factura

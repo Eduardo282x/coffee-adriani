@@ -1,5 +1,5 @@
 ::-webkit-scrollbar {
-    background-color: transparent;
+    background-color: #ebe0d2;
     border-radius: 1rem;
 }
 
@@ -13,7 +13,8 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #ebe0d2;
+    /* background-color: #ebe0d2; */
+    background-color: #6f4e37;
     border-radius: 1rem;
     /* border: 1px solid #f1f2f3; */
 }

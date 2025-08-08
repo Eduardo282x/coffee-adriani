@@ -111,9 +111,10 @@ export const Clients = () => {
 
     const generateReport = async (data: BodyReport) => {
         setLoading(true)
-        const parseData = {
-        ...data,
-            blockId: Number(data.blockId)
+        const parseData: BodyReport = {
+            status: data.status,
+            zone: data.zone == 'all' ? '' : data.zone,
+            blockId: data.blockId.toString() == 'all' ? 0 :  Number(data.blockId)
         }
         const response = await generateReportPDF(parseData) as Blob;
         const url = URL.createObjectURL(response)

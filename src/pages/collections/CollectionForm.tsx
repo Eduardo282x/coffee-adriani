@@ -4,11 +4,22 @@ import { Label } from '@/components/ui/label'
 import { CollectionMessageBody } from '@/interfaces/collection.interface'
 import { FromProps } from '@/interfaces/form.interface'
 import { FC, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
+
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 
 export const CollectionForm: FC<FromProps> = ({ data, onSubmit }) => {
-
-
     const { register, handleSubmit, reset } = useForm<CollectionMessageBody>({
         defaultValues: {
             title: '',
@@ -51,5 +62,30 @@ export const CollectionForm: FC<FromProps> = ({ data, onSubmit }) => {
                 <Button type='submit' className='w-40' >Enviar</Button>
             </div>
         </form>
+    )
+}
+
+interface DeleteMessageFormProps {
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    onDelete: (action: boolean) => void;
+}
+
+export const DeleteMessageForm = ({ open, setOpen, onDelete }: DeleteMessageFormProps) => {
+    return (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogContent >
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Eliminar Mensaje</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Estas seguro que desea eliminar este mensaje?. Esta acción no se podrá deshacer.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-gray-200 hover:bg-gray-100 text-black" onClick={() => onDelete(false)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-800 hover:bg-red-700 text-white" onClick={() => onDelete(true)} >Eliminar</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     )
 }

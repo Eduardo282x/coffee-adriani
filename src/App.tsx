@@ -22,8 +22,13 @@ import { Administration } from './pages/administration/Administration';
 import { Collections } from './pages/collections/Collections';
 
 
-function App() {
+function AxiosInterceptorProvider() {
   useAxiosInterceptor();
+  return null;
+}
+
+function App() {
+  // useAxiosInterceptor();
 
   useSocket('message', data => {
     console.log(data);
@@ -37,6 +42,7 @@ function App() {
     <div className='w-screen h-screen overflow-y-auto bg-[#ebe0d2]'>
       <Toaster />
       <BrowserRouter>
+        <AxiosInterceptorProvider />
         <Routes>
           <Route path="/login" element={<Login />} />
 

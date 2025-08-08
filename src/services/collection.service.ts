@@ -1,5 +1,5 @@
 import { CollectionBody, CollectionMessageBody, MarkBody } from "@/interfaces/collection.interface";
-import { getDataApi, postDataApi, putDataApi } from "./base.service";
+import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeCollection = '/collection';
 
@@ -35,6 +35,13 @@ export const getMessageCollection = async () => {
 export const postMessageCollection = async (data: CollectionMessageBody) => {
     try {
         return await postDataApi(`${routeCollection}/messages`, data);
+    } catch (err) {
+        return err
+    }
+}
+export const deleteMessageCollection = async (messageId: number) => {
+    try {
+        return await deleteDataApi(`${routeCollection}/messages/${messageId}`);
     } catch (err) {
         return err
     }

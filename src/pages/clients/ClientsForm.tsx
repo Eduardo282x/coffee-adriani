@@ -134,7 +134,7 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
             zone: '',
             blockId: 0
         }
-    })
+    });
 
     return (
         <Form {...form}>
@@ -146,8 +146,8 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
                         { label: 'Sin deuda', value: 'clean' },
                     ]
                 } />
-                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks} />
-                <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones} />
+                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
+                <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
 
                 <div className='w-full flex items-center justify-center'>
                     <Button type='submit' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
