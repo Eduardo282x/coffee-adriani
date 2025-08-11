@@ -32,7 +32,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (expansibleRef.current && !expansibleRef.current.contains(event.target as Node)) {
-                setOpen(false);
+                // setOpen(false);
             }
         };
 
