@@ -46,7 +46,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                 <Filter dataBase={invoice} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} />
             </div>
 
-            <DropDownFilter contentMenu={
+            <DropDownFilter>
                 <FiltersGroups
                     handleChangeStatusInvoice={handleChangeStatusInvoice}
                     handleChangeBlock={handleChangeBlock}
@@ -55,7 +55,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                     setDateStart={setDateStart}
                     setDateEnd={setDateEnd}
                 />
-            } />
+            </DropDownFilter>
 
             {/* <Button className="bg-green-700 hover:bg-green-600 text-white translate-y-3"><Download /> Exportar</Button> */}
         </div>
@@ -71,10 +71,10 @@ const FiltersGroups = ({
     setDateStart,
     setDateEnd
 }: FilterGroupsProps) => {
-    const { blocks, getBlocksApi} = blockStore();
+    const { blocks, getBlocksApi } = blockStore();
 
     const getBlockStoreApi = async () => {
-        if(!blocks || blocks.allBlocks.length == 0){
+        if (!blocks || blocks.allBlocks.length == 0) {
             await getBlocksApi();
         }
     }

@@ -179,7 +179,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         <div className="">
             <div className="flex items-center justify-between w-full gap-5 my-4">
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
-                    <Button onClick={newGift} className="bg-[#6f4e37]" type="button">
+                    <Button onClick={newGift} className="bg-[#6f4e37] hidden" type="button">
                         Agregar regalo
                     </Button>
 

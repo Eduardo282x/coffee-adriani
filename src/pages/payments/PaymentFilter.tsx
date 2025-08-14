@@ -78,7 +78,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                 />
             </div>
 
-            <DropDownFilter contentMenu={
+            <DropDownFilter>
                 <FilterSelect
                     handleChangeMethods={handleChangeMethods}
                     handleChangeStatusAssociated={handleChangeStatusAssociated}
@@ -88,7 +88,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                     methods={methods}
                     accounts={accounts}
                 />
-            } />
+            </DropDownFilter>
 
             {/* <Button className="bg-green-700 hover:bg-green-600 text-white translate-y-3"><Download /> Exportar</Button> */}
         </div>

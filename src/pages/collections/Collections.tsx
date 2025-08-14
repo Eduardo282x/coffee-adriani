@@ -3,9 +3,9 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
-import { deleteMessageCollection, getCollection, getMessageCollection, postMessageCollection, postSendMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
-import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody } from "@/interfaces/collection.interface"
-import { clientCollectionColumns, getSendVariant, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
+import { deleteMessageCollection, getCollection, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
+import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
+import { clientCollectionColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
 import { IColumns } from "@/components/table/table.interface.ts";
@@ -14,8 +14,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DialogComponent } from "@/components/dialog/DialogComponent.tsx"
 import { CollectionForm, DeleteMessageForm } from "./CollectionForm.tsx"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx"
+import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter.tsx"
+import { CollectionActions } from "./CollectionActions.tsx"
+import { Switch } from "@/components/ui/switch.tsx"
+import { IoMdSettings } from "react-icons/io"
 
-type TypesViews = 'collection' | 'messages' | 'sended' | 'no-sended' | 'history' | 'errors';
+type TypesViews = 'collection' | 'messages';
+type CollectionTypes = 'collection' | 'messages' | 'sended' | 'no-sended' | 'history' | 'errors';
 
 export const Collections = () => {
     const [messages, setMessages] = useState<GroupMessages>({ allMessages: [], messages: [] });
@@ -23,9 +28,11 @@ export const Collections = () => {
     const [columns, setColumns] = useState<IColumns<ICollection>[]>(clientCollectionColumns);
     const [loading, setLoading] = useState<boolean>(false);
     const [view, setView] = useState<TypesViews>('collection');
+    const [viewMessages, setViewMessages] = useState<CollectionTypes>('collection');
     // const [showMessage, setShowMessages] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false)
-    const [openDialogDeleteMessage, setOpenDialogDeleteMessage] = useState<boolean>(false)
+    const [openDialogDeleteMessage, setOpenDialogDeleteMessage] = useState<boolean>(false);
+    const [markAll, setMarkAll] = useState<boolean>(false);
     const [messageSelected, setMessageSelected] = useState<IMessages | null>(null);
 
     const getCollectionsApi = async () => {
@@ -71,17 +78,20 @@ export const Collections = () => {
                 column: 'send',
                 label: 'Enviar',
                 element: (data: ICollection) => (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger>
-                            <span className={`${getSendVariant(data.send)}`}>
-                                {data.send == true ? 'Enviar' : 'No enviar'}
-                            </span>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => getActions('send', { ...data, send: true }, true)}>Enviar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => getActions('send', { ...data, send: false }, true)}>No Enviar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <Switch checked={data.send} onCheckedChange={(value) => getActions('send', { ...data, send: value }, true)} />
+                    </div>
+                    // <DropdownMenu>
+                    //     <DropdownMenuTrigger>
+                    //         <span className={`${getSendVariant(data.send)}`}>
+                    //             {data.send == true ? 'Enviar' : 'No enviar'}
+                    //         </span>
+                    //     </DropdownMenuTrigger>
+                    //     <DropdownMenuContent>
+                    //         <DropdownMenuItem onClick={() => getActions('send', { ...data, send: true }, true)}>Enviar</DropdownMenuItem>
+                    //         <DropdownMenuItem onClick={() => getActions('send', { ...data, send: false }, true)}>No Enviar</DropdownMenuItem>
+                    //     </DropdownMenuContent>
+                    // </DropdownMenu>
                 ),
                 orderBy: '',
                 type: 'custom',
@@ -105,8 +115,6 @@ export const Collections = () => {
     }, [])
 
     const setFilterCollection = (collections: ICollection[]) => {
-        console.log(collections);
-
         setCollections(prev => {
             return {
                 ...prev,
@@ -158,20 +166,18 @@ export const Collections = () => {
         }
 
         if (byColumn) {
-            setLoading(true);
+            // setLoading(true);
             const updateData = {
                 messageId: data.messageId,
                 send: data.send
             }
 
             await putCollection(data.id, updateData);
-            setLoading(false);
+            // setLoading(false);
         }
 
     }
     const getActionsMessage = (action: string, data: IMessages) => {
-        console.log(action);
-
         setMessageSelected(data);
         if (action === 'Editar') {
             setTimeout(() => {
@@ -205,16 +211,28 @@ export const Collections = () => {
     }
 
     const sendMessage = async () => {
-        setLoading(true)
-        await postSendMessageCollection()
-        console.log('Prueba de mensaje enviado');
-        setLoading(false)
+        setLoading(true);
+        await postSendMessageCollection();
+        setLoading(false);
     }
-    const markNoSend = () => {
-        markCollections({ send: false })
+
+    const toggleSendData = (send: boolean) => {
+        setMarkAll(send)
+        markCollections({ send: send })
     }
-    const markSend = () => {
-        markCollections({ send: true })
+
+    const updateAllMessageClient = async (messageId: number) => {
+        const findMessage = messages.allMessages.find(item => item.id == messageId) as Message;
+        setCollections(prev => ({
+            ...prev,
+            collections: prev.collections.map(item => ({
+                ...item,
+                messageId: messageId,
+                message: findMessage
+            }))
+        }))
+
+        await putAllMessageCollection(messageId);
     }
 
     const markCollections = async (mark: MarkBody) => {
@@ -229,7 +247,18 @@ export const Collections = () => {
                 })
             }
         })
-        await putMarkCollection(mark)
+        await putMarkCollection(mark);
+    }
+
+    useEffect(() => {
+        setMarkAll(collections.collections.filter(item => item.send == true).length == collections.collections.length)
+    }, [collections.collections]);
+
+    const setClassName = (type: CollectionTypes): string => {
+        if (viewMessages == type) {
+            return 'bg-gray-200 px-2 py-1 cursor-pointer rounded-md'
+        }
+        return 'hover:bg-gray-200 px-2 py-1 cursor-pointer rounded-md'
     }
 
     return (
@@ -251,14 +280,12 @@ export const Collections = () => {
 
                     <Tabs
                         className="border rounded-lg border-[#ebe0d2] p-1 mx-4"
-                        defaultValue="collection" value={view} onValueChange={(value) => setView(value as TypesViews)}>
+                        defaultValue="collection"
+                        value={view}
+                        onValueChange={(value) => { setView(value as TypesViews); setViewMessages(value as TypesViews) }}>
                         <TabsList>
                             <TabsTrigger value="collection">Cobranza</TabsTrigger>
                             <TabsTrigger value="messages">Mensajes</TabsTrigger>
-                            <TabsTrigger value="sended">Enviados</TabsTrigger>
-                            <TabsTrigger value="no-sended">No Enviados</TabsTrigger>
-                            <TabsTrigger value="history">Historial</TabsTrigger>
-                            <TabsTrigger value="errors">Errores</TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </div>
@@ -266,7 +293,20 @@ export const Collections = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Cobranza</h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Cobranza</h2>
+                        {view == 'collection' &&
+                            <DropDownFilter>
+                                <div className="flex flex-col gap-1">
+                                    <p className={`${setClassName('collection')}`} onClick={() => setViewMessages('collection')}>Todos</p>
+                                    <p className={`${setClassName('sended')}`} onClick={() => setViewMessages('sended')}>Enviados</p>
+                                    <p className={`${setClassName('no-sended')}`} onClick={() => setViewMessages('no-sended')}>No Enviados</p>
+                                    <p className={`${setClassName('history')}`} onClick={() => setViewMessages('history')}>Historial</p>
+                                    <p className={`${setClassName('errors')}`} onClick={() => setViewMessages('errors')}>Errores</p>
+                                </div>
+                            </DropDownFilter>
+                        }
+                    </div>
                     <div className="flex items-center gap-2">
                         <div className="flex w-80  items-center space-x-2">
                             {view == 'collection'
@@ -274,14 +314,24 @@ export const Collections = () => {
                                 : <Filter dataBase={messages.allMessages} columns={messageCollectionColumns} setDataFilter={setFilterMessage} />
                             }
                         </div>
+
                         <Button onClick={sendMessage} className="bg-[#6f4e37] text-white hover:bg-[#7a5b45]">Enviar mensajes</Button>
-                        <Button onClick={markNoSend} className="bg-[#9e673f] text-white hover:bg-[#7a5b45]">No Enviar a todos</Button>
-                        <Button onClick={markSend} className="bg-[#b27245] text-white hover:bg-[#7a5b45]">Enviar a todos</Button>
+
+                        <div className="-mt-6">
+                            <DropDownFilter customIcon={IoMdSettings}>
+                                <CollectionActions
+                                    markAll={markAll}
+                                    changeMessage={updateAllMessageClient}
+                                    toggleSendData={toggleSendData}
+                                    messages={messages.allMessages}
+                                />
+                            </DropDownFilter>
+                        </div>
                     </div>
                 </div>
 
                 <div className="rounded-md border">
-                    {view == 'collection' && (
+                    {viewMessages == 'collection' && (
                         <TableComponent
                             columns={columns}
                             dataBase={collections.collections}
@@ -292,7 +342,7 @@ export const Collections = () => {
                             action={getActions}
                         />
                     )}
-                    {view == 'sended' && (
+                    {viewMessages == 'sended' && (
                         <TableComponent
                             columns={normalColumns}
                             dataBase={collections.collections.filter(item => isToday(item.sentAt))}
@@ -303,7 +353,7 @@ export const Collections = () => {
                             action={getActions}
                         />
                     )}
-                    {view == 'no-sended' && (
+                    {viewMessages == 'no-sended' && (
                         <TableComponent
                             columns={normalColumns}
                             dataBase={collections.collections.filter(item => !isToday(item.sentAt))}

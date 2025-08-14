@@ -39,6 +39,13 @@ export const postMessageCollection = async (data: CollectionMessageBody) => {
         return err
     }
 }
+export const putAllMessageCollection = async (messageId: number) => {
+    try {
+        return await putDataApi(`${routeCollection}/message-clients/${messageId}`, {});
+    } catch (err) {
+        return err
+    }
+}
 export const deleteMessageCollection = async (messageId: number) => {
     try {
         return await deleteDataApi(`${routeCollection}/messages/${messageId}`);
