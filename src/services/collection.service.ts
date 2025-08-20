@@ -10,6 +10,13 @@ export const getCollection = async () => {
         return err
     }
 }
+export const getCollectionHistory = async () => {
+    try {
+        return await getDataApi(`${routeCollection}/history`);
+    } catch (err) {
+        return err
+    }
+}
 export const putCollection = async (id: number, data: CollectionBody) => {
     try {
         return await putDataApi(`${routeCollection}/${id}`, data);

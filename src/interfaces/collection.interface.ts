@@ -17,6 +17,10 @@ export interface GroupCollection {
     allCollections: ICollection[],
     collections: ICollection[],
 }
+export interface GroupCollectionHistory {
+    allCollections: ICollectionHistory[],
+    collections: ICollectionHistory[],
+}
 
 export interface GroupMessages {
     allMessages: IMessages[],
@@ -43,6 +47,19 @@ export interface ICollection {
     message: Message;
     invoices: IInvoice[];
     total: number;
+}
+
+export interface ICollectionHistory {
+    id: number;
+    send: boolean;
+    sentAt: Date | null;
+    createdAt: Date;
+    description: string;
+    sended: boolean;
+    clientId: number;
+    client: IClients; 
+    messageId: number;
+    message: Message;
 }
 
 export interface Message {

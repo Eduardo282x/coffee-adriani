@@ -44,12 +44,12 @@ export const TableComponent = <T,>({
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(50);
 
     useEffect(() => {
         setDataFilter(dataBase)
         setPage(0)
-        setRowsPerPage(10)
+        setRowsPerPage(50)
     }, [dataBase])
 
     useEffect(() => {

@@ -3,9 +3,9 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
-import { deleteMessageCollection, getCollection, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
-import { CollectionMessageBody, GroupCollection, GroupMessages, ICollection, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
-import { clientCollectionColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
+import { deleteMessageCollection, getCollection, getCollectionHistory, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
+import { CollectionMessageBody, GroupCollection, GroupCollectionHistory, GroupMessages, ICollection, ICollectionHistory, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
+import { clientCollectionColumns, collectionErrorsColumns, collectionHistoryColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
 import { IColumns } from "@/components/table/table.interface.ts";
@@ -25,6 +25,7 @@ type CollectionTypes = 'collection' | 'messages' | 'sended' | 'no-sended' | 'his
 export const Collections = () => {
     const [messages, setMessages] = useState<GroupMessages>({ allMessages: [], messages: [] });
     const [collections, setCollections] = useState<GroupCollection>({ allCollections: [], collections: [] });
+    const [collectionsHistory, setCollectionsHistory] = useState<GroupCollectionHistory>({ allCollections: [], collections: [] });
     const [columns, setColumns] = useState<IColumns<ICollection>[]>(clientCollectionColumns);
     const [loading, setLoading] = useState<boolean>(false);
     const [view, setView] = useState<TypesViews>('collection');
@@ -109,8 +110,19 @@ export const Collections = () => {
         setLoading(false)
     }
 
+    const getCollectionHistoryApi = async () => {
+        const response: ICollectionHistory[] = await getCollectionHistory();
+        if (response) {
+            setCollectionsHistory({
+                allCollections: response,
+                collections: response,
+            });
+        }
+    }
+
     useEffect(() => {
         getCollectionsApi();
+        getCollectionHistoryApi();
         getMessageCollectionApi();
     }, [])
 
@@ -136,7 +148,7 @@ export const Collections = () => {
         setMessageSelected(null);
     }
 
-    const getActions = async (action: string, data: ICollection, byColumn?: boolean) => {
+    const getActions = async (action: string, data: ICollection | ICollectionHistory, byColumn?: boolean) => {
         if (action == 'send' && byColumn) {
             setCollections(prev => {
                 return {
@@ -293,8 +305,8 @@ export const Collections = () => {
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Cobranza</h2>
+                    <div className="flex items-end gap-2">
+                        <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37] mb-2">Gestión de Cobranza</h2>
                         {view == 'collection' &&
                             <DropDownFilter>
                                 <div className="flex flex-col gap-1">
@@ -361,6 +373,20 @@ export const Collections = () => {
                             renderRow={(collec, index) => (
                                 <CollectionExpandible key={index} collection={collec} />
                             )}
+                            action={getActions}
+                        />
+                    )}
+                    {viewMessages == 'history' && (
+                        <TableComponent
+                            columns={collectionHistoryColumns}
+                            dataBase={collectionsHistory.collections}
+                            action={getActions}
+                        />
+                    )}
+                    {viewMessages == 'errors' && (
+                        <TableComponent
+                            columns={collectionErrorsColumns}
+                            dataBase={collectionsHistory.collections.filter(item => item.sended == false)}
                             action={getActions}
                         />
                     )}

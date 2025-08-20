@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 
 export const socket = io(import.meta.env.VITE_BASE_URL_API, {
-    transports: ['websocket']
+    transports: ['websocket', 'polling']
 });
 
 export const useSocket = (channel: string, callback: (data: any) => void) => {

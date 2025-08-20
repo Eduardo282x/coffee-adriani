@@ -48,10 +48,10 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="20">20</SelectItem>
                                 <SelectItem value="50">50</SelectItem>
                                 <SelectItem value="100">100</SelectItem>
+                                <SelectItem value="200">200</SelectItem>
+                                <SelectItem value="500">500</SelectItem>
                             </SelectGroup>
                         </SelectContent>
                     </Select>

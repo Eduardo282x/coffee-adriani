@@ -1,6 +1,6 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { ICollection, IMessages } from "@/interfaces/collection.interface";
+import { ICollection, ICollectionHistory, IMessages } from "@/interfaces/collection.interface";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { getBadgeVariant } from "../invoices/invoices.data";
 import { IInvoice } from "@/interfaces/invoice.interface";
@@ -109,6 +109,94 @@ export const normalColumns: IColumns<ICollection>[] = [
         icon: false,
     }
 ]
+
+export const collectionHistoryColumns: IColumns<ICollectionHistory>[] = [
+    {
+        column: 'client.name',
+        label: 'Cliente',
+        element: (data) => data.client ? data.client.name : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'client.phone',
+        label: 'Teléfono',
+        element: (data) => data.client ? data.client.phone : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'message.title',
+        label: 'Mensaje',
+        element: (data) => data.message.title,
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    },
+    {
+        column: 'sended',
+        label: 'Enviado',
+        element: (data) => <span className={`${sendedBageVariant(data.sended)}`}>{data.sended ? 'Enviado' : 'No enviado'}</span>,
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    },
+    {
+        column: 'sentAt',
+        label: 'Enviado',
+        element: (data) => sendedAt(data.sentAt),
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    }
+]
+
+export const collectionErrorsColumns: IColumns<ICollectionHistory>[] = [
+    {
+        column: 'client.name',
+        label: 'Cliente',
+        element: (data) => data.client ? data.client.name : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'description',
+        label: 'Descripción',
+        element: (data) => data.description,
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    },
+    {
+        column: 'sended',
+        label: 'Enviado',
+        element: (data) => <span className={`${sendedBageVariant(data.sended)}`}>{data.sended ? 'Enviado' : 'No enviado'}</span>,
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    },
+    {
+        column: 'sentAt',
+        label: 'Enviado',
+        element: (data) => sendedAt(data.sentAt),
+        // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+        orderBy: '',
+        type: 'custom',
+        icon: false,
+    }
+]
+
+const sendedBageVariant = (sended: boolean): string => {
+    return sended ? "rounded-lg px-2 bg-blue-100 text-blue-800" : "rounded-lg px-2 bg-red-100 text-red-800";
+}
 
 function sendedAt(sentAt?: string | Date | null): string {
     if (!sentAt) return "No enviado.";

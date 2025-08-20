@@ -11,9 +11,11 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { BlockForm, ClientsForm, ReportForm } from "./ClientsForm"
-import { Download } from "lucide-react";
+// import { Download } from "lucide-react";
 import { formatDate } from "@/hooks/formaters"
 import { clientStore, blockStore } from "@/store/clientStore"
+// import { RiFileExcel2Line } from "react-icons/ri"
+import { FaRegFilePdf } from "react-icons/fa"
 
 export const Clients = () => {
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
@@ -114,7 +116,7 @@ export const Clients = () => {
         const parseData: BodyReport = {
             status: data.status,
             zone: data.zone == 'all' ? '' : data.zone,
-            blockId: data.blockId.toString() == 'all' ? 0 :  Number(data.blockId)
+            blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId)
         }
         const response = await generateReportPDF(parseData) as Blob;
         const url = URL.createObjectURL(response)
@@ -203,13 +205,18 @@ export const Clients = () => {
                         <div className="flex w-72 items-center space-x-2">
                             {showBlocks
                                 ? <Filter dataBase={blocks.allBlocks} columns={blockColumns} setDataFilter={setBlocksFilter} />
-                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter}  disabledEffect={true}/>
+                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} disabledEffect={true} />
                             }
                         </div>
 
-                        <Button onClick={() => setOpenDialogReport(true)} className="bg-green-700 hover:bg-green-600 text-white">
-                            <Download /> Exportar
+
+                        <Button size='sm' onClick={() => setOpenDialogReport(true)} className="bg-red-800 hover:bg-red-600 text-white">
+                            <FaRegFilePdf className="text-white font-bold" /> Exportar PDF
                         </Button>
+
+                        {/* <Button size='sm' onClick={() => setOpenDialogReport(true)} className="bg-green-700 hover:bg-green-600 text-white">
+                            <RiFileExcel2Line className="text-white font-bold" /> Exportar Excel
+                        </Button> */}
                     </div>
                 </div>
 
