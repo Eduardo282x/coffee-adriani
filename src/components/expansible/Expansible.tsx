@@ -163,7 +163,16 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
 
                     <div className="w-full">
                         {showDetails
-                            ? <TableComponent dataBase={dataDetails} columns={invoiceItemsColumns} />
+                            ? <div className="space-y-2">
+                                <p className="text-lg font-semibold text-[#37271b]">Detalles</p>
+                                <TableComponent dataBase={dataDetails.filter(item => item.type == 'SALE')} columns={invoiceItemsColumns} />
+                                {dataDetails.filter(item => item.type == 'GIFT').length > 0 && (
+                                    <>
+                                        <p className="text-lg font-semibold text-[#37271b]">Regalos</p>
+                                        <TableComponent dataBase={dataDetails.filter(item => item.type == 'GIFT')} columns={invoiceItemsColumns} />
+                                    </>
+                                )}
+                            </div>
                             : <TableComponent dataBase={dataDetailsPay} columns={invoiceItemsPaymentColumns} />
                         }
                     </div>

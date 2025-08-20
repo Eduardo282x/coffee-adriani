@@ -7,7 +7,6 @@ import { ArrowUp, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { formatNumberWithDots } from "@/hooks/formaters";
 import { ToolTip } from "../tooltip/ToolTip";
 import { IoIosArrowDown } from "react-icons/io";
 
@@ -149,7 +148,7 @@ export const TableComponent = <T,>({
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={columns.length - 2}>Total</TableCell>
-                                <TableCell className="text-left">{formatNumberWithDots(Number(total), '', ' $')}</TableCell>
+                                <TableCell className="text-left">{total} $</TableCell>
                                 <TableCell className="text-left"></TableCell>
                             </TableRow>
                         </TableFooter>

@@ -271,6 +271,11 @@ export const Invoices = () => {
         setLoadingFile(false);
     }
 
+    const newInvoices = ()=> {
+        setOpenDialog(true);
+        setSelectInvoice(null);
+    }
+
     return (
         <div className="flex flex-col">
             {loadingFile && <ScreenLoader/>}
@@ -286,7 +291,7 @@ export const Invoices = () => {
                         Validar facturas
                     </Button>
                     <DolarComponents />
-                    <Button onClick={() => setOpenDialog(true)}>
+                    <Button onClick={newInvoices}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nueva Factura
                     </Button>
@@ -373,7 +378,7 @@ export const Invoices = () => {
                     className="w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
                     label2="Agregar Factura"
                     label1="Editar Factura"
-                    isEdit={true}
+                    isEdit={selectInvoice !== null}
                 >
                     <InvoiceForm inventory={inventory} onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
                 </DialogComponent>

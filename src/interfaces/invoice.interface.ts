@@ -101,9 +101,11 @@ export interface InvoiceItems {
     quantity: number;
     unitPrice: number;
     subtotal: number;
+    type: TypeDetailsProductInvoices;
     product: IProducts;
 }
 
+export type TypeDetailsProductInvoices = 'SALE' | 'GIFT';
 export interface IInvoiceForm {
     clientId: number;
     controlNumber: string;

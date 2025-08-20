@@ -16,6 +16,9 @@ import toast from "react-hot-toast";
 import { addDays, addYears } from "date-fns";
 import { IInvoice } from "@/interfaces/invoice.interface";
 import { clientStore } from "@/store/clientStore";
+import { Trash2 } from "lucide-react";
+import { formatOnlyNumberWithDots } from "@/hooks/formaters";
+
 interface InvoiceFormProps extends FromProps {
     inventory: GroupInventoryDate
 }
@@ -41,7 +44,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
-        if (data) {
+        if (data != null) {
             const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
             setConsignment(parseData.consignment);
             setControlNumber(parseData.controlNumber);
@@ -49,7 +52,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             setDateDue(new Date(parseData.dueDate));
             setClientSelected(findClient || null);
 
-            const inventoryData = parseData.invoiceItems.map((inv) => {
+            const inventoryData = parseData.invoiceItems.filter(item => item.type == 'SALE').map((inv) => {
                 const findInventory = inventory.allInventory.find((invData) => invData.productId === inv.productId) as IInventory;
                 if (!findInventory) {
                     return undefined;
@@ -59,7 +62,12 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                     quantity: inv.quantity,
                     subtotal: inv.quantity * findInventory?.product.price || 0
                 };
-            })
+            });
+
+            setGiftData(parseData.invoiceItems.filter(item => item.type == 'GIFT').map((inv) => ({
+                productId: inv.productId,
+                quantity: inv.quantity
+            })))
 
             setTimeout(() => {
                 setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
@@ -84,16 +92,36 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         }
     }
 
-    const onChangeGift = (data: string) => {
+    const onChangeGift = (data: string, index: number) => {
         const selectedProductData = inventory.allInventory.find((inv) => inv.id === Number(data));
         if (selectedProductData) {
             console.log(selectedProductData);
+            setGiftData(prev => prev.map((item, idx) => {
+                if (idx === index) {
+                    return {
+                        ...item,
+                        productId: selectedProductData.productId,
+                    }
+                }
+                return item;
+            }))
         }
     }
 
-    const onChangeQuantityGift = (quantity: string) => {
-        console.log(`Cambie cantidad ${quantity}`);
+    const onChangeQuantityGift = (quantity: string, index: number) => {
+        setGiftData(prev => prev.map((item, idx) => {
+            if (idx === index) {
+                return {
+                    ...item,
+                    quantity: Number(quantity),
+                }
+            }
+            return item;
+        }))
+    }
 
+    const removeGift = (index: number) => {
+        setGiftData(prev => prev.filter((_, idx) => idx !== index));
     }
 
     const selectProduct = (data: string) => {
@@ -152,7 +180,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const onChangeDateDispatch = (date: Date | undefined) => {
         setDateDispatch(date);
         const moreDays = addDays(date as Date, 8);
-        if(moreDays){
+        if (moreDays) {
             setDateDue(moreDays);
         }
     }
@@ -166,6 +194,17 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             return
         }
 
+        const combineDataInvoiceGift = gifData.map(item => ({
+            productId: item.productId,
+            quantity: Number(item.quantity),
+            type: 'GIFT'
+        }));
+
+        const combineDataInvoice = inventoryData.map(item => ({
+            productId: item.product.id,
+            quantity: Number(item.quantity),
+        }));
+
         const bodyInvoice = {
             clientId: clientSelected?.id,
             controlNumber: controlNumber,
@@ -173,13 +212,9 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             dispatchDate: dateDispatch,
             dueDate: dateDue,
             priceUSD: priceUSD,
-            details: inventoryData.map((inv) => {
-                return {
-                    productId: inv.product.id,
-                    quantity: Number(inv.quantity),
-                }
-            })
+            details: [...combineDataInvoiceGift, ...combineDataInvoice]
         }
+        
         onSubmit(bodyInvoice)
     }
 
@@ -187,14 +222,15 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         <div className="">
             <div className="flex items-center justify-between w-full gap-5 my-4">
                 <div className="flex flex-col items-start justify-start gap-2 w-80">
-                    <Button onClick={newGift} className="bg-[#6f4e37] hidden" type="button">
+                    <Button variant='primary' onClick={newGift} className="bg-[#6f4e37] text-white" type="button">
                         Agregar regalo
                     </Button>
 
                     {gifData && gifData.map((item, index: number) => (
                         <div key={index} className="flex items-center justify-between gap-2 w-full">
-                            <Autocomplete placeholder="Seleccione un producto" data={inventory.inventory} onChange={onChangeGift}></Autocomplete>
-                            <Input className="w-1/2" value={item.quantity} onChange={(e) => onChangeQuantityGift(e.target.value)} type="number" />
+                            <Autocomplete placeholder="Seleccione un producto" data={inventory.inventory} onChange={(data) => onChangeGift(data, index)}></Autocomplete>
+                            <Input className="w-15" value={item.quantity} onChange={(e) => onChangeQuantityGift(e.target.value, index)} type="number" />
+                            <Button size='icon' onClick={() => removeGift(index)}><Trash2 className="text-red-500" /></Button>
                         </div>
                     ))}
                     {/* <Input className="w-full" value={controlNumber} onChange={(e) => setControlNumber(e.target.value)} /> */}
@@ -242,7 +278,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 </div>
             </div>
 
-            <TableComponent columns={productColumns} total={total.toFixed(2)} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
+            <TableComponent columns={productColumns} total={formatOnlyNumberWithDots(total)} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
 
             <div className="flex items-center justify-end mt-4">
                 <Button disabled={total === 0} onClick={onSubmitInvoice}>Generar Factura</Button>

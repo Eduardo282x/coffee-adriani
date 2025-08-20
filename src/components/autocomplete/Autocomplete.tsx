@@ -79,7 +79,7 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
                 {value
                     ? data.find((option) => option.value.toString() === value)?.label
                     : placeholder}
-                <ChevronsUpDown className="absolute top-3 right-2 ml-2 h-4 w-4 shrink-0 opacity-50" />
+                <ChevronsUpDown className="absolute top-3 right-2 ml-2 h-4 w-4 shrink-0 text-gray-500 bg-white" />
             </Button>
 
             {open && (
