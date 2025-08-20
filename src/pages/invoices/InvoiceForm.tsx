@@ -13,7 +13,7 @@ import { FromProps } from "@/interfaces/form.interface";
 import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
-import { addYears } from "date-fns";
+import { addDays, addYears } from "date-fns";
 import { IInvoice } from "@/interfaces/invoice.interface";
 import { clientStore } from "@/store/clientStore";
 interface InvoiceFormProps extends FromProps {
@@ -30,7 +30,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const [priceUSD, setPriceUSD] = useState<boolean>(false);
     const [consignment, setConsignment] = useState<boolean>(false);
     const [dateDispatch, setDateDispatch] = useState<Date | undefined>(new Date());
-    const [dateDue, setDateDue] = useState<Date | undefined>(new Date());
+    const [dateDue, setDateDue] = useState<Date | undefined>(addDays(new Date(), 8));
 
     const { clients, clientOptions, getClientsApi } = clientStore();
 
@@ -149,6 +149,14 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         }))
     }
 
+    const onChangeDateDispatch = (date: Date | undefined) => {
+        setDateDispatch(date);
+        const moreDays = addDays(date as Date, 8);
+        if(moreDays){
+            setDateDue(moreDays);
+        }
+    }
+
     const onSubmitInvoice = () => {
         if (controlNumber === '') {
             toast.custom(<Snackbar success={false} message={"Por favor, complete todos los campos del formulario"} />, {
@@ -201,7 +209,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             </div>
 
             <div className="flex items-center justify-between w-full gap-5 my-4">
-                <DatePicker setDate={setDateDispatch} date={dateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
+                <DatePicker setDate={onChangeDateDispatch} date={dateDispatch} label="Fecha de Despacho" maxDate={new Date()} minDate={new Date(2000)} />
 
                 <DatePicker setDate={setDateDue} date={dateDue} label="Fecha de Vencimiento" minDate={dateDispatch} maxDate={addYears(dateDispatch as Date, 5)} />
             </div>
