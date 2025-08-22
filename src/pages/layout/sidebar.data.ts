@@ -1,4 +1,4 @@
-import { BarChart3, Users, FileText, Package, ShoppingCart, User } from "lucide-react"
+import { BarChart3, Users, FileText, Package, User } from "lucide-react"
 import { BsCash } from "react-icons/bs";
 import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md";
 import { RiAdminLine } from "react-icons/ri";
@@ -40,11 +40,11 @@ export const menuItems = [
         icon: MdOutlineInventory2 ,
         href: "/inventario",
     },
-    {
-        title: "Ventas",
-        icon: ShoppingCart,
-        href: "/ventas",
-    },
+    // {
+    //     title: "Ventas",
+    //     icon: ShoppingCart,
+    //     href: "/ventas",
+    // },
     {
         title: "Administración",
         icon: RiAdminLine ,

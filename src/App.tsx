@@ -9,7 +9,7 @@ import { Products } from './pages/products/Products';
 // import { SidebarProvider } from './components/ui/sidebar';
 // import { AppSidebar } from './pages/layout/Sidebar';
 import { Inventory } from './pages/inventory/Inventory';
-import { Sales } from './pages/sales/Sales';
+// import { Sales } from './pages/sales/Sales';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useAxiosInterceptor } from './services/Interceptor';
@@ -52,7 +52,7 @@ function App() {
             <Route path="/facturas" element={<Invoices />} />
             <Route path="/productos" element={<Products />} />
             {/* <Route path="/productos/historial" element={<Products />} /> */}
-            <Route path="/ventas" element={<Sales />} />
+            {/* <Route path="/ventas" element={<Sales />} /> */}
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/usuarios" element={<Users />} />
             <Route path="/administracion" element={<Administration />} />
