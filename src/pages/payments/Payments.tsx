@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
-import { DateRangeFilter } from '@/interfaces/invoice.interface';
+import { DateRangeFilter, IInvoice } from '@/interfaces/invoice.interface';
 import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -21,6 +21,7 @@ import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
+import { getInvoiceUnordered } from '@/services/invoice.service';
 // import { PaymentExpandible } from './PaymentExpandible';
 
 export const Payments = () => {
@@ -34,6 +35,8 @@ export const Payments = () => {
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const [openDisassociate, setOpenDisassociate] = useState<boolean>(false);
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
+
+    const [invoicesForPay, setInvoicesForPay] = useState<IInvoice[]>([]);
 
     const [totalize, setTotalize] = useState({ remaining: 0, total: 0 })
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
@@ -49,11 +52,13 @@ export const Payments = () => {
 
     useEffect(() => {
         getAllPaymentsApi();
+        getInvoiceApi();
     }, [])
 
     useEffect(() => {
         if (date?.to) {
             getPaymentsFilterApi()
+            getInvoiceApi();
         }
     }, [date?.to])
 
@@ -267,8 +272,13 @@ export const Payments = () => {
         setOpenPayDialog(false)
     }
 
+    const getInvoiceApi = async () => {
+        const response: IInvoice[] = await getInvoiceUnordered();
+        setInvoicesForPay(response);
+    }
+
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col h-screen overflow-y-hidden">
             {loading && (
                 <ScreenLoader />
             )}
@@ -289,7 +299,6 @@ export const Payments = () => {
                 </div>
             </header>
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
-
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between">
@@ -359,7 +368,7 @@ export const Payments = () => {
                     label1="Asociar pago a factura"
                     isEdit={true}
                 >
-                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} />
+                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} invoiceForPay={invoicesForPay} />
                 </DialogComponent>
             )}
 

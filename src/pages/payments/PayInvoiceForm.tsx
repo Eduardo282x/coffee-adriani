@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { IPayInvoiceForm, IPayments } from '@/interfaces/payment.interface';
 import { formatNumberWithDots } from '@/hooks/formaters';
-import { getInvoiceUnordered } from '@/services/invoice.service';
 import { Autocomplete } from '@/components/autocomplete/Autocomplete';
 import { IInvoice, IInvoiceForPay } from '@/interfaces/invoice.interface';
 import { TableComponent } from '@/components/table/TableComponent';
@@ -13,41 +12,34 @@ import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 // import { IDolar } from '@/interfaces/product.interface';
 
-// interface PayInvoiceFormProps extends FromProps {
-//     dolar: IDolar | undefined
-// }
+interface PayInvoiceFormProps extends FromProps {
+    invoiceForPay: IInvoice[]
+}
 
-export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
+export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, invoiceForPay }) => {
     const [infoPayment, setInfoPayment] = useState<IPayments>(data);
     const [allInvoices, setAllInvoices] = useState<IOptions[]>([]);
     // const [cash, setCash] = useState<boolean>(false);
     const [currencyBs, setCurrencyBs] = useState<boolean>(false);
     const [invoicesForPay, setInvoicesForPay] = useState<IInvoiceForPay[]>([]);
-    const [invoices, setInvoices] = useState<IInvoice[]>([]);
     const [restPayment, setRestPayment] = useState<number>(0);
 
     useEffect(() => {
         setCurrencyBs(data.account.method.currency === 'BS');
         // setCash(data.account.method.currency === 'USD' && data.account.method.name === 'Efectivo $')
         setInfoPayment(data);
-        setRestPayment(Number(data.remainingUSD))
-    }, [data])
+        setRestPayment(Number(data.remainingUSD));
+    }, [data]);
 
     useEffect(() => {
-        getInvoiceApi()
-    }, [])
-
-    const getInvoiceApi = async () => {
-        const response: IInvoice[] = await getInvoiceUnordered();
-        setInvoices(response);
-        const parseData: IOptions[] = response.map((inv: IInvoice) => (
+        const parseData: IOptions[] = invoiceForPay.map((inv: IInvoice) => (
             {
                 label: `Factura #${inv.controlNumber} - ${inv.client?.name}`,
                 value: inv.id.toString(),
             }
         ));
         setAllInvoices(parseData);
-    }
+    }, [invoiceForPay])
 
     const setPayment = (payment: IPayments, remaining: boolean): string => {
         if (payment.account.method.currency === 'USD') {
@@ -66,7 +58,7 @@ export const PayInvoiceForm: FC<FromProps> = ({ onSubmit, data }) => {
     }
 
     const selectInvoice = (value: string) => {
-        const findInvoice: IInvoiceForPay = invoices.find((inv) => inv.id.toString() === value) as IInvoiceForPay;
+        const findInvoice: IInvoiceForPay = invoiceForPay.find((inv) => inv.id.toString() === value) as IInvoiceForPay;
         if (!findInvoice) return;
 
         const duplicateInvoice = invoicesForPay.find(item => item.id.toString() == value);
