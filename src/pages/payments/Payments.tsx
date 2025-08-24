@@ -4,7 +4,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { GroupPayments, InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
 import { deletePayment, getPayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putDisassociatePayment, putPayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
-import { paymentsColumns } from './payment.data';
+import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
 import { DateRangeFilter, IInvoice } from '@/interfaces/invoice.interface';
@@ -43,12 +43,7 @@ export const Payments = () => {
     // const today = new Date();
 
     const [date, setDate] = useState<DateRange | undefined>(undefined)
-
-    // const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [accountFilter, setAccountFilter] = useState<string>('all');
-    const [associatedFilter, setAssociatedFilter] = useState<string>('all');
-    const [methodFilter, setMethodFilter] = useState<string>('all');
-    const [creditFilter, setCreditFilter] = useState<string>('all');
+    const [filter, setFilters] = useState<PaymentFilters>(initialPaymentFilters);
 
     useEffect(() => {
         getAllPaymentsApi();
@@ -80,6 +75,12 @@ export const Payments = () => {
         setLoading(false)
     }
 
+    useEffect(() => {
+        const calculateRemaining = payments.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
+        const calculateTotal = payments.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
+        setTotalize({ remaining: calculateRemaining, total: calculateTotal });
+    }, [payments.payments])
+
     const getPaymentsFilterApi = async () => {
         setLoading(true);
         const filterDate: DateRangeFilter = {
@@ -108,55 +109,38 @@ export const Payments = () => {
         })
     }
 
-    const handleChangeCredit = (option: string) => {
-        setCreditFilter(option);
-    };
-
-    // const handleChangeStatusPay = (option: string) => {
-    //     setStatusFilter(option);
-    // };
-
-    const handleChangeStatusAssociated = (option: string) => {
-        setAssociatedFilter(option);
-    };
-    const handleChangeAccount = (option: string) => {
-        setAccountFilter(option);
-    };
-
-    const handleChangeMethods = (option: string) => {
-        setMethodFilter(option);
-    };
+    const handleChangeFilter = (filter: PaymentFilterType,value: string) => {
+        setFilters(prev => ({
+            ...prev,
+            [filter]: value
+        }))
+    }
 
 
     useEffect(() => {
         let filtered = [...payments.allPayments];
 
-        // if (statusFilter !== 'all') {
-        //     filtered = filtered.filter(pay => pay.status === statusFilter);
-        // }
-
-        if (associatedFilter !== 'all') {
-            filtered = filtered.filter(pay => pay.associated === (associatedFilter === 'associated'));
+        if (filter.associated !== 'all') {
+            filtered = filtered.filter(pay => pay.associated === (filter.associated === 'associated'));
         }
 
-        if (methodFilter !== 'all') {
-            filtered = filtered.filter(pay => pay.account.method.id === Number(methodFilter));
+        if (filter.method !== 'all') {
+            filtered = filtered.filter(pay => pay.account.method.id === Number(filter.method));
         }
 
-        if (creditFilter !== 'all') {
-            filtered = filtered.filter(pay => pay.credit == (creditFilter == 'credit'));
+        if (filter.credit !== 'all') {
+            filtered = filtered.filter(pay => pay.credit == (filter.credit == 'credit'));
         }
 
-        if (accountFilter !== 'all') {
-            filtered = filtered.filter(pay => pay.accountId == Number(accountFilter));
+        if (filter.account !== 'all') {
+            filtered = filtered.filter(pay => pay.accountId == Number(filter.account));
         }
 
         setPayments(prev => ({
             ...prev,
             payments: filtered
         }));
-    }, [associatedFilter, methodFilter, creditFilter, accountFilter, payments.allPayments]);
-
+    }, [filter, payments.allPayments]);
 
 
     const savePayments = async (data: IPaymentForm) => {
@@ -278,7 +262,7 @@ export const Payments = () => {
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-y-hidden">
+        <div className="flex flex-col">
             {loading && (
                 <ScreenLoader />
             )}
@@ -307,16 +291,13 @@ export const Payments = () => {
                     <div className="flex items-end gap-2">
                         <DropdownColumnFilter columns={columns} setColumns={setColumns} />
                         <PaymentFilter
+                            filters={filter}
+                            handleChangeFilter={handleChangeFilter}
                             paymentsColumns={paymentsColumns}
                             setPaymentsFilter={setPaymentsFilter}
                             payments={payments.paymentsFilter}
                             date={date}
                             setDate={setDate}
-                            handleChangeMethods={handleChangeMethods}
-                            handleChangeAccount={handleChangeAccount}
-                            // handleChangeStatusPay={handleChangeStatusPay}
-                            handleChangeStatusAssociated={handleChangeStatusAssociated}
-                            handleChangeCredit={handleChangeCredit}
                         />
                     </div>
                 </div>

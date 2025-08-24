@@ -209,7 +209,6 @@ export const paymentsFilterColumns: IColumns<IInvoiceForPay>[] = [
     },
 ]
 
-
 export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
     {
         label: 'Factura',
@@ -256,7 +255,6 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
     },
 ]
 
-
 export const formatTimeToAMPM = (time: string): string => {
     if (!time) return ""
 
@@ -276,4 +274,20 @@ export const formatTimeRange = (startTime: string): string => {
     // const formattedEnd = formatTimeToAMPM(endTime)
 
     return `${formattedStart}`
+}
+
+export interface PaymentFilters {
+    account: string;
+    associated: string;
+    method: string;
+    credit: string;
+}
+
+export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit';
+
+export const initialPaymentFilters: PaymentFilters = {
+    account: 'all',    
+    associated: 'all',
+    method: 'all',
+    credit: 'all',
 }
