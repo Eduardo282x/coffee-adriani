@@ -49,7 +49,6 @@ export const Collections = () => {
     }
 
     const getMessageCollectionApi = async () => {
-        setLoading(true);
         const response: IMessages[] = await getMessageCollection();
 
         const newColumns: IColumns<ICollection>[] = [
@@ -58,7 +57,7 @@ export const Collections = () => {
                 label: 'Mensaje',
                 element: (data: ICollection) => (
                     <DropdownMenu>
-                        <DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild>
                             <span className="rounded-lg px-2 bg-green-100 text-green-800">
                                 {data.message ? data.message.title : ''}
                             </span>
@@ -107,7 +106,6 @@ export const Collections = () => {
                 messages: response,
             });
         }
-        setLoading(false)
     }
 
     const getCollectionHistoryApi = async () => {
@@ -133,7 +131,8 @@ export const Collections = () => {
                 collections
             }
         })
-    }
+    };
+
     const setFilterMessage = (messages: IMessages[]) => {
         setMessages(prev => {
             return {
@@ -178,14 +177,12 @@ export const Collections = () => {
         }
 
         if (byColumn) {
-            // setLoading(true);
             const updateData = {
                 messageId: data.messageId,
                 send: data.send
             }
 
             await putCollection(data.id, updateData);
-            // setLoading(false);
         }
 
     }
@@ -205,19 +202,43 @@ export const Collections = () => {
 
     const onSubmitMessage = async (message: CollectionMessageBody) => {
         if (messageSelected) {
-            await putMessageCollection(messageSelected.id, message)
+            await putMessageCollection(messageSelected.id, message);
+            const updatedMessage = {
+                ...messageSelected,
+                title: message.title,
+                content: message.content,
+                updatedAt: new Date(),
+            };
+            setMessages(prev => ({
+                ...prev,
+                messages: prev.messages.map(item => item.id == messageSelected.id ? updatedMessage : item),
+            }));
         } else {
-            await postMessageCollection(message)
+            await postMessageCollection(message);
+            const newMessage = {
+                id: Math.floor(Math.random() * 1000) + 100, // Simula un ID único
+                title: message.title,
+                content: message.content,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+            setMessages(prev => ({
+                ...prev,
+                messages: [...prev.messages, newMessage],
+            }));
         }
-
         setOpenDialog(false);
-        await getMessageCollectionApi();
+        // await getMessageCollectionApi();
     }
 
     const deleteMessageAPI = async (actionDelete: boolean) => {
         if (actionDelete && messageSelected) {
-            await deleteMessageCollection(messageSelected.id)
-            await getMessageCollectionApi();
+            await deleteMessageCollection(messageSelected.id);
+            setMessages(prev => ({
+                ...prev,
+                messages: prev.messages.filter(item => item.id != messageSelected.id),
+            }));
+            // await getMessageCollectionApi();
         }
         setOpenDialogDeleteMessage(false);
     }
@@ -400,7 +421,6 @@ export const Collections = () => {
                     )}
                 </div>
             </main >
-
 
             <DialogComponent
                 open={openDialog}

@@ -28,8 +28,8 @@ export const CollectionActions = ({ markAll, toggleSendData, messages, changeMes
                         <SelectValue placeholder="Mensaje" />
                     </SelectTrigger>
                     <SelectContent>
-                        {messages.map(item => (
-                            <SelectItem value={item.id.toString()}>{item.title}</SelectItem>
+                        {messages.map((item, index) => (
+                            <SelectItem key={index} value={item.id.toString()}>{item.title}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
