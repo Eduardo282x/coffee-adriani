@@ -95,7 +95,7 @@ export const TableComponent = <T,>({
 
     return (
         <>
-            <div className={`rounded-md border ${className}`}>
+            <div className={`rounded-md border hidden lg:block ${className}`}>
                 <Table>
                     <TableHeader className={`shadow-md ${hideColumns && 'hidden'}`}>
                         <TableRow>
@@ -156,6 +156,12 @@ export const TableComponent = <T,>({
                 </Table>
             </div>
 
+            <div className="block lg:hidden space-y-2">
+                {dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+                    <CardDynamicMobile key={index} data={item} columns={columnData} />
+                ))}
+            </div>
+
             {(!hidePaginator && dataBase.length >= 5) && (
                 <Paginator
                     page={page}
@@ -167,6 +173,24 @@ export const TableComponent = <T,>({
                 </Paginator>
             )}
         </>
+    )
+}
+
+interface CardDynamicMobileProps<T> {
+    data: T;
+    columns: IColumns<T>[];
+}
+
+const CardDynamicMobile = <T,>({ data, columns }: CardDynamicMobileProps<T>) => {
+    return (
+        <div className="bg-white rounded-md p-4 shadow-md w-full relative">
+            {columns.filter(item => !item.optionActions).map((col: IColumns<T>, index: number) => (
+                <div key={index} className="flex gap-2">
+                    <span className="font-semibold">{col.label}:</span>
+                    <span>{col.element(data)}</span>
+                </div>
+            ))}
+        </div>
     )
 }
 

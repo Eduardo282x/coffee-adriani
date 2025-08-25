@@ -34,12 +34,12 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
     }
 
     return (
-        <div className='p-2 flex items-center justify-between w-full '>
-            <div>
+        <div className='p-2 flex flex-wrap items-center justify-between w-full '>
+            <div className='lg:my-0 my-2'>
                 <p className='text-gray-700'><span className='font-medium '>Total de Elementos:</span> {totalElements}</p>
             </div>
 
-            <div className="flex items-center justify-center gap-8">
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
                 <div className="flex items-center justify-center gap-2">
                     <span className=' text-gray-700 text-sm font-medium'>Elementos por pagina: </span>
                     <Select onValueChange={changeValueSelect} value={rowsPerPage.toString()}>
@@ -57,7 +57,7 @@ export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPa
                     </Select>
                 </div>
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex  items-center justify-center gap-2">
                     <Button variant="outline" size="icon" disabled={page == 0} className=' cursor-pointer rounded-full' onClick={() => arrowBtns('back')}>
                         <ChevronLeft />
                     </Button>
