@@ -11,15 +11,16 @@ interface ToolTipProps {
     tooltip: string;
     children: React.ReactNode;
     position?: TooltipPosition;
+    className?: string;
 }
 
 type TooltipPosition = "bottom" | "top" | "right" | "left" | undefined;
 
-export const ToolTip: FC<ToolTipProps> = ({ tooltip, children, position }) => {
+export const ToolTip: FC<ToolTipProps> = ({ tooltip, children, position, className }) => {
     return (
         <TooltipProvider>
             <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger className={`${className}`}>
                     {children}
                 </TooltipTrigger>
                 <TooltipContent side={position}>
