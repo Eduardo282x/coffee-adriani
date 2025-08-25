@@ -4,7 +4,7 @@ import { FC } from 'react';
 
 interface CardDashboardProps {
     title: string;
-    mainNumber: string;
+    mainNumber: number;
     percent: string;
     subtitle: string;
     icon: React.ComponentType<{ className?: string }>

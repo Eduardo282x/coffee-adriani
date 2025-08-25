@@ -1,19 +1,24 @@
 import { Button } from "@/components/ui/button"
-import { pendingInvoices } from "./pending-invoices.data"
+import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters"
+import { LastPending } from "@/interfaces/dashboard.interface"
 
-export const PendingInvoices = () => {
+interface PendingInvoicesProps {
+    invoicesData: LastPending[]
+}
+
+export const PendingInvoices = ({ invoicesData }: PendingInvoicesProps) => {
     return (
         <div className="space-y-4">
-            {pendingInvoices.map((invoice, index) => (
+            {invoicesData && invoicesData.map((invoice, index) => (
                 <div key={index} className="grid grid-cols-3">
                     <div className="space-y-1">
-                        <p className="text-sm font-medium leading-none">{invoice.id}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.client}</p>
+                        <p className="text-sm font-medium leading-none">{invoice.controlNumber}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
                     </div>
 
                     <div className="text-center">
-                        <p className="text-sm font-medium">{invoice.amount}</p>
-                        <p className="text-xs text-muted-foreground">{invoice.date}</p>
+                        <p className="text-sm font-medium">{formatOnlyNumberWithDots(invoice.totalAmount)} $</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(invoice.dispatchDate)}</p>
                     </div>
 
                     <div className="text-right">
