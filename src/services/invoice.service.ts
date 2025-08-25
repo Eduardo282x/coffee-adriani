@@ -89,6 +89,13 @@ export const putPendingInvoice = async (id: number) => {
         return err
     }
 }
+export const putCleanInvoice = async (id: number) => {
+    try {
+        return await putDataApi(`${routeInvoice}/clean/${id}`, {});
+    } catch (err) {
+        return err
+    }
+}
 
 export const deleteInvoice = async (id: number): Promise<BaseResponse> => {
     try {

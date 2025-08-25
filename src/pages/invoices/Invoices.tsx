@@ -7,7 +7,7 @@ import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm";
 import { MdUpdate } from "react-icons/md";
 import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, InvoiceStatus, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter, putPendingInvoice } from "@/services/invoice.service"
+import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter, putPendingInvoice, putCleanInvoice } from "@/services/invoice.service"
 import { Expansible } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
@@ -235,6 +235,26 @@ export const Invoices = () => {
         putPendingInvoice(invoice.id);
     }
 
+    const cleanInvoices = (invoice: IInvoice) => {
+        setInvoices((prev) => {
+            return {
+                ...prev,
+                invoices: prev.invoices.map(item => {
+                    return {
+                        client: item.client,
+                        invoices: item.invoices.map(data => {
+                            return {
+                                ...data,
+                                remaining: data.id == invoice.id ? 0 : data.remaining
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        putCleanInvoice(invoice.id);
+    }
+
     const checkInvoicesApi = async () => {
         await checkInvoices()
     }
@@ -279,32 +299,32 @@ export const Invoices = () => {
     return (
         <div className="flex flex-col">
             {loadingFile && <ScreenLoader/>}
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center  gap-2 lg:gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Facturas</h1>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <Button onClick={checkInvoicesApi}>
+                <div className="flex items-center gap-2 lg:gap-4">
+                    <Button onClick={checkInvoicesApi} className="hidden lg:flex">
                         <MdUpdate className="mr-2 h-4 w-4" />
                         Validar facturas
                     </Button>
                     <DolarComponents />
                     <Button onClick={newInvoices}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nueva Factura
+                        <span className="hidden lg:block">Nueva Factura</span>
                     </Button>
                 </div>
             </header>
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
             <main className="flex-1 p-4 md:p-6 min-h-[80vh]">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Facturas</h2>
 
                     <div className='flex items-end justify-center gap-2'>
-                        <Button onClick={generateExcel} className="bg-green-700 hover:bg-green-600 text-white">
+                        <Button onClick={generateExcel} className="bg-green-700 hover:bg-green-600 text-white hidden lg:flex">
                             <Download /> Exportar
                         </Button>
                         <InvoiceFilter
@@ -353,6 +373,7 @@ export const Invoices = () => {
                                             columns={invoiceColumns}
                                             payInvoices={payInvoices}
                                             pendingInvoices={pendingInvoices}
+                                            cleanInvoices={cleanInvoices}
                                             editInvoice={editInvoice}
                                             deleteInvoice={deleteInvoiceApi}
                                         />
@@ -375,7 +396,7 @@ export const Invoices = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
+                    className="w-[90%] lg:w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
                     label2="Agregar Factura"
                     label1="Editar Factura"
                     isEdit={selectInvoice !== null}

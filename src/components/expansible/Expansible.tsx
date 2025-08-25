@@ -10,19 +10,24 @@ import { Button } from "../ui/button";
 // import { Download } from "lucide-react";
 import { MdOutlineEdit, MdPayments } from "react-icons/md";
 import { CgRemove } from "react-icons/cg";
+import { ToolTip } from "../tooltip/ToolTip";
+import { BsFillEraserFill } from "react-icons/bs";
+
 interface ExpansibleProps {
     invoice: InvoiceApi;
     columns: IColumns<IInvoice>[];
     editInvoice: (data: IInvoice) => void;
     payInvoices: (data: IInvoice) => void;
     pendingInvoices: (data: IInvoice) => void;
+    cleanInvoices: (data: IInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices }) => {
+export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
+    const [openDialogCleanInvoice, setOpenDialogCleanInvoice] = useState<boolean>(false);
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [dataDetailsPay, setDataDetailsPay] = useState<IInvoicePayment[]>([]);
@@ -44,6 +49,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
 
     const action = (action: string, data: IInvoice) => {
         setInvoiceSelected(data);
+
         setDataDetails(data.invoiceItems);
         setDataDetailsPay(data.InvoicePayment);
 
@@ -79,6 +85,14 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         if (invoiceSelected) {
             pendingInvoices(invoiceSelected);
             setOpenDialog(false);
+        }
+    }
+
+    const handleCleanInvoice = () => {
+        if (invoiceSelected) {
+            cleanInvoices(invoiceSelected);
+            // setOpenDialog(false);
+            setOpenDialogCleanInvoice(false);
         }
     }
 
@@ -118,18 +132,26 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                     {/* Botones de acciones */}
                     <div className="absolute -top-11 left-0 flex justify-between w-full gap-3">
                         <div className="flex gap-2">
-                            {/* <Button className="bg-green-700 hover:bg-green-600 text-white">
-                            <Download /> Exportar
-                        </Button> */}
-                            <Button onClick={handleEditInvoice}>
-                                <MdOutlineEdit /> Editar
-                            </Button>
-                            <Button onClick={handlePendingInvoice}>
-                                <CgRemove /> Pendiente
-                            </Button>
-                            <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
-                                <MdPayments /> Marcar Pagada
-                            </Button>
+                            <ToolTip position="right" tooltip={"Editar Factura"}>
+                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handleEditInvoice}>
+                                    <MdOutlineEdit />
+                                </Button>
+                            </ToolTip>
+                            <ToolTip position="right" tooltip={"Limpiar Factura"}>
+                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={() => setOpenDialogCleanInvoice(true)}>
+                                    <BsFillEraserFill />
+                                </Button>
+                            </ToolTip>
+                            <ToolTip position="right" tooltip={"Pendiente Factura"}>
+                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handlePendingInvoice}>
+                                    <CgRemove />
+                                </Button>
+                            </ToolTip>
+                            <ToolTip position="right" tooltip={"Marcar Pagada"}>
+                                <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
+                                    <MdPayments />
+                                </Button>
+                            </ToolTip>
                         </div>
 
                         <div className="mr-10">
@@ -192,6 +214,20 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                 <div className="flex items-center justify-center gap-8 mt-5">
                     <Button onClick={() => setOpenDialogDelete(false)} className="text-lg ">Cancelar</Button>
                     <Button onClick={deleteInvoices} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
+                </div>
+            </DialogComponent>
+
+            <DialogComponent
+                open={openDialogCleanInvoice}
+                setOpen={setOpenDialogCleanInvoice}
+                className="w-[28rem]"
+                label2=""
+                label1="Estas seguro que deseas limpiar esta factura? Esta acción no se puede devolver."
+                isEdit={true}
+            >
+                <div className="flex items-center justify-center gap-8 mt-5">
+                    <Button onClick={() => setOpenDialogCleanInvoice(false)} className="text-lg ">Cancelar</Button>
+                    <Button onClick={handleCleanInvoice} className="text-lg bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white">Limpiar</Button>
                 </div>
             </DialogComponent>
         </div>
