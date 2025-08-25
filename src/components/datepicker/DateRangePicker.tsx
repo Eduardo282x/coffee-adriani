@@ -1,12 +1,13 @@
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar } from '../ui/calendar';
+import { Calendar } from "@/components/ui/calendar"
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
 // import { addDays, format } from 'date-fns';
 import { Label } from '../ui/label';
 import { FC, useEffect, useState } from 'react';
-import { es } from 'date-fns/locale';
+// import { es } from 'date-fns/locale';
+import { es } from "react-day-picker/locale";
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 
@@ -14,9 +15,10 @@ interface DateRangePickerProps {
     datePicker: DateRange | undefined;
     setDatePicker: (date: DateRange | undefined) => void;
     label: string;
+    btnWidth?: string;
 }
 
-export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDatePicker, label }) => {
+export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDatePicker, label, btnWidth }) => {
     const [date, setDate] = useState<DateRange | undefined>(datePicker)
     const [open, setOpen] = useState<boolean>(false);
 
@@ -35,7 +37,8 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
                         variant={"outline"}
                         className={cn(
                             "w-48 overflow-hidden justify-start text-left font-normal",
-                            !date && "text-muted-foreground"
+                            !date && "text-muted-foreground",
+                            btnWidth
                         )}
                     >
                         <CalendarIcon />
@@ -56,12 +59,12 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                        initialFocus
                         mode="range"
                         locale={es}
                         selected={date}
                         onSelect={setDate}
                         defaultMonth={date?.from}
+                        captionLayout="dropdown"
                     />
                 </PopoverContent>
             </Popover>

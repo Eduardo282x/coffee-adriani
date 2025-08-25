@@ -6,7 +6,8 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Label } from '../ui/label';
 import { FC } from 'react';
-import { es } from 'date-fns/locale';
+// import { es } from 'date-fns/locale';
+import { es } from "react-day-picker/locale";
 
 interface DatePickerProps {
     setDate: (date: Date | undefined) => void;
@@ -42,9 +43,10 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        fromDate={minDate}
-                        toDate={maxDate}
-                        initialFocus
+                        captionLayout="dropdown"
+                        startMonth={minDate}
+                        endMonth={maxDate}
+                        hidden={[{ before: new Date(minDate as Date), after: new Date(maxDate as Date) }]}
                     />
                 </PopoverContent>
             </Popover>
