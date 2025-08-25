@@ -1,7 +1,23 @@
 import { IColumns } from "@/components/table/table.interface";
-import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { IInvoice } from "@/interfaces/invoice.interface";
+import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters";
+import { IInvoice, InvoiceItems } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
+
+export interface ITotals {
+    totalInvoice: string;
+    totalInvoiceRemaining: string;
+    totalInvoiceDetails: string;
+    totalPayments: string,
+    total: string
+}
+
+export const baseTotals: ITotals = {
+    totalInvoice: '0',
+    totalInvoiceRemaining: '0',
+    totalInvoiceDetails: '0',
+    totalPayments: '0',
+    total: '0'
+};
 
 export const expendePaymentsColumns: IColumns<IPayments>[] = [
     {
@@ -67,6 +83,49 @@ export const expenseInvoiceColumns: IColumns<IInvoice>[] = [
         label: 'Restante',
         column: 'remaining',
         element: (data: IInvoice) => formatNumberWithDots(Number(data.remaining).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Regalos',
+        column: 'gifts',
+        element: (data: IInvoice) => data.invoiceItems.filter(item => item.type == 'GIFT').reduce((acc, item) => acc + item.quantity, 0),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+];
+
+export const expenseInvoiceDetailsColumns: IColumns<InvoiceItems>[] = [
+    {
+        label: 'Producto',
+        column: 'product.name',
+        element: (data: InvoiceItems) => data.product.name,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Precio',
+        column: 'unitPrice',
+        element: (data: InvoiceItems) => `${formatOnlyNumberWithDots(data.unitPrice)} $`,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Cantidad',
+        column: 'quantity',
+        element: (data: InvoiceItems) => data.quantity,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Subtotal',
+        column: 'subtotal',
+        element: (data: InvoiceItems) => `${formatOnlyNumberWithDots(data.subtotal)} $`,
         orderBy: '',
         type: 'string',
         icon: false,

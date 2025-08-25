@@ -6,7 +6,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DailyTotal, IExpenses, ProductSale } from "@/interfaces/adminitration.interface";
 import { getExpenses } from "@/services/expenses.service";
 import { useEffect, useState } from "react";
-import { expendePaymentsColumns, expenseInvoiceColumns } from "./administration.data";
+import { baseTotals, expendePaymentsColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
@@ -40,7 +40,7 @@ export const Administration = () => {
     const [expenses, setExpenses] = useState<IExpenses | null>(null);
     const [cardEarnsData, setCardEarnsData] = useState<CardEarnsProps[]>([]);
     const [productSales, setProductSales] = useState<ProductSale[]>([]);
-    const [totals, setTotals] = useState<{ totalInvoice: string; totalPayments: string, total: string }>({ totalInvoice: '0', totalPayments: '0', total: '0' });
+    const [totals, setTotals] = useState<ITotals>(baseTotals);
     const [filtersDate, setFiltersDate] = useState({
         startDate: new Date(now.getFullYear(), now.getMonth(), 1),
         endDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
@@ -87,9 +87,12 @@ export const Administration = () => {
                 setExpenses(response);
                 setProductSales(response.invoicesEarns.resumen.productPercentage);
                 const totalInvoice = response.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);
+                const totalInvoiceDetails = response.invoices.flatMap(item => item.invoiceItems.filter(element => element.type == 'GIFT')).reduce((acc, item) => acc + Number(item.subtotal), 0);
                 const totalPayments = response.payments.reduce((acc, pay) => acc + Number(pay.amount), 0);
                 setTotals({
-                    totalInvoice: formatOnlyNumberWithDots(totalInvoice),
+                    totalInvoice: formatOnlyNumberWithDots(totalInvoice + totalInvoiceDetails),
+                    totalInvoiceRemaining: formatOnlyNumberWithDots(totalInvoice),
+                    totalInvoiceDetails: formatOnlyNumberWithDots(totalInvoiceDetails),
                     totalPayments: formatOnlyNumberWithDots(totalPayments),
                     total: formatOnlyNumberWithDots(totalInvoice + totalPayments)
                 })
@@ -230,8 +233,21 @@ export const Administration = () => {
                 )}
                 {option == 'invoices' && expenses && (
                     <div>
-                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
-                        <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns} />
+                        <div className="flex items-center justify-start gap-2">
+                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
+                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Restante:</span> {totals.totalInvoiceRemaining} $</p>
+                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Regalos:</span> {totals.totalInvoiceDetails} $</p>
+                        </div>
+                        <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns}
+                            isExpansible={true}
+                            renderRow={(item, index) => (
+                                item.invoiceItems.length > 0
+                                    ? (
+                                        <TableComponent dataBase={item.invoiceItems.filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
+                                    ) :
+                                    <p>Sin regalos</p>
+                            )}
+                        />
                     </div>
                 )}
                 {option == 'pay' && expenses && (
