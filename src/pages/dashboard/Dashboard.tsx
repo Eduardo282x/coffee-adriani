@@ -21,7 +21,7 @@ export const Dashboard = () => {
     const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
     const now = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
-        from: new Date(now.getFullYear(), now.getMonth(), 1),
+        from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7),
         to: new Date(now.getFullYear(), now.getMonth(), now.getDate())
     })
 
@@ -40,8 +40,6 @@ export const Dashboard = () => {
     }
 
     const exportData = async () => {
-        console.log('exportart');
-        
         const dateRange: DateRangeFilter = {
             startDate: new Date(date?.from as Date),
             endDate: new Date(date?.to as Date),
@@ -68,7 +66,8 @@ export const Dashboard = () => {
                     <RiFileExcel2Line className="text-green-600 font-bold" /> Exportar Excel
                 </Button>
             </header>
-            <main className="flex-1 space-y-4 p-4 md:p-6">
+
+            <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight ">Resumen</h2>
                     <div className="flex items-center gap-2">
