@@ -28,6 +28,10 @@ export const AppSidebar = () => {
         localStorage.removeItem('token');
     }
 
+    const goProfile = () => {
+        navigate('/perfil')
+    }
+
     useEffect(() => { 
         if (validateToken()) {
             setUserData(validateToken() as ITokenExp)
@@ -75,7 +79,7 @@ export const AppSidebar = () => {
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-60">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={goProfile}>
                                     <User2 className="mr-2 h-4 w-4" />
                                     <span>Perfil</span>
                                 </DropdownMenuItem>

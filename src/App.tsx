@@ -20,6 +20,7 @@ import { socket, useSocket } from './services/socket.io';
 import { Accounts } from './pages/accounts/Accounts';
 import { Administration } from './pages/administration/Administration';
 import { Collections } from './pages/collections/Collections';
+import { Profile } from './pages/profile/Profile';
 
 
 function AxiosInterceptorProvider() {
@@ -59,6 +60,7 @@ function App() {
             <Route path="/cobranza" element={<Collections />} />
             <Route path="/pagos" element={<Payments />} />
             <Route path="/cuentas-pago" element={<Accounts />} />
+            <Route path="/perfil" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>
