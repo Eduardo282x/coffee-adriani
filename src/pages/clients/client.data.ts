@@ -11,6 +11,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => data.name,
         orderBy: '',
         type: 'string',
+        visible: true,
         icon: false,
     },
     {
@@ -20,6 +21,17 @@ export const clientsColumns: IColumns<IClients>[] = [
         className: () => 'max-w-[12rem] block text-ellipsis',
         orderBy: '',
         type: 'string',
+        visible: true,
+        icon: false,
+    },
+    {
+        column: 'addressSecondary',
+        label: 'Dirección Secundaria',
+        element: (data: IClients) => data.addressSecondary ? data.addressSecondary : '-',
+        className: () => 'max-w-[12rem] block text-ellipsis',
+        orderBy: '',
+        type: 'string',
+        visible: false,
         icon: false,
     },
     {
@@ -28,6 +40,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => data.rif ? formatNumberWithDots(data.rif, '', '', true) : '-',
         orderBy: '',
         type: 'string',
+        visible: true,
         icon: false,
     },
     {
@@ -36,6 +49,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => data.phone,
         orderBy: '',
         type: 'string',
+        visible: true,
         icon: false,
     },
     {
@@ -44,6 +58,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => data.zone,
         orderBy: '',
         type: 'string',
+        visible: false,
         icon: false,
     },
     {
@@ -52,6 +67,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => data.block ? data.block.name : '-',
         orderBy: '',
         type: 'string',
+        visible: true,
         icon: false,
     },
     {
@@ -60,6 +76,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         element: (data: IClients) => formatDate(data.createdAt),
         orderBy: '',
         type: 'string',
+        visible: false,
         icon: false,
     },
     {
@@ -69,6 +86,7 @@ export const clientsColumns: IColumns<IClients>[] = [
         orderBy: '',
         type: 'string',
         icon: true,
+        visible: true,
         optionActions: [
             { label: 'Editar', icon: Edit, className: '' },
             { label: 'Eliminar', icon: Trash2, className: 'text-red-600' },
@@ -148,6 +166,7 @@ export interface IClientsForm {
     name: string;
     rif: string;
     address: string;
+    addressSecondary: string;
     phone: string;
     zone: string;
     blockId: string | number;
@@ -159,6 +178,7 @@ export const defaultValues: IClientsForm = {
     name: '',
     rif: '',
     address: '',
+    addressSecondary: '',
     phone: '',
     zone: '',
     blockId: ''

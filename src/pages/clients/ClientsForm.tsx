@@ -26,6 +26,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                 name: data.name,
                 rif: data.rif,
                 address: data.address,
+                addressSecondary: data.addressSecondary,
                 phone: data.phone,
                 zone: findZone ? findZone.value.toString() : '',
                 blockId: data.blockId.toString(),
@@ -41,44 +42,54 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
     }
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-4 w-full  py-4">
+        <div>
+            <Form {...form}>
+                <form id='client-form' onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4  gap-4 w-full  py-4">
 
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Nombre
-                    </Label>
-                    <Input {...form.register('name')} />
-                </div>
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Nombre
+                        </Label>
+                        <Input {...form.register('name')} />
+                    </div>
 
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Rif
-                    </Label>
-                    {/* <Input {...form.register('rif')} /> */}
-                    <InputSelect value={form.getValues().rif} onChange={setValueInput} name='rif' label='' options={rifOptions} max={11} type='number'></InputSelect>
-                </div>
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Dirección
-                    </Label>
-                    <Input {...form.register('address')} />
-                </div>
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Rif
+                        </Label>
+                        {/* <Input {...form.register('rif')} /> */}
+                        <InputSelect value={form.getValues().rif} onChange={setValueInput} name='rif' label='' options={rifOptions} max={11} type='number'></InputSelect>
+                    </div>
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Dirección
+                        </Label>
+                        <Input {...form.register('address')} />
+                    </div>
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Dirección Secundaria 
+                        </Label>
+                        <Input {...form.register('addressSecondary')} placeholder='(Opcional)' />
+                    </div>
 
-                <div className="flex flex-col items-start justify-start gap-2 w-full">
-                    <Label className="text-right">
-                        Teléfono
-                    </Label>
-                    <Input type='phone' {...form.register('phone')} />
-                    {/* <InputSelect value={form.getValues().phone} onChange={setValueInput} name='phone' label='' options={phoneOptions} max={7} type='number'></InputSelect> */}
-                </div>
+                    <div className="flex flex-col items-start justify-start gap-2 w-full">
+                        <Label className="text-right">
+                            Teléfono
+                        </Label>
+                        <Input type='phone' {...form.register('phone')} />
+                        {/* <InputSelect value={form.getValues().phone} onChange={setValueInput} name='phone' label='' options={phoneOptions} max={7} type='number'></InputSelect> */}
+                    </div>
 
-                <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones}></FormSelect>
-                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks}></FormSelect>
+                    <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones}></FormSelect>
+                    <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks}></FormSelect>
 
-                <Button type='submit'>Enviar</Button>
-            </form>
-        </Form>
+                </form>
+            </Form>
+            <div className='w-full flex items-center justify-center'>
+                <Button form='client-form' type='submit' className='w-1/2 text-white bg-[#6f4e37] hover:bg-[#6f4e37]/80'>Enviar</Button>
+            </div>
+        </div>
     )
 }
 

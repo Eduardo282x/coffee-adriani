@@ -118,7 +118,7 @@ export const Users = () => {
             </header>
 
             <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-wrap space-y-4 lg:space-y-0 w-full items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Usuarios</h2>
                     <div className="flex items-center gap-8">
 
@@ -136,7 +136,7 @@ export const Users = () => {
             <DialogComponent
                 open={openDialog}
                 setOpen={setOpenDialog}
-                className="w-[35rem]"
+                className="w-[90%] lg:w-[35rem]"
                 label2="Agregar Usuario"
                 label1="Editar Usuario"
                 isEdit={edit}
@@ -147,7 +147,7 @@ export const Users = () => {
             <DialogComponent
                 open={openDeleteDialog}
                 setOpen={setOpenDeleteDialog}
-                className="w-[28rem]"
+                className="w-[90%] lg:w-[28rem]"
                 label2=""
                 label1="Estas seguro que deseas eliminar este usuario?"
                 isEdit={true}

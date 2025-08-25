@@ -16,15 +16,22 @@ import { formatDate } from "@/hooks/formaters"
 import { clientStore, blockStore } from "@/store/clientStore"
 // import { RiFileExcel2Line } from "react-icons/ri"
 import { FaRegFilePdf } from "react-icons/fa"
+import { DropdownColumnFilter } from "@/components/table/DropdownColumnFilter"
+import { IColumns } from "@/components/table/table.interface"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { RiFileExcel2Line } from "react-icons/ri"
 
 export const Clients = () => {
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
 
+    const [columns, setColumns] = useState<IColumns<IClients>[]>(clientsColumns);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogReport, setOpenDialogReport] = useState<boolean>(false);
     const [openDialogBlock, setOpenDialogBlock] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [openDeleteDialogBlock, setOpenDeleteDialogBlock] = useState<boolean>(false);
+    const [openDropdown, setOpenDropdown] = useState(false);
+
 
     const [dataDialog, setDataDialog] = useState<IClientsForm>(defaultValues);
     const [dataDialogBlock, setDataDialogBlock] = useState<Block | null>(null);
@@ -157,6 +164,16 @@ export const Clients = () => {
         }
     }, [openDialog])
 
+    const exportPDF = () => {
+        setOpenDropdown(false);
+        setTimeout(() => setOpenDialogReport(true), 0);
+    }
+
+    const exportExcel = () => {
+        setOpenDropdown(false);
+        setTimeout(() => setOpenDialogReport(true), 0);
+    }
+
     return (
         <div className="flex flex-col">
             {loading && (
@@ -175,7 +192,7 @@ export const Clients = () => {
                         <Button className={`${!showBlocks ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setShowBlocks(true)}>Bloques</Button>
                     </div>
 
-                    <Button onClick={addNew}>
+                    <Button onClick={addNew} className="hidden lg:flex">
                         <Plus className="mr-2 h-4 w-4" />
                         {showBlocks ? 'Nuevo Bloque' : 'Nuevo Cliente'}
                     </Button>
@@ -183,12 +200,13 @@ export const Clients = () => {
             </header>
 
             <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-wrap items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Clientes</h2>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <DropdownColumnFilter columns={columns} setColumns={setColumns} />
                         {!showBlocks && (
                             <Select onValueChange={handleChangeBlock}>
-                                <SelectTrigger className="w-32 ">
+                                <SelectTrigger className=" w-full lg:w-32 mt-2 lg:mt-0 ">
                                     <SelectValue placeholder="Bloques" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -202,28 +220,39 @@ export const Clients = () => {
                             </Select>
                         )}
 
-                        <div className="flex w-72 items-center space-x-2">
+                        <Button onClick={addNew} className="lg:hidden w-full flex bg-[#6f4e37] hover:bg-[#6f4e37]/90 text-white">
+                            <Plus className="mr-2 h-4 w-4" />
+                            {showBlocks ? 'Nuevo Bloque' : 'Nuevo Cliente'}
+                        </Button>
+
+                        <div className="flex w-full lg:w-72 items-center space-x-2">
                             {showBlocks
                                 ? <Filter dataBase={blocks.allBlocks} columns={blockColumns} setDataFilter={setBlocksFilter} />
-                                : <Filter dataBase={clients.clients} columns={clientsColumns} setDataFilter={setClientsFilter} disabledEffect={true} />
+                                : <Filter dataBase={clients.clients} columns={columns} setDataFilter={setClientsFilter} disabledEffect={true} />
                             }
                         </div>
 
+                        <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
+                            <DropdownMenuTrigger asChild>
+                                <Button className="w-full lg:w-auto bg-[#6f4e37] hover:bg-[#6f4e37]/90 text-white">Exportar</Button>
+                            </DropdownMenuTrigger>
 
-                        <Button size='sm' onClick={() => setOpenDialogReport(true)} className="bg-red-800 hover:bg-red-600 text-white">
-                            <FaRegFilePdf className="text-white font-bold" /> Exportar PDF
-                        </Button>
-
-                        {/* <Button size='sm' onClick={() => setOpenDialogReport(true)} className="bg-green-700 hover:bg-green-600 text-white">
-                            <RiFileExcel2Line className="text-white font-bold" /> Exportar Excel
-                        </Button> */}
+                            <DropdownMenuContent className="bg-white border shadow-md rounded-md p-2">
+                                <DropdownMenuItem onClick={exportExcel} className="cursor-pointer hover:bg-gray-100 rounded-md p-2 flex items-center gap-2">
+                                    <RiFileExcel2Line className="text-green-600 font-bold" /> Exportar Excel
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={exportPDF} className="cursor-pointer hover:bg-gray-100 rounded-md p-2 flex items-center gap-2">
+                                    <FaRegFilePdf className="text-red-600 font-bold" /> Exportar PDF
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 
                 <div>
                     {showBlocks
                         ? <TableComponent columns={blockColumns} dataBase={blocks.blocks} action={getActionBlocks}></TableComponent>
-                        : <TableComponent columns={clientsColumns} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
+                        : <TableComponent columns={columns.filter(col => col.visible == true)} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
                     }
                 </div>
             </main>
@@ -232,7 +261,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[45rem]"
+                    className="w-[90%] lg:w-[48rem]"
                     label2="Agregar Cliente"
                     label1="Editar Cliente"
                     isEdit={edit}
@@ -245,7 +274,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialogBlock}
                     setOpen={setOpenDialogBlock}
-                    className="w-[45rem]"
+                    className="w-[90%] lg:w-[45rem]"
                     label2="Agregar Bloque"
                     label1="Editar Bloque"
                     isEdit={edit}
@@ -258,7 +287,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialogReport}
                     setOpen={setOpenDialogReport}
-                    className="w-[20rem]"
+                    className="w-[90%] lg:w-[20rem]"
                     label2="Generar Reporte"
                     label1="Generar Reporte"
                     isEdit={false}
@@ -271,7 +300,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDeleteDialog}
                     setOpen={setOpenDeleteDialog}
-                    className="w-[28rem]"
+                    className="w-[90%] lg:w-[28rem]"
                     label2=""
                     label1="Estas seguro que deseas eliminar este cliente?"
                     isEdit={true}
@@ -287,7 +316,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDeleteDialogBlock}
                     setOpen={setOpenDeleteDialogBlock}
-                    className="w-[28rem]"
+                    className="w-[90%] lg:w-[28rem]"
                     label2=""
                     label1="Estas seguro que deseas eliminar este bloque?"
                     isEdit={true}

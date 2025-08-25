@@ -1,4 +1,4 @@
-import { formatNumberWithDots, formatDateWithDateTime } from '@/hooks/formaters';
+import { formatDateWithDateTime, formatOnlyNumberWithDots } from '@/hooks/formaters';
 import { IDolar, IDolarForm, DolarBody } from '@/interfaces/product.interface';
 import { getProductDolar, updateDolarAutomatic, updateDolar } from '@/services/products.service';
 import { RefreshCcw } from 'lucide-react';
@@ -43,19 +43,19 @@ export const DolarComponents = () => {
         <div>
             <div className='flex items-center gap-4'>
                 <ToolTip tooltip="Actualizar manual" position="left">
-                    <Button onClick={() => setOpenDolar(true)}>
+                    <Button onClick={() => setOpenDolar(true)} className='hidden lg:flex'>
                         <MdOutlineCurrencyExchange />
                     </Button>
                 </ToolTip>
                 <ToolTip tooltip="Actualizar tasa dolar" position="left">
-                    <Button onClick={updateDolarApi}>
+                    <Button onClick={updateDolarApi} className='hidden lg:flex'>
                         <RefreshCcw />
                     </Button>
                 </ToolTip>
 
-                <div className="border border-[#ebe0d2] px-4 py-1 rounded-lg relative">
-                    <span className="font-semibold text-[#ebe0d2]">Dolar:</span> {dolar ? formatNumberWithDots(Number(dolar?.dolar).toFixed(2), '', ' Bs') : '00,0 Bs'}
-                    <span className=" absolute -bottom-6 -left-32 text-sm w-80">Ultima actualización: {formatDateWithDateTime(dolar ? dolar.date as Date : new Date())}</span>
+                <div className="lg:border border-[#ebe0d2] lg:px-4 py-1 rounded-lg relative">
+                    <span className="font-semibold text-xs lg:text-sm text-[#ebe0d2] text-ellipsis whitespace-nowrap block">Dolar: {dolar ? formatOnlyNumberWithDots(dolar?.dolar) : ''}  Bs</span> 
+                    <span className=" absolute -bottom-6 -left-32 text-sm w-80 hidden lg:block">Ultima actualización: {formatDateWithDateTime(dolar ? dolar.date as Date : new Date())}</span>
                 </div>
             </div>
 

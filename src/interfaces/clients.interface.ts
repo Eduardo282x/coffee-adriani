@@ -35,6 +35,7 @@ export interface IClients {
     name: string;
     rif: string;
     address: string;
+    addressSecondary: string;
     phone: string;
     zone: string;
     blockId: number;
