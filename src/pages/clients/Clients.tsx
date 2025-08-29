@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { postClients, putClients, generateReportPDF } from "@/services/clients.service"
+import { postClients, putClients, generateReportPDF, getClientsExcel } from "@/services/clients.service"
 import { Block, BodyBlock, BodyReport, IClients } from "@/interfaces/clients.interface"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
@@ -126,14 +126,14 @@ export const Clients = () => {
             blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId)
         }
         const response = await generateReportPDF(parseData) as Blob;
-        const url = URL.createObjectURL(response)
-        const link = window.document.createElement("a")
-        link.href = url
-        link.download = `Reporte de Clientes - ${formatDate(new Date())}.pdf`
-        window.document.body.appendChild(link)
-        link.click()
-        window.document.body.removeChild(link)
-        URL.revokeObjectURL(url)
+        const url = URL.createObjectURL(response);
+        const link = window.document.createElement("a");
+        link.href = url;
+        link.download = `Reporte de Clientes - ${formatDate(new Date())}.pdf`;
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         setOpenDialogReport(false);
         setLoading(false);
     }
@@ -169,9 +169,16 @@ export const Clients = () => {
         setTimeout(() => setOpenDialogReport(true), 0);
     }
 
-    const exportExcel = () => {
-        setOpenDropdown(false);
-        setTimeout(() => setOpenDialogReport(true), 0);
+    const exportExcel = async () => {
+        const response = await getClientsExcel() as Blob;
+        const url = URL.createObjectURL(response);
+        const link = window.document.createElement("a");
+        link.href = url;
+        link.download = `Reporte de Clientes - ${formatDate(new Date())}.xlsx`;
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 
     return (
