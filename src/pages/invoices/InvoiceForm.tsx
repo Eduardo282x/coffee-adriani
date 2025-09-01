@@ -38,7 +38,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const { clients, clientOptions, getClientsApi } = clientStore();
 
     const newGift = () => {
-        setGiftData(prev => [...prev, { productId: 0, quantity: 0 }])
+        setGiftData(prev => [...prev, { productId: 0, quantity: 1 }])
     }
 
 
@@ -281,7 +281,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             <TableComponent columns={productColumns} total={formatOnlyNumberWithDots(total)} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
 
             <div className="flex items-center justify-end mt-4">
-                <Button disabled={total === 0} onClick={onSubmitInvoice}>Generar Factura</Button>
+                <Button disabled={total === 0 && gifData.length == 0} onClick={onSubmitInvoice}>Generar Factura</Button>
             </div>
 
             {/* <div className="fixed bottom-0 left-0 w-full border-t bg-white px-6 py-4 flex justify-end z-10">

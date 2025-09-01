@@ -332,9 +332,9 @@ export const Payments = () => {
                     open={openDialog}
                     setOpen={setOpenDialog}
                     className="w-[30rem]"
-                    label2="Agregar Cliente"
-                    label1="Registrar Pago"
-                    isEdit={false}
+                    label2="Registrar Pago"
+                    label1="Actualizar Pago"
+                    isEdit={paymentSelected ? true : false}
                 >
                     <PaymentForm onSubmit={savePayments} data={paymentSelected} />
                 </DialogComponent>
