@@ -134,13 +134,10 @@ export const TableComponent = <T,>({
                             </TableRow>
                         ) : (
                             dataFilter && dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
-                                <>
-                                    {isExpansible ?
-                                        <TableRowExpansible index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
-                                        :
-                                        <TableRowNormal index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
-                                    }
-                                </>
+                                isExpansible ?
+                                    <TableRowExpansible key={index} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
+                                    :
+                                    <TableRowNormal key={index} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                             ))
                         )}
                     </TableBody>

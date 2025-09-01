@@ -20,7 +20,7 @@ export const ToolTip: FC<ToolTipProps> = ({ tooltip, children, position, classNa
     return (
         <TooltipProvider>
             <Tooltip>
-                <TooltipTrigger className={`${className}`}>
+                <TooltipTrigger className={`${className}`} asChild>
                     {children}
                 </TooltipTrigger>
                 <TooltipContent side={position}>
