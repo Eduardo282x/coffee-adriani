@@ -22,6 +22,7 @@ export interface IInventory {
 export interface BodyInventory {
     productId: number;
     quantity: number;
+    date?: Date;
 }
 
 export interface GroupInventoryDate {
