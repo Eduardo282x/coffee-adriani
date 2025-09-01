@@ -1,5 +1,5 @@
 import { CollectionBody, CollectionMessageBody, MarkBody } from "@/interfaces/collection.interface";
-import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
+import { deleteDataApi, getDataApi, getDataFileApi, postDataApi, putDataApi } from "./base.service";
 
 const routeCollection = '/collection';
 
@@ -13,6 +13,14 @@ export const getCollection = async () => {
 export const getCollectionHistory = async () => {
     try {
         return await getDataApi(`${routeCollection}/history`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const getCollectionExcel = async () => {
+    try {
+        return await getDataFileApi(`${routeCollection}/export`);
     } catch (err) {
         return err
     }

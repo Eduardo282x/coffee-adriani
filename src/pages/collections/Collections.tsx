@@ -3,7 +3,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { useState, useEffect } from "react"
-import { deleteMessageCollection, getCollection, getCollectionHistory, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
+import { deleteMessageCollection, getCollection, getCollectionExcel, getCollectionHistory, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
 import { CollectionMessageBody, GroupCollection, GroupCollectionHistory, GroupMessages, ICollection, ICollectionHistory, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
 import { clientCollectionColumns, collectionErrorsColumns, collectionHistoryColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
 import { CollectionExpandible } from "./CollectionExpandible"
@@ -18,6 +18,7 @@ import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter.tsx"
 import { CollectionActions } from "./CollectionActions.tsx"
 import { Switch } from "@/components/ui/switch.tsx"
 import { IoMdSettings } from "react-icons/io"
+import { RiFileExcel2Line } from "react-icons/ri"
 
 type TypesViews = 'collection' | 'messages';
 type CollectionTypes = 'collection' | 'messages' | 'sended' | 'no-sended' | 'history' | 'errors';
@@ -294,6 +295,18 @@ export const Collections = () => {
         return 'hover:bg-gray-200 px-2 py-1 cursor-pointer rounded-md'
     }
 
+    const exportExcelCollection = async () => {
+        const response = await getCollectionExcel() as Blob;
+        const url = URL.createObjectURL(response);
+        const link = window.document.createElement("a");
+        link.href = url;
+        link.download = `Cobranza.xlsx`;
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
     return (
         <div className="flex flex-col">
             {loading && (
@@ -341,6 +354,9 @@ export const Collections = () => {
                         }
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button onClick={exportExcelCollection} className="bg-green-700 hover:bg-green-600 text-white">
+                            <RiFileExcel2Line className=" font-bold" /> Exportar
+                        </Button>
                         <div className="flex w-80  items-center space-x-2">
                             {view == 'collection'
                                 ? <Filter dataBase={collections.allCollections} columns={columns} setDataFilter={setFilterCollection} />
