@@ -15,7 +15,6 @@ export interface IInventory {
     subtotal?: number;
     createdAt: Date;
     product: IProducts;
-
     movementType?: string,
     movementDate?: Date,
 }

@@ -289,7 +289,10 @@ const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
         const newValue = e.target.value;
         setValue(newValue);
         if (column.type === 'editable' && action) {
-            action('editable', { ...data, [column.column]: newValue });
+            // action('editable', { ...data, [column.column]: newValue });
+            // Crear nuevo objeto con la propiedad anidada actualizada
+            const updatedData = setNestedValueInObject(data, column.column, newValue);
+            action('editable', updatedData);
         }
     }
 
@@ -354,6 +357,7 @@ const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
     )
 }
 
+// Función helper para obtener valores anidados
 const getNestedValue = (obj: any, path: string): string => {
     try {
         return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || '';
@@ -361,3 +365,18 @@ const getNestedValue = (obj: any, path: string): string => {
         return '';
     }
 }
+
+// Función helper para establecer valores anidados dinámicamente
+const setNestedValueInObject = (obj: any, path: string, value: any): any => {
+    const keys = path.split('.');
+    const result = { ...obj };
+    
+    let current = result;
+    for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
+    }
+    
+    current[keys[keys.length - 1]] = value;
+    return result;
+};

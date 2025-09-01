@@ -100,6 +100,7 @@ export interface InvoiceItems {
     productId: number;
     quantity: number;
     unitPrice: number;
+    unitPriceUSD: number;
     subtotal: number;
     type: TypeDetailsProductInvoices;
     product: IProducts;
@@ -112,7 +113,14 @@ export interface IInvoiceForm {
     consignment: boolean;
     priceUSD: boolean;
     dueDate: Date;
-    details: BodyInventory[];
+    details: DetailsInvoices[];
+}
+
+export interface DetailsInvoices extends BodyInventory{
+    productId: number;
+    quantity: number;
+    price: number;
+    priceUSD: number;
 }
 
 export interface DateRangeFilter {

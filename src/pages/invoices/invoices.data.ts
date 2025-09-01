@@ -230,18 +230,18 @@ export const productColumns: IColumns<IInventory>[] = [
         className: (data: IInventory) => data.id > 1 ? 'w-[12rem] block text-ellipsis overflow-hidden' : 'w-[12rem] block text-ellipsis overflow-hidden'
     },
     {
-        column: 'price',
+        column: 'product.price',
         label: 'Precio',
-        element: (data: IInventory) => formatNumberWithDots(data.product.price, '', ' $'),
+        element: (data: IInventory) => `${data.product.price}`,
         orderBy: '',
-        type: 'string',
+        type: 'editable',
     },
     {
-        column: 'price',
+        column: 'product.priceUSD',
         label: 'Precio USD',
-        element: (data: IInventory) => formatNumberWithDots(data.product.priceUSD, '', ' $'),
+        element: (data: IInventory) => `${data.product.priceUSD}`,
         orderBy: '',
-        type: 'string',
+        type: 'editable',
     },
     {
         column: 'quantity',

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Autocomplete } from "@/components/autocomplete/Autocomplete";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IClients } from "@/interfaces/clients.interface";
-import { BodyInventory, GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
+import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
 // import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useState } from "react";
 import { productColumns } from "./invoices.data";
@@ -14,7 +15,7 @@ import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
 import { addDays, addYears } from "date-fns";
-import { IInvoice } from "@/interfaces/invoice.interface";
+import { DetailsInvoices, IInvoice } from "@/interfaces/invoice.interface";
 import { clientStore } from "@/store/clientStore";
 import { Trash2 } from "lucide-react";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
@@ -27,7 +28,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     // const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
     const [inventoryData, setInventoryData] = useState<IInventory[]>([]);
-    const [gifData, setGiftData] = useState<BodyInventory[]>([]);
+    const [gifData, setGiftData] = useState<DetailsInvoices[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [controlNumber, setControlNumber] = useState<string>('');
     const [priceUSD, setPriceUSD] = useState<boolean>(false);
@@ -38,9 +39,8 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const { clients, clientOptions, getClientsApi } = clientStore();
 
     const newGift = () => {
-        setGiftData(prev => [...prev, { productId: 0, quantity: 1 }])
+        setGiftData(prev => [...prev, { productId: 0, quantity: 1, price: 0, priceUSD: 0 }])
     }
-
 
     useEffect(() => {
         const parseData: IInvoice = data as IInvoice;
@@ -59,14 +59,21 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 }
                 return {
                     ...findInventory,
+                    product: {
+                        ...inv.product,
+                        price: Number(inv.unitPrice),
+                        priceUSD: Number(inv.unitPriceUSD),
+                    },
                     quantity: inv.quantity,
-                    subtotal: inv.quantity * findInventory?.product.price || 0
+                    subtotal: inv.quantity * inv.unitPrice || 0
                 };
             });
 
             setGiftData(parseData.invoiceItems.filter(item => item.type == 'GIFT').map((inv) => ({
                 productId: inv.productId,
-                quantity: inv.quantity
+                quantity: inv.quantity,
+                price: inv.product.price,
+                priceUSD: inv.product.priceUSD,
             })))
 
             setTimeout(() => {
@@ -95,12 +102,13 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     const onChangeGift = (data: string, index: number) => {
         const selectedProductData = inventory.allInventory.find((inv) => inv.id === Number(data));
         if (selectedProductData) {
-            console.log(selectedProductData);
             setGiftData(prev => prev.map((item, idx) => {
                 if (idx === index) {
                     return {
                         ...item,
                         productId: selectedProductData.productId,
+                        price: selectedProductData.product.price,
+                        priceUSD: selectedProductData.product.priceUSD,
                     }
                 }
                 return item;
@@ -141,18 +149,18 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     }
 
     const changeDataTable = (action: string, data: IInventory) => {
-        if (action == 'editable') {
+        if (action === 'editable') {
             setInventoryData((prev) => prev.map((inv) => {
                 if (inv.id === data.id) {
+                    // Ahora data ya viene con las propiedades anidadas correctamente actualizadas
                     return {
-                        ...inv,
-                        quantity: data.quantity,
-                        subtotal: data.quantity * inv.product.price,
+                        ...data,
+                        subtotal: data.quantity * data.product.price, // Recalcular subtotal
                     };
                 } else {
                     return inv;
                 }
-            }))
+            }));
         }
 
         if (action == 'Eliminar') {
@@ -197,12 +205,16 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         const combineDataInvoiceGift = gifData.map(item => ({
             productId: item.productId,
             quantity: Number(item.quantity),
+            price: Number(item.price),
+            priceUSD: Number(item.priceUSD),
             type: 'GIFT'
         }));
 
         const combineDataInvoice = inventoryData.map(item => ({
             productId: item.product.id,
             quantity: Number(item.quantity),
+            price: Number(item.product.price),
+            priceUSD: Number(item.product.priceUSD),
         }));
 
         const bodyInvoice = {
@@ -214,7 +226,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
             priceUSD: priceUSD,
             details: [...combineDataInvoiceGift, ...combineDataInvoice]
         }
-        
+
         onSubmit(bodyInvoice)
     }
 
@@ -278,7 +290,13 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 </div>
             </div>
 
-            <TableComponent columns={productColumns} total={formatOnlyNumberWithDots(total)} dataBase={inventoryData} action={changeDataTable} includeFooter={true}></TableComponent>
+            <TableComponent
+                columns={productColumns}
+                total={formatOnlyNumberWithDots(total)}
+                dataBase={inventoryData}
+                action={changeDataTable}
+                includeFooter={true}
+            />
 
             <div className="flex items-center justify-end mt-4">
                 <Button disabled={total === 0 && gifData.length == 0} onClick={onSubmitInvoice}>Generar Factura</Button>
