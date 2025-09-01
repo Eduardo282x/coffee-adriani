@@ -22,7 +22,7 @@ interface InventoryFormProps extends FromProps {
 }
 
 export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, data, products }) => {
-    const isEdit = data ? true : false;
+    const isEdit = data.productId !== 0 ? true : false;
     const [entryDate, setEntryDate] = useState<Date | undefined>(new Date());
 
     const form = useForm<BodyInventory>({

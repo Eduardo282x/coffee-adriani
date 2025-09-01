@@ -16,8 +16,10 @@ import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
 import { DateRangeFilter } from "@/interfaces/invoice.interface"
 import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
+import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 
 export const Dashboard = () => {
+    const [loading, setLoading] = useState<boolean>(false);
     const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
     const now = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
@@ -30,13 +32,14 @@ export const Dashboard = () => {
     }, [date?.to])
 
     const getDashboardApi = async () => {
+        setLoading(true);
         const dateRange: DateRangeFilter = {
             startDate: new Date(date?.from as Date),
             endDate: new Date(date?.to as Date),
         }
         const response: IDashboard = await getDashboard(dateRange);
-        console.log(response);
         setDashBoardData(response);
+        setLoading(false);
     }
 
     const exportData = async () => {
@@ -57,6 +60,8 @@ export const Dashboard = () => {
 
     return (
         <div className="flex flex-col ">
+
+            {loading && <ScreenLoader/>}
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
