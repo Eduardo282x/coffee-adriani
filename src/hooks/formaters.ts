@@ -21,7 +21,8 @@ export const formatDateTime = (dateToFormat: string | Date): string => {
 
 export const formatDateWithDateTime = (dateToFormat: string | Date): string => {
     const date = new Date(dateToFormat);
-    let hours = date.getHours();
+    const getTime = dateToFormat.toString().split('T')[1];
+    let hours = Number(getTime.slice(0,2));
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const day = String(date.getDate()).padStart(2, '0');

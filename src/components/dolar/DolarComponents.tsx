@@ -66,7 +66,6 @@ export const DolarComponents = () => {
                 label2="Agregar Producto"
                 label1="Actualizar Dolar"
                 isEdit={true}
-
             >
                 <DolarForm onSubmit={updateDolarManual}></DolarForm>
             </DialogComponent>
