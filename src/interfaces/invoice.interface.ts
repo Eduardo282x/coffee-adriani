@@ -16,18 +16,84 @@ export interface PaymentsInvoices {
     totalPending: number;
 }
 
-export interface NewInvoiceApiPackage {
-    invoices: InvoiceApi[];
+export interface Statistics {
     package: number;
+    packagePaid: number;
+    packagePending: number;
+    packagePaidUSD: number;
+    packagePaidBS: number;
+    packagePendingUSD: number;
+    packagePendingBS: number;
     detPackage: DetPackage[];
-    payments: PaymentsInvoices;
+    payments: Payments;
+    summary: Summary;
 }
+
 export interface DetPackage {
-    product: IProducts;
+    productId: number;
+    product: string;
     totalQuantity: number;
     paidQuantity: number;
-    total: number;
+    pendingQuantity: number;
+    paidQuantityUSD: number;
+    paidQuantityBS: number;
+    pendingQuantityUSD: number;
+    pendingQuantityBS: number;
 }
+
+export interface Payments {
+    total: number;
+    totalPending: number;
+    totalPaid: number;
+    debt: number;
+    remaining: number;
+}
+
+export interface Summary {
+    invoiceCount: number;
+    averageInvoiceValue: number;
+    paymentPercentage: number;
+}
+
+
+export interface InvoiceAPINew {
+    invoices: InvoiceAPINewInvoice[];
+    pagination: Pagination;
+}
+
+export interface InvoiceAPINewInvoice {
+    client: IClients;
+    invoices: InvoiceInvoice[];
+}
+
+export interface InvoiceInvoice {
+    id: number;
+    clientId: number;
+    dispatchDate: Date;
+    dueDate: Date;
+    controlNumber: string;
+    exchangeRate: null;
+    sellerId: null;
+    totalAmount: string;
+    remaining: string;
+    consignment: boolean;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    deleted: boolean;
+    invoiceItems: InvoiceItems[];
+    InvoicePayment: IInvoicePayment[];
+}
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+}
+
 
 export interface InvoiceApi {
     client: IClients;
@@ -43,7 +109,6 @@ export interface IInvoice {
     exchangeRate: null;
     totalAmount: number;
     remaining: number | string;
-    totalAmountBs: number | string;
     consignment: boolean;
     status: InvoiceStatus;
     createdAt: Date;
@@ -77,7 +142,6 @@ export interface IInvoicePayment {
 
 export interface IInvoiceForPay extends IInvoice {
     totalPaid: number | string;
-    totalAmountBs: number | string;
     currency: string;
     specialPrice: string | number;
 }
@@ -116,7 +180,7 @@ export interface IInvoiceForm {
     details: DetailsInvoices[];
 }
 
-export interface DetailsInvoices extends BodyInventory{
+export interface DetailsInvoices extends BodyInventory {
     productId: number;
     quantity: number;
     price: number;

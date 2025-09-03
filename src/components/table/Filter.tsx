@@ -10,17 +10,18 @@ import { IPayments } from "@/interfaces/payment.interface";
 interface IFilter {
     dataBase: any[];
     setDataFilter: (value: any) => void;
+    setSearch?: (filter: string) => void;
     columns: IColumns<any>[];
     disabledEffect?: boolean;
     filterInvoices?: boolean;
     filterInvoicesPayments?: boolean;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments }) => {
+export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments }) => {
     const [filter, setFilter] = useState<string>('');
 
     useEffect(() => {
-        if (!disabledEffect){
+        if (!disabledEffect) {
             setDataFilter(dataBase)
         }
     }, [dataBase])
@@ -32,6 +33,11 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, disabledEffect = 
     }
 
     const handleFilter = (value: string) => {
+
+        if (setSearch) {
+            setSearch(value)
+        }
+
         if (!value) {
             setDataFilter(dataBase);
             return;

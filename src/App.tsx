@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import { Login } from './pages/auth/Login/Login';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { Clients } from './pages/clients/Clients';
-import { Invoices } from './pages/invoices/Invoices';
+import { InvoicesPage } from './pages/invoices/Invoices';
 import { Products } from './pages/products/Products';
 // import { SidebarProvider } from './components/ui/sidebar';
 // import { AppSidebar } from './pages/layout/Sidebar';
@@ -21,12 +21,23 @@ import { Accounts } from './pages/accounts/Accounts';
 import { Administration } from './pages/administration/Administration';
 import { Collections } from './pages/collections/Collections';
 import { Profile } from './pages/profile/Profile';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function AxiosInterceptorProvider() {
   useAxiosInterceptor();
   return null;
-}
+};
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      gcTime: 10 * 60 * 1000, // 10 minutos
+    },
+  },
+});
 
 function App() {
   // useAxiosInterceptor();
@@ -40,31 +51,34 @@ function App() {
   }, [])
 
   return (
-    <div className='w-screen h-screen overflow-y-auto bg-[#ebe0d2]'>
-      <Toaster />
-      <BrowserRouter>
-        <AxiosInterceptorProvider />
-        <Routes>
-          <Route path="/login" element={<Login />} />
+    <QueryClientProvider client={queryClient}>
+      <div className='w-screen h-screen overflow-y-auto bg-[#ebe0d2]'>
+        <Toaster />
+        <BrowserRouter>
+          <AxiosInterceptorProvider />
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/clientes" element={<Clients />} />
-            <Route path="/facturas" element={<Invoices />} />
-            <Route path="/productos" element={<Products />} />
-            {/* <Route path="/productos/historial" element={<Products />} /> */}
-            {/* <Route path="/ventas" element={<Sales />} /> */}
-            <Route path="/inventario" element={<Inventory />} />
-            <Route path="/usuarios" element={<Users />} />
-            <Route path="/administracion" element={<Administration />} />
-            <Route path="/cobranza" element={<Collections />} />
-            <Route path="/pagos" element={<Payments />} />
-            <Route path="/cuentas-pago" element={<Accounts />} />
-            <Route path="/perfil" element={<Profile />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/clientes" element={<Clients />} />
+              <Route path="/facturas" element={<InvoicesPage />} />
+              <Route path="/productos" element={<Products />} />
+              {/* <Route path="/productos/historial" element={<Products />} /> */}
+              {/* <Route path="/ventas" element={<Sales />} /> */}
+              <Route path="/inventario" element={<Inventory />} />
+              <Route path="/usuarios" element={<Users />} />
+              <Route path="/administracion" element={<Administration />} />
+              <Route path="/cobranza" element={<Collections />} />
+              <Route path="/pagos" element={<Payments />} />
+              <Route path="/cuentas-pago" element={<Accounts />} />
+              <Route path="/perfil" element={<Profile />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </div>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   )
 }
 

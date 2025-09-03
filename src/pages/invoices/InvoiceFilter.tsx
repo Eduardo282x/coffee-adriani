@@ -8,19 +8,20 @@ import { Block } from "@/interfaces/clients.interface"
 import { FC, useEffect } from "react"
 import { blockStore } from "@/store/clientStore"
 import { DateRange } from "react-day-picker"
-import { InvoiceApi, InvoiceStatus } from "@/interfaces/invoice.interface"
+import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 
 interface IInvoiceFilter extends FilterGroupsProps {
     setInvoicesFilter: (value: InvoiceApi[]) => void;
-    invoice: InvoiceApi[];
-    clientColumns: IColumns<InvoiceApi>[];
+    // invoice: InvoiceApi[];
+    clientColumns: IColumns<InvoiceAPINewInvoice>[];
 }
 
 interface FilterGroupsProps {
     handleChangeStatusInvoice: (value: InvoiceStatus) => void;
     handleChangeBlock: (value: string) => void;
+    handleChangeSearch: (value: string) => void;
     dateStart: DateRange | undefined;
     dateEnd: DateRange | undefined;
     setDateStart: (date: DateRange | undefined) => void;
@@ -31,11 +32,12 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     setInvoicesFilter,
     handleChangeStatusInvoice,
     handleChangeBlock,
+    handleChangeSearch,
     dateStart,
     dateEnd,
     setDateStart,
     setDateEnd,
-    invoice,
+    // invoice,
     clientColumns }) => {
 
     return (
@@ -43,13 +45,14 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 
             <div className="w-60">
                 <Label className="mb-2">Buscar</Label>
-                <Filter dataBase={invoice} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} />
+                <Filter dataBase={[]} setSearch={handleChangeSearch} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} />
             </div>
 
             <DropDownFilter>
                 <FiltersGroups
                     handleChangeStatusInvoice={handleChangeStatusInvoice}
                     handleChangeBlock={handleChangeBlock}
+                    handleChangeSearch={handleChangeSearch}
                     dateStart={dateStart}
                     dateEnd={dateEnd}
                     setDateStart={setDateStart}

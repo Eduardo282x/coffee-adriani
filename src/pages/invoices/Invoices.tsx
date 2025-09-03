@@ -1,395 +1,370 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Download, Plus } from "lucide-react"
+import { Download, Plus, Loader2 } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { InvoiceForm } from "./InvoiceForm";
-import { MdUpdate } from "react-icons/md";
-import { DateRangeFilter, DetPackage, GroupInvoices, IInvoice, IInvoiceForm, InvoiceApi, InvoiceStatus, NewInvoiceApiPackage, PaymentsInvoices } from "@/interfaces/invoice.interface"
-import { deleteInvoice, getInvoice, getInvoiceFilter, postInvoice, putInvoice, putPayInvoice, checkInvoices, getInvoiceExcelFilter, putPendingInvoice, putCleanInvoice } from "@/services/invoice.service"
-import { Expansible } from "@/components/expansible/Expansible"
+import { InvoiceForm } from "./InvoiceForm"
+import { MdUpdate } from "react-icons/md"
+import { IInvoiceForm, DateRangeFilter, InvoiceInvoice } from "@/interfaces/invoice.interface"
+import { getInvoiceExcelFilter } from "@/services/invoice.service"
+import { ExpansibleInvoice } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
 import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
-import { formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters"
+import { formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage, DetailsPayments } from "./DetailsPackage"
-import { BaseResponse } from "@/services/base.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface"
 import { getInventory } from "@/services/inventory.service"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
+// import { useOptimizedInvoices } from "./hooks/useOptimizedInvoices"
+import { useOptimizedInvoices } from '@/hooks/invoice.hook';
 
-export const Invoices = () => {
+export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [selectInvoice, setSelectInvoice] = useState<IInvoice | null>(null);
-    const [invoice, setInvoices] = useState<GroupInvoices>({ allInvoices: [], invoices: [], invoicesFilter: [] });
-    const [payedInvoice, setPayedInvoices] = useState<PaymentsInvoices>({ total: 0, remaining: 0, debt: 0, totalPending: 0 });
-    const [detPackage, setDetPackage] = useState<DetPackage[]>([])
-    const [packages, setPackages] = useState<number>(0);
-    const [packageRest, setPackageRest] = useState<number>(0);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [selectInvoice, setSelectInvoice] = useState<InvoiceInvoice | null>(null);
     const [loadingFile, setLoadingFile] = useState<boolean>(false);
-    const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined)
-    const [dateEnd, setDateEnd] = useState<DateRange | undefined>(undefined)
-    const [selectedBlock, setSelectedBlock] = useState<string>('all');
-    const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
-
+    const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined);
     const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
 
-    const getAllInvoicesApi = async () => {
-        setLoading(true);
-        const response: NewInvoiceApiPackage = await getInvoice();
-        if (response) {
-            setDetPackage(response.detPackage)
-            setPackages(response.package);
-            setPackageRest(response.detPackage.reduce((acc, item) => acc + item.total, 0))
-            setPayedInvoices(response.payments);
-            setInvoices({
-                allInvoices: response.invoices,
-                invoices: response.invoices,
-                invoicesFilter: response.invoices,
-            });
+    // Hook optimizado
+    const {
+        invoices,
+        statistics,
+        totalCount,
+        isLoading,
+        isLoadingMore,
+        isMutating,
+        hasMore,
+        loadMore,
+        applyDateFilter,
+        handleChangeBlock,
+        handleChangeSearch,
+        handleChangeStatusInvoice,
+        // selectedBlock,
+        // selectedStatus,
+
+        createInvoice,
+        updateInvoice,
+        removeInvoice,
+        payInvoice,
+        setPendingInvoice,
+        cleanInvoice,
+        validateInvoices,
+        error
+    } = useOptimizedInvoices({
+        pageSize: 50,
+        enableStatistics: true
+    });
+
+    // Cargar inventario al montar
+    useEffect(() => {
+        getInventoryApi();
+    }, []);
+
+    // Aplicar filtro de fecha cuando cambia
+    useEffect(() => {
+        if (dateStart?.to) {
+            const filterDate: DateRangeFilter = {
+                startDate: dateStart.from || new Date(),
+                endDate: addDays(dateStart.to, 1),
+            };
+            applyDateFilter(filterDate);
+        } else {
+            applyDateFilter(null);
         }
-        setLoading(false)
-    }
+    }, [dateStart?.to, applyDateFilter]);
+
+    // Socket listeners
+    useSocket('message', (data) => {
+        console.log(data);
+    });
+
+    useEffect(() => {
+        socket.emit('message', 'Entre a las facturas');
+    }, []);
 
     const getInventoryApi = async () => {
         const response: IInventory[] = await getInventory();
         if (response) {
-            const parseInventory = response.map((inv: IInventory) => {
-                return {
-                    label: `${inv.product.name} - ${inv.product.presentation}`,
-                    value: inv.id
-                }
-            })
+            const parseInventory = response.map((inv: IInventory) => ({
+                label: `${inv.product.name} - ${inv.product.presentation}`,
+                value: inv.id
+            }));
             setInventory({ allInventory: response, inventory: parseInventory });
         }
-    }
-
-    const getInvoicesFilterApi = async () => {
-        setLoading(true);
-        const filterDate: DateRangeFilter = {
-            startDate: dateStart?.from ? dateStart.from : new Date(),
-            endDate: dateStart?.to ? addDays(dateStart.to, 1) : new Date(),
-        }
-        const response: NewInvoiceApiPackage = await getInvoiceFilter(filterDate);
-        if (response) {
-            setDetPackage(response.detPackage)
-            setPackages(response.package);
-            setPackageRest(response.detPackage.reduce((acc, item) => acc + item.total, 0))
-            setPayedInvoices(response.payments);
-            setInvoices({
-                allInvoices: response.invoices,
-                invoices: response.invoices,
-                invoicesFilter: response.invoices
-            });
-        }
-        setLoading(false)
-    }
-
-    useEffect(() => {
-        getInventoryApi()
-        getAllInvoicesApi()
-    }, [])
-
-    useEffect(() => {
-        if (dateStart?.to) {
-            getInvoicesFilterApi()
-        }
-    }, [dateStart?.to])
+    };
 
     const generateInvoice = async (data: IInvoiceForm) => {
-        setLoading(true)
-        if (selectInvoice) {
-            await updateInvoiceApi(selectInvoice.id, data)
-        } else {
-            await postInvoice(data);
+        try {
+            if (selectInvoice) {
+                await updateInvoice(selectInvoice.id, data);
+            } else {
+                await createInvoice(data);
+            }
+            setOpenDialog(false);
+            setSelectInvoice(null);
+            socket.emit('message', 'Actualice inventario');
+        } catch (error) {
+            console.error('Error al procesar factura:', error);
         }
-        setOpenDialog(false);
-
-        setLoading(false)
-        socket.emit('message', 'Actualice inventario')
-
-        if (dateStart?.to) {
-            getInvoicesFilterApi()
-        }
-    }
-
-    const handleChangeBlock = (option: string) => {
-        setSelectedBlock(option);
-        applyInvoiceFilters(option, selectedStatus);
     };
 
-    const handleChangeStatusInvoice = (option: InvoiceStatus) => {
-        setSelectedStatus(option);
-        applyInvoiceFilters(selectedBlock, option);
-    };
-
-
-    const applyInvoiceFilters = (blockId: string, status: InvoiceStatus) => {
-        let filtered = invoice.allInvoices;
-
-        // Filtro por bloque
-        if (blockId !== 'all') {
-            filtered = filtered.filter(inv => inv.client.blockId === Number(blockId));
-        }
-
-        // Filtro por estado
-        if (status !== 'all') {
-            const filteredByStatus: InvoiceApi[] = filtered.map(inv => {
-
-                if (status === 'Abonadas') {
-                    const filteredInvoices = inv.invoices.filter(invoice => (invoice.status === 'Pendiente' || invoice.status === 'Vencida') && invoice.InvoicePayment.length > 0);
-                    if (filteredInvoices.length > 0) {
-                        return {
-                            client: inv.client,
-                            invoices: filteredInvoices,
-                        };
-                    }
-                    return null;
-                } else {
-                    const filteredInvoices = inv.invoices.filter(invoice => invoice.status === status);
-                    if (filteredInvoices.length > 0) {
-                        return {
-                            client: inv.client,
-                            invoices: filteredInvoices,
-                        };
-                    }
-                    return null;
-                }
-            }).filter((item): item is InvoiceApi => item !== null);
-
-
-            filtered = filteredByStatus;
-        }
-
-        setInvoices(prev => ({ ...prev, invoices: filtered }));
-    };
-
-
-    const setInvoicesFilter = (invoices: InvoiceApi[]) => {
-        setInvoices((prev) => ({ ...prev, invoices: invoices }))
-    }
-
-    useSocket('message', data => {
-        console.log(data);
-    })
-
-    useEffect(() => {
-        socket.emit('message', 'Entre a las facturas')
-    }, [])
-
-    const deleteInvoiceApi = async (id: number) => {
-        const res: BaseResponse = await deleteInvoice(id);
-        if (res.success) {
-            await getInvoicesFilterApi();
-        }
-    }
-
-    const editInvoice = (invoice: IInvoice) => {
+    const editInvoice = (invoice: InvoiceInvoice) => {
         setSelectInvoice(invoice);
         setOpenDialog(true);
-    }
+    };
 
-    const payInvoices = (invoice: IInvoice) => {
-        setInvoices((prev) => {
-            return {
-                ...prev,
-                invoices: prev.invoices.map(item => {
-                    return {
-                        client: item.client,
-                        invoices: item.invoices.map(data => {
-                            return {
-                                ...data,
-                                status: data.id == invoice.id ? 'Pagado' : data.status
-                            }
-                        })
-                    }
-                })
-            }
-        })
-        putPayInvoice(invoice.id);
-    }
+    const deleteInvoiceHandler = async (id: number) => {
+        try {
+            await removeInvoice(id);
+        } catch (error) {
+            console.error('Error al eliminar factura:', error);
+        }
+    };
 
-    const pendingInvoices = (invoice: IInvoice) => {
-        setInvoices((prev) => {
-            return {
-                ...prev,
-                invoices: prev.invoices.map(item => {
-                    return {
-                        client: item.client,
-                        invoices: item.invoices.map(data => {
-                            return {
-                                ...data,
-                                status: data.id == invoice.id ? 'Pendiente' : data.status
-                            }
-                        })
-                    }
-                })
-            }
-        })
-        putPendingInvoice(invoice.id);
-    }
+    const payInvoices = async (invoice: InvoiceInvoice) => {
+        try {
+            await payInvoice(invoice.id);
+        } catch (error) {
+            console.error('Error al pagar factura:', error);
+        }
+    };
 
-    const cleanInvoices = (invoice: IInvoice) => {
-        setInvoices((prev) => {
-            return {
-                ...prev,
-                invoices: prev.invoices.map(item => {
-                    return {
-                        client: item.client,
-                        invoices: item.invoices.map(data => {
-                            return {
-                                ...data,
-                                remaining: data.id == invoice.id ? 0 : data.remaining
-                            }
-                        })
-                    }
-                })
-            }
-        })
-        putCleanInvoice(invoice.id);
-    }
+    const pendingInvoices = async (invoice: InvoiceInvoice) => {
+        try {
+            await setPendingInvoice(invoice.id);
+        } catch (error) {
+            console.error('Error al marcar factura como pendiente:', error);
+        }
+    };
+
+    const cleanInvoices = async (invoice: InvoiceInvoice) => {
+        try {
+            await cleanInvoice(invoice.id);
+        } catch (error) {
+            console.error('Error al limpiar factura:', error);
+        }
+    };
 
     const checkInvoicesApi = async () => {
-        await checkInvoices()
-    }
-
-    const updateInvoiceApi = async (id: number, data: IInvoiceForm) => {
-        await putInvoice(id, data);
-        setOpenDialog(false);
-
-        socket.emit('message', 'Actualice inventario')
-        await getInvoicesFilterApi();
-    }
+        try {
+            await validateInvoices();
+        } catch (error) {
+            console.error('Error al validar facturas:', error);
+        }
+    };
 
     const generateExcel = async () => {
-        setLoadingFile(true)
-        let response: Blob;
-        if (dateStart) {
-            // Puedes adaptar el formato según lo que espera tu backend
-            const filterDate: DateRangeFilter = {
-                startDate: dateStart.from ? dateStart.from : new Date(),
-                endDate: dateStart.to ? addDays(dateStart.to, 1) : new Date(),
-            };
-            response = await getInvoiceExcelFilter(filterDate) as Blob;
-        } else {
-            response = await getInvoiceExcelFilter() as Blob;
-        }
-        const url = URL.createObjectURL(response)
-        const link = window.document.createElement("a")
-        link.href = url
-        link.download = `Reporte de Facturas.xlsx`
-        window.document.body.appendChild(link)
-        link.click()
-        window.document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-        setLoadingFile(false);
-    }
+        setLoadingFile(true);
+        try {
+            let response: Blob;
+            if (dateStart) {
+                const filterDate: DateRangeFilter = {
+                    startDate: dateStart.from || new Date(),
+                    endDate: dateStart.to ? addDays(dateStart.to, 1) : new Date(),
+                };
+                response = await getInvoiceExcelFilter(filterDate) as Blob;
+            } else {
+                response = await getInvoiceExcelFilter() as Blob;
+            }
 
-    const newInvoices = ()=> {
+            const url = URL.createObjectURL(response);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `Reporte de Facturas.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error al generar Excel:', error);
+        } finally {
+            setLoadingFile(false);
+        }
+    };
+
+    const newInvoices = () => {
         setOpenDialog(true);
         setSelectInvoice(null);
+    };
+
+    // Función para cargar más facturas (scroll infinito)
+    const handleLoadMore = () => {
+        if (!isLoadingMore && hasMore) {
+            loadMore();
+        }
+    };
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <p className="text-red-500 mb-4">Error al cargar las facturas</p>
+                <Button onClick={() => window.location.reload()}>
+                    Recargar página
+                </Button>
+            </div>
+        );
     }
 
     return (
         <div className="flex flex-col">
-            {loadingFile && <ScreenLoader/>}
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center  gap-2 lg:gap-4 text-white px-6">
+            {(loadingFile || isMutating) && <ScreenLoader />}
+
+            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-2 lg:gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Facturas</h1>
                 </div>
 
                 <div className="flex items-center gap-2 lg:gap-4">
-                    <Button onClick={checkInvoicesApi} className="hidden lg:flex">
-                        <MdUpdate className="mr-2 h-4 w-4" />
+                    <Button
+                        onClick={checkInvoicesApi}
+                        className="hidden lg:flex"
+                        disabled={isMutating}
+                    >
+                        {isMutating ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <MdUpdate className="mr-2 h-4 w-4" />
+                        )}
                         Validar facturas
                     </Button>
                     <DolarComponents />
-                    <Button onClick={newInvoices}>
+                    <Button onClick={newInvoices} disabled={isMutating}>
                         <Plus className="mr-2 h-4 w-4" />
                         <span className="hidden lg:block">Nueva Factura</span>
                     </Button>
                 </div>
             </header>
+
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
             <main className="flex-1 p-4 md:p-6 min-h-[80vh]">
                 <div className="flex flex-wrap items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Facturas</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
+                        Gestión de Facturas
+                        {totalCount > 0 && (
+                            <span className="text-sm font-normal ml-2">
+                                ({totalCount} total)
+                            </span>
+                        )}
+                    </h2>
 
                     <div className='flex items-end justify-center gap-2'>
-                        <Button onClick={generateExcel} className="bg-green-700 hover:bg-green-600 text-white hidden lg:flex">
-                            <Download /> Exportar
+                        <Button
+                            onClick={generateExcel}
+                            className="bg-green-700 hover:bg-green-600 text-white hidden lg:flex"
+                            disabled={loadingFile}
+                        >
+                            {loadingFile ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Download className="mr-2 h-4 w-4" />
+                            )}
+                            Exportar
                         </Button>
                         <InvoiceFilter
-                            setInvoicesFilter={setInvoicesFilter}
+                            setInvoicesFilter={() => { }} // Ya no necesario con el hook
                             handleChangeStatusInvoice={handleChangeStatusInvoice}
                             handleChangeBlock={handleChangeBlock}
                             dateStart={dateStart}
                             setDateStart={setDateStart}
-                            dateEnd={dateEnd}
-                            setDateEnd={setDateEnd}
-                            invoice={invoice.invoicesFilter}
+                            dateEnd={undefined}
+                            setDateEnd={() => { }}
+                            handleChangeSearch={handleChangeSearch}
+                            // invoice={invoices}
                             clientColumns={clientColumns}
                         />
                     </div>
                 </div>
 
-                {loading && (
+                {isLoading && (
                     <div className="text-center">
                         <Loading />
                     </div>
                 )}
 
-                {!loading && (invoice.invoices && invoice.invoices.length > 0) && (
-                    (
-                        <>
+                {!isLoading && invoices.length > 0 && (
+                    <>
+                        {statistics && (
                             <div className="my-2 text-md flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     <div>
-                                        <p><span className="font-bold">Total de bultos:</span> {formatNumberWithDots(packages, '', '')} bultos</p>
-                                        <p><span className="font-bold">Bultos restantes:</span> {formatOnlyNumberWithDots(packageRest, 4)} bultos</p>
+                                        <p>
+                                            <span className="font-bold">Total de bultos: </span>
+                                            {formatOnlyNumberWithDots(statistics.package)} bultos
+                                        </p>
+                                        {/* <p>
+                                            <span className="font-bold">Bultos Pagos: </span>
+                                            {formatOnlyNumberWithDots(statistics.packagePaid, 4)} bultos
+                                        </p> */}
+                                        <p>
+                                            <span className="font-bold">Bultos restantes: </span>
+                                            {formatOnlyNumberWithDots(statistics.packagePending, 4)} bultos
+                                        </p>
                                     </div>
-                                    <DetailsPackage detPackage={detPackage} />
+                                    <DetailsPackage
+                                        detPackage={statistics.detPackage}
+                                        packagePaid={statistics.packagePaid}
+                                        packagePaidBS={statistics.packagePaidBS}
+                                        packagePaidUSD={statistics.packagePaidUSD}
+                                    />
                                 </div>
+                                <DetailsPayments payments={statistics.payments} />
+                            </div>
+                        )}
 
-                                <DetailsPayments payments={payedInvoice} />
+                        <div className="rounded-md border">
+                            <TableComponent
+                                dataBase={invoices}
+                                columns={clientColumns}
+                                colSpanColumns={true}
+                                renderRow={(inv, index) => (
+                                    <ExpansibleInvoice
+                                        key={index}
+                                        invoice={inv}
+                                        columns={invoiceColumns}
+                                        setLoading={setLoadingFile}
+                                        payInvoices={payInvoices}
+                                        pendingInvoices={pendingInvoices}
+                                        cleanInvoices={cleanInvoices}
+                                        editInvoice={editInvoice}
+                                        deleteInvoice={deleteInvoiceHandler}
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Botón para cargar más */}
+                        {hasMore && (
+                            <div className="text-center mt-4">
+                                <Button
+                                    onClick={handleLoadMore}
+                                    disabled={isLoadingMore}
+                                    variant="outline"
+                                >
+                                    {isLoadingMore ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Cargando más...
+                                        </>
+                                    ) : (
+                                        'Cargar más facturas'
+                                    )}
+                                </Button>
                             </div>
-                            <div className="rounded-md border">
-                                <TableComponent
-                                    dataBase={invoice.invoices}
-                                    columns={clientColumns}
-                                    colSpanColumns={true}
-                                    renderRow={(inv, index) => (
-                                        <Expansible
-                                            key={index}
-                                            invoice={inv}
-                                            columns={invoiceColumns}
-                                            payInvoices={payInvoices}
-                                            pendingInvoices={pendingInvoices}
-                                            cleanInvoices={cleanInvoices}
-                                            editInvoice={editInvoice}
-                                            deleteInvoice={deleteInvoiceApi}
-                                        />
-                                    )} />
-                            </div>
-                        </>
-                    )
+                        )}
+                    </>
                 )}
 
-                {/* <div className="text-end px-2 mb-2">
-                    <p className="text-lg font-semibold">Total de facturas: {invoice.invoices.length + 1}</p>
-                </div> */}
-
-                {!loading && invoice.invoices.length == 0 && (
+                {!isLoading && invoices.length === 0 && (
                     <div className="text-center w-full">
-                        <span >No se encontraron facturas.</span>
+                        <span>No se encontraron facturas.</span>
                     </div>
                 )}
 
@@ -401,10 +376,13 @@ export const Invoices = () => {
                     label1="Editar Factura"
                     isEdit={selectInvoice !== null}
                 >
-                    <InvoiceForm inventory={inventory} onSubmit={generateInvoice} data={selectInvoice}></InvoiceForm>
+                    <InvoiceForm
+                        inventory={inventory}
+                        onSubmit={generateInvoice}
+                        data={selectInvoice}
+                    />
                 </DialogComponent>
             </main>
-        </div >
-    )
-}
-
+        </div>
+    );
+};

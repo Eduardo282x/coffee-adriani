@@ -15,7 +15,7 @@ import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
 import { addDays, addYears } from "date-fns";
-import { DetailsInvoices, IInvoice } from "@/interfaces/invoice.interface";
+import { DetailsInvoices, InvoiceInvoice } from "@/interfaces/invoice.interface";
 import { clientStore } from "@/store/clientStore";
 import { Trash2 } from "lucide-react";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
@@ -43,7 +43,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
     }
 
     useEffect(() => {
-        const parseData: IInvoice = data as IInvoice;
+        const parseData: InvoiceInvoice = data as InvoiceInvoice;
         if (data != null) {
             const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
             setConsignment(parseData.consignment);

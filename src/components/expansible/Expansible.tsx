@@ -1,5 +1,5 @@
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
-import { IInvoice, InvoiceApi, InvoiceItems, IInvoicePayment } from "@/interfaces/invoice.interface";
+import { InvoiceItems, IInvoicePayment, InvoiceAPINewInvoice, InvoiceInvoice } from "@/interfaces/invoice.interface";
 import { FC, useEffect, useRef, useState } from "react"
 import { IoIosArrowDown } from "react-icons/io";
 import { TableComponent } from "../table/TableComponent";
@@ -12,18 +12,21 @@ import { MdOutlineEdit, MdPayments } from "react-icons/md";
 import { CgRemove } from "react-icons/cg";
 import { ToolTip } from "../tooltip/ToolTip";
 import { BsFillEraserFill } from "react-icons/bs";
+// import { useOptimizedInvoices } from "@/hooks/invoice.hook";
+import { getInvoiceDetails } from "@/services/invoice.service";
 
 interface ExpansibleProps {
-    invoice: InvoiceApi;
-    columns: IColumns<IInvoice>[];
-    editInvoice: (data: IInvoice) => void;
-    payInvoices: (data: IInvoice) => void;
-    pendingInvoices: (data: IInvoice) => void;
-    cleanInvoices: (data: IInvoice) => void;
+    invoice: InvoiceAPINewInvoice;
+    columns: IColumns<InvoiceInvoice>[];
+    setLoading: (load: boolean) => void;
+    editInvoice: (data: InvoiceInvoice) => void;
+    payInvoices: (data: InvoiceInvoice) => void;
+    pendingInvoices: (data: InvoiceInvoice) => void;
+    cleanInvoices: (data: InvoiceInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices }) => {
+export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -31,7 +34,7 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [dataDetailsPay, setDataDetailsPay] = useState<IInvoicePayment[]>([]);
-    const [invoiceSelected, setInvoiceSelected] = useState<IInvoice | null>(null);
+    const [invoiceSelected, setInvoiceSelected] = useState<InvoiceInvoice | null>(null);
     const [showDetails, setShowDetails] = useState<boolean>(true);
 
     useEffect(() => {
@@ -47,11 +50,19 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         };
     }, []);
 
-    const action = (action: string, data: IInvoice) => {
+    const action = async (action: string, data: InvoiceInvoice) => {
+        setLoading(true);
         setInvoiceSelected(data);
-
-        setDataDetails(data.invoiceItems);
-        setDataDetailsPay(data.InvoicePayment);
+        const response = await getInvoiceDetails(data.id);
+        setDataDetails(response.invoiceItems);
+        setDataDetailsPay(response.InvoicePayment);
+        const invoiceData = {
+            ...data,
+            invoiceItems: response.invoiceItems,
+            InvoicePayment: response.InvoicePayment,
+        }
+        setLoading(false);
+        setInvoiceSelected(invoiceData as InvoiceInvoice);
 
         if (action === 'Detalles') {
             setOpenDialog(true)
@@ -62,9 +73,9 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
         }
     }
 
-    const remainingPay = (invoice: IInvoice | null): string => {
+    const remainingPay = (invoice: InvoiceInvoice | null): string => {
         if (!invoice) return '0.00';
-        return Number(invoice.totalAmount - Number(invoice.remaining)).toFixed(2);
+        return Number(Number(invoice.totalAmount) - Number(invoice.remaining)).toFixed(2);
     }
 
     const handleEditInvoice = () => {
@@ -133,17 +144,17 @@ export const Expansible: FC<ExpansibleProps> = ({ invoice, columns, deleteInvoic
                     <div className="absolute -top-11 left-0 flex justify-between w-full gap-3">
                         <div className="flex gap-2">
                             <ToolTip position="right" tooltip={"Editar Factura"}>
-                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handleEditInvoice}>
+                                <Button className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handleEditInvoice}>
                                     <MdOutlineEdit />
                                 </Button>
                             </ToolTip>
                             <ToolTip position="right" tooltip={"Limpiar Factura"}>
-                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={() => setOpenDialogCleanInvoice(true)}>
+                                <Button className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={() => setOpenDialogCleanInvoice(true)}>
                                     <BsFillEraserFill />
                                 </Button>
                             </ToolTip>
                             <ToolTip position="right" tooltip={"Pendiente Factura"}>
-                                <Button  className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handlePendingInvoice}>
+                                <Button className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handlePendingInvoice}>
                                     <CgRemove />
                                 </Button>
                             </ToolTip>

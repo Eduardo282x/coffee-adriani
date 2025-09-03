@@ -9,16 +9,29 @@ import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { DetPackage, PaymentsInvoices } from "@/interfaces/invoice.interface";
 
 interface DetailsPackageProps {
-    detPackage: DetPackage[]
+    detPackage: DetPackage[];
+    packagePaid: number;
+    packagePaidBS: number;
+    packagePaidUSD: number;
 }
 
-export const DetailsPackage = ({ detPackage }: DetailsPackageProps) => {
+export const DetailsPackage = ({ detPackage, packagePaid, packagePaidBS, packagePaidUSD }: DetailsPackageProps) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="cursor-pointer">
                 <Button className="bg-[#6f4e37] text-white hover:bg-[#7c5a43]">Detalles</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[30rem]">
+                <DropdownMenuItem className="grid grid-cols-3 gap-1" onSelect={(e) => e.preventDefault()}>
+                    <p className="font-bold">Total de Bultos</p>
+                    <p className="font-bold">Bultos Pagos BS</p>
+                    <p className="font-bold">Bultos Pagos USD</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="grid grid-cols-3 gap-1 border-b-2 pb-2" onSelect={(e) => e.preventDefault()}>
+                    <p className="">{formatOnlyNumberWithDots(packagePaid)}</p>
+                    <p className="">{formatOnlyNumberWithDots(packagePaidBS)}</p>
+                    <p className="">{formatOnlyNumberWithDots(packagePaidUSD)}</p>
+                </DropdownMenuItem>
                 <DropdownMenuItem className="grid grid-cols-5 gap-1" onSelect={(e) => e.preventDefault()}>
                     <p className="font-bold col-span-2">Producto</p>
                     <p className="font-bold">Despachado</p>
@@ -27,10 +40,10 @@ export const DetailsPackage = ({ detPackage }: DetailsPackageProps) => {
                 </DropdownMenuItem>
                 {detPackage && detPackage.map((item: DetPackage, index: number) => (
                     <DropdownMenuItem className="grid grid-cols-5 gap-1" key={index} onSelect={(e) => e.preventDefault()}>
-                        <p className=" col-span-2">{item.product.name} {item.product.presentation}</p>
+                        <p className=" col-span-2">{item.product}</p>
                         <p className="">{formatOnlyNumberWithDots(item.totalQuantity, 4)}</p>
                         <p className="">{formatOnlyNumberWithDots(item.paidQuantity, 4)}</p>
-                        <p className="">{formatOnlyNumberWithDots(item.total, 4)}</p>
+                        <p className="">{formatOnlyNumberWithDots(item.pendingQuantity, 4)}</p>
                     </DropdownMenuItem>
                 ))}
                 {detPackage.length == 0 && (

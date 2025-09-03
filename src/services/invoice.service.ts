@@ -1,4 +1,4 @@
-import { DateRangeFilter, IInvoiceForm } from "@/interfaces/invoice.interface";
+import { DateRangeFilter, IInvoiceForm, InvoiceAPINew, InvoiceStatus } from "@/interfaces/invoice.interface";
 import { deleteDataApi, getDataApi, postDataApi, postDataFileApi, putDataApi } from "./base.service";
 import { BaseResponse } from "./base.interface";
 
@@ -12,6 +12,64 @@ export const getInvoice = async () => {
     }
 }
 
+export interface InvoiceFilterPaginate extends InvoiceDateRangeFilter {
+    page: number,
+    limit: number,
+    search?: string,
+    blockId?: string,
+    status?: InvoiceStatus
+}
+interface InvoiceDateRangeFilter {
+    startDate?: Date,
+    endDate?: Date
+}
+
+export const getInvoicesFilterPaginated = async (filtersInvoice: InvoiceFilterPaginate): Promise<InvoiceAPINew[] | BaseResponse> => {
+    try {
+        // Filtrar valores undefined/null antes de crear query params
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filtersInvoice).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        return await getDataApi(`${routeInvoice}/paginated?${query}`);
+    } catch (err) {
+        return {
+            message: String(err),
+            success: false
+        }
+    }
+}
+export const getInvoiceDetails = async (invoiceId: number) => {
+    try {
+        return await getDataApi(`${routeInvoice}/details/${invoiceId}`);
+    } catch (err) {
+        return err
+    }
+}
+export const getInvoiceStatistics = async (dateRange: InvoiceDateRangeFilter) => {
+    try {
+        const cleanFilters = Object.fromEntries(
+            Object.entries(dateRange).filter(([, value]) =>
+                value !== undefined && value !== null
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        const queryString = query ? `?${query}` : '';
+        return await getDataApi(`${routeInvoice}/statistics${queryString}`);
+    } catch (err) {
+        return err
+    }
+}
 export const getInvoiceUnordered = async () => {
     try {
         return await getDataApi(`${routeInvoice}/unordered`);

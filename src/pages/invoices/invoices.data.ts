@@ -1,16 +1,16 @@
 import { IColumns } from "@/components/table/table.interface"
 import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { IInventory } from "@/interfaces/inventory.interface"
-import { IInvoice, InvoiceApi, InvoiceItems, IInvoicePayment } from "@/interfaces/invoice.interface";
+import { InvoiceItems, IInvoicePayment, InvoiceAPINewInvoice, InvoiceInvoice } from "@/interfaces/invoice.interface";
 import { Trash2 } from "lucide-react";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 
-export const clientColumns: IColumns<InvoiceApi>[] = [
+export const clientColumns: IColumns<InvoiceAPINewInvoice>[] = [
     {
         column: 'client.name',
         label: 'Cliente',
-        element: (data: InvoiceApi) => data.client.name,
+        element: (data: InvoiceAPINewInvoice) => data.client.name,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -18,7 +18,7 @@ export const clientColumns: IColumns<InvoiceApi>[] = [
     {
         column: 'client.rif',
         label: 'Rif',
-        element: (data: InvoiceApi) => formatNumberWithDots(data.client.rif, '', '', true),
+        element: (data: InvoiceAPINewInvoice) => formatNumberWithDots(data.client.rif, '', '', true),
         orderBy: '',
         type: 'string',
         icon: false,
@@ -26,7 +26,7 @@ export const clientColumns: IColumns<InvoiceApi>[] = [
     {
         column: 'client.zone',
         label: 'Zona',
-        element: (data: InvoiceApi) => data.client.zone,
+        element: (data: InvoiceAPINewInvoice) => data.client.zone,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -34,7 +34,7 @@ export const clientColumns: IColumns<InvoiceApi>[] = [
     {
         column: 'client.blockId',
         label: 'Bloque',
-        element: (data: InvoiceApi) => data.client.block.name,
+        element: (data: InvoiceAPINewInvoice) => data.client.block.name,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -49,78 +49,71 @@ export const clientColumns: IColumns<InvoiceApi>[] = [
     },
 ];
 
-export const invoiceColumns: IColumns<IInvoice>[] = [
+export const invoiceColumns: IColumns<InvoiceInvoice>[] = [
     {
         column: 'controlNumber',
         label: 'Numero factura',
-        element: (data: IInvoice) => data.controlNumber,
+        element: (data: InvoiceInvoice) => data.controlNumber,
         orderBy: '',
         type: 'string',
     },
     {
         column: 'consignment',
         label: 'Consignación',
-        element: (data: IInvoice) => data.consignment ? 'Si' : 'No',
+        element: (data: InvoiceInvoice) => data.consignment ? 'Si' : 'No',
         orderBy: '',
         type: 'string',
     },
     {
         column: 'totalAmount',
         label: 'Estado',
-        element: (data: IInvoice) => data.status,
+        element: (data: InvoiceInvoice) => data.status,
         orderBy: '',
         type: 'string',
-        className: (data: IInvoice) => getBadgeVariant(data.status)
+        className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
     },
     {
         column: 'remaining',
         label: 'Debe',
-        element: (data: IInvoice) => `${formatOnlyNumberWithDots(data.remaining)} $`,
+        element: (data: InvoiceInvoice) => `${formatOnlyNumberWithDots(data.remaining)} $`,
         orderBy: '',
         type: 'string',
-        // className: (data: IInvoice) => getBadgeVariant(data.status)
+        // className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
     },
     {
         column: 'remaining',
         label: 'Pagado',
-        element: (data: IInvoice) => `${formatOnlyNumberWithDots(data.totalAmount - Number(data.remaining))} $`,
+        element: (data: InvoiceInvoice) => `${formatOnlyNumberWithDots(Number(data.totalAmount) - Number(data.remaining))} $`,
         orderBy: '',
         type: 'string',
-        // className: (data: IInvoice) => getBadgeVariant(data.status)
+        // className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
     },
-    {
-        column: 'totalAmount',
-        label: 'Fecha pago',
-        element: (data: IInvoice) => data.InvoicePayment.length > 0 ? formatDate(data.InvoicePayment[data.InvoicePayment.length - 1].createdAt) : '-',
-        orderBy: '',
-        type: 'string',
-        // className: (data: IInvoice) => getBadgeVariant(data.status)
-    },
+    // {
+    //     column: 'totalAmount',
+    //     label: 'Fecha pago',
+    //     element: (data: InvoiceInvoice) => data.InvoicePayment.length > 0 ? formatDate(data.InvoicePayment[data.InvoicePayment.length - 1].createdAt) : '-',
+    //     orderBy: '',
+    //     type: 'string',
+    //     // className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
+    // },
     {
         column: 'totalAmount',
         label: 'Total',
-        element: (data: IInvoice) => formatNumberWithDots(data.totalAmount, '', ' $'),
+        element: (data: InvoiceInvoice) => formatNumberWithDots(data.totalAmount, '', ' $'),
         orderBy: '',
         type: 'string',
     },
-    // {
-    //     column: 'totalAmountBs',
-    //     label: 'Total Bs',
-    //     element: (data: IInvoice) => formatNumberWithDots(data.totalAmountBs, '', ' Bs'),
-    //     orderBy: '',
-    //     type: 'string',
-    // },
     {
         column: 'dispatchDate',
         label: 'Despacho',
-        element: (data: IInvoice) => formatDate(data.dispatchDate),
+        element: (data: InvoiceInvoice) => formatDate(data.dispatchDate),
         orderBy: '',
         type: 'string',
     },
     {
         column: 'dueDate',
         label: 'Vencimiento',
-        element: (data: IInvoice) => formatDate(data.dueDate),
+        element: (data: InvoiceInvoice) => formatDate(data.dueDate),
         orderBy: '',
         type: 'string',
     },

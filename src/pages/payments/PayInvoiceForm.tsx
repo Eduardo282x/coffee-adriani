@@ -93,7 +93,6 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, invoic
             ...findInvoice,
             totalPaid: setCurrencyPay,
             currency: infoPayment.account.method.currency,
-            // totalAmountBs: Number(Number(dolar?.dolar) * Number(findInvoice.totalAmount)).toFixed(2)
         }
 
         if (!currencyBs && findInvoice.totalAmount == findInvoice.remaining) {
@@ -119,7 +118,6 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, invoic
                         ...inv,
                         totalPaid: data.totalPaid,
                         currency: infoPayment.account.method.currency,
-                        // totalAmountBs: Number(Number(dolar?.dolar) * data.totalAmount).toFixed(2)
                     }
                 }
                 return inv;
