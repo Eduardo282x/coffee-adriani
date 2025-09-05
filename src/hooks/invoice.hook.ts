@@ -71,10 +71,13 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['invoice-statistics', dateFilter],
+        queryKey: ['invoice-statistics', dateFilter, search, selectedBlock, selectedStatus],
         queryFn: () => getInvoiceStatistics({
             startDate: dateFilter?.startDate,
-            endDate: dateFilter?.endDate
+            endDate: dateFilter?.endDate,
+            search: search.trim(),
+            ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
+            ...(selectedStatus !== 'all' && { status: selectedStatus })
         }),
         enabled: enableStatistics,
         staleTime: 2 * 60 * 1000,

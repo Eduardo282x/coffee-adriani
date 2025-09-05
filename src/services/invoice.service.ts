@@ -15,13 +15,13 @@ export const getInvoice = async () => {
 export interface InvoiceFilterPaginate extends InvoiceDateRangeFilter {
     page: number,
     limit: number,
-    search?: string,
-    blockId?: string,
-    status?: InvoiceStatus
 }
 interface InvoiceDateRangeFilter {
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
+    search?: string,
+    blockId?: string,
+    status?: InvoiceStatus
 }
 
 export const getInvoicesFilterPaginated = async (filtersInvoice: InvoiceFilterPaginate): Promise<InvoiceAPINew[] | BaseResponse> => {
@@ -54,9 +54,10 @@ export const getInvoiceDetails = async (invoiceId: number) => {
 }
 export const getInvoiceStatistics = async (dateRange: InvoiceDateRangeFilter) => {
     try {
+        // Filtrar valores undefined/null antes de crear query params
         const cleanFilters = Object.fromEntries(
             Object.entries(dateRange).filter(([, value]) =>
-                value !== undefined && value !== null
+                value !== undefined && value !== null && value !== ''
             )
         );
 
