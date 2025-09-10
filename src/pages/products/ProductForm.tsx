@@ -16,6 +16,7 @@ const validationSchema = z.object({
   priceUSD: z.coerce.number().positive().min(0),
   purchasePrice: z.coerce.number().positive().min(0),
   purchasePriceUSD: z.coerce.number().positive().min(0),
+  type: z.string(),
 })
 
 export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
@@ -34,6 +35,7 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
         amount: data.amount,
         purchasePrice: data.purchasePrice,
         purchasePriceUSD: data.purchasePriceUSD,
+        type: data.type,
       }
       reset(parseBodyData)
     }
@@ -41,7 +43,7 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full py-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 overflow-y-auto items-start gap-4 w-full py-4">
         {formDataProduct && formDataProduct.map((data: FormDataProduct, index: number) => (
           <div key={index} className="flex flex-col items-start justify-start gap-4 w-full">
             <Label className="text-right">
@@ -54,8 +56,8 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
           </div>
         ))}
 
-        <div className='w-full flex items-center justify-center'>
-          <Button type='submit' className='w-40' >Enviar</Button>
+        <div className='w-full col-span-2 flex items-center justify-center'>
+          <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
         </div>
       </form>
 

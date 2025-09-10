@@ -32,11 +32,26 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabl
         return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || ''
     }
 
-    const handleFilter = (value: string) => {
+    useEffect(() => {
+        if (!setSearch) return; // si no hay setSearch, no hacemos debounce
 
-        if (setSearch) {
-            setSearch(value)
-        }
+        const handler = setTimeout(() => {
+            setSearch(filter);
+        }, 500); // espera 500ms antes de notificar al padre
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [filter, setSearch]);
+
+    useEffect(() => {
+        if (setSearch) return; // ya se maneja arriba con debounce
+
+        handleFilter(filter);
+    }, [filter]);
+
+    const handleFilter = (value: string) => {
+        if (setSearch) return; // evitamos filtrar si solo estamos usando setSearch
 
         if (!value) {
             setDataFilter(dataBase);

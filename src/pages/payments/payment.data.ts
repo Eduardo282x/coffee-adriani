@@ -281,13 +281,15 @@ export interface PaymentFilters {
     associated: string;
     method: string;
     credit: string;
+    type: string;
 }
 
-export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit';
+export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit' | 'type';
 
 export const initialPaymentFilters: PaymentFilters = {
     account: 'all',    
     associated: 'all',
     method: 'all',
     credit: 'all',
+    type: 'all',
 }

@@ -162,8 +162,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
 
         return {
             invoices: allInvoices,
-            totalCount: 0,
-            // totalCount: invoicesData.pages[0]?.pagination?.totalCount ?? 0,
+            totalCount: (invoicesData.pages[0] as any).pagination?.totalCount ?? 0,
             hasMore: hasNextPage
         };
     }, [invoicesData, hasNextPage]);

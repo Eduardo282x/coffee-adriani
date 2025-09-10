@@ -11,6 +11,14 @@ export const getProduct = async () => {
     }
 }
 
+export const getProductType = async () => {
+    try {
+        return await getDataApi(`${routeProduct}/type`);
+    } catch (err) {
+        return err
+    }
+}
+
 export const getProductDolar = async () => {
     try {
         return await getDataApi(`${routeProduct}/dolar`);

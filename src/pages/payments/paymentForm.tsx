@@ -120,7 +120,7 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
                 </div>
 
                 <div className='w-full flex justify-center'>
-                    <Button className="bg-green-700 hover:bg-green-600 text-white w-32" type='submit'>Registrar Pago</Button>
+                    <Button className="bg-green-700 hover:bg-green-600 text-white w-32" type='submit' variant='primary'>Registrar Pago</Button>
                 </div>
             </form>
         </Form>

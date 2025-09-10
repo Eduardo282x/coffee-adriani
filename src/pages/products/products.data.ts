@@ -68,6 +68,15 @@ export const productsColumns: IColumns<IProducts>[] = [
     //     icon: false,
     // },
     {
+        column: 'type',
+        label: 'Tipo',
+        element: (data: IProducts) => data.type,
+        orderBy: '',
+        visible: true,
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'amount',
         label: 'Cantidad',
         element: (data: IProducts) => data.amount.toString(),
@@ -109,6 +118,7 @@ export interface IProductsForm {
     purchasePrice: number;
     purchasePriceUSD: number;
     amount: number;
+    type: string;
 }
 
 // export type TypesProductsForm = 'name' | 'rif' | 'address' | 'phone' | 'zone' | 'blockId';
@@ -121,6 +131,7 @@ export const defaultValues: IProductsForm = {
     purchasePrice: 0,
     purchasePriceUSD: 0,
     amount: 0,
+    type: 'Cafe',
 }
 
 export interface FormDataProduct {
@@ -129,7 +140,7 @@ export interface FormDataProduct {
     name: KeysFormProducts;
 }
 
-type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'purchasePriceUSD' | 'amount';
+type KeysFormProducts = 'name' | 'presentation' | 'price' | 'priceUSD' | 'purchasePrice' | 'purchasePriceUSD' | 'amount' | 'type';
 
 export const formDataProduct: FormDataProduct[] = [
     {
@@ -166,5 +177,10 @@ export const formDataProduct: FormDataProduct[] = [
         label: 'Cantidad',
         type: 'text',
         name: 'amount'
-    }
+    },
+    {
+        label: 'Tipo',
+        type: 'text',
+        name: 'type'
+    },
 ]

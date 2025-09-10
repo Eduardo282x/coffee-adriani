@@ -15,6 +15,7 @@ export interface IProducts {
     id: number;
     name: string;
     presentation: string;
+    type: string;
     price: number;
     priceBs: number;
     priceUSD: number;
@@ -38,4 +39,8 @@ export interface IDolarForm {
 export interface DolarBody {
     dolar: number;
     date: Date;
+}
+
+export interface ProductType {
+    type: string;
 }

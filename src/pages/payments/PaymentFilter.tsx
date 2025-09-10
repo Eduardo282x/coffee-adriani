@@ -10,6 +10,8 @@ import { IColumns } from '@/components/table/table.interface';
 import { DropDownFilter } from '@/components/dropdownFilter/DropDownFilter';
 import { PaymentFilters, PaymentFilterType } from './payment.data';
 import { IOptions } from '@/interfaces/form.interface';
+import { ProductType } from '@/interfaces/product.interface';
+import { getProductType } from '@/services/products.service';
 
 
 interface SelectFiltersOptions {
@@ -23,6 +25,7 @@ interface PaymentsFilterProps {
     date: DateRange | undefined;
     setDate: (date: DateRange | undefined) => void;
     payments: IPayments[];
+    handleChangeSearch: (value: string) => void;
     setPaymentsFilter: (value: IPayments[]) => void;
     paymentsColumns: IColumns<IPayments>[];
     filters: PaymentFilters;
@@ -34,12 +37,14 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     setDate,
     filters,
     handleChangeFilter,
-    payments,
+    // payments,
+    handleChangeSearch,
     setPaymentsFilter,
     paymentsColumns
 }) => {
     const [methods, setMethods] = useState<Method[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [types, setTypes] = useState<ProductType[]>([]);
 
     const [optionsFilters, setOptionsFilters] = useState<SelectFiltersOptions[]>([])
 
@@ -51,13 +56,17 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
         const response = await getPaymentMethod();
         setMethods(response);
     }
+    const getProductsTypesApi = async () => {
+        const response = await getProductType();
+        setTypes(response);
+    }
 
     useEffect(() => {
         const filtersOptions: SelectFiltersOptions[] = [
             {
                 label: 'Cuentas de pago',
                 value: filters.account,
-                name:'account',
+                name: 'account',
                 options: [
                     { label: 'Todos', value: 'all' },
                     ...accounts.map(acc => ({ label: `${acc.name} ${acc.bank}`, value: acc.id.toString() }))
@@ -66,7 +75,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
             {
                 label: 'Métodos de pago',
                 value: filters.method,
-                name:'method',
+                name: 'method',
                 options: [
                     { label: 'Todas', value: 'all' },
                     ...methods.map(met => ({ label: met.name, value: met.id.toString() }))
@@ -75,7 +84,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
             {
                 label: 'Pagos asociados',
                 value: filters.associated,
-                name:'associated',
+                name: 'associated',
                 options: [
                     { label: 'Todos', value: 'all' },
                     { label: 'Asociados', value: 'associated' },
@@ -85,19 +94,29 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
             {
                 label: 'Pagos con abonos',
                 value: filters.credit,
-                name:'credit',
+                name: 'credit',
                 options: [
                     { label: 'Todos', value: 'all' },
                     { label: 'Abonos', value: 'credit' },
                     { label: 'Sin Abonos', value: 'noCredit' }
                 ]
             },
+            {
+                label: 'Tipo de producto',
+                value: filters.type,
+                name: 'type',
+                options: [
+                    { label: 'Todos', value: 'all' },
+                    ...types.map(ty => ({ label: ty.type, value: ty.type }))
+                ]
+            },
         ];
 
         setOptionsFilters(filtersOptions);
-    }, [methods, accounts, filters])
+    }, [methods, accounts, types, filters])
 
     useEffect(() => {
+        getProductsTypesApi();
         getPaymentMethodsApi();
         getPaymentAccountsApi();
     }, [])
@@ -105,13 +124,13 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     return (
         <div className="flex items-center gap-3">
             <DateRangePicker setDatePicker={setDate} datePicker={date} label={'Rango de Fecha'} />
-
             <div className="w-60">
                 <Label className="mb-2">Buscar</Label>
                 <Filter
-                    dataBase={payments}
+                    dataBase={[]}
                     columns={paymentsColumns}
                     setDataFilter={setPaymentsFilter}
+                    setSearch={handleChangeSearch}
                     filterInvoices={true}
                     filterInvoicesPayments={true}
                 />

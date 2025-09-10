@@ -23,6 +23,7 @@ interface TableProps<T> {
     hideColumns?: boolean;
     isExpansible?: boolean;
     shortSpaces?: boolean;
+    totalElements?: number;
 }
 
 export const TableComponent = <T,>({
@@ -37,7 +38,8 @@ export const TableComponent = <T,>({
     colSpanColumns,
     hideColumns,
     isExpansible,
-    shortSpaces
+    shortSpaces,
+    totalElements
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
@@ -165,7 +167,7 @@ export const TableComponent = <T,>({
                     rowsPerPage={rowsPerPage}
                     changePage={handleChangePage}
                     maxPage={Math.ceil(dataBase.length / rowsPerPage)}
-                    totalElements={dataBase.length}
+                    totalElements={totalElements ? totalElements : dataBase.length}
                 >
                 </Paginator>
             )}

@@ -120,3 +120,40 @@ export interface Method {
     name: string;
     currency: string;
 }
+
+
+///
+
+export interface PaginatedPaymentResponse {
+    payments: IPayments[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalCount: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+    };
+}
+
+export interface PaymentStatisticsResponse {
+    totals: {
+        totalBs: number;
+        totalUSD: number;
+        totalRemainingBs: number;
+        totalRemainingUSD: number;
+    };
+    counts: {
+        total: number;
+        associated: number;
+        unassociated: number;
+    };
+    byMethod: Array<{
+        accountId: number;
+        accountName: string;
+        method: string;
+        currency: string;
+        totalAmount: number;
+        count: number;
+    }>;
+}
