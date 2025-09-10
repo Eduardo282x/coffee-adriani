@@ -72,7 +72,7 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, data, products
                 )}
 
                 <div className='w-full flex items-center justify-center'>
-                    <Button type='submit' className='w-40' >Enviar</Button>
+                    <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
                 </div>
             </form>
         </Form>

@@ -84,7 +84,7 @@ export const UsersForm: FC<FromProps> = ({ data, onSubmit }) => {
 
                 <FormSelect form={form} name='rolId' label='Rol' placeholder='Seleccione un rol' options={roles}></FormSelect>
                 <div className='w-full flex items-center justify-center'>
-                    <Button type='submit' className='w-40' >Enviar</Button>
+                    <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
                 </div>
             </form>
 

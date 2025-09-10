@@ -248,11 +248,6 @@ export const InvoicesPage = () => {
                 <div className="flex flex-wrap items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
                         Gestión de Facturas
-                        {totalCount > 0 && (
-                            <span className="text-sm font-normal ml-2">
-                                ({totalCount} total)
-                            </span>
-                        )}
                     </h2>
 
                     <div className='flex items-end justify-center gap-2'>
@@ -324,6 +319,7 @@ export const InvoicesPage = () => {
                                 dataBase={invoices}
                                 columns={clientColumns}
                                 colSpanColumns={true}
+                                totalElements={totalCount}
                                 renderRow={(inv, index) => (
                                     <ExpansibleInvoice
                                         key={index}

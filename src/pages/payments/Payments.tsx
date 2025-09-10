@@ -1,8 +1,8 @@
 import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { GroupPayments, InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody, PaymentAPI, TotalPay } from '@/interfaces/payment.interface';
-import { deletePayment, getPayment, getPaymentFilter, postAssociatePayment, postPayment, putConfirmPayment, putDisassociatePayment, putPayment } from '@/services/payment.service';
+import { InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody } from '@/interfaces/payment.interface';
+import { postAssociatePayment, putDisassociatePayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -22,136 +22,111 @@ import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
 import { getInvoiceUnordered } from '@/services/invoice.service';
-// import { PaymentExpandible } from './PaymentExpandible';
+import { useOptimizedPayments } from '@/hooks/payment.hook';
 
 export const Payments = () => {
-    const [payments, setPayments] = useState<GroupPayments>({ allPayments: [], payments: [], paymentsFilter: [] });
+    // Estados locales específicos del componente
     const [paymentSelected, setPaymentSelected] = useState<IPayments | null>(null);
-    const [totalPayments, setTotalPayments] = useState<TotalPay>({ totalBs: 0, totalUSD: 0 })
-    const [loading, setLoading] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const [openDisassociate, setOpenDisassociate] = useState<boolean>(false);
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
-
     const [invoicesForPay, setInvoicesForPay] = useState<IInvoice[]>([]);
-
-    const [totalize, setTotalize] = useState({ remaining: 0, total: 0 })
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
-    // const today = new Date();
-
-    const [date, setDate] = useState<DateRange | undefined>(undefined)
+    const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [filter, setFilters] = useState<PaymentFilters>(initialPaymentFilters);
 
-    useEffect(() => {
-        getAllPaymentsApi();
-        getInvoiceApi();
-    }, [])
+    // Hook optimizado
+    const {
+        payments,
+        totalCount,
+        statistics,
+        isLoading,
+        isMutating,
+        applyDateFilter,
+        createPayment,
+        updatePayment,
+        removePayment,
+        confirmZellePayment,
+        handleChangeAccount,
+        handleChangeMethod,
+        handleChangeCredit,
+        handleChangeTypeProduct,
+        // handleChangeStatus,
+        handleChangeAssociation,
+        handleChangeSearch,
+        hasMore,
+        loadMore,
+        isLoadingMore,
+    } = useOptimizedPayments({
+        pageSize: 50,
+        enableStatistics: true
+    });
 
+    // Efectos iniciales
+    useEffect(() => {
+        getInvoiceApi();
+    }, []);
+
+    // Aplicar filtro de fecha cuando cambia
     useEffect(() => {
         if (date?.to) {
-            getPaymentsFilterApi()
-            getInvoiceApi();
+            const filterDate: DateRangeFilter = {
+                startDate: date.from || new Date(),
+                endDate: addDays(date.to, 1),
+            };
+            applyDateFilter(filterDate);
+        } else {
+            applyDateFilter(null);
         }
-    }, [date?.to])
+    }, [date?.to, applyDateFilter]);
 
-
-    const getAllPaymentsApi = async () => {
-        setLoading(true);
-        const response: PaymentAPI = await getPayment();
-        if (response) {
-            setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
-            const calculateRemaining = response.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
-            const calculateTotal = response.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
-            setTotalize({ remaining: calculateRemaining, total: calculateTotal });
-            setPayments({
-                allPayments: response.payments,
-                payments: response.payments,
-                paymentsFilter: response.payments
-            });
-        }
-        setLoading(false)
-    }
-
-    useEffect(() => {
-        const calculateRemaining = payments.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
-        const calculateTotal = payments.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
-        setTotalize({ remaining: calculateRemaining, total: calculateTotal });
-    }, [payments.payments])
-
-    const getPaymentsFilterApi = async () => {
-        setLoading(true);
-        const filterDate: DateRangeFilter = {
-            startDate: date?.from ? date.from : new Date(),
-            endDate: date?.to ? addDays(date.to, 1) : new Date(),
-        }
-        const response: PaymentAPI = await getPaymentFilter(filterDate);
-        if (response) {
-            setTotalPayments({ totalBs: response.totalBs, totalUSD: response.totalUSD });
-            const calculateRemaining = response.payments.reduce((acc, item) => acc + Number(item.remainingUSD), 0);
-            const calculateTotal = response.payments.reduce((acc, item) => acc + Number(item.amountUSD), 0);
-            setTotalize({ remaining: calculateRemaining, total: calculateTotal });
-            setPayments({
-                allPayments: response.payments,
-                payments: response.payments,
-                paymentsFilter: response.payments
-            });
-        }
-        setLoading(false)
-    }
-
-    const setPaymentsFilter = (data: IPayments[]) => {
-        setPayments({
-            ...payments,
-            payments: data
-        })
-    }
-
-    const handleChangeFilter = (filter: PaymentFilterType,value: string) => {
+    const handleChangeFilter = (filter: PaymentFilterType, value: string) => {
+        switch (filter) {
+            case 'account':
+                handleChangeAccount(Number(value));
+                break;
+            case 'method':
+                handleChangeMethod(Number(value));
+                break;
+            case 'credit':
+                handleChangeCredit(value as 'credit' | 'noCredit' | 'all');
+                break;
+            case 'type':
+                handleChangeTypeProduct(value);
+                break;
+            case 'associated':
+                handleChangeAssociation(value as 'associated' | 'unassociated' | 'all');
+                break;
+            default:
+                break;
+        };
         setFilters(prev => ({
             ...prev,
             [filter]: value
-        }))
-    }
-
+        }));
+    };
 
     useEffect(() => {
-        let filtered = [...payments.allPayments];
+        console.log(filter);
 
-        if (filter.associated !== 'all') {
-            filtered = filtered.filter(pay => pay.associated === (filter.associated === 'associated'));
-        }
-
-        if (filter.method !== 'all') {
-            filtered = filtered.filter(pay => pay.account.method.id === Number(filter.method));
-        }
-
-        if (filter.credit !== 'all') {
-            filtered = filtered.filter(pay => pay.credit == (filter.credit == 'credit'));
-        }
-
-        if (filter.account !== 'all') {
-            filtered = filtered.filter(pay => pay.accountId == Number(filter.account));
-        }
-
-        setPayments(prev => ({
-            ...prev,
-            payments: filtered
-        }));
-    }, [filter, payments.allPayments]);
-
+    }, [filter])
 
     const savePayments = async (data: IPaymentForm) => {
-        if (paymentSelected) {
-            await putPayment(paymentSelected.id, data)
-        } else {
-            await postPayment(data)
+        try {
+            if (paymentSelected) {
+                await updatePayment(paymentSelected.id, data);
+            } else {
+                await createPayment(data);
+            }
+            setOpenDialog(false);
+            setPaymentSelected(null);
+        } catch (error) {
+            console.error('Error al guardar pago:', error);
         }
-        await getPaymentsFilterApi();
-        setOpenDialog(false);
-    }
+    };
 
     const getActions = (action: string, data: IPayments) => {
         setPaymentSelected(data);
@@ -204,68 +179,91 @@ export const Payments = () => {
 
     const getActionExpansiblePayment = async (data: InvoicePayment) => {
         setPaymentDisassociate(data);
-        setOpenDisassociate(true)
-    }
+        setOpenDisassociate(true);
+    };
 
     const disassociatePayment = async (data: boolean) => {
-        if (data == true && paymentDisassociate) {
-            // await postAssociatePayment(paymentDisassociate)
-            const parseBody: PayDisassociateBody = {
-                id: paymentDisassociate.id,
-                invoiceId: paymentDisassociate.invoiceId,
-                paymentId: paymentDisassociate.paymentId
+        if (data === true && paymentDisassociate) {
+            try {
+                const parseBody: PayDisassociateBody = {
+                    id: paymentDisassociate.id,
+                    invoiceId: paymentDisassociate.invoiceId,
+                    paymentId: paymentDisassociate.paymentId
+                };
+                await putDisassociatePayment(parseBody);
+                console.log('Pago desasociado');
+            } catch (error) {
+                console.error('Error al desasociar pago:', error);
             }
-            await putDisassociatePayment(parseBody)
-            console.log('Pago desasociado');
         }
-        setOpenDisassociate(false)
-    }
+        setOpenDisassociate(false);
+        setPaymentDisassociate(null);
+    };
 
     const handleNewPayments = () => {
         setPaymentSelected(null);
         setTimeout(() => {
             setOpenDialog(true);
         }, 0);
-    }
+    };
 
     const confirmPayment = async () => {
-        await putConfirmPayment(paymentSelected ? paymentSelected.id : 0);
-        await getPaymentsFilterApi();
-        setOpenConfirmDialog(false)
-    }
+        try {
+            if (paymentSelected) {
+                await confirmZellePayment(paymentSelected.id);
+            }
+            setOpenConfirmDialog(false);
+            setPaymentSelected(null);
+        } catch (error) {
+            console.error('Error al confirmar pago:', error);
+        }
+    };
 
     const deletePaymentApi = async () => {
-        await deletePayment(paymentSelected ? paymentSelected.id : 0);
-        await getPaymentsFilterApi();
-        setOpenDialogDelete(false)
-    }
+        try {
+            if (paymentSelected) {
+                await removePayment(paymentSelected.id);
+            }
+            setOpenDialogDelete(false);
+            setPaymentSelected(null);
+        } catch (error) {
+            console.error('Error al eliminar pago:', error);
+        }
+    };
 
     const payInvoice = async (data: IPayInvoiceForm) => {
-        setPayments((prev) => {
-            return {
-                ...prev,
-                payments: prev.payments.map(item => {
-                    return {
-                        ...item,
-                        associated: item.id === data.paymentId ? true : item.associated
-                    }
-                })
-            }
-        })
-        await postAssociatePayment(data);
-        setOpenPayDialog(false)
-    }
+        try {
+            await postAssociatePayment(data);
+            setOpenPayDialog(false);
+            setPaymentSelected(null);
+        } catch (error) {
+            console.error('Error al asociar pago:', error);
+        }
+    };
 
     const getInvoiceApi = async () => {
-        const response: IInvoice[] = await getInvoiceUnordered();
-        setInvoicesForPay(response);
-    }
+        try {
+            const response: IInvoice[] = await getInvoiceUnordered();
+            setInvoicesForPay(response);
+        } catch (error) {
+            console.error('Error al cargar facturas:', error);
+        }
+    };
+
+    const setPaymentsFilter = (data: IPayments[]) => {
+        // Esta función ya no es necesaria con useMemo, pero la mantenemos para compatibilidad
+        console.log('setPaymentsFilter llamado con:', data.length, 'pagos');
+    };
+
+    const handleLoadMore = () => {
+        if (hasMore && !isLoadingMore) {
+            loadMore();
+        }
+    };
 
     return (
         <div className="flex flex-col">
-            {loading && (
-                <ScreenLoader />
-            )}
+            {(isLoading || isMutating) && <ScreenLoader />}
 
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
@@ -276,17 +274,20 @@ export const Payments = () => {
                 <div className="flex items-center gap-4">
                     <DolarComponents />
 
-                    <Button onClick={handleNewPayments}>
+                    <Button onClick={handleNewPayments} disabled={isMutating}>
                         <Plus className="mr-2 h-4 w-4" />
                         Registrar Pago
                     </Button>
                 </div>
             </header>
+
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Pagos</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
+                        Gestión de Pagos
+                    </h2>
 
                     <div className="flex items-end gap-2">
                         <DropdownColumnFilter columns={columns} setColumns={setColumns} />
@@ -295,7 +296,8 @@ export const Payments = () => {
                             handleChangeFilter={handleChangeFilter}
                             paymentsColumns={paymentsColumns}
                             setPaymentsFilter={setPaymentsFilter}
-                            payments={payments.paymentsFilter}
+                            handleChangeSearch={handleChangeSearch}
+                            payments={[]}
                             date={date}
                             setDate={setDate}
                         />
@@ -305,28 +307,66 @@ export const Payments = () => {
                 <div className=''>
                     <div className='w-full flex items-center justify-between my-2'>
                         <div className="flex items-center justify-start gap-2">
-                            <p className='text-lg'><span className='font-semibold'>Total Bs:</span> {formatOnlyNumberWithDots(totalPayments.totalBs)} Bs</p>
-                            <p className='text-lg'><span className='font-semibold'>Total $:</span> {formatOnlyNumberWithDots(totalPayments.totalUSD)} $</p>
+                            {statistics && (
+                                <>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Total Bs:</span> {formatOnlyNumberWithDots(statistics.totals.totalBs)} Bs
+                                    </p>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Total $:</span> {formatOnlyNumberWithDots(statistics.totals.totalUSD)} $
+                                    </p>
+                                </>
+                            )}
                         </div>
 
                         <div className='flex items-center justify-start gap-2'>
-                            <p className=''><span className='font-semibold'>Total:</span> {formatOnlyNumberWithDots(totalize.total)} $</p>
-                            <p className=''><span className='font-semibold'>Sobrante:</span> {formatOnlyNumberWithDots(totalize.remaining)} $</p>
+                            <p className=''>
+                                <span className='font-semibold'>Total:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.total) : ''} $
+                            </p>
+                            <p className=''>
+                                <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.remaining) : ''} $
+                            </p>
                         </div>
                     </div>
+
                     <TableComponent
-                        columns={columns.filter(col => col.visible == true)}
-                        dataBase={payments.payments}
+                        columns={columns.filter(col => col.visible === true)}
+                        dataBase={payments}
                         isExpansible={true}
+                        totalElements={totalCount}
                         renderRow={(pay, index) => (
-                            <PaymentExpandible key={index} payment={pay} actionPayment={getActionExpansiblePayment} />
+                            <PaymentExpandible
+                                key={index}
+                                payment={pay}
+                                actionPayment={getActionExpansiblePayment}
+                            />
                         )}
                         action={getActions}
                     />
+
+                    {/* Botón para cargar más */}
+                    {hasMore && (
+                        <div className="text-center mt-4">
+                            <Button
+                                onClick={handleLoadMore}
+                                disabled={isLoadingMore}
+                                variant="outline"
+                            >
+                                {isLoadingMore ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                                        Cargando más...
+                                    </>
+                                ) : (
+                                    'Cargar más pagos'
+                                )}
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </main>
 
-
+            {/* Diálogos existentes */}
             {openDialog && (
                 <DialogComponent
                     open={openDialog}
@@ -349,7 +389,11 @@ export const Payments = () => {
                     label1="Asociar pago a factura"
                     isEdit={true}
                 >
-                    <PayInvoiceForm onSubmit={payInvoice} data={paymentSelected} invoiceForPay={invoicesForPay} />
+                    <PayInvoiceForm
+                        onSubmit={payInvoice}
+                        data={paymentSelected}
+                        invoiceForPay={invoicesForPay}
+                    />
                 </DialogComponent>
             )}
 
@@ -374,11 +418,22 @@ export const Payments = () => {
                     label2=""
                     label1="Deseas confirmar el pago ?"
                     isEdit={true}
-
                 >
                     <div className="flex items-center justify-center gap-8 mt-5">
-                        <Button onClick={() => setOpenConfirmDialog(false)} className="text-lg ">Cancelar</Button>
-                        <Button onClick={confirmPayment} className="text-lg bg-blue-500 hover:bg-blue-800 text-white">Confirmar</Button>
+                        <Button
+                            onClick={() => setOpenConfirmDialog(false)}
+                            className="text-lg"
+                            disabled={isMutating}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={confirmPayment}
+                            className="text-lg bg-blue-500 hover:bg-blue-800 text-white"
+                            disabled={isMutating}
+                        >
+                            {isMutating ? 'Confirmando...' : 'Confirmar'}
+                        </Button>
                     </div>
                 </DialogComponent>
             )}
@@ -393,11 +448,23 @@ export const Payments = () => {
                     isEdit={true}
                 >
                     <div className="flex items-center justify-center gap-8 mt-5">
-                        <Button onClick={() => setOpenDialogDelete(false)} className="text-lg ">Cancelar</Button>
-                        <Button onClick={deletePaymentApi} className="text-lg bg-red-500 hover:bg-red-800 text-white">Eliminar</Button>
+                        <Button
+                            onClick={() => setOpenDialogDelete(false)}
+                            className="text-lg"
+                            disabled={isMutating}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={deletePaymentApi}
+                            className="text-lg bg-red-500 hover:bg-red-800 text-white"
+                            disabled={isMutating}
+                        >
+                            {isMutating ? 'Eliminando...' : 'Eliminar'}
+                        </Button>
                     </div>
                 </DialogComponent>
             )}
         </div>
-    )
-}
+    );
+};

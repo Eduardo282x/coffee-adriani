@@ -79,7 +79,7 @@ export const AccountsForm: FC<FromProps> = ({ onSubmit, data }) => {
                 <FormSelect form={form} name='bank' label='Banco' placeholder='Seleccione un banco' options={banks}></FormSelect>
                 <FormSelect form={form} name='methodId' label='Metodo de pago' placeholder='Seleccione un metodo de pago' options={methods}></FormSelect>
                 <div className='w-full flex items-center justify-center'>
-                    <Button type='submit' className='w-40' >Enviar</Button>
+                    <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
                 </div>
             </form>
 

@@ -87,7 +87,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                 </form>
             </Form>
             <div className='w-full flex items-center justify-center'>
-                <Button form='client-form' type='submit' className='w-1/2 text-white bg-[#6f4e37] hover:bg-[#6f4e37]/80'>Enviar</Button>
+                <Button form='client-form' type='submit' variant='primary' className='w-1/2 text-white bg-[#6f4e37] hover:bg-[#6f4e37]/80'>Enviar</Button>
             </div>
         </div>
     )
@@ -131,7 +131,7 @@ export const BlockForm: FC<FromProps> = ({ data, onSubmit }) => {
                 </div>
 
                 <div className='w-full flex items-center justify-center'>
-                    <Button type='submit' className='w-40' >Enviar</Button>
+                    <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
                 </div>
             </form>
         </div>
@@ -161,7 +161,7 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
                 <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
 
                 <div className='w-full flex items-center justify-center'>
-                    <Button type='submit' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
+                    <Button type='submit' variant='primary' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
                 </div>
             </form>
         </Form>

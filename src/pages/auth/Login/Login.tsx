@@ -119,7 +119,7 @@ export const Login = () => {
                         </div>
 
                         <div className='w-full space-y-3' >
-                            <Button type='submit' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white' >Iniciar sesión</Button>
+                            <Button type='submit' variant='primary' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white' >Iniciar sesión</Button>
                             <Button type='button' className='w-full' onClick={() => setRecover(true)}>Recuperar contraseña</Button>
                         </div>
                     </form>
@@ -145,7 +145,7 @@ export const Login = () => {
                         </div>
 
                         <div className='w-full space-y-3' >
-                            <Button type='submit' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white'>Recuperar</Button>
+                            <Button type='submit' variant='primary' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white'>Recuperar</Button>
                             <Button type='button' className='w-full' onClick={() => setRecover(false)}>Volver</Button>
                         </div>
                     </form>

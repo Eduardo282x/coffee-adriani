@@ -23,7 +23,7 @@ export const DolarForm: FC<FromProps> = ({ onSubmit }) => {
             </div>
 
             <div className='w-full flex items-center justify-center'>
-                <Button type='submit' className='w-40' >Actualizar</Button>
+                <Button type='submit' variant='primary' className='w-40' >Actualizar</Button>
             </div>
         </form>
     )
