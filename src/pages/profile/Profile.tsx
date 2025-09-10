@@ -104,7 +104,7 @@ export const Profile = () => {
                         <Button type='button' onClick={() => setChangePassword(!changePassword)}>
                             <CiLock />Cambiar contraseña
                         </Button>
-                        <Button type='submit' variant='primary' variant='primary' form='info-form' onClick={() => setChangePassword(!changePassword)}>
+                        <Button type='submit' variant='primary' form='info-form' onClick={() => setChangePassword(!changePassword)}>
                             <FaRegSave />Guardar
                         </Button>
                     </div>
