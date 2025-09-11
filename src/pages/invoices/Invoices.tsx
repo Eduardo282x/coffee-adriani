@@ -156,7 +156,7 @@ export const InvoicesPage = () => {
         try {
             await checkOneInvoice(invoice.id);
         } catch (error) {
-            console.error('Error al limpiar factura:', error);
+            console.error('Error al revisar factura:', error);
         }
     };
 
