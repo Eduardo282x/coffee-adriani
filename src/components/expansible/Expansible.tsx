@@ -1,7 +1,7 @@
 import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
 import { InvoiceItems, IInvoicePayment, InvoiceAPINewInvoice, InvoiceInvoice } from "@/interfaces/invoice.interface";
 import { FC, useEffect, useRef, useState } from "react"
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown, IoMdCheckmark } from "react-icons/io";
 import { TableComponent } from "../table/TableComponent";
 import { IColumns } from "../table/table.interface";
 import { DialogComponent } from "../dialog/DialogComponent";
@@ -23,10 +23,11 @@ interface ExpansibleProps {
     payInvoices: (data: InvoiceInvoice) => void;
     pendingInvoices: (data: InvoiceInvoice) => void;
     cleanInvoices: (data: InvoiceInvoice) => void;
+    checkInvoices: (data: InvoiceInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices }) => {
+export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices, checkInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -88,6 +89,12 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
     const handlePayInvoice = () => {
         if (invoiceSelected) {
             payInvoices(invoiceSelected);
+            setOpenDialog(false);
+        }
+    }
+    const handleCheckInvoice = () => {
+        if (invoiceSelected) {
+            checkInvoices(invoiceSelected);
             setOpenDialog(false);
         }
     }
@@ -153,9 +160,14 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
                                     <BsFillEraserFill />
                                 </Button>
                             </ToolTip>
-                            <ToolTip position="right" tooltip={"Pendiente Factura"}>
+                            <ToolTip position="right" tooltip={"Marcar Pendiente"}>
                                 <Button className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handlePendingInvoice}>
                                     <CgRemove />
+                                </Button>
+                            </ToolTip>
+                            <ToolTip position="right" tooltip={"Revisar Factura"}>
+                                <Button className="bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white" onClick={handleCheckInvoice}>
+                                    <IoMdCheckmark />
                                 </Button>
                             </ToolTip>
                             <ToolTip position="right" tooltip={"Marcar Pagada"}>

@@ -14,6 +14,7 @@ import {
     putCleanInvoice,
     checkInvoices,
     InvoiceFilterPaginate,
+    checkInvoicesPayment,
 } from '@/services/invoice.service';
 
 interface UseInvoicesOptions {
@@ -146,6 +147,14 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         },
     });
 
+    const checkInvoiceMutation = useMutation({
+        mutationFn: checkInvoicesPayment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
+        },
+    });
+
     const checkInvoicesMutation = useMutation({
         mutationFn: checkInvoices,
         onSuccess: () => {
@@ -215,6 +224,10 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         return cleanInvoiceMutation.mutateAsync(id);
     }, [cleanInvoiceMutation]);
 
+    const checkOneInvoice = useCallback(async (id: number) => {
+        return checkInvoiceMutation.mutateAsync(id);
+    }, [checkInvoiceMutation]);
+
     const validateInvoices = useCallback(async () => {
         return checkInvoicesMutation.mutateAsync();
     }, [checkInvoicesMutation]);
@@ -227,6 +240,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         payInvoiceMutation.isPending ||
         pendingInvoiceMutation.isPending ||
         cleanInvoiceMutation.isPending ||
+        checkInvoiceMutation.isPending ||
         checkInvoicesMutation.isPending;
 
     return {
@@ -264,6 +278,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         payInvoice,
         setPendingInvoice,
         cleanInvoice,
+        checkOneInvoice,
         validateInvoices,
 
         // Control manual

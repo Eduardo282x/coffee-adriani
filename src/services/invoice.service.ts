@@ -87,6 +87,14 @@ export const getInvoiceExpired = async () => {
     }
 }
 
+export const checkInvoicesPayment = async (invoiceId: number) => {
+    try {
+        return await postDataApi(`${routeInvoice}/check-invoice/${invoiceId}`, {});
+    } catch (err) {
+        return err
+    }
+}
+
 export const checkInvoices = async () => {
     try {
         return await postDataApi(`${routeInvoice}/check`, {});

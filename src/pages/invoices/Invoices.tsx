@@ -54,6 +54,7 @@ export const InvoicesPage = () => {
         payInvoice,
         setPendingInvoice,
         cleanInvoice,
+        checkOneInvoice,
         validateInvoices,
         error
     } = useOptimizedInvoices({
@@ -146,6 +147,14 @@ export const InvoicesPage = () => {
     const cleanInvoices = async (invoice: InvoiceInvoice) => {
         try {
             await cleanInvoice(invoice.id);
+        } catch (error) {
+            console.error('Error al limpiar factura:', error);
+        }
+    };
+
+    const checkInvoice = async (invoice: InvoiceInvoice) => {
+        try {
+            await checkOneInvoice(invoice.id);
         } catch (error) {
             console.error('Error al limpiar factura:', error);
         }
@@ -329,6 +338,7 @@ export const InvoicesPage = () => {
                                         payInvoices={payInvoices}
                                         pendingInvoices={pendingInvoices}
                                         cleanInvoices={cleanInvoices}
+                                        checkInvoices={checkInvoice}
                                         editInvoice={editInvoice}
                                         deleteInvoice={deleteInvoiceHandler}
                                     />
