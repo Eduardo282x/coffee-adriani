@@ -1,3 +1,4 @@
+import { InputAutocomplete } from '@/components/autocomplete/InputAutocomplete'
 import { DatePicker } from '@/components/datepicker/DatePicker'
 import { FormSelect } from '@/components/form/FormSelect'
 import { Button } from '@/components/ui/button'
@@ -5,8 +6,8 @@ import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
-import { AccountPay, IPaymentForm } from '@/interfaces/payment.interface'
-import { getPaymentAccounts } from '@/services/payment.service'
+import { AccountPay, DescriptionPayment, IPaymentForm } from '@/interfaces/payment.interface'
+import { getPaymentAccounts, getPaymentDescriptions } from '@/services/payment.service'
 import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 
@@ -15,8 +16,10 @@ import { useForm } from 'react-hook-form';
 
 
 export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
+    const [descriptionOptions, setDescriptionOptions] = useState<IOptions[]>([]);
     const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
+    const [showFieldDescription, setShowFieldDescription] = useState<boolean>(false);
     const today = new Date();
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
@@ -28,14 +31,16 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
                 amount: data.amount,
                 time: new Date(data.paymentDate).toISOString().split('T')[1].slice(0, 5),
                 accountId: data.accountId.toString(),
+                description: data.description,
             }
             setDateDispatch(data.paymentDate)
             form.reset(formData)
         }
-    }, [data, accountsOptions])
+    }, [data, accountsOptions, descriptionOptions])
 
     useEffect(() => {
-        getAccountsApi()
+        getAccountsApi();
+        getDescriptionsApi();
     }, [])
 
     const getAccountsApi = async () => {
@@ -47,6 +52,15 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
             }
         }))
     }
+    const getDescriptionsApi = async () => {
+        const response: DescriptionPayment[] = await getPaymentDescriptions()
+        setDescriptionOptions(response.map(data => {
+            return {
+                label: data.description,
+                value: data.description
+            }
+        }))
+    }
 
     const form = useForm<IPaymentForm>({
         defaultValues: {
@@ -54,8 +68,15 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
             amount: 0,
             time: defaultTime,
             accountId: 0,
+            description: '',
         }
-    })
+    });
+
+    useEffect(() => {
+        const getValue = form.watch('accountId');
+        const findAccount = accountsOptions.find(item => item.value == getValue);
+        setShowFieldDescription(findAccount?.label.includes('Gastos') as boolean)
+    }, [form.watch('accountId')])
 
     const onSubmitForm = (data: IPaymentForm) => {
         const dateObj = typeof paymentDate === 'string' ? new Date(paymentDate) : paymentDate;
@@ -65,10 +86,14 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
             reference: data.reference,
             amount: Number(data.amount),
             accountId: Number(data.accountId),
-            paymentDate: newPaymentDate
+            paymentDate: newPaymentDate,
+            description: form.getValues('description'),
         }
-
         onSubmit(parseData)
+    }
+
+    const changeFiltersDescription = (value: string) => {
+        form.setValue('description', value)
     }
 
     return (
@@ -119,8 +144,29 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
                     <Input autoComplete='off' {...form.register('reference')} />
                 </div>
 
+                {showFieldDescription && (
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Tipo de gasto
+                        </Label>
+                        <InputAutocomplete
+                            data={descriptionOptions}
+                            placeholder=''
+                            fullSize={true}
+                            valueDefault={form.getValues('description')}
+                            onChange={changeFiltersDescription}
+                        />
+                    </div>
+                )}
+
                 <div className='w-full flex justify-center'>
-                    <Button className="bg-green-700 hover:bg-green-600 text-white w-32" type='submit' variant='primary'>Registrar Pago</Button>
+                    <Button
+                        className="bg-green-700 hover:bg-green-600 text-white w-32"
+                        type='submit'
+                        variant='primary'
+                    >
+                        Registrar Pago
+                    </Button>
                 </div>
             </form>
         </Form>

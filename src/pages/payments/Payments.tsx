@@ -54,6 +54,7 @@ export const Payments = () => {
         handleChangeMethod,
         handleChangeCredit,
         handleChangeTypeProduct,
+        handleChangeTypeDescription,
         // handleChangeStatus,
         handleChangeAssociation,
         handleChangeSearch,
@@ -97,6 +98,9 @@ export const Payments = () => {
             case 'type':
                 handleChangeTypeProduct(value);
                 break;
+            case 'typeDescription':
+                handleChangeTypeDescription(value);
+                break;
             case 'associated':
                 handleChangeAssociation(value as 'associated' | 'unassociated' | 'all');
                 break;
@@ -108,11 +112,6 @@ export const Payments = () => {
             [filter]: value
         }));
     };
-
-    useEffect(() => {
-        console.log(filter);
-
-    }, [filter])
 
     const savePayments = async (data: IPaymentForm) => {
         try {

@@ -22,6 +22,7 @@ export interface IPayments {
     remaining: string;
     accountId: number;
     reference: string;
+    description: string;
     dolarId: number;
     paymentDate: Date;
     associated: boolean;
@@ -78,6 +79,7 @@ export interface IPaymentForm {
     reference: string;
     time?: string;
     accountId: number;
+    description?: string;
 }
 
 export interface AssociatePayInvoice {
@@ -113,6 +115,10 @@ export interface AccountPay {
     createdAt: Date;
     updatedAt: Date;
     method: Method;
+}
+
+export interface DescriptionPayment {
+    description: string;
 }
 
 export interface Method {

@@ -16,7 +16,7 @@ export interface FilterPayments {
     accountId?: number;
     methodId?: number;
     status?: string;
-    associated?: string;
+    associated?: boolean;
 }
 
 export const getPayment = async () => {
@@ -72,6 +72,13 @@ export const getPaymentDetails = async (paymentId: number) => {
     }
 };
 
+export const getPaymentDescriptions = async () => {
+    try {
+        return await getDataApi(`${routePayment}/descriptions`);
+    } catch (err) {
+        return err
+    }
+}
 export const getPaymentAccounts = async () => {
     try {
         return await getDataApi(`${routePayment}/accounts`);

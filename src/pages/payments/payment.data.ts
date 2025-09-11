@@ -102,6 +102,15 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         className: () => 'font-semibold text-blue-600'
     },
     {
+        column: 'description',
+        label: 'Tipo de gasto',
+        element: (data: IPayments) => data.description ? data.description : '-',
+        orderBy: '',
+        visible: false,
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'paymentDate',
         label: 'Fecha pago',
         element: (data: IPayments) => formatDate(data.paymentDate),
@@ -282,14 +291,16 @@ export interface PaymentFilters {
     method: string;
     credit: string;
     type: string;
+    typeDescription: string;
 }
 
-export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit' | 'type';
+export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit' | 'type' | 'typeDescription';
 
 export const initialPaymentFilters: PaymentFilters = {
-    account: 'all',    
+    account: 'all',
     associated: 'all',
     method: 'all',
     credit: 'all',
     type: 'all',
+    typeDescription: 'all',
 }

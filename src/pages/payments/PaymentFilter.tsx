@@ -3,8 +3,8 @@ import { Label } from '@/components/ui/label';
 import { FC, useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter } from '@/components/table/Filter';
-import { getPaymentMethod, getPaymentAccounts } from '@/services/payment.service';
-import { Account, IPayments, Method } from '@/interfaces/payment.interface';
+import { getPaymentMethod, getPaymentAccounts, getPaymentDescriptions } from '@/services/payment.service';
+import { Account, DescriptionPayment, IPayments, Method } from '@/interfaces/payment.interface';
 import { DateRange } from 'react-day-picker';
 import { IColumns } from '@/components/table/table.interface';
 import { DropDownFilter } from '@/components/dropdownFilter/DropDownFilter';
@@ -45,6 +45,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     const [methods, setMethods] = useState<Method[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [types, setTypes] = useState<ProductType[]>([]);
+    const [typeDescription, setTypeDescription] = useState<DescriptionPayment[]>([]);
 
     const [optionsFilters, setOptionsFilters] = useState<SelectFiltersOptions[]>([])
 
@@ -59,6 +60,10 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     const getProductsTypesApi = async () => {
         const response = await getProductType();
         setTypes(response);
+    }
+    const getPaymentTypeDescriptionApi = async () => {
+        const response = await getPaymentDescriptions();
+        setTypeDescription(response);
     }
 
     useEffect(() => {
@@ -110,6 +115,15 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
                     ...types.map(ty => ({ label: ty.type, value: ty.type }))
                 ]
             },
+            {
+                label: 'Tipo de gasto',
+                value: filters.typeDescription,
+                name: 'typeDescription',
+                options: [
+                    { label: 'Todos', value: 'all' },
+                    ...typeDescription.map(ty => ({ label: ty.description, value: ty.description }))
+                ]
+            },
         ];
 
         setOptionsFilters(filtersOptions);
@@ -119,6 +133,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
         getProductsTypesApi();
         getPaymentMethodsApi();
         getPaymentAccountsApi();
+        getPaymentTypeDescriptionApi();
     }, [])
 
     return (

@@ -1,22 +1,19 @@
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check } from "lucide-react"
 import { IOptions } from "@/interfaces/form.interface";
 import { FC, useEffect, useRef, useState } from "react";
-import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
-interface AutoCompleteProps {
+interface InputAutocomplete {
     data: IOptions[];
     placeholder: string;
     onChange: (value: string) => void;
     valueDefault?: string | number;
-    resetValues?: boolean;
     fullSize?: boolean;
-    inputField?: boolean;
 }
 
-export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChange, inputField, valueDefault, resetValues, fullSize }) => {
+export const InputAutocomplete: FC<InputAutocomplete> = ({ data, onChange, valueDefault, fullSize }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string | number>(valueDefault ? valueDefault : "");
-    const [inputValue, setInputValue] = useState<string>("");
     const [dataFiltered, setDataFiltered] = useState<IOptions[]>(data);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -27,10 +24,6 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
     const handleSelect = (currentValue: string) => {
         setValue(currentValue);
         onChange(currentValue);
-
-        if (resetValues) {
-            setValue('')
-        }
         setOpen(false);
     };
 
@@ -39,11 +32,9 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
             setOpen(false);
         }
     };
-
     useEffect(() => {
-        setInputValue('')
-        setDataFiltered(data);
-    }, [open])
+        setOpen(dataFiltered.length > 0)
+    }, [dataFiltered])
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
@@ -55,19 +46,19 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
     const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
     const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
-
-        if (inputField) {
-            onChange(e.target.value)
-        }
+        const getInputValue = e.target.value
+        onChange(getInputValue);
+        setValue(getInputValue);
         const filteredData = data.filter((option) =>
-            normalize(option.label).includes(normalize(e.target.value))
+            normalize(option.label).includes(normalize(getInputValue))
         );
         setDataFiltered(filteredData);
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
             const selectedOption = dataFiltered[0];
             if (selectedOption) {
                 handleSelect(selectedOption.value.toString());
@@ -76,29 +67,15 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
     }
 
     return (
-        <div className={`relative  ${fullSize ? 'w-full' : 'w-80 max-w-80'}`} ref={ref}>
-            <Button
-                type="button"
-                variant="outline"
-                className="w-full justify-between overflow-hidden"
-                onClick={() => setOpen(!open)}
-            >
-                {value
-                    ? data.find((option) => option.value.toString() === value)?.label
-                    : placeholder}
-                <ChevronsUpDown className="absolute top-3 right-2 ml-2 h-4 w-4 shrink-0 text-gray-500 bg-white" />
-            </Button>
+        <div className={`relative ${fullSize ? 'w-full' : 'w-80 max-w-80'}`} ref={ref}>
+            <Input
+                onChange={onChangeInput}
+                onKeyDown={handleKeyDown}
+                value={value}
+            />
 
             {open && (
-                <div className="border rounded-lg overflow-hidden absolute animationOpacity z-20 mt-1 bg-white">
-                    <input
-                        autoFocus
-                        placeholder={placeholder}
-                        className="px-2 py-1 rounded-none border-b-2 outline-none w-full"
-                        value={inputValue}
-                        onChange={onChangeInput}
-                        onKeyDown={handleKeyDown}
-                    />
+                <div className="border rounded-lg overflow-hidden absolute w-full animationOpacity z-20 mt-1 bg-white">
                     <div className={`max-h-60 overflow-y-auto px-2 ${fullSize ? 'w-full' : 'w-80 max-w-80'}`}>
                         {dataFiltered && dataFiltered.map((option: IOptions, index: number) => (
                             <p
