@@ -47,3 +47,23 @@ export interface LastPending {
     deleted: boolean;
     client: IClients;
 }
+
+export interface ClientDemand {
+    topClients:             TopClient[];
+    buckets:                Buckets;
+    totalClientsConsidered: number;
+}
+
+export interface Buckets {
+    "0-20":   TopClient[];
+    "21-100": TopClient[];
+    "101+":   TopClient[];
+}
+
+export interface TopClient {
+    clientId:      number;
+    clientName:    string;
+    invoicesCount: number;
+    totalItems:    number;
+    totalAmount:   number;
+}

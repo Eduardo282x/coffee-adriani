@@ -9,18 +9,24 @@ import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
 import { RecentSales } from "./components/recent-sales"
 import { CardDashboard } from "./components/CardDashboard"
-import { getDashboard, getDashboardReport } from "@/services/dashboard.service"
-import { IDashboard } from "@/interfaces/dashboard.interface"
+import { getDashboard, getDashboardClientDemand, getDashboardReport } from "@/services/dashboard.service"
+import { ClientDemand, IDashboard } from "@/interfaces/dashboard.interface"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
 import { DateRangeFilter } from "@/interfaces/invoice.interface"
 import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
+import { Notifications } from "@/components/notifications/Notifications"
+import { ClientDemandComponent } from "./components/client-demand"
+import { formatOnlyNumberWithDots } from "@/hooks/formaters"
+// import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
 export const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [viewClient, setViewClient] = useState<boolean>(true);
     const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
+    const [clientDemandData, setClientDemandData] = useState<ClientDemand>({} as ClientDemand);
     const now = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
         from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7),
@@ -29,6 +35,7 @@ export const Dashboard = () => {
 
     useEffect(() => {
         getDashboardApi();
+        getDashboardClientDemandApi();
     }, [date?.to])
 
     const getDashboardApi = async () => {
@@ -40,6 +47,17 @@ export const Dashboard = () => {
         const response: IDashboard = await getDashboard(dateRange);
         setDashBoardData(response);
         setLoading(false);
+    }
+
+    const getDashboardClientDemandApi = async () => {
+        setLoading(true);
+        const dateRange: DateRangeFilter = {
+            startDate: new Date(date?.from as Date),
+            endDate: new Date(date?.to as Date),
+        }
+        const response: ClientDemand = await getDashboardClientDemand(dateRange);
+        setClientDemandData(response);
+        // setLoading(false);
     }
 
     const exportData = async () => {
@@ -58,18 +76,27 @@ export const Dashboard = () => {
         URL.revokeObjectURL(url)
     }
 
+    const returnPercent = (part: number, total: number) => {
+        if (total === 0) return 0;
+        const result = formatOnlyNumberWithDots(((part / total) * 100), 2);
+        return result;
+    }
+
     return (
         <div className="flex flex-col ">
 
-            {loading && <ScreenLoader/>}
+            {loading && <ScreenLoader />}
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Dashboard</h1>
                 </div>
-                <Button onClick={exportData}>
-                    <RiFileExcel2Line className="text-green-600 font-bold" /> Exportar Excel
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Notifications />
+                    <Button onClick={exportData}>
+                        <RiFileExcel2Line className="text-green-600 font-bold" /> Exportar Excel
+                    </Button>
+                </div>
             </header>
 
             <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
@@ -102,6 +129,7 @@ export const Dashboard = () => {
                         {/* <TabsTrigger value="ventas">Ventas</TabsTrigger> */}
                         <TabsTrigger value="inventario">Inventario</TabsTrigger>
                         <TabsTrigger value="facturas">Facturas</TabsTrigger>
+                        <TabsTrigger value="client">Demanda de clientes</TabsTrigger>
                     </TabsList>
                     <TabsContent value="ventas" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -190,6 +218,54 @@ export const Dashboard = () => {
                                                     <div className="flex items-center">
                                                         <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
                                                         <span>Vencidas ({dashBoardData.invoices.expired.percent}%)</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="client" className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                            <Card className="col-span-5">
+                                <CardHeader className="flex justify-between items-center">
+                                    <div>
+                                        <CardTitle>Top de clientes ({clientDemandData.totalClientsConsidered})</CardTitle>
+                                        <CardDescription>Lista de clientes con mayor demanda de productos</CardDescription>
+                                    </div>
+
+                                    <div className="hidden items-center justify-between overflow-hidden rounded-md bg-[#d2c3b3] cursor-pointer text-sm font-medium">
+                                        <p onClick={() => setViewClient(true)} className={`${viewClient ? 'bg-[#6f4e37] text-white' : ''} rounded-md text-sm px-2 py-1`}>Top Clientes</p>
+                                        <p onClick={() => setViewClient(false)} className={`${!viewClient ? 'bg-[#6f4e37] text-white' : ''} rounded-md text-sm px-2 py-1`}>Demanda por cliente</p>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <ClientDemandComponent clientDemandData={clientDemandData.topClients} />
+                                </CardContent>
+                            </Card>
+                            <Card className="col-span-2">
+                                <CardHeader>
+                                    <CardTitle>Clientes por demanda</CardTitle>
+                                    <CardDescription>Distribución de clientes según su Productos</CardDescription>
+                                </CardHeader>
+                                <CardContent className="pl-2">
+                                    <div className="h-full flex items-center justify-center">
+                                        <div className="text-center">
+                                            {clientDemandData.buckets && (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center">
+                                                        <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                                                        <span>Mayor de 100 ({returnPercent(clientDemandData.buckets["101+"].length, clientDemandData.totalClientsConsidered)}%)</span>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <div className="w-4 h-4 rounded-full bg-yellow-500 mr-2"></div>
+                                                        <span>Entre 20-100 ({returnPercent(clientDemandData.buckets["21-100"].length, clientDemandData.totalClientsConsidered)}%)</span>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
+                                                        <span>Menor a 20 ({returnPercent(clientDemandData.buckets["0-20"].length, clientDemandData.totalClientsConsidered)}%)</span>
                                                     </div>
                                                 </div>
                                             )}
