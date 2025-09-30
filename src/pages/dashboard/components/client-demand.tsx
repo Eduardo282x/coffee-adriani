@@ -1,5 +1,6 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { formatOnlyNumberWithDots } from "@/hooks/formaters"
-import { TopClient } from "@/interfaces/dashboard.interface"
+import { Buckets, TopClient } from "@/interfaces/dashboard.interface"
 
 
 interface ClientDemandProps {
@@ -7,7 +8,7 @@ interface ClientDemandProps {
 }
 export const ClientDemandComponent = ({ clientDemandData }: ClientDemandProps) => {
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto max-h-[30rem]">
             {clientDemandData && clientDemandData.map((client, index) => (
                 <div key={index} className="grid grid-cols-2">
                     <div className="space-y-1">
@@ -31,6 +32,41 @@ export const ClientDemandComponent = ({ clientDemandData }: ClientDemandProps) =
                     </div> */}
                 </div>
             ))}
+        </div>
+    )
+}
+
+interface ClientBucketsProps {
+    buckets: Buckets
+}
+export const ClientBuckets = ({ buckets }: ClientBucketsProps) => {
+    return (
+        <div>
+            <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                defaultValue="most"
+            >
+                <AccordionItem value="most">
+                    <AccordionTrigger>Clientes con demanda de producto mayor a 100 bultos</AccordionTrigger>
+                    <AccordionContent>
+                        <ClientDemandComponent clientDemandData={buckets["101+"]}/>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="middle">
+                    <AccordionTrigger>Clientes con demanda de producto entre 20 y 100 bultos</AccordionTrigger>
+                    <AccordionContent>
+                        <ClientDemandComponent clientDemandData={buckets["21-100"]}/>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="less">
+                    <AccordionTrigger>Clientes con demanda de producto menor a 20 bulto</AccordionTrigger>
+                    <AccordionContent>
+                        <ClientDemandComponent clientDemandData={buckets["0-20"]}/>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
         </div>
     )
 }

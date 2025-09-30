@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { Notifications } from "@/components/notifications/Notifications"
-import { ClientDemandComponent } from "./components/client-demand"
+import { ClientBuckets, ClientDemandComponent } from "./components/client-demand"
 import { formatOnlyNumberWithDots } from "@/hooks/formaters"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
@@ -35,8 +35,11 @@ export const Dashboard = () => {
 
     useEffect(() => {
         getDashboardApi();
-        getDashboardClientDemandApi();
     }, [date?.to])
+
+    useEffect(() => {
+        getDashboardClientDemandApi();
+    }, [])
 
     const getDashboardApi = async () => {
         setLoading(true);
@@ -50,12 +53,7 @@ export const Dashboard = () => {
     }
 
     const getDashboardClientDemandApi = async () => {
-        setLoading(true);
-        const dateRange: DateRangeFilter = {
-            startDate: new Date(date?.from as Date),
-            endDate: new Date(date?.to as Date),
-        }
-        const response: ClientDemand = await getDashboardClientDemand(dateRange);
+        const response: ClientDemand = await getDashboardClientDemand();
         setClientDemandData(response);
         // setLoading(false);
     }
@@ -236,13 +234,18 @@ export const Dashboard = () => {
                                         <CardDescription>Lista de clientes con mayor demanda de productos</CardDescription>
                                     </div>
 
-                                    <div className="hidden items-center justify-between overflow-hidden rounded-md bg-[#d2c3b3] cursor-pointer text-sm font-medium">
+                                    <div className="flex items-center justify-between overflow-hidden rounded-md bg-[#d2c3b3] cursor-pointer text-sm font-medium">
                                         <p onClick={() => setViewClient(true)} className={`${viewClient ? 'bg-[#6f4e37] text-white' : ''} rounded-md text-sm px-2 py-1`}>Top Clientes</p>
                                         <p onClick={() => setViewClient(false)} className={`${!viewClient ? 'bg-[#6f4e37] text-white' : ''} rounded-md text-sm px-2 py-1`}>Demanda por cliente</p>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <ClientDemandComponent clientDemandData={clientDemandData.topClients} />
+                                    {viewClient &&
+                                        <ClientDemandComponent clientDemandData={clientDemandData.topClients} />
+                                    }
+                                    {!viewClient &&
+                                        <ClientBuckets buckets={clientDemandData.buckets} />
+                                    }
                                 </CardContent>
                             </Card>
                             <Card className="col-span-2">
