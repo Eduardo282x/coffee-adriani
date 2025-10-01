@@ -59,6 +59,7 @@ export const Dashboard = () => {
     }
 
     const exportData = async () => {
+        setLoading(true)
         const dateRange: DateRangeFilter = {
             startDate: new Date(date?.from as Date),
             endDate: new Date(date?.to as Date),
@@ -71,7 +72,8 @@ export const Dashboard = () => {
         window.document.body.appendChild(link)
         link.click()
         window.document.body.removeChild(link)
-        URL.revokeObjectURL(url)
+        URL.revokeObjectURL(url);
+        setLoading(false);
     }
 
     const returnPercent = (part: number, total: number) => {
