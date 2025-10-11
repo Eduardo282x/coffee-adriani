@@ -29,6 +29,7 @@
     "@tailwindcss/vite": "^4.0.17",
     "@tanstack/react-query": "^5.85.9",
     "@tanstack/react-query-devtools": "^5.85.9",
+    "@vercel/analytics": "^1.5.0",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
