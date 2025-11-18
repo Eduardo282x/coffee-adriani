@@ -19,7 +19,7 @@ import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { Notifications } from "@/components/notifications/Notifications"
 import { ClientBuckets, ClientDemandComponent } from "./components/client-demand"
-import { formatOnlyNumberWithDots } from "@/hooks/formaters"
+import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
 export const Dashboard = () => {
@@ -68,7 +68,7 @@ export const Dashboard = () => {
         const url = URL.createObjectURL(response)
         const link = window.document.createElement("a")
         link.href = url
-        link.download = `Reporte de Facturas.xlsx`
+        link.download = `Reporte de Facturas ${formatDate(new Date())}.xlsx`
         window.document.body.appendChild(link)
         link.click()
         window.document.body.removeChild(link)
