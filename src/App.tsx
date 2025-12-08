@@ -23,7 +23,7 @@ import { Collections } from './pages/collections/Collections';
 import { Profile } from './pages/profile/Profile';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Analytics } from "@vercel/analytics/next"
+// import { Analytics } from "@vercel/analytics/next"
 
 function AxiosInterceptorProvider() {
   useAxiosInterceptor();
@@ -78,7 +78,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </div>
-      <Analytics/>
+      {/* <Analytics/> */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
