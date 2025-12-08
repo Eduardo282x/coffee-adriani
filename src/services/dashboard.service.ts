@@ -19,7 +19,7 @@ export const getDashboardClientDemand = async () => {
 }
 export const getDashboardReport = async (filter: DateRangeFilter) => {
     try {
-        return await postDataFileApi(`${routeDashboard}/export`, filter);
+        return await postDataFileApi(`${routeDashboard}/export/v2`, filter);
     } catch (err) {
         return err
     }
