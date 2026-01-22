@@ -28,6 +28,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const [invoiceId, setInvoiceId] = useState<number>(1);
     const [search, setSearch] = useState<string>('');
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
+    const [selectedTypeProduct, setSelectedTypeProduct] = useState<string>('Cafe');
     const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
 
     const queryClient = useQueryClient();
@@ -42,7 +43,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         error: invoicesError,
         refetch: refetchInvoices
     } = useInfiniteQuery({
-        queryKey: ['invoices', dateFilter, search, selectedBlock, selectedStatus],
+        queryKey: ['invoices', dateFilter, search, selectedBlock, selectedTypeProduct, selectedStatus],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InvoiceFilterPaginate = {
@@ -53,6 +54,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
                     endDate: dateFilter.endDate
                 }),
                 search: search.trim(),
+                type: selectedTypeProduct,
                 ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
                 ...(selectedStatus !== 'all' && { status: selectedStatus })
             };
@@ -72,11 +74,12 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['invoice-statistics', dateFilter, search, selectedBlock, selectedStatus],
+        queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, search, selectedBlock, selectedStatus],
         queryFn: () => getInvoiceStatistics({
             startDate: dateFilter?.startDate,
             endDate: dateFilter?.endDate,
             search: search.trim(),
+            type: selectedTypeProduct,
             ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
             ...(selectedStatus !== 'all' && { status: selectedStatus })
         }),
@@ -195,6 +198,10 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         setSelectedBlock(option);
     }, []);
 
+    const handleChangeTypeProduct = useCallback((option: string) => {
+        setSelectedTypeProduct(option);
+    }, []);
+
     const handleChangeStatusInvoice = useCallback((option: InvoiceStatus) => {
         setSelectedStatus(option);
     }, []);
@@ -264,11 +271,13 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         // Filtros
         applyDateFilter,
         handleChangeBlock,
+        handleChangeTypeProduct,
         handleChangeSearch,
         handleChangeStatusInvoice,
         setInvoiceId,
         currentFilter: dateFilter,
         selectedBlock,
+        selectedTypeProduct,
         selectedStatus,
 
         // Mutaciones

@@ -13,10 +13,11 @@ export const getInvoice = async () => {
 }
 
 export interface InvoiceFilterPaginate extends InvoiceDateRangeFilter {
-    page: number,
-    limit: number,
+    page: number;
+    limit: number;
 }
 interface InvoiceDateRangeFilter {
+    type: string;
     startDate?: Date,
     endDate?: Date,
     search?: string,

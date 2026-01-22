@@ -45,8 +45,9 @@ export const InvoicesPage = () => {
         handleChangeBlock,
         handleChangeSearch,
         handleChangeStatusInvoice,
-        // selectedBlock,
-        // selectedStatus,
+        handleChangeTypeProduct,
+        selectedBlock,
+        selectedTypeProduct,
 
         createInvoice,
         updateInvoice,
@@ -185,7 +186,7 @@ export const InvoicesPage = () => {
             const url = URL.createObjectURL(response);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `Reporte de Facturas.xlsx`;
+            link.download = `Reporte de Facturas ${dateStart ? `${dateStart.from?.toLocaleDateString()} - ${dateStart.to?.toLocaleDateString()}` : ''}.xlsx`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -276,6 +277,9 @@ export const InvoicesPage = () => {
                             setInvoicesFilter={() => { }} // Ya no necesario con el hook
                             handleChangeStatusInvoice={handleChangeStatusInvoice}
                             handleChangeBlock={handleChangeBlock}
+                            handleChangeTypeProduct={handleChangeTypeProduct}
+                            selectedBlock={selectedBlock}
+                            selectedTypeProduct={selectedTypeProduct}
                             dateStart={dateStart}
                             setDateStart={setDateStart}
                             dateEnd={undefined}

@@ -5,12 +5,15 @@ import { Filter } from "@/components/table/Filter"
 // import { Button } from "@/components/ui/button"
 // import { Download } from "lucide-react"
 import { Block } from "@/interfaces/clients.interface"
-import { FC, useEffect } from "react"
+import { FC, useEffect, useState } from "react"
 import { blockStore } from "@/store/clientStore"
 import { DateRange } from "react-day-picker"
 import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
+import { getProductType } from "@/services/products.service"
+import { ProductType } from "@/interfaces/product.interface"
+// useOptimizedInvoices removed to avoid creating a separate hook instance here
 
 interface IInvoiceFilter extends FilterGroupsProps {
     setInvoicesFilter: (value: InvoiceApi[]) => void;
@@ -20,12 +23,15 @@ interface IInvoiceFilter extends FilterGroupsProps {
 
 interface FilterGroupsProps {
     handleChangeStatusInvoice: (value: InvoiceStatus) => void;
+    handleChangeTypeProduct: (value: string) => void;
     handleChangeBlock: (value: string) => void;
     handleChangeSearch: (value: string) => void;
     dateStart: DateRange | undefined;
     dateEnd: DateRange | undefined;
     setDateStart: (date: DateRange | undefined) => void;
     setDateEnd: (date: DateRange | undefined) => void;
+    selectedBlock?: string;
+    selectedTypeProduct?: string;
 }
 
 export const InvoiceFilter: FC<IInvoiceFilter> = ({
@@ -33,12 +39,16 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     handleChangeStatusInvoice,
     handleChangeBlock,
     handleChangeSearch,
+    handleChangeTypeProduct,
     dateStart,
     dateEnd,
     setDateStart,
     setDateEnd,
     // invoice,
-    clientColumns }) => {
+    clientColumns,
+    selectedBlock,
+    selectedTypeProduct
+}) => {
 
     return (
         <div className="flex items-center gap-3">
@@ -51,12 +61,15 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
             <DropDownFilter>
                 <FiltersGroups
                     handleChangeStatusInvoice={handleChangeStatusInvoice}
+                    handleChangeTypeProduct={handleChangeTypeProduct}
                     handleChangeBlock={handleChangeBlock}
                     handleChangeSearch={handleChangeSearch}
                     dateStart={dateStart}
                     dateEnd={dateEnd}
                     setDateStart={setDateStart}
                     setDateEnd={setDateEnd}
+                    selectedBlock={selectedBlock}
+                    selectedTypeProduct={selectedTypeProduct}
                 />
             </DropDownFilter>
 
@@ -69,12 +82,16 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 const FiltersGroups = ({
     handleChangeStatusInvoice,
     handleChangeBlock,
+    handleChangeTypeProduct,
     dateStart,
     dateEnd,
     setDateStart,
-    setDateEnd
+    setDateEnd,
+    selectedBlock,
+    selectedTypeProduct
 }: FilterGroupsProps) => {
     const { blocks, getBlocksApi } = blockStore();
+    const [types, setTypes] = useState<ProductType[]>([]);
 
     const getBlockStoreApi = async () => {
         if (!blocks || blocks.allBlocks.length == 0) {
@@ -82,9 +99,15 @@ const FiltersGroups = ({
         }
     }
 
+    const getProductsTypesApi = async () => {
+        const response = await getProductType();
+        setTypes(response);
+    }
+
     useEffect(() => {
         getBlockStoreApi();
-    }, [])
+        getProductsTypesApi();
+    }, []);
 
     return (
         <div className="flex flex-col items-start justify-start gap-2 p-1">
@@ -113,7 +136,7 @@ const FiltersGroups = ({
 
             <div className="w-full">
                 <Label className="mb-2">Bloques</Label>
-                <Select onValueChange={handleChangeBlock}>
+                <Select value={selectedBlock} onValueChange={handleChangeBlock}>
                     <SelectTrigger className="w-full ">
                         <SelectValue placeholder="Bloques" />
                     </SelectTrigger>
@@ -122,6 +145,22 @@ const FiltersGroups = ({
                             <SelectItem value='all'>Todos</SelectItem>
                             {blocks && blocks.allBlocks.map((blo: Block, index: number) => (
                                 <SelectItem key={index} value={blo.id.toString()}>{blo.name}</SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="w-full">
+                <Label className="mb-2">Tipo de producto</Label>
+                <Select value={selectedTypeProduct} onValueChange={handleChangeTypeProduct}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Producto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {types && types.map((ty: ProductType, index: number) => (
+                                <SelectItem key={index} value={ty.type}>{ty.type}</SelectItem>
                             ))}
                         </SelectGroup>
                     </SelectContent>
