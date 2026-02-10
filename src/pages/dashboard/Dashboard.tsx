@@ -13,13 +13,17 @@ import { getDashboard, getDashboardClientDemand, getDashboardReport } from "@/se
 import { ClientDemand, IDashboard } from "@/interfaces/dashboard.interface"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
-import { DateRangeFilter } from "@/interfaces/invoice.interface"
+import { DateRangeFilter, ExportDashboard } from "@/interfaces/invoice.interface"
 import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { Notifications } from "@/components/notifications/Notifications"
 import { ClientBuckets, ClientDemandComponent } from "./components/client-demand"
 import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters"
+import { Label } from "@/components/ui/label"
+import { ProductType } from "@/interfaces/product.interface"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getProductType } from "@/services/products.service"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
 export const Dashboard = () => {
@@ -28,6 +32,9 @@ export const Dashboard = () => {
     const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
     const [clientDemandData, setClientDemandData] = useState<ClientDemand>({} as ClientDemand);
     const now = new Date();
+    const [types, setTypes] = useState<ProductType[]>([]);
+    const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
+
     const [date, setDate] = useState<DateRange | undefined>({
         from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7),
         to: new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -39,7 +46,13 @@ export const Dashboard = () => {
 
     useEffect(() => {
         getDashboardClientDemandApi();
+        getProductsTypesApi()
     }, [])
+
+    const getProductsTypesApi = async () => {
+        const response = await getProductType();
+        setTypes(response);
+    }
 
     const getDashboardApi = async () => {
         setLoading(true);
@@ -60,9 +73,10 @@ export const Dashboard = () => {
 
     const exportData = async () => {
         setLoading(true)
-        const dateRange: DateRangeFilter = {
+        const dateRange: ExportDashboard = {
             startDate: new Date(date?.from as Date),
             endDate: new Date(date?.to as Date),
+            type: productTypeSelected
         }
         const response = await getDashboardReport(dateRange) as Blob;
         const url = URL.createObjectURL(response)
@@ -102,13 +116,30 @@ export const Dashboard = () => {
             <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight ">Resumen</h2>
-                    <div className="flex items-center gap-2">
-                        <DateRangePicker
-                            datePicker={date}
-                            setDatePicker={setDate}
-                            label="Rango de fecha"
-                            btnWidth="w-60"
-                        />
+                    <div className="flex items-start gap-4">
+                        <div className="flex flex-col items-end justify-start gap-2">
+                            <Label>Tipo de producto</Label>
+                            <Select value={productTypeSelected} onValueChange={setProductTypeSelected}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Producto" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {types && types.map((ty: ProductType, index: number) => (
+                                            <SelectItem key={index} value={ty.type}>{ty.type}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DateRangePicker
+                                datePicker={date}
+                                setDatePicker={setDate}
+                                label="Rango de fecha"
+                                btnWidth="w-60"
+                            />
+                        </div>
                     </div>
                 </div>
 
