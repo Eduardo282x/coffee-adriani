@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineCash } from "react-icons/hi";
 import { MdOutlinePlaylistRemove } from "react-icons/md";
+import { FiFileText } from "react-icons/fi";
 
 export const paymentsColumns: IColumns<IPayments>[] = [
     {
@@ -250,6 +251,17 @@ export const paymentsInvoiceAssociatedColumns: IColumns<IInvoice>[] = [
         orderBy: '',
         type: 'string',
         icon: false,
+    },
+    {
+        label: 'Ver factura',
+        column: '',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Ver', icon: FiFileText, className: 'text-blue-600' },
+        ]
     },
     {
         label: 'Desasociar',

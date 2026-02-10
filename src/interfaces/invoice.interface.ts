@@ -69,6 +69,7 @@ export interface InvoiceAPINewInvoice {
 export interface InvoiceInvoice {
     id: number;
     clientId: number;
+    client?: IClients;
     dispatchDate: Date;
     dueDate: Date;
     controlNumber: string;

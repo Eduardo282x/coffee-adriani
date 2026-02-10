@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
-import { DateRangeFilter, IInvoice } from '@/interfaces/invoice.interface';
+import { DateRangeFilter, IInvoice, InvoiceInvoice } from '@/interfaces/invoice.interface';
 import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -21,8 +21,9 @@ import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
-import { getInvoiceUnordered } from '@/services/invoice.service';
+import { getInvoiceDetails, getInvoiceUnordered } from '@/services/invoice.service';
 import { useOptimizedPayments } from '@/hooks/payment.hook';
+import { InvoicePreview } from './InvoicePreview';
 
 export const Payments = () => {
     // Estados locales específicos del componente
@@ -32,11 +33,22 @@ export const Payments = () => {
     const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false);
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const [openDisassociate, setOpenDisassociate] = useState<boolean>(false);
+    const [openView, setOpenView] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
     const [invoicesForPay, setInvoicesForPay] = useState<IInvoice[]>([]);
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [filter, setFilters] = useState<PaymentFilters>(initialPaymentFilters);
+
+    const [invoice, setInvoice] = useState<InvoiceInvoice | null>(null);
+
+    const getInvoiceDetailsAPI = async (invoiceId: number) => {
+        setLoading(true);
+        const response = await getInvoiceDetails(invoiceId);
+        setInvoice(response as unknown as InvoiceInvoice);
+        setLoading(false);
+    }
 
     // Hook optimizado
     const {
@@ -70,6 +82,11 @@ export const Payments = () => {
     useEffect(() => {
         getInvoiceApi();
     }, []);
+
+    const closePreview = () => {
+        setOpenView(false);
+        setInvoice(null);
+    }
 
     // Aplicar filtro de fecha cuando cambia
     useEffect(() => {
@@ -176,9 +193,14 @@ export const Payments = () => {
         }
     };
 
-    const getActionExpansiblePayment = async (data: InvoicePayment) => {
+    const getActionExpansiblePayment = async (data: InvoicePayment, action: string) => {
         setPaymentDisassociate(data);
-        setOpenDisassociate(true);
+
+        if (action === 'Desasociar') setOpenDisassociate(true);
+        if (action === 'Ver') {
+            getInvoiceDetailsAPI(data.invoiceId)
+            setOpenView(true);
+        }
     };
 
     const disassociatePayment = async (data: boolean) => {
@@ -463,6 +485,12 @@ export const Payments = () => {
                         </Button>
                     </div>
                 </DialogComponent>
+            )}
+
+            {loading && <ScreenLoader />}
+
+            {openView && invoice && (
+                <InvoicePreview openDialog={openView} setOpenDialog={closePreview} invoice={invoice} />
             )}
         </div>
     );

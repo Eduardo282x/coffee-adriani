@@ -6,7 +6,7 @@ import { IInvoice } from "@/interfaces/invoice.interface";
 
 interface PaymentExpandibleProps {
     payment: IPayments;
-    actionPayment: (data: InvoicePayment) => void;
+    actionPayment: (data: InvoicePayment, action: string) => void;
 }
 
 export const PaymentExpandible = ({ payment, actionPayment }: PaymentExpandibleProps) => {
@@ -20,8 +20,8 @@ export const PaymentExpandible = ({ payment, actionPayment }: PaymentExpandibleP
 
     const getAction = (type: string, data: IInvoice) => {
         const findPayment = payment.InvoicePayment.find(item => item.invoiceId === data.id) as InvoicePayment;
-        if (type === 'Desasociar') {
-            actionPayment(findPayment)
+        if (type === 'Desasociar' || type === 'Ver') {
+            actionPayment(findPayment, type)
         }
     }
 
