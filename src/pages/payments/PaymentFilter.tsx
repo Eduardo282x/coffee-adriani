@@ -1,17 +1,15 @@
 import { DateRangePicker } from '@/components/datepicker/DateRangePicker';
 import { Label } from '@/components/ui/label';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter } from '@/components/table/Filter';
-import { getPaymentMethod, getPaymentAccounts, getPaymentDescriptions } from '@/services/payment.service';
-import { Account, DescriptionPayment, IPayments, Method } from '@/interfaces/payment.interface';
+import { AccountPay, DescriptionPayment, IPayments, Method } from '@/interfaces/payment.interface';
 import { DateRange } from 'react-day-picker';
 import { IColumns } from '@/components/table/table.interface';
 import { DropDownFilter } from '@/components/dropdownFilter/DropDownFilter';
 import { PaymentFilters, PaymentFilterType } from './payment.data';
 import { IOptions } from '@/interfaces/form.interface';
 import { ProductType } from '@/interfaces/product.interface';
-import { getProductType } from '@/services/products.service';
 
 
 interface SelectFiltersOptions {
@@ -30,6 +28,10 @@ interface PaymentsFilterProps {
     paymentsColumns: IColumns<IPayments>[];
     filters: PaymentFilters;
     handleChangeFilter: (filter: PaymentFilterType, value: string) => void;
+    methods: Method[];
+    accounts: AccountPay[];
+    types: ProductType[];
+    typeDescription: DescriptionPayment[];
 }
 
 export const PaymentFilter: FC<PaymentsFilterProps> = ({
@@ -40,101 +42,70 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
     // payments,
     handleChangeSearch,
     setPaymentsFilter,
-    paymentsColumns
+    paymentsColumns,
+    methods,
+    accounts,
+    types,
+    typeDescription,
 }) => {
-    const [methods, setMethods] = useState<Method[]>([]);
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [types, setTypes] = useState<ProductType[]>([]);
-    const [typeDescription, setTypeDescription] = useState<DescriptionPayment[]>([]);
-
-    const [optionsFilters, setOptionsFilters] = useState<SelectFiltersOptions[]>([])
-
-    const getPaymentAccountsApi = async () => {
-        const response = await getPaymentAccounts();
-        setAccounts(response);
-    }
-    const getPaymentMethodsApi = async () => {
-        const response = await getPaymentMethod();
-        setMethods(response);
-    }
-    const getProductsTypesApi = async () => {
-        const response = await getProductType();
-        setTypes(response);
-    }
-    const getPaymentTypeDescriptionApi = async () => {
-        const response = await getPaymentDescriptions();
-        setTypeDescription(response);
-    }
-
-    useEffect(() => {
-        const filtersOptions: SelectFiltersOptions[] = [
-            {
-                label: 'Cuentas de pago',
-                value: filters.account,
-                name: 'account',
-                options: [
-                    { label: 'Todos', value: 'all' },
-                    ...accounts.map(acc => ({ label: `${acc.name} ${acc.bank}`, value: acc.id.toString() }))
-                ]
-            },
-            {
-                label: 'Métodos de pago',
-                value: filters.method,
-                name: 'method',
-                options: [
-                    { label: 'Todas', value: 'all' },
-                    ...methods.map(met => ({ label: met.name, value: met.id.toString() }))
-                ]
-            },
-            {
-                label: 'Pagos asociados',
-                value: filters.associated,
-                name: 'associated',
-                options: [
-                    { label: 'Todos', value: 'all' },
-                    { label: 'Asociados', value: 'associated' },
-                    { label: 'Sin Asociar', value: 'noAssociated' }
-                ]
-            },
-            {
-                label: 'Pagos con abonos',
-                value: filters.credit,
-                name: 'credit',
-                options: [
-                    { label: 'Todos', value: 'all' },
-                    { label: 'Abonos', value: 'credit' },
-                    { label: 'Sin Abonos', value: 'noCredit' }
-                ]
-            },
-            {
-                label: 'Tipo de producto',
-                value: filters.type,
-                name: 'type',
-                options: [
-                    { label: 'Todos', value: 'all' },
-                    ...types.map(ty => ({ label: ty.type, value: ty.type }))
-                ]
-            },
-            {
-                label: 'Tipo de gasto',
-                value: filters.typeDescription,
-                name: 'typeDescription',
-                options: [
-                    { label: 'Todos', value: 'all' },
-                    ...typeDescription.map(ty => ({ label: ty.description, value: ty.description }))
-                ]
-            },
-        ];
-
-        setOptionsFilters(filtersOptions);
-    }, [methods, accounts, types, filters])
-
-    useEffect(() => {
-        getProductsTypesApi();
-        getPaymentMethodsApi();
-        getPaymentAccountsApi();
-        getPaymentTypeDescriptionApi();
-    }, [])
+    const optionsFilters: SelectFiltersOptions[] = [
+        {
+            label: 'Cuentas de pago',
+            value: filters.account,
+            name: 'account',
+            options: [
+                { label: 'Todos', value: 'all' },
+                ...accounts.map(acc => ({ label: `${acc.name} ${acc.bank}`, value: acc.id.toString() }))
+            ]
+        },
+        {
+            label: 'Métodos de pago',
+            value: filters.method,
+            name: 'method',
+            options: [
+                { label: 'Todas', value: 'all' },
+                ...methods.map(met => ({ label: met.name, value: met.id.toString() }))
+            ]
+        },
+        {
+            label: 'Pagos asociados',
+            value: filters.associated,
+            name: 'associated',
+            options: [
+                { label: 'Todos', value: 'all' },
+                { label: 'Asociados', value: 'associated' },
+                { label: 'Sin Asociar', value: 'unassociated' }
+            ]
+        },
+        {
+            label: 'Pagos con abonos',
+            value: filters.credit,
+            name: 'credit',
+            options: [
+                { label: 'Todos', value: 'all' },
+                { label: 'Abonos', value: 'credit' },
+                { label: 'Sin Abonos', value: 'noCredit' }
+            ]
+        },
+        {
+            label: 'Tipo de producto',
+            value: filters.type,
+            name: 'type',
+            options: [
+                { label: 'Todos', value: 'all' },
+                ...types.map(ty => ({ label: ty.type, value: ty.type }))
+            ]
+        },
+        {
+            label: 'Tipo de gasto',
+            value: filters.typeDescription,
+            name: 'typeDescription',
+            options: [
+                { label: 'Todos', value: 'all' },
+                ...typeDescription.map(ty => ({ label: ty.description, value: ty.description }))
+            ]
+        },
+    ];
 
     return (
         <div className="flex items-center gap-3">

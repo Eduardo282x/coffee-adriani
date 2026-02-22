@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Download, Plus, Loader2 } from "lucide-react"
@@ -18,18 +18,26 @@ import { socket, useSocket } from "@/services/socket.io"
 import { formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { DetailsPackage, DetailsPayments } from "./DetailsPackage"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
-import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface"
-import { getInventory } from "@/services/inventory.service"
+import { GroupInventoryDate } from "@/interfaces/inventory.interface"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 // import { useOptimizedInvoices } from "./hooks/useOptimizedInvoices"
 import { useOptimizedInvoices } from '@/hooks/invoice.hook';
+import { useOptimizedInventory } from "@/hooks/inventory.hook";
 
 export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [selectInvoice, setSelectInvoice] = useState<InvoiceInvoice | null>(null);
     const [loadingFile, setLoadingFile] = useState<boolean>(false);
     const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined);
-    const [inventory, setInventory] = useState<GroupInventoryDate>({ allInventory: [], inventory: [] });
+    const { inventory: inventoryList } = useOptimizedInventory();
+
+    const inventory = useMemo<GroupInventoryDate>(() => {
+        const parseInventory = inventoryList.map((inv) => ({
+            label: `${inv.product.name} - ${inv.product.presentation}`,
+            value: inv.id
+        }));
+        return { allInventory: inventoryList, inventory: parseInventory };
+    }, [inventoryList]);
 
     // Hook optimizado
     const {
@@ -63,11 +71,6 @@ export const InvoicesPage = () => {
         enableStatistics: true
     });
 
-    // Cargar inventario al montar
-    useEffect(() => {
-        getInventoryApi();
-    }, []);
-
     // Aplicar filtro de fecha cuando cambia
     useEffect(() => {
         if (dateStart?.to) {
@@ -79,7 +82,7 @@ export const InvoicesPage = () => {
         } else {
             applyDateFilter(null);
         }
-    }, [dateStart?.to, applyDateFilter]);
+    }, [dateStart?.from, dateStart?.to, applyDateFilter]);
 
     // Socket listeners
     useSocket('message', (data) => {
@@ -89,17 +92,6 @@ export const InvoicesPage = () => {
     useEffect(() => {
         socket.emit('message', 'Entre a las facturas');
     }, []);
-
-    const getInventoryApi = async () => {
-        const response: IInventory[] = await getInventory();
-        if (response) {
-            const parseInventory = response.map((inv: IInventory) => ({
-                label: `${inv.product.name} - ${inv.product.presentation}`,
-                value: inv.id
-            }));
-            setInventory({ allInventory: response, inventory: parseInventory });
-        }
-    };
 
     const generateInvoice = async (data: IInvoiceForm) => {
         try {

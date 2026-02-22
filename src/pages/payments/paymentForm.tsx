@@ -7,22 +7,36 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { AccountPay, DescriptionPayment, IPaymentForm } from '@/interfaces/payment.interface'
-import { getPaymentAccounts, getPaymentDescriptions } from '@/services/payment.service'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form';
 
 // import TimePicker from 'react-time-picker';
 
+interface PaymentFormProps extends FromProps {
+    accounts: AccountPay[];
+    descriptions: DescriptionPayment[];
+}
 
-
-export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
-    const [descriptionOptions, setDescriptionOptions] = useState<IOptions[]>([]);
-    const [accountsOptions, setAccountsOptions] = useState<IOptions[]>([]);
+export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, descriptions }) => {
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
     const [showFieldDescription, setShowFieldDescription] = useState<boolean>(false);
     const today = new Date();
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
+
+    const accountsOptions = useMemo<IOptions[]>(() => {
+        return accounts.map(item => ({
+            label: `${item.bank} - ${item.name}`,
+            value: item.id
+        }));
+    }, [accounts]);
+
+    const descriptionOptions = useMemo<IOptions[]>(() => {
+        return descriptions.map(item => ({
+            label: item.description,
+            value: item.description
+        }));
+    }, [descriptions]);
 
     useEffect(() => {
         if (data) {
@@ -37,30 +51,6 @@ export const PaymentForm: FC<FromProps> = ({ onSubmit, data }) => {
             form.reset(formData)
         }
     }, [data, accountsOptions, descriptionOptions])
-
-    useEffect(() => {
-        getAccountsApi();
-        getDescriptionsApi();
-    }, [])
-
-    const getAccountsApi = async () => {
-        const response: AccountPay[] = await getPaymentAccounts()
-        setAccountsOptions(response.map(data => {
-            return {
-                label: `${data.bank} - ${data.name}`,
-                value: data.id
-            }
-        }))
-    }
-    const getDescriptionsApi = async () => {
-        const response: DescriptionPayment[] = await getPaymentDescriptions()
-        setDescriptionOptions(response.map(data => {
-            return {
-                label: data.description,
-                value: data.description
-            }
-        }))
-    }
 
     const form = useForm<IPaymentForm>({
         defaultValues: {

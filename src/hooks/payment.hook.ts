@@ -4,6 +4,9 @@ import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tansta
 import {
     getPaymentsPaginated,
     getPaymentStatistics,
+    getPaymentMethod,
+    getPaymentAccounts,
+    getPaymentDescriptions,
     updatePayment,
     registerPayment,
     deletePayment,
@@ -15,6 +18,11 @@ import {
     postAssociatePayment,
     putPaymentAccounts
 } from '@/services/payment.service';
+import { getInvoiceUnordered } from '@/services/invoice.service';
+import { IInvoice } from '@/interfaces/invoice.interface';
+import { getProductType } from '@/services/products.service';
+import { AccountPay, DescriptionPayment, Method } from '@/interfaces/payment.interface';
+import { ProductType } from '@/interfaces/product.interface';
 
 interface PaymentDateRangeFilter {
     startDate?: Date;
@@ -103,6 +111,61 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         enabled: enableStatistics,
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
+    });
+
+    const {
+        data: invoicesForPayData,
+        isLoading: isLoadingInvoicesForPay,
+        refetch: refetchInvoicesForPay
+    } = useQuery({
+        queryKey: ['invoices-unordered'],
+        queryFn: () => getInvoiceUnordered() as Promise<IInvoice[]>,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
+    });
+
+    const {
+        data: paymentMethodsData,
+        isLoading: isLoadingPaymentMethods,
+        refetch: refetchPaymentMethods,
+    } = useQuery({
+        queryKey: ['payment-methods'],
+        queryFn: () => getPaymentMethod() as Promise<Method[]>,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
+    });
+
+    const {
+        data: paymentAccountsData,
+        isLoading: isLoadingPaymentAccounts,
+        refetch: refetchPaymentAccounts,
+    } = useQuery({
+        queryKey: ['payment-accounts'],
+        queryFn: () => getPaymentAccounts() as Promise<AccountPay[]>,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
+    });
+
+    const {
+        data: paymentDescriptionsData,
+        isLoading: isLoadingPaymentDescriptions,
+        refetch: refetchPaymentDescriptions,
+    } = useQuery({
+        queryKey: ['payment-descriptions'],
+        queryFn: () => getPaymentDescriptions() as Promise<DescriptionPayment[]>,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
+    });
+
+    const {
+        data: productTypesData,
+        isLoading: isLoadingProductTypes,
+        refetch: refetchProductTypes,
+    } = useQuery({
+        queryKey: ['product-types'],
+        queryFn: () => getProductType() as Promise<ProductType[]>,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
     });
 
     // 3. Mutaciones para pagos
@@ -290,7 +353,13 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     }, [deleteAccountMutation]);
 
     // 9. Estado de carga general
-    const isLoading = isLoadingPayments || isLoadingStatistics;
+    const isLoading = isLoadingPayments ||
+        isLoadingStatistics ||
+        isLoadingInvoicesForPay ||
+        isLoadingPaymentMethods ||
+        isLoadingPaymentAccounts ||
+        isLoadingPaymentDescriptions ||
+        isLoadingProductTypes;
     const isMutating = createPaymentMutation.isPending ||
         updatePaymentMutation.isPending ||
         deletePaymentMutation.isPending ||
@@ -306,11 +375,21 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         // Datos
         payments: processedData?.payments || [],
         statistics: statisticsData,
+        invoicesForPay: invoicesForPayData || [],
+        paymentMethods: paymentMethodsData || [],
+        paymentAccounts: paymentAccountsData || [],
+        paymentDescriptions: paymentDescriptionsData || [],
+        productTypes: productTypesData || [],
         totalCount: processedData?.totalCount || 0,
 
         // Estados de carga
         isLoading,
         isLoadingStatistics,
+        isLoadingInvoicesForPay,
+        isLoadingPaymentMethods,
+        isLoadingPaymentAccounts,
+        isLoadingPaymentDescriptions,
+        isLoadingProductTypes,
         isLoadingMore: isFetchingNextPage,
         isMutating,
 
@@ -350,6 +429,11 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         // Control manual
         refetch: refetchPayments,
         refetchStatistics,
+        refetchInvoicesForPay,
+        refetchPaymentMethods,
+        refetchPaymentAccounts,
+        refetchPaymentDescriptions,
+        refetchProductTypes,
 
         // Errores
         error: paymentsError

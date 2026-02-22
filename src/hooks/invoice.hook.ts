@@ -25,7 +25,7 @@ interface UseInvoicesOptions {
 export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const { pageSize = 50, enableStatistics = true } = options;
     const [dateFilter, setDateFilter] = useState<DateRangeFilter | null>(null);
-    const [invoiceId, setInvoiceId] = useState<number>(1);
+    const [invoiceId, setInvoiceId] = useState<number | null>(null);
     const [search, setSearch] = useState<string>('');
     const [selectedBlock, setSelectedBlock] = useState<string>('all');
     const [selectedTypeProduct, setSelectedTypeProduct] = useState<string>('Cafe');
@@ -95,8 +95,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         refetch: refetchDetails
     } = useQuery({
         queryKey: ['invoice-details', invoiceId],
-        queryFn: () => getInvoiceDetails(invoiceId),
-        enabled: true,
+        queryFn: () => getInvoiceDetails(Number(invoiceId)),
+        enabled: invoiceId !== null,
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
     });

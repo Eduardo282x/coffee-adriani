@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
-import { DateRangeFilter, IInvoice, InvoiceInvoice } from '@/interfaces/invoice.interface';
+import { DateRangeFilter, InvoiceInvoice } from '@/interfaces/invoice.interface';
 import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -21,7 +21,6 @@ import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
-import { getInvoiceDetails, getInvoiceUnordered } from '@/services/invoice.service';
 import { useOptimizedPayments } from '@/hooks/payment.hook';
 import { InvoicePreview } from './InvoicePreview';
 
@@ -34,25 +33,21 @@ export const Payments = () => {
     const [openPayDialog, setOpenPayDialog] = useState<boolean>(false);
     const [openDisassociate, setOpenDisassociate] = useState<boolean>(false);
     const [openView, setOpenView] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
-    const [invoicesForPay, setInvoicesForPay] = useState<IInvoice[]>([]);
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [filter, setFilters] = useState<PaymentFilters>(initialPaymentFilters);
-
     const [invoice, setInvoice] = useState<InvoiceInvoice | null>(null);
 
-    const getInvoiceDetailsAPI = async (invoiceId: number) => {
-        setLoading(true);
-        const response = await getInvoiceDetails(invoiceId);
-        setInvoice(response as unknown as InvoiceInvoice);
-        setLoading(false);
-    }
 
     // Hook optimizado
     const {
         payments,
+        invoicesForPay,
+        paymentMethods,
+        paymentAccounts,
+        paymentDescriptions,
+        productTypes,
         totalCount,
         statistics,
         isLoading,
@@ -78,11 +73,6 @@ export const Payments = () => {
         enableStatistics: true
     });
 
-    // Efectos iniciales
-    useEffect(() => {
-        getInvoiceApi();
-    }, []);
-
     const closePreview = () => {
         setOpenView(false);
         setInvoice(null);
@@ -99,7 +89,7 @@ export const Payments = () => {
         } else {
             applyDateFilter(null);
         }
-    }, [date?.to, applyDateFilter]);
+    }, [date?.from, date?.to, applyDateFilter]);
 
     const handleChangeFilter = (filter: PaymentFilterType, value: string) => {
         switch (filter) {
@@ -198,7 +188,7 @@ export const Payments = () => {
 
         if (action === 'Desasociar') setOpenDisassociate(true);
         if (action === 'Ver') {
-            getInvoiceDetailsAPI(data.invoiceId)
+            setInvoice(data.invoice as unknown as InvoiceInvoice);
             setOpenView(true);
         }
     };
@@ -262,15 +252,6 @@ export const Payments = () => {
         }
     };
 
-    const getInvoiceApi = async () => {
-        try {
-            const response: IInvoice[] = await getInvoiceUnordered();
-            setInvoicesForPay(response);
-        } catch (error) {
-            console.error('Error al cargar facturas:', error);
-        }
-    };
-
     const setPaymentsFilter = (data: IPayments[]) => {
         // Esta función ya no es necesaria con useMemo, pero la mantenemos para compatibilidad
         console.log('setPaymentsFilter llamado con:', data.length, 'pagos');
@@ -318,6 +299,10 @@ export const Payments = () => {
                             paymentsColumns={paymentsColumns}
                             setPaymentsFilter={setPaymentsFilter}
                             handleChangeSearch={handleChangeSearch}
+                            methods={paymentMethods}
+                            accounts={paymentAccounts}
+                            types={productTypes}
+                            typeDescription={paymentDescriptions}
                             payments={[]}
                             date={date}
                             setDate={setDate}
@@ -397,7 +382,12 @@ export const Payments = () => {
                     label1="Actualizar Pago"
                     isEdit={paymentSelected ? true : false}
                 >
-                    <PaymentForm onSubmit={savePayments} data={paymentSelected} />
+                    <PaymentForm
+                        onSubmit={savePayments}
+                        data={paymentSelected}
+                        accounts={paymentAccounts}
+                        descriptions={paymentDescriptions}
+                    />
                 </DialogComponent>
             )}
 
@@ -486,8 +476,6 @@ export const Payments = () => {
                     </div>
                 </DialogComponent>
             )}
-
-            {loading && <ScreenLoader />}
 
             {openView && invoice && (
                 <InvoicePreview openDialog={openView} setOpenDialog={closePreview} invoice={invoice} />

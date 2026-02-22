@@ -13,8 +13,8 @@ import { InventoryForm } from "./InventoryForm"
 import { IColumns } from "@/components/table/table.interface"
 import { InventoryCards } from "./InventoryCards"
 import { useSocket } from "@/services/socket.io"
-import { inventoryStore } from "@/store/inventoryStore"
 import { productStore } from "@/store/productStore"
+import { useOptimizedInventory } from "@/hooks/inventory.hook"
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
@@ -29,12 +29,12 @@ export const Inventory = () => {
     const [inventorySelected, setInventorySelected] = useState<IInventory | null>(null)
 
     const {
-        loading,
-        setLoading,
         inventory,
         inventoryHistory,
-        getInventoryApi
-    } = inventoryStore();
+        isLoading,
+        refetchInventory,
+        refetchInventoryHistory
+    } = useOptimizedInventory();
 
     const { productOptions, products, getProductsApi } = productStore();
 
@@ -51,19 +51,10 @@ export const Inventory = () => {
     }
 
     useEffect(() => {
-        getInventoryStore();
-    }, [])
-
-    const getInventoryStore = async () => {
-        if (!inventory || inventory.length == 0) {
-            setLoading(true);
-            await getInventoryApi();
-        }
         if (!products || products.products.length == 0) {
-            await getProductsApi();
+            getProductsApi();
         }
-        setLoading(false);
-    }
+    }, [products, getProductsApi])
 
     useEffect(() => {
         const total: number = inventory.reduce((acc, item) => acc + item.quantity, 0)
@@ -85,7 +76,8 @@ export const Inventory = () => {
             await postInventory(data)
         }
         setOpenDialog(false);
-        await getInventoryApi();
+        await refetchInventory();
+        await refetchInventoryHistory();
     }
 
     const newElement = () => {
@@ -110,12 +102,13 @@ export const Inventory = () => {
 
     useSocket('message', async (data) => {
         console.log(data);
-        await getInventoryApi();
+        await refetchInventory();
+        await refetchInventoryHistory();
     })
 
     return (
         <div className="flex flex-col">
-            {loading && (
+            {isLoading && (
                 <ScreenLoader />
             )}
 

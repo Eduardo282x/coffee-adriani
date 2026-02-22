@@ -1,31 +1,21 @@
 import { formatDateWithDateTime, formatOnlyNumberWithDots } from '@/hooks/formaters';
-import { IDolar, IDolarForm, DolarBody } from '@/interfaces/product.interface';
-import { getProductDolar, updateDolarAutomatic, updateDolar } from '@/services/products.service';
+import { IDolarForm, DolarBody } from '@/interfaces/product.interface';
 import { RefreshCcw } from 'lucide-react';
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { MdOutlineCurrencyExchange } from 'react-icons/md';
 import { ToolTip } from '../tooltip/ToolTip';
 import { DialogComponent } from '../dialog/DialogComponent';
 import { DolarForm } from '@/pages/products/DolarForm';
 import { Button } from '../ui/button';
 import { addDays } from 'date-fns';
+import { useProductDolar } from '@/hooks/product.hook';
 
 export const DolarComponents = () => {
     const [openDolar, setOpenDolar] = useState<boolean>(false);
-    const [dolar, setDolar] = useState<IDolar>();
-
-    useEffect(() => {
-        getProductDolarApi();
-    }, [])
-
-    const getProductDolarApi = async () => {
-        const response: IDolar = await getProductDolar();
-        setDolar(response)
-    }
+    const { dolar, updateDolarAutomatic, updateDolarManual: updateDolarManualApi } = useProductDolar();
 
     const updateDolarApi = async () => {
         await updateDolarAutomatic();
-        await getProductDolarApi();
     }
 
     const updateDolarManual = async (data: IDolarForm) => {
@@ -34,8 +24,7 @@ export const DolarComponents = () => {
             dolar: Number(data.dolar),
             date: addDays(tomorrow, 1)
         };
-        await updateDolar(dataDolar);
-        await getProductDolarApi();
+        await updateDolarManualApi(dataDolar);
         setOpenDolar(false);
     }
 
