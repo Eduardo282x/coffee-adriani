@@ -11,7 +11,6 @@ import { getInvoiceExcelFilter } from "@/services/invoice.service"
 import { ExpansibleInvoice } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
 import { Loading } from "@/components/loaders/Loading"
-import { addDays } from "date-fns"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
@@ -76,7 +75,7 @@ export const InvoicesPage = () => {
         if (dateStart?.to) {
             const filterDate: DateRangeFilter = {
                 startDate: dateStart.from || new Date(),
-                endDate: addDays(dateStart.to, 1),
+                endDate: dateStart.to,
             };
             applyDateFilter(filterDate);
         } else {
@@ -168,7 +167,7 @@ export const InvoicesPage = () => {
             if (dateStart) {
                 const filterDate: DateRangeFilter = {
                     startDate: dateStart.from || new Date(),
-                    endDate: dateStart.to ? addDays(dateStart.to, 1) : new Date(),
+                    endDate: dateStart.to ? dateStart.to : new Date(),
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             } else {
