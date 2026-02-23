@@ -24,6 +24,7 @@ interface IInvoiceFilter extends FilterGroupsProps {
 interface FilterGroupsProps {
     handleChangeStatusInvoice: (value: InvoiceStatus) => void;
     handleChangeTypeProduct: (value: string) => void;
+    handleChangeZone: (value: string) => void;
     handleChangeBlock: (value: string) => void;
     handleChangeSearch: (value: string) => void;
     dateStart: DateRange | undefined;
@@ -31,6 +32,7 @@ interface FilterGroupsProps {
     setDateStart: (date: DateRange | undefined) => void;
     setDateEnd: (date: DateRange | undefined) => void;
     selectedBlock?: string;
+    selectedZone?: string;
     selectedTypeProduct?: string;
 }
 
@@ -38,6 +40,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     setInvoicesFilter,
     handleChangeStatusInvoice,
     handleChangeBlock,
+    handleChangeZone,
     handleChangeSearch,
     handleChangeTypeProduct,
     dateStart,
@@ -47,6 +50,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     // invoice,
     clientColumns,
     selectedBlock,
+    selectedZone,
     selectedTypeProduct
 }) => {
 
@@ -62,12 +66,14 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                 <FiltersGroups
                     handleChangeStatusInvoice={handleChangeStatusInvoice}
                     handleChangeTypeProduct={handleChangeTypeProduct}
+                    handleChangeZone={handleChangeZone}
                     handleChangeBlock={handleChangeBlock}
                     handleChangeSearch={handleChangeSearch}
                     dateStart={dateStart}
                     dateEnd={dateEnd}
                     setDateStart={setDateStart}
                     setDateEnd={setDateEnd}
+                    selectedZone={selectedZone}
                     selectedBlock={selectedBlock}
                     selectedTypeProduct={selectedTypeProduct}
                 />
@@ -83,15 +89,23 @@ const FiltersGroups = ({
     handleChangeStatusInvoice,
     handleChangeBlock,
     handleChangeTypeProduct,
+    handleChangeZone,
     dateStart,
     dateEnd,
     setDateStart,
     setDateEnd,
+    selectedZone,
     selectedBlock,
     selectedTypeProduct
 }: FilterGroupsProps) => {
     const { blocks, getBlocksApi } = blockStore();
     const [types, setTypes] = useState<ProductType[]>([]);
+    const zones = [
+        { label: 'Zona Norte', value: 'Zona Norte' },
+        { label: 'Zona Sur', value: 'Zona Sur' },
+        { label: 'Zona Este', value: 'Zona Este' },
+        { label: 'Zona Oeste', value: 'Zona Oeste' }
+    ];
 
     const getBlockStoreApi = async () => {
         if (!blocks || blocks.allBlocks.length == 0) {
@@ -129,6 +143,23 @@ const FiltersGroups = ({
                             <SelectItem value='Abonadas'>Abonadas</SelectItem>
                             <SelectItem value='Vencida'>Vencida</SelectItem>
                             {/* <SelectItem value='Cancelada'>Cancelada</SelectItem> */}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="w-full">
+                <Label className="mb-2">Zona</Label>
+                <Select value={selectedZone} onValueChange={handleChangeZone}>
+                    <SelectTrigger className="w-full ">
+                        <SelectValue placeholder="Zona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value='all'>Todas</SelectItem>
+                            {zones && zones.map((zone: { label: string, value: string }, index: number) => (
+                                <SelectItem key={index} value={zone.value}>{zone.label}</SelectItem>
+                            ))}
                         </SelectGroup>
                     </SelectContent>
                 </Select>

@@ -53,6 +53,8 @@ export const InvoicesPage = () => {
         handleChangeSearch,
         handleChangeStatusInvoice,
         handleChangeTypeProduct,
+        handleChangeZone,
+        selectedZone,
         selectedBlock,
         selectedTypeProduct,
 
@@ -269,7 +271,9 @@ export const InvoicesPage = () => {
                             handleChangeStatusInvoice={handleChangeStatusInvoice}
                             handleChangeBlock={handleChangeBlock}
                             handleChangeTypeProduct={handleChangeTypeProduct}
+                            handleChangeZone={handleChangeZone}
                             selectedBlock={selectedBlock}
+                            selectedZone={selectedZone}
                             selectedTypeProduct={selectedTypeProduct}
                             dateStart={dateStart}
                             setDateStart={setDateStart}
