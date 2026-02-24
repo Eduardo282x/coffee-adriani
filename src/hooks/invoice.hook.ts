@@ -51,8 +51,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
                 page: Number(pageParam),
                 limit: pageSize,
                 ...(dateFilter && {
-                    startDate: dateFilter.startDate,
-                    endDate: dateFilter.endDate
+                    startDate: formatDateOnly(dateFilter.startDate),
+                    endDate: formatDateOnly(dateFilter.endDate)
                 }),
                 search: search.trim(),
                 type: selectedTypeProduct,
@@ -78,8 +78,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     } = useQuery({
         queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, search, selectedZone, selectedBlock, selectedStatus],
         queryFn: () => getInvoiceStatistics({
-            startDate: dateFilter?.startDate,
-            endDate: dateFilter?.endDate,
+            startDate: formatDateOnly(dateFilter?.startDate),
+            endDate: formatDateOnly(dateFilter?.endDate),
             search: search.trim(),
             type: selectedTypeProduct,
             ...(selectedZone !== 'all' && { zone: selectedZone }),
@@ -90,6 +90,13 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
     });
+
+    const formatDateOnly = (value: Date | string | null | undefined): string => {
+        if (!value) return '';
+        const date = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toISOString().slice(0, 10);
+    };
 
     // 2. Consulta separada para estadísticas
     const {

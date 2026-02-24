@@ -18,8 +18,8 @@ export interface InvoiceFilterPaginate extends InvoiceDateRangeFilter {
 }
 interface InvoiceDateRangeFilter {
     type: string;
-    startDate?: Date,
-    endDate?: Date,
+    startDate?: Date | string,
+    endDate?: Date | string,
     search?: string,
     blockId?: string,
     status?: InvoiceStatus
