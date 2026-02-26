@@ -20,6 +20,7 @@ export interface LowStock {
 
 export interface Invoices {
     total: number;
+    totalClients: number;
     payed: Pagadas;
     expired: Pagadas;
     pending: Pagadas;

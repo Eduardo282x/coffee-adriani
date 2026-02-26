@@ -148,10 +148,10 @@ export const Dashboard = () => {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {/* <CardDashboard title="Ventas Totales" mainNumber="$45,231.89" percent="+20.1%" icon={DollarSign} subtitle="desde el último período"></CardDashboard> */}
 
-                        <CardDashboard title="Clientes Nuevos" mainNumber={0} percent="+10.5%" icon={Users} subtitle="desde el último período"></CardDashboard>
-                        <CardDashboard title="Facturas Pagadas" mainNumber={dashBoardData.invoices.payed.amount} percent="+15.2%" icon={Package} subtitle="desde el último período"></CardDashboard>
-                        <CardDashboard title="Facturas Pendientes" mainNumber={dashBoardData.invoices.pending.amount} percent="-2.5%" icon={ShoppingCart} subtitle="desde el último período"></CardDashboard>
-                        <CardDashboard title="Facturas Vencidas" mainNumber={dashBoardData.invoices.expired.amount} percent="-2.5%" icon={ShoppingCart} subtitle="desde el último período"></CardDashboard>
+                        <CardDashboard title="Total de Clientes" number={dashBoardData.invoices.totalClients} icon={Users}></CardDashboard>
+                        <CardDashboard title="Facturas Pagadas" number={dashBoardData.invoices.payed.amount} icon={Package}></CardDashboard>
+                        <CardDashboard title="Facturas Pendientes" number={dashBoardData.invoices.pending.amount} icon={ShoppingCart}></CardDashboard>
+                        <CardDashboard title="Facturas Vencidas" number={dashBoardData.invoices.expired.amount} icon={ShoppingCart}></CardDashboard>
                     </div>
                 )}
 
