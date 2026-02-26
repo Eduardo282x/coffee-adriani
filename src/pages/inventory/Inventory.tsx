@@ -15,11 +15,16 @@ import { InventoryCards } from "./InventoryCards"
 import { useSocket } from "@/services/socket.io"
 import { productStore } from "@/store/productStore"
 import { useOptimizedInventory } from "@/hooks/inventory.hook"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ProductType } from "@/interfaces/product.interface"
+import { getProductType } from "@/services/products.service"
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [column, setColumn] = useState<IColumns<IInventory>[]>(inventoryColumns)
+    const [type, setType] = useState<string>('Cafe');
+    const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
     const [history, setHistory] = useState<boolean>(false);
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
     const [dataForm, setDataForm] = useState<BodyInventory>({
@@ -56,13 +61,22 @@ export const Inventory = () => {
         }
     }, [products, getProductsApi])
 
+    const getProductsTypesApi = async () => {
+        const response = await getProductType();
+        setTypesProduct(response);
+    }
+
     useEffect(() => {
-        const total: number = inventory.reduce((acc, item) => acc + item.quantity, 0)
+        getProductsTypesApi();
+    }, [])
+
+    useEffect(() => {
+        const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + item.quantity, 0)
         const down: number = inventory.filter(pro => pro.quantity < 50).length;
         const zero: number = inventory.filter(pro => pro.quantity === 0).length;
         setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
         setData({ allInventory: inventory, inventory: inventory });
-    }, [inventory])
+    }, [inventory, type])
 
 
     const setInventoryFilter = (inventoryFilter: IInventory[]) => {
@@ -132,7 +146,20 @@ export const Inventory = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Inventario</h2>
 
-                    <div className="flex w-full max-w-sm items-center space-x-2">
+                    <div className="flex w-full max-w-lg items-center space-x-2">
+                        {/* <Label className="mb-2">Tipo de producto</Label> */}
+                        <Select value={type} onValueChange={setType}>
+                            <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Producto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    {typesProduct && typesProduct.map((ty: ProductType, index: number) => (
+                                        <SelectItem key={index} value={ty.type}>{ty.type}</SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         <Filter dataBase={data.allInventory} columns={column} setDataFilter={setInventoryFilter} />
                     </div>
                 </div>
