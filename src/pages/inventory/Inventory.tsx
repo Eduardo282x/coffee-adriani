@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { extraColumn, inventoryColumns } from "./inventory.data"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { TableComponent } from "@/components/table/TableComponent"
@@ -41,7 +41,9 @@ export const Inventory = () => {
         refetchInventoryHistory
     } = useOptimizedInventory();
 
-    const { productOptions, products, getProductsApi } = productStore();
+    const productOptions = productStore((state) => state.productOptions);
+    const products = productStore((state) => state.products);
+    const getProductsApi = productStore((state) => state.getProductsApi);
 
     const toggleButton = (active: boolean) => {
         setHistory(active);
@@ -71,7 +73,8 @@ export const Inventory = () => {
     }, [])
 
     useEffect(() => {
-        const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + item.quantity, 0)
+        const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)
+        // const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + item.quantity, 0)
         const down: number = inventory.filter(pro => pro.quantity < 50).length;
         const zero: number = inventory.filter(pro => pro.quantity === 0).length;
         setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
@@ -114,11 +117,13 @@ export const Inventory = () => {
         }, 0);
     }
 
-    useSocket('message', async (data) => {
+    const handleSocketMessage = useCallback(async (data: unknown) => {
         console.log(data);
         await refetchInventory();
         await refetchInventoryHistory();
-    })
+    }, [refetchInventory, refetchInventoryHistory]);
+
+    useSocket('message', handleSocketMessage)
 
     return (
         <div className="flex flex-col">

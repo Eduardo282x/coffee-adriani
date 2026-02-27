@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInventory, getInventoryHistory } from '@/services/inventory.service';
 import { IInventory } from '@/interfaces/inventory.interface';
 
+const EMPTY_INVENTORY: IInventory[] = [];
+
 export const useOptimizedInventory = () => {
     const queryClient = useQueryClient();
 
@@ -33,8 +35,8 @@ export const useOptimizedInventory = () => {
     };
 
     return {
-        inventory: inventoryData || [],
-        inventoryHistory: inventoryHistoryData || [],
+        inventory: inventoryData ?? EMPTY_INVENTORY,
+        inventoryHistory: inventoryHistoryData ?? EMPTY_INVENTORY,
         isLoading: isLoadingInventory || isLoadingInventoryHistory,
         isLoadingInventory,
         isLoadingInventoryHistory,
