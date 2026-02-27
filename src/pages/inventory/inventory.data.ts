@@ -5,17 +5,9 @@ import { MdEdit } from "react-icons/md";
 
 export const inventoryColumns: IColumns<IInventory>[] = [
     {
-        label: 'Nombre',
+        label: 'Producto',
         column: 'product.name',
-        element: (data: IInventory) => data.product.name,
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
-    {
-        label: 'Presentación',
-        column: 'product.presentation',
-        element: (data: IInventory) => data.product.presentation,
+        element: (data: IInventory) => `${data.product.name} - ${data.product.presentation}`,
         orderBy: '',
         type: 'string',
         icon: false,
@@ -36,14 +28,14 @@ export const inventoryColumns: IColumns<IInventory>[] = [
         type: 'string',
         icon: false,
     },
-    {
-        column: 'product.priceBs',
-        label: 'Precio (Bs)',
-        element: (data: IInventory) => formatNumberWithDots(data.product.priceBs, '', ' Bs'),
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
+    // {
+    //     column: 'product.priceBs',
+    //     label: 'Precio (Bs)',
+    //     element: (data: IInventory) => formatNumberWithDots(data.product.priceBs, '', ' Bs'),
+    //     orderBy: '',
+    //     type: 'string',
+    //     icon: false,
+    // },
     {
         column: 'quantity',
         label: 'Cantidad',

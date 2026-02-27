@@ -5,23 +5,23 @@ import { Edit, Trash2 } from "lucide-react";
 
 export const productsColumns: IColumns<IProducts>[] = [
     {
-        label: 'Nombre',
+        label: 'Producto',
         column: 'name',
-        element: (data: IProducts) => data.name,
+        element: (data: IProducts) => `${data.name} - ${data.presentation}`,
         orderBy: '',
         visible: true,
         type: 'string',
         icon: false,
     },
-    {
-        column: 'presentation',
-        label: 'Presentación',
-        element: (data: IProducts) => data.presentation,
-        orderBy: '',
-        visible: true,
-        type: 'string',
-        icon: false,
-    },
+    // {
+    //     column: 'presentation',
+    //     label: 'Presentación',
+    //     element: (data: IProducts) => data.presentation,
+    //     orderBy: '',
+    //     visible: true,
+    //     type: 'string',
+    //     icon: false,
+    // },
     {
         column: 'purchasePriceUSD',
         label: 'Precio Compra ($)',
