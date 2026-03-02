@@ -87,13 +87,13 @@ function App() {
 export default App
 
 
-export const sendMessage = (channel: string, data: any) => {
-  socket.emit(channel, data)
-}
+// export const sendMessage = (channel: string, data: any) => {
+//   socket.emit(channel, data)
+// }
 
-export const listenMessage = (channel: string) => {
-  socket.on(channel, data => {
-    console.log(data);
-    return data;
-  })
-}
+// export const listenMessage = (channel: string) => {
+//   socket.on(channel, data => {
+//     console.log(data);
+//     return data;
+//   })
+// }
