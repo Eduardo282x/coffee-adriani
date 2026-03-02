@@ -115,7 +115,7 @@ export const Dashboard = () => {
 
             <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight ">Resumen</h2>
+                    <h2 className="text-2xl font-semibold tracking-tight text-[#6f4e37]">Resumen</h2>
                     <div className="flex items-start gap-4">
                         <div className="flex flex-col items-end justify-start gap-2">
                             <Label>Tipo de producto</Label>
