@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { Login } from './pages/auth/Login/Login';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { Clients } from './pages/clients/Clients';
@@ -74,6 +74,7 @@ function App() {
               <Route path="/pagos" element={<Payments />} />
               <Route path="/cuentas-pago" element={<Accounts />} />
               <Route path="/perfil" element={<Profile />} />
+              <Route path="*" element={<Navigate to="/"  replace/>} />
             </Route>
           </Routes>
         </BrowserRouter>
