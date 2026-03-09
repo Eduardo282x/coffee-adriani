@@ -24,10 +24,20 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
 
+    const form = useForm<IPaymentForm>({
+        defaultValues: {
+            reference: '',
+            amount: 0,
+            time: defaultTime,
+            accountId: 0,
+            description: '',
+        }
+    });
+
     const accountsOptions = useMemo<IOptions[]>(() => {
         return accounts.map(item => ({
             label: `${item.bank} - ${item.name}`,
-            value: item.id
+            value: item.id.toString()
         }));
     }, [accounts]);
 
@@ -44,29 +54,23 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
                 reference: data.reference,
                 amount: data.amount,
                 time: new Date(data.paymentDate).toISOString().split('T')[1].slice(0, 5),
-                accountId: data.accountId.toString(),
+                accountId: Number(data.accountId),
                 description: data.description,
             }
-            setDateDispatch(data.paymentDate)
-            form.reset(formData)
-        }
-    }, [data, accountsOptions, descriptionOptions])
+            setDateDispatch(data.paymentDate);
 
-    const form = useForm<IPaymentForm>({
-        defaultValues: {
-            reference: '',
-            amount: 0,
-            time: defaultTime,
-            accountId: 0,
-            description: '',
+            setTimeout(() => {
+                form.reset(formData)
+            }, 100);
         }
-    });
+    }, [data, form])
+
+    const selectedAccountId = form.watch('accountId');
 
     useEffect(() => {
-        const getValue = form.watch('accountId');
-        const findAccount = accountsOptions.find(item => item.value == getValue);
+        const findAccount = accountsOptions.find(item => item.value == selectedAccountId?.toString());
         setShowFieldDescription(findAccount?.label.includes('Gastos') as boolean)
-    }, [form.watch('accountId')])
+    }, [accountsOptions, selectedAccountId])
 
     const onSubmitForm = (data: IPaymentForm) => {
         const dateObj = typeof paymentDate === 'string' ? new Date(paymentDate) : paymentDate;
