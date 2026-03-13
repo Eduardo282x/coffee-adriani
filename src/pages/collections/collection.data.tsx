@@ -70,7 +70,7 @@ export const clientCollectionColumns: IColumns<ICollection>[] = [
         orderBy: '',
         type: 'string',
         icon: false,
-    }
+    },
 ];
 
 export const normalColumns: IColumns<ICollection>[] = [

@@ -157,7 +157,7 @@ export const TableComponent = <T,>({
 
             <div className="block lg:hidden space-y-2">
                 {dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
-                    <CardDynamicMobile key={index} data={item} columns={columnData} />
+                    <CardDynamicMobile key={index} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
                 ))}
             </div>
 
@@ -178,17 +178,39 @@ export const TableComponent = <T,>({
 interface CardDynamicMobileProps<T> {
     data: T;
     columns: IColumns<T>[];
+    isExpansible: boolean;
+    renderRow?: (item: T, index: number) => React.ReactNode;
 }
 
-const CardDynamicMobile = <T,>({ data, columns }: CardDynamicMobileProps<T>) => {
+const CardDynamicMobile = <T,>({ data, columns, isExpansible, renderRow }: CardDynamicMobileProps<T>) => {
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleOpen = () => {
+        setOpen(!open);
+    }
+
     return (
-        <div className="bg-white rounded-md p-4 shadow-md w-full relative">
+        <div className="bg-white rounded-md p-4 shadow-md w-full relative" onClick={handleOpen}>
+            {isExpansible && (
+                <div className="cursor-pointer absolute top-6 right-4">
+                    <IoIosArrowDown
+                        className={`transition-transform text-xl ${open ? 'rotate-180' : 'rotate-0'}`}
+                    />
+                </div>
+            )}
+
             {columns.filter(item => !item.optionActions).map((col: IColumns<T>, index: number) => (
                 <div key={index} className="flex gap-2">
                     <span className="font-semibold">{col.label}:</span>
                     <span>{col.element(data)}</span>
                 </div>
             ))}
+
+            {open && (
+                <div className="shadow-xl border border-gray-400 rounded-xl overflow-hidden mt-2">
+                    {renderRow && renderRow(data, 0)}
+                </div>
+            )}
         </div>
     )
 }
@@ -372,13 +394,13 @@ const getNestedValue = (obj: any, path: string): string => {
 const setNestedValueInObject = (obj: any, path: string, value: any): any => {
     const keys = path.split('.');
     const result = { ...obj };
-    
+
     let current = result;
     for (let i = 0; i < keys.length - 1; i++) {
         current[keys[i]] = { ...current[keys[i]] };
         current = current[keys[i]];
     }
-    
+
     current[keys[keys.length - 1]] = value;
     return result;
 };

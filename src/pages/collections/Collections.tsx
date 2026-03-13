@@ -10,15 +10,16 @@ import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
 import { IColumns } from "@/components/table/table.interface.ts";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DialogComponent } from "@/components/dialog/DialogComponent.tsx"
 import { CollectionForm, DeleteMessageForm } from "./CollectionForm.tsx"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter.tsx"
 import { CollectionActions } from "./CollectionActions.tsx"
-import { Switch } from "@/components/ui/switch.tsx"
-import { IoMdSettings } from "react-icons/io"
-import { RiFileExcel2Line } from "react-icons/ri"
+// import { Switch } from "@/components/ui/switch.tsx"
+import { IoMdSettings } from "react-icons/io";
+import { RiFileExcel2Line } from "react-icons/ri";
+import { FaWhatsapp } from "react-icons/fa";
 
 type TypesViews = 'collection' | 'messages';
 type CollectionTypes = 'collection' | 'messages' | 'sended' | 'no-sended' | 'history' | 'errors';
@@ -53,51 +54,54 @@ export const Collections = () => {
         const response: IMessages[] = await getMessageCollection();
 
         const newColumns: IColumns<ICollection>[] = [
-            {
-                column: 'message.title',
-                label: 'Mensaje',
-                element: (data: ICollection) => (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <span className="rounded-lg px-2 bg-green-100 text-green-800">
-                                {data.message ? data.message.title : ''}
-                            </span>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {response && response.map((me: IMessages, index: number) => (
-                                <DropdownMenuItem key={index} onClick={() => getActions('message.title', { ...data, messageId: me.id, message: me }, true)}>{me.title}</DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                ),
-                // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
-                orderBy: '',
-                type: 'custom',
-                icon: false,
-            },
+            // {
+            //     column: 'message.title',
+            //     label: 'Mensaje',
+            //     element: (data: ICollection) => (
+            //         <DropdownMenu>
+            //             <DropdownMenuTrigger asChild>
+            //                 <span className="rounded-lg px-2 bg-green-100 text-green-800">
+            //                     {data.message ? data.message.title : ''}
+            //                 </span>
+            //             </DropdownMenuTrigger>
+            //             <DropdownMenuContent>
+            //                 {response && response.map((me: IMessages, index: number) => (
+            //                     <DropdownMenuItem key={index} onClick={() => getActions('message.title', { ...data, messageId: me.id, message: me }, true)}>{me.title}</DropdownMenuItem>
+            //                 ))}
+            //             </DropdownMenuContent>
+            //         </DropdownMenu>
+            //     ),
+            //     // className: () => "rounded-lg px-2 bg-green-100 text-green-800",
+            //     orderBy: '',
+            //     type: 'custom',
+            //     icon: false,
+            // },
             {
                 column: 'send',
                 label: 'Enviar',
                 element: (data: ICollection) => (
                     <div onClick={(e) => e.stopPropagation()}>
-                        <Switch checked={data.send} onCheckedChange={(value) => getActions('send', { ...data, send: value }, true)} />
+                        <Button className="text-white bg-green-600 hover:bg-green-700"  onClick={() => getActions('redirect-whatsApp', data)} >
+                            <FaWhatsapp />
+                        </Button>
                     </div>
-                    // <DropdownMenu>
-                    //     <DropdownMenuTrigger>
-                    //         <span className={`${getSendVariant(data.send)}`}>
-                    //             {data.send == true ? 'Enviar' : 'No enviar'}
-                    //         </span>
-                    //     </DropdownMenuTrigger>
-                    //     <DropdownMenuContent>
-                    //         <DropdownMenuItem onClick={() => getActions('send', { ...data, send: true }, true)}>Enviar</DropdownMenuItem>
-                    //         <DropdownMenuItem onClick={() => getActions('send', { ...data, send: false }, true)}>No Enviar</DropdownMenuItem>
-                    //     </DropdownMenuContent>
-                    // </DropdownMenu>
                 ),
                 orderBy: '',
                 type: 'custom',
                 icon: false,
             }
+            // {
+            //     column: 'send',
+            //     label: 'Enviar',
+            //     element: (data: ICollection) => (
+            //         <div onClick={(e) => e.stopPropagation()}>
+            //             <Switch checked={data.send} onCheckedChange={(value) => getActions('send', { ...data, send: value }, true)} />
+            //         </div>
+            //     ),
+            //     orderBy: '',
+            //     type: 'custom',
+            //     icon: false,
+            // }
         ]
 
         setColumns([...clientCollectionColumns, ...newColumns])
@@ -175,6 +179,10 @@ export const Collections = () => {
                     })
                 }
             })
+        }
+
+        if (action == 'redirect-whatsApp') {
+            return handleSendReminder(data as ICollection);
         }
 
         if (byColumn) {
@@ -307,6 +315,24 @@ export const Collections = () => {
         URL.revokeObjectURL(url);
     }
 
+    const handleSendReminder = (colletion: ICollection) => {
+        // 1. Normalizar el número: dejamos solo los dígitos
+        const cleanPhone = colletion.client.phone.replace(/\D/g, '');
+
+        // 2. Armar el mensaje amigable
+        // const message = `¡Hola, ${invoice.clientName}! Esperamos que los despachos de café estén yendo excelente. ☕\n\nTe escribimos para dejarte este recordatorio amistoso de que la factura #${invoice.invoiceNumber} por $${invoice.amount} está pendiente. ¿Te podemos ayudar con algo?\n\n¡Quedamos a la orden!`;
+
+        // 3. Codificar el mensaje para la URL
+        // const encodedMessage = encodeURIComponent(message);
+
+        // 4. Construir el link final
+        // const waLink = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+        const waLink = `https://wa.me/${cleanPhone}`;
+
+        // 5. Abrir en una nueva pestaña
+        window.open(waLink, '_blank');
+    };
+
     return (
         <div className="flex flex-col">
             {loading && (
@@ -330,16 +356,16 @@ export const Collections = () => {
                         value={view}
                         onValueChange={(value) => { setView(value as TypesViews); setViewMessages(value as TypesViews) }}>
                         <TabsList>
-                            <TabsTrigger value="collection">Cobranza</TabsTrigger>
-                            <TabsTrigger value="messages">Mensajes</TabsTrigger>
+                            <TabsTrigger variant='secondary' value="collection">Cobranza</TabsTrigger>
+                            <TabsTrigger variant='secondary' value="messages">Mensajes</TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </div>
             </header>
 
             <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-end gap-2">
+                <div className="flex lg:flex-row flex-col items-center justify-between mb-6">
+                    <div className="flex items-end gap-2 lg:mt-0 -mt-4">
                         <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37] mb-2">Gestión de Cobranza</h2>
                         {view == 'collection' &&
                             <DropDownFilter>
@@ -353,20 +379,20 @@ export const Collections = () => {
                             </DropDownFilter>
                         }
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button onClick={exportExcelCollection} className="bg-green-700 hover:bg-green-600 text-white">
+                    <div className="flex items-center gap-2 lg:mt-0 mt-2">
+                        <Button onClick={exportExcelCollection} className="bg-green-700 hover:bg-green-600 text-white lg:flex hidden">
                             <RiFileExcel2Line className=" font-bold" /> Exportar
                         </Button>
-                        <div className="flex w-80  items-center space-x-2">
+                        <div className="flex w-80 items-center space-x-2">
                             {view == 'collection'
                                 ? <Filter dataBase={collections.allCollections} columns={columns} setDataFilter={setFilterCollection} />
                                 : <Filter dataBase={messages.allMessages} columns={messageCollectionColumns} setDataFilter={setFilterMessage} />
                             }
                         </div>
 
-                        <Button onClick={sendMessage} className="bg-[#6f4e37] text-white hover:bg-[#7a5b45]">Enviar mensajes</Button>
+                        <Button onClick={sendMessage} className="bg-[#6f4e37] text-white hover:bg-[#7a5b45] lg:block hidden">Enviar mensajes</Button>
 
-                        <div className="-mt-6">
+                        <div className="-mt-6 lg:block hidden">
                             <DropDownFilter customIcon={IoMdSettings}>
                                 <CollectionActions
                                     markAll={markAll}
