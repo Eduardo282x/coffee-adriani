@@ -1,17 +1,29 @@
 # ☕ Café Adriani — Sistema de Gestión para Empresa Distribuidora
 
-> Aplicación web moderna para la gestión de pedidos, productos y operaciones de una cafetería. Desarrollada con React, TypeScript y Vite, con despliegue en producción vía Vercel.
-
-🔗 **Demo en vivo:** [v0-cafe-adriani.vercel.app](https://v0-cafe-adriani.vercel.app)
+> Aplicación web administrativa desarrollada a medida para una distribuidora de café, reemplazando su gestión manual en Excel por una plataforma centralizada que digitaliza productos, inventario, clientes, facturación, cobros y reportes.
+ 
+🔗 **Backend:** [coffee-adriani-api](https://github.com/Eduardo282x/coffee-adriani-api)
 
 ---
 
 ## 📋 Descripción
 
-Café Adriani es una plataforma web administrativa desarrollada para modernizar y digitalizar la gestión de una cafetería. El sistema permite administrar el catálogo de productos, gestionar pedidos y mantener el control operativo del negocio desde una interfaz intuitiva y responsive.
-
-Este proyecto fue desarrollado con enfoque en una experiencia de usuario fluida, tipado estricto con TypeScript y una arquitectura de componentes escalable.
-
+Café Adriani es un sistema administrativo interno desarrollado para una distribuidora de café que llevaba sus operaciones comerciales en hojas de cálculo. La necesidad principal del cliente era poder agrupar y visualizar facturas por cliente, gestionar sus cobros pendientes y generar reportes consolidados por rango de fechas.
+ 
+El sistema reemplaza completamente ese flujo manual con una plataforma web moderna, accesible para el personal interno de la empresa.
+ 
+---
+ 
+## ✨ Módulos del sistema
+ 
+- 📦 **Productos e inventario** — Creación de productos y control de stock en tiempo real
+- 👥 **Gestión de clientes** — Organización de clientes por zonas y bloques según la estructura de distribución
+- 🧾 **Facturación** — Creación y administración de facturas con visualización agrupada por cliente
+- 💳 **Pagos y conciliación** — Registro de pagos en módulo independiente; el sistema vincula cada pago a su factura una vez recibido el comprobante
+- 📲 **Cobranza** — Vista de clientes con facturas pendientes y acceso directo a WhatsApp de cada cliente para enviar recordatorios de pago con un clic
+- 📊 **Dashboard ejecutivo** — Panel con métricas del negocio: total de clientes, stock, demanda de productos, clientes con mayor volumen y últimas facturas
+- 📁 **Reportes en Excel** — Exportación de reportes filtrados por rango de fechas
+- 
 ---
 
 ## ✨ Funcionalidades principales
