@@ -1,54 +1,117 @@
-# React + TypeScript + Vite
+# ☕ Café Adriani — Sistema de Gestión para Cafetería
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Aplicación web moderna para la gestión de pedidos, productos y operaciones de una cafetería. Desarrollada con React, TypeScript y Vite, con despliegue en producción vía Vercel.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📋 Descripción
 
-## Expanding the ESLint configuration
+Café Adriani es una plataforma web administrativa desarrollada para modernizar y digitalizar la gestión de una cafetería. El sistema permite administrar el catálogo de productos, gestionar pedidos y mantener el control operativo del negocio desde una interfaz intuitiva y responsive.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Este proyecto fue desarrollado con enfoque en una experiencia de usuario fluida, tipado estricto con TypeScript y una arquitectura de componentes escalable.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+---
+
+## ✨ Funcionalidades principales
+
+- 📦 **Gestión de productos** — Alta, edición y eliminación de ítems del menú con categorías y precios
+- 🛒 **Gestión de pedidos** — Registro y seguimiento del estado de los pedidos
+- 📊 **Panel administrativo** — Vista general de operaciones y métricas del negocio
+- 📱 **Diseño responsive** — Interfaz adaptable a dispositivos móviles, tablets y escritorio
+- 🎨 **UI moderna** — Componentes visuales limpios con Tailwind CSS y shadcn/ui
+
+---
+
+## 🛠️ Tecnologías utilizadas
+
+| Categoría | Tecnología |
+|-----------|------------|
+| Framework | React 18 |
+| Lenguaje | TypeScript |
+| Bundler | Vite |
+| Estilos | Tailwind CSS |
+| Componentes UI | shadcn/ui |
+| Linting | ESLint |
+
+---
+
+## 🚀 Instalación y uso local
+
+### Requisitos previos
+
+- Node.js 18 o superior
+- npm o yarn
+
+### Pasos
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Eduardo282x/coffee-adriani.git
+cd coffee-adriani
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar el archivo .env con tus valores
+
+# 4. Iniciar servidor de desarrollo
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La aplicación estará disponible en `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## 📁 Estructura del proyecto
+
 ```
+coffee-adriani/
+├── public/               # Recursos estáticos (imágenes, íconos)
+├── src/
+│   ├── components/       # Componentes reutilizables de UI
+│   ├── pages/            # Vistas principales de la aplicación
+│   ├── hooks/            # Custom hooks de React
+│   ├── services/         # Llamadas a APIs y lógica de datos
+│   ├── types/            # Tipos e interfaces de TypeScript
+│   └── App.tsx           # Componente raíz y configuración de rutas
+├── .env                  # Variables de entorno (no subir al repo)
+├── components.json       # Configuración de shadcn/ui
+├── vercel.json           # Configuración de despliegue en Vercel
+├── vite.config.ts        # Configuración de Vite
+└── package.json          # Dependencias y scripts del proyecto
+```
+
+---
+
+## ⚙️ Scripts disponibles
+
+```bash
+npm run dev       # Inicia el servidor de desarrollo con HMR
+npm run build     # Genera la build de producción en /dist
+npm run preview   # Previsualiza la build de producción localmente
+npm run lint      # Ejecuta ESLint para revisar el código
+```
+
+---
+
+## 🌐 Despliegue
+
+El proyecto está configurado para despliegue continuo en **Vercel**. Cada push a la rama `main` dispara automáticamente un nuevo despliegue en producción.
+
+El archivo `vercel.json` incluye la configuración de rutas para que el enrutamiento de React funcione correctamente en producción (SPA fallback).
+
+---
+
+## 👤 Autor
+
+**Eduardo Rojas**
+- GitHub: [@Eduardo282x](https://github.com/Eduardo282x)
+- Email: eduardorojas282x@gmail.com
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso privado. Todos los derechos reservados © Eduardo Rojas.
