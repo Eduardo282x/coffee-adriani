@@ -2,34 +2,35 @@ import { IInvoice } from "./invoice.interface";
 import { IPayments } from "./payment.interface";
 
 export interface IExpenses {
-    invoices: IInvoice[];
-    payments: IPayments[];
-    invoicesEarns: InvoiceEarns;
-    paymentsNoAssociated: IPaymentsNoAssociated;
+    invoicesEarns:        InvoicesEarns;
+    invoices:             IInvoice[];
+    payments:             IPayments[];
+    paymentsNoAssociated: PaymentsNoAssociated;
 }
 
-export interface IPaymentsNoAssociated {
-    payments: IPayments[];
-    total: number;
+export interface InvoicesEarns {
+    productPercentages: ProductPercentage[];
+    invoiceEarns:       InvoiceEarn[];
+    totalEarnDay:       number;
+    totalEarnMonth:     number;
 }
 
-export interface InvoiceEarns {
-    dailyData: DailyTotal[];
-    resumen: Resumen
-}
-export interface Resumen {
-    totalMonthGain: number;
-    productPercentage: ProductSale[];
-}
-
-
-export interface DailyTotal {
-    dia: number;
-    ganancias: number;
-    meta: number;
+export interface InvoiceEarn {
+    invoiceId:     number;
+    controlNumber: string;
+    client:        string;
+    earn:          number;
+    createdAt:     Date;
 }
 
-export interface ProductSale {
-    name: string;
+export interface ProductPercentage {
+    productId:  number;
+    name:       string;
+    quantity:   number;
     percentage: string;
+}
+
+export interface PaymentsNoAssociated {
+    payments: IPayments[];
+    total:    number;
 }

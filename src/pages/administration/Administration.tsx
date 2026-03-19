@@ -1,18 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { DailyTotal, IExpenses, ProductSale } from "@/interfaces/adminitration.interface";
-import { getExpenses } from "@/services/expenses.service";
-import { useEffect, useState } from "react";
-import { baseTotals, expendePaymentsColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
+import { InvoiceEarn, ProductPercentage } from "@/interfaces/adminitration.interface";
+import { useEffect, useMemo, useState } from "react";
+import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { PiCoffeeBeanFill } from "react-icons/pi";
 import { LuEqualApproximately } from "react-icons/lu";
+import { useAdministration } from "@/hooks/administration.hook";
 
 import {
     Select,
@@ -30,115 +29,114 @@ const coffeeColors = {
     espresso: "#3E2723",
 }
 
-type OptionAdministration = 'pay' | 'invoices' | 'earns';
+type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
+
+function getMonthsFrom2025() {
+    const months = [];
+    const now = new Date();
+    const startYear = 2025;
+    const startMonth = 0;
+    const endYear = now.getFullYear();
+    const endMonth = now.getMonth();
+
+    for (let year = startYear; year <= endYear; year++) {
+        const firstMonth = year === startYear ? startMonth : 0;
+        const lastMonth = year === endYear ? endMonth : 11;
+        for (let month = firstMonth; month <= lastMonth; month++) {
+            months.push({
+                value: `${year}-${month + 1}`,
+                label: `${new Date(year, month).toLocaleString('es-ES', { month: 'long' })} ${year}`,
+                year,
+                month,
+            });
+        }
+    }
+
+    return months;
+}
 
 export const Administration = () => {
     const now = new Date();
 
     const [option, setOption] = useState<OptionAdministration>('earns')
-    const [loading, setLoading] = useState<boolean>(false);
-    const [expenses, setExpenses] = useState<IExpenses | null>(null);
-    const [cardEarnsData, setCardEarnsData] = useState<CardEarnsProps[]>([]);
-    const [productSales, setProductSales] = useState<ProductSale[]>([]);
-    const [totals, setTotals] = useState<ITotals>(baseTotals);
     const [filtersDate, setFiltersDate] = useState({
         startDate: new Date(now.getFullYear(), now.getMonth(), 1),
         endDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
     });
+    const { expenses, isLoading, isFetching } = useAdministration(filtersDate);
 
-    function getMonthsFrom2025() {
-        const months = [];
-        const now = new Date();
-        const startYear = 2025;
-        const startMonth = 0; // Enero
-        const endYear = now.getFullYear();
-        const endMonth = now.getMonth(); // 0-indexed
-
-        for (let year = startYear; year <= endYear; year++) {
-            const firstMonth = year === startYear ? startMonth : 0;
-            const lastMonth = year === endYear ? endMonth : 11;
-            for (let month = firstMonth; month <= lastMonth; month++) {
-                months.push({
-                    value: `${year}-${month + 1}`,
-                    label: `${new Date(year, month).toLocaleString('es-ES', { month: 'long' })} ${year}`,
-                    year,
-                    month
-                });
-            }
-        }
-        return months;
-    }
+    const monthsList = useMemo(() => getMonthsFrom2025(), []);
 
     const [month, setMonth] = useState(() => {
-        const months = getMonthsFrom2025();
-        return months[months.length - 1]?.value; // mes actual por defecto
+        return monthsList[monthsList.length - 1]?.value;
     });
-    const monthsList = getMonthsFrom2025();
 
-    useEffect(() => {
-        getExpensesApi()
-    }, [filtersDate])
-
-    const getExpensesApi = async () => {
-        setLoading(true);
-        try {
-            const response: IExpenses = await getExpenses(filtersDate);
-            if (response) {
-                setExpenses(response);
-                setProductSales(response.invoicesEarns.resumen.productPercentage);
-                const totalInvoice = response.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);
-                const totalInvoiceDetails = response.invoices.flatMap(item => item.invoiceItems.filter(element => element.type == 'GIFT')).reduce((acc, item) => acc + Number(item.subtotal), 0);
-                const totalPayments = response.payments.reduce((acc, pay) => acc + Number(pay.amount), 0);
-                setTotals({
-                    totalInvoice: formatOnlyNumberWithDots(totalInvoice + totalInvoiceDetails),
-                    totalInvoiceRemaining: formatOnlyNumberWithDots(totalInvoice),
-                    totalInvoiceDetails: formatOnlyNumberWithDots(totalInvoiceDetails),
-                    totalPayments: formatOnlyNumberWithDots(totalPayments),
-                    total: formatOnlyNumberWithDots(totalInvoice + totalPayments)
-                })
-
-                const setCard = [
-                    {
-                        title: 'Total del Mes',
-                        Icon: DollarSign,
-                        text: `${formatOnlyNumberWithDots(response.invoicesEarns.resumen.totalMonthGain - (totalInvoice + totalPayments))}$`,
-                        subtitle: 'Total',
-                        classNameCard: 'text-[#6f4e37]'
-                    },
-                    {
-                        title: 'Ganancias del Mes',
-                        Icon: TrendingUp,
-                        text: `${formatOnlyNumberWithDots(response.invoicesEarns.resumen.totalMonthGain)}$`,
-                        subtitle: 'Ganancias',
-                        classNameCard: 'text-green-800'
-                    },
-                    {
-                        title: 'Gastos del Mes',
-                        Icon: TrendingDown,
-                        text: `${formatOnlyNumberWithDots(totalInvoice + totalPayments)}$`,
-                        subtitle: 'Gastos',
-                        classNameCard: 'text-red-800'
-                    },
-                    {
-                        title: 'Pagos sin asociar',
-                        Icon: LuEqualApproximately,
-                        text: `${formatOnlyNumberWithDots(response.paymentsNoAssociated.total)}$`,
-                        subtitle: 'Pagos no asociados',
-                        classNameCard: ''
-                    },
-                ];
-                setCardEarnsData(setCard)
-
-            }
-        } catch (err) {
-            console.log(err);
+    const { totals, cardEarnsData, productSales } = useMemo<{
+        totals: ITotals;
+        cardEarnsData: CardEarnsProps[];
+        productSales: ProductPercentage[];
+    }>(() => {
+        if (!expenses) {
+            return {
+                totals: baseTotals,
+                cardEarnsData: [],
+                productSales: [],
+            };
         }
-        setLoading(false);
-    }
+
+        const totalInvoice = expenses.invoices.reduce((acc, inv) => acc + Number(inv.remaining), 0);
+        const totalInvoiceDetails = expenses.invoices
+            .flatMap((item) => item.invoiceItems.filter((element) => element.type === 'GIFT'))
+            .reduce((acc, item) => acc + Number(item.subtotal), 0);
+        const totalPayments = expenses.payments.reduce((acc, pay) => acc + Number(pay.amountUSD), 0);
+        const totalExpenses = totalInvoice + totalInvoiceDetails + totalPayments;
+        const totalEarnMonth = Number(expenses.invoicesEarns.totalEarnMonth);
+
+        return {
+            totals: {
+                totalInvoice: formatOnlyNumberWithDots(totalInvoice + totalInvoiceDetails),
+                totalInvoiceRemaining: formatOnlyNumberWithDots(totalInvoice),
+                totalInvoiceDetails: formatOnlyNumberWithDots(totalInvoiceDetails),
+                totalPayments: formatOnlyNumberWithDots(totalPayments),
+                total: formatOnlyNumberWithDots(totalExpenses),
+            },
+            cardEarnsData: [
+                {
+                    title: 'Total del Mes',
+                    Icon: DollarSign,
+                    text: `${formatOnlyNumberWithDots(totalEarnMonth - totalExpenses)}$`,
+                    subtitle: 'Total',
+                    classNameCard: 'text-[#6f4e37]',
+                },
+                {
+                    title: 'Ganancias del Mes',
+                    Icon: TrendingUp,
+                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$`,
+                    subtitle: 'Ganancias',
+                    classNameCard: 'text-green-800',
+                },
+                {
+                    title: 'Gastos del Mes',
+                    Icon: TrendingDown,
+                    text: `${formatOnlyNumberWithDots(totalExpenses)}$`,
+                    subtitle: 'Gastos',
+                    classNameCard: 'text-red-800',
+                },
+                {
+                    title: 'Pagos sin asociar',
+                    Icon: LuEqualApproximately,
+                    text: `${formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)}$ (${expenses.paymentsNoAssociated.payments.length})`,
+                    subtitle: 'Pagos no asociados',
+                    classNameCard: '',
+                },
+            ],
+            productSales: expenses.invoicesEarns.productPercentages,
+        };
+    }, [expenses]);
 
     return (
         <div className="flex flex-col">
-            {loading && (
+            {isLoading || isFetching && (
                 <ScreenLoader />
             )}
 
@@ -155,6 +153,7 @@ export const Administration = () => {
 
                     <div className="flex gap-2 items-center">
                         <Select value={month} onValueChange={(val) => {
+                            if (val === month) return;
                             setMonth(val);
                             const [year, m] = val.split('-').map(Number);
                             setFiltersDate(prev => ({
@@ -162,7 +161,6 @@ export const Administration = () => {
                                 startDate: new Date(year, m - 1, 1),
                                 endDate: new Date(year, m, 0),
                             }));
-                            getExpensesApi(); // Si quieres recargar los datos al cambiar el mes
                         }}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Fecha" />
@@ -204,7 +202,7 @@ export const Administration = () => {
                                 </CardHeader>
                                 <CardContent>
                                     {expenses && (
-                                        <GananciasChart gains={expenses.invoicesEarns.dailyData} />
+                                        <GananciasChart gains={expenses.invoicesEarns.invoiceEarns} />
                                     )}
                                 </CardContent>
                             </Card>
@@ -241,11 +239,13 @@ export const Administration = () => {
                         <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns}
                             isExpansible={true}
                             renderRow={(item, index) => (
-                                item.invoiceItems.length > 0
+                                item.invoiceItems.filter(item => item.type == 'GIFT').length > 0
                                     ? (
                                         <TableComponent dataBase={item.invoiceItems.filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
                                     ) :
-                                    <p>Sin regalos</p>
+                                    <div className="bg-white text-center w-full py-2 font-semibold">
+                                        <p>Sin regalos</p>
+                                    </div>
                             )}
                         />
                     </div>
@@ -256,6 +256,15 @@ export const Administration = () => {
                         <TableComponent dataBase={expenses.payments} columns={expendePaymentsColumns} />
                     </div>
                 )}
+                {option == 'paymentsNoAssociated' && expenses && (
+                    <div>
+                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)} $</p>
+                        <TableComponent dataBase={expenses.paymentsNoAssociated.payments} columns={expendePaymentsNoAssociatedColumns} />
+                    </div>
+                )}
+                {/* {isFetching && expenses && (
+                    <p className="text-xs text-[#8c6d46] mt-2">Actualizando datos...</p>
+                )} */}
             </main>
         </div>
     )
@@ -267,11 +276,12 @@ interface TabsAdministrationProps {
 }
 const TabsAdministration = ({ option, setOption }: TabsAdministrationProps) => {
     return (
-        <div className="w-72 mb-2">
+        <div className="w-auto mb-2">
             <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
                 <Button className={`${option !== 'earns' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOption('earns')}>Ganancias</Button>
                 <Button className={`${option !== 'invoices' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOption('invoices')}>Facturas</Button>
                 <Button className={`${option !== 'pay' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOption('pay')}>Gastos</Button>
+                <Button className={`${option !== 'paymentsNoAssociated' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOption('paymentsNoAssociated')}>Pagos No Asociados</Button>
             </div>
         </div>
     )
@@ -300,11 +310,19 @@ const CardEarns = ({ title, subtitle, text, Icon, classNameCard }: CardEarnsProp
 }
 
 interface GananciasChartProps {
-    gains: DailyTotal[]
+    gains: InvoiceEarn[]
 }
 
 function GananciasChart({ gains }: GananciasChartProps) {
     const [mounted, setMounted] = useState(false)
+
+    const chartData = useMemo(
+        () => gains.map((item) => ({
+            ...item,
+            ganancias: Number(item.earn ?? 0),
+        })),
+        [gains]
+    );
 
     useEffect(() => {
         setMounted(true)
@@ -316,7 +334,7 @@ function GananciasChart({ gains }: GananciasChartProps) {
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                    data={gains}
+                    data={chartData}
                     margin={{
                         top: 5,
                         right: 30,
@@ -325,14 +343,23 @@ function GananciasChart({ gains }: GananciasChartProps) {
                     }}
                 >
                     <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="dia" tickFormatter={(value) => `${value}`} />
-                    <YAxis tickFormatter={(value) => `$${value}`} />
+                    <XAxis
+                        dataKey="createdAt"
+                        tickFormatter={(value) => {
+                            const parsedDate = new Date(value);
+                            return Number.isNaN(parsedDate.getTime()) ? '' : `${parsedDate.getDate()}`;
+                        }}
+                    />
+                    <YAxis tickFormatter={(value) => `$${formatOnlyNumberWithDots(value)}`} />
                     <Tooltip
-                        formatter={(value: number, name: string) => [
-                            `$${value.toLocaleString()}`,
-                            name === "ganancias" ? "Ganancias" : "Meta",
+                        formatter={(value: number | string) => [
+                            `$${formatOnlyNumberWithDots(Number(value || 0))}`,
+                            "Ganancias",
                         ]}
-                        labelFormatter={(label) => `Día ${label}`}
+                        labelFormatter={(label) => {
+                            const parsedDate = new Date(label);
+                            return Number.isNaN(parsedDate.getTime()) ? `Día ${label}` : `Día ${parsedDate.getDate()}`;
+                        }}
                         contentStyle={{
                             backgroundColor: "rgba(255, 250, 240, 0.95)",
                             borderColor: coffeeColors.mediumRoast,
@@ -346,14 +373,6 @@ function GananciasChart({ gains }: GananciasChartProps) {
                         strokeWidth={2}
                         activeDot={{ r: 6, fill: coffeeColors.espresso }}
                         name="ganancias"
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="meta"
-                        stroke={coffeeColors.lightRoast}
-                        strokeWidth={1}
-                        // strokeDasharray="5 5"
-                        name="meta"
                     />
                 </LineChart>
             </ResponsiveContainer>

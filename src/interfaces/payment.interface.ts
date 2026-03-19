@@ -32,7 +32,7 @@ export interface IPayments {
     updatedAt: Date;
     dolar: Dolar;
     account: Account;
-    amountUSD: string;
+    amountUSD: string | number;
     amountBs: string;
     InvoicePayment: InvoicePayment[];
 }
