@@ -2,6 +2,8 @@
 
 > Aplicación web moderna para la gestión de pedidos, productos y operaciones de una cafetería. Desarrollada con React, TypeScript y Vite, con despliegue en producción vía Vercel.
 
+🔗 **Demo en vivo:** [v0-cafe-adriani.vercel.app](https://v0-cafe-adriani.vercel.app)
+
 ---
 
 ## 📋 Descripción
@@ -32,6 +34,7 @@ Este proyecto fue desarrollado con enfoque en una experiencia de usuario fluida,
 | Estilos | Tailwind CSS |
 | Componentes UI | shadcn/ui |
 | Linting | ESLint |
+| Despliegue | VPS |
 
 ---
 
@@ -96,11 +99,43 @@ npm run lint      # Ejecuta ESLint para revisar el código
 
 ---
 
-## 🌐 Despliegue
+## 🌐 Despliegue en VPS (Contabo)
 
-El proyecto está configurado para despliegue continuo en **Vercel**. Cada push a la rama `main` dispara automáticamente un nuevo despliegue en producción.
+El proyecto está desplegado en un servidor VPS con **Ubuntu Linux** en Contabo, utilizando **Nginx** como servidor web y reverse proxy.
 
-El archivo `vercel.json` incluye la configuración de rutas para que el enrutamiento de React funcione correctamente en producción (SPA fallback).
+### Pasos para desplegar en producción
+
+```bash
+# 1. Generar la build de producción
+npm run build
+
+# 2. Copiar el contenido de /dist al servidor
+scp -r dist/ usuario@ip-del-servidor:/var/www/coffee-adriani
+```
+
+### Configuración de Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name tu-dominio.com;
+
+    root /var/www/coffee-adriani;
+    index index.html;
+
+    # Necesario para el enrutamiento SPA de React
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+Después de guardar la configuración, recargar Nginx:
+
+```bash
+sudo nginx -t          # Verificar configuración
+sudo systemctl reload nginx
+```
 
 ---
 
