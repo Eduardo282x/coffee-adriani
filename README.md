@@ -1,4 +1,4 @@
-# ☕ Café Adriani — Sistema de Gestión para Cafetería
+# ☕ Café Adriani — Sistema de Gestión para Empresa Distribuidora
 
 > Aplicación web moderna para la gestión de pedidos, productos y operaciones de una cafetería. Desarrollada con React, TypeScript y Vite, con despliegue en producción vía Vercel.
 
