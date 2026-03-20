@@ -65,8 +65,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
                 page: pageParam,
                 limit: pageSize,
                 ...(dateFilter && {
-                    startDate: dateFilter.startDate,
-                    endDate: dateFilter.endDate
+                    startDate: formatDateOnly(dateFilter.startDate),
+                    endDate: formatDateOnly(dateFilter.endDate)
                 }),
                 search: search,
                 ...(selectedAccount && { accountId: selectedAccount }),
@@ -88,6 +88,13 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         staleTime: 5 * 60 * 1000,
     });
 
+    const formatDateOnly = (value: Date | string | null | undefined): string => {
+        if (!value) return '';
+        const date = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toISOString().slice(0, 10);
+    };
+
     // 2. Consulta separada para estadísticas
     const {
         data: statisticsData,
@@ -96,8 +103,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     } = useQuery({
         queryKey: ['payment-statistics', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation],
         queryFn: () => getPaymentStatistics({
-            startDate: dateFilter?.startDate,
-            endDate: dateFilter?.endDate,
+            startDate: formatDateOnly(dateFilter?.startDate),
+            endDate: formatDateOnly(dateFilter?.endDate),
             search: search,
             ...(selectedAccount && { accountId: selectedAccount }),
             ...(selectedMethod && { methodId: selectedMethod }),

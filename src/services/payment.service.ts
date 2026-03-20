@@ -10,8 +10,8 @@ export interface FilterPaymentsPaginated extends FilterPayments {
     page: number
 }
 export interface FilterPayments {
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: Date | string;
+    endDate?: Date | string;
     search?: string;
     accountId?: number;
     methodId?: number;

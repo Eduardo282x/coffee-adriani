@@ -8,7 +8,6 @@ import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColum
 import { PaymentFilter } from './PaymentFilter';
 import { DateRange } from 'react-day-picker';
 import { DateRangeFilter, InvoiceInvoice } from '@/interfaces/invoice.interface';
-import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DialogComponent } from '@/components/dialog/DialogComponent';
@@ -83,7 +82,7 @@ export const Payments = () => {
         if (date?.to) {
             const filterDate: DateRangeFilter = {
                 startDate: date.from || new Date(),
-                endDate: addDays(date.to, 1),
+                endDate: date.to,
             };
             applyDateFilter(filterDate);
         } else {
