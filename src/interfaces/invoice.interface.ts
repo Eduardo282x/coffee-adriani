@@ -1,5 +1,4 @@
 import { IClients } from "./clients.interface";
-import { BodyInventory } from "./inventory.interface";
 import { IPayments } from "./payment.interface";
 import { IProducts } from "./product.interface";
 
@@ -181,7 +180,7 @@ export interface IInvoiceForm {
     details: DetailsInvoices[];
 }
 
-export interface DetailsInvoices extends BodyInventory {
+export interface DetailsInvoices {
     productId: number;
     quantity: number;
     price: number;

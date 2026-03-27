@@ -1,7 +1,9 @@
 import { IColumns } from "@/components/table/table.interface";
-import { formatDate, formatDateTime, formatNumberWithDots } from "@/hooks/formaters";
-import { IInventory } from "@/interfaces/inventory.interface";
+import { formatDate, formatDateTime, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters";
+import { DetailHistory, History, IInventory } from "@/interfaces/inventory.interface";
+import { Trash2 } from "lucide-react";
 import { MdEdit } from "react-icons/md";
+import { ProductTable } from "./InventoryForm";
 
 export const inventoryColumns: IColumns<IInventory>[] = [
     {
@@ -57,44 +59,44 @@ export const inventoryColumns: IColumns<IInventory>[] = [
     },
 ]
 
-export const extraColumn: IColumns<IInventory>[] = [
+export const inventoryColumnsHistory: IColumns<History>[] = [
+    {
+        label: 'Numero de Control',
+        column: 'controlNumber',
+        element: (data: History) => data.controlNumber,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
     {
         label: 'Movimiento',
         column: 'movementType',
-        element: (data: IInventory) => setTranslateColumn(data),
+        element: (data: History) => setTranslateColumn(data),
         orderBy: '',
         type: 'string',
-        className: (data: IInventory) => setClassNameHistoryColumn(data),
+        className: (data: History) => setClassNameHistoryColumn(data),
         icon: false,
     },
     {
-        label: 'Descripcion',
+        label: 'Descripción',
         column: 'description',
-        element: (data: IInventory) => data.description,
+        element: (data: History) => data.description,
         orderBy: '',
         type: 'string',
-        className: (data: IInventory) => setClassNameHistoryColumn(data),
-        icon: false,
-    },
-    {
-        label: 'Hora',
-        column: 'movementDate',
-        element: (data: IInventory) => data.movementDate ? formatDateTime(data.movementDate) : '',
-        orderBy: '',
-        type: 'string',
+        className: (data: History) => setClassNameHistoryColumn(data),
         icon: false,
     },
     {
         label: 'Fecha',
         column: 'movementDate',
-        element: (data: IInventory) => data.movementDate ? formatDate(data.movementDate) : '',
+        element: (data: History) => data.movementDate ? formatDate(data.movementDate) : '',
         orderBy: '',
         type: 'string',
         icon: false,
-    }
+    },
 ]
 
-const setTranslateColumn = (data: IInventory): string => {
+const setTranslateColumn = (data: History): string => {
     if (data.movementType === 'IN') {
         return 'Entrada'
     }
@@ -107,7 +109,7 @@ const setTranslateColumn = (data: IInventory): string => {
     return ''
 }
 
-const setClassNameHistoryColumn = (data: IInventory): string => {
+const setClassNameHistoryColumn = (data: History): string => {
     if (data.movementType === 'IN') {
         return 'rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800'
     }
@@ -119,3 +121,83 @@ const setClassNameHistoryColumn = (data: IInventory): string => {
     }
     return ''
 }
+
+export const inventoryColumnDetailHistory: IColumns<DetailHistory>[] = [
+    {
+        label: 'Producto',
+        column: 'name',
+        element: (data: DetailHistory) => `${data.name} - ${data.presentation}`,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'priceUSD',
+        label: 'Precio ($)',
+        element: (data: DetailHistory) => `${formatOnlyNumberWithDots(data.priceUSD)} $`,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    // {
+    //     column: 'price',
+    //     label: 'Precio',
+    //     element: (data: DetailHistory) => `${formatOnlyNumberWithDots(data.priceBs)} Bs`,
+    //     orderBy: '',
+    //     type: 'string',
+    //     icon: false,
+    // },
+    {
+        column: 'quantity',
+        label: 'Cantidad',
+        element: (data: DetailHistory) => data.quantity.toString(),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'date',
+        label: 'Hora',
+        element: (data: DetailHistory) => data.date ? formatDateTime(data.date) : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'date',
+        label: 'Fecha',
+        element: (data: DetailHistory) => data.date ? formatDate(data.date) : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    }
+];
+
+
+export const inventoryProductFormColumns: IColumns<ProductTable>[] = [
+    {
+        column: 'name',
+        label: 'Producto',
+        element: (data: ProductTable) => `${data.name} - ${data.presentation}`,
+        orderBy: '',
+        type: 'string',
+    },
+    {
+        column: 'quantity',
+        label: 'Cantidad',
+        element: () => `0`,
+        orderBy: '',
+        type: 'editable',
+    },
+    {
+        column: '',
+        label: 'Eliminar',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-600' },
+        ]
+    },
+]

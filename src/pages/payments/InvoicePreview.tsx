@@ -5,6 +5,7 @@ import { invoiceItemsColumns, invoiceItemsPaymentColumns } from '../invoices/inv
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { IInvoicePayment, InvoiceInvoice, InvoiceItems } from '@/interfaces/invoice.interface'
+import { getInvoiceDetails } from '@/services/invoice.service'
 
 interface InvoicePreviewProps {
     openDialog: boolean;
@@ -20,11 +21,17 @@ export const InvoicePreview = ({ openDialog, setOpenDialog, invoice }: InvoicePr
 
     useEffect(() => {
         console.log(invoice);
-        if(invoice){
-            setDataDetails(invoice.invoiceItems);
-            setDataDetailsPay(invoice.InvoicePayment);
+        if (invoice) {
+            getDetailsInvoiceForPreview(invoice)
         }
-    },[invoice])
+    }, [invoice])
+
+    const getDetailsInvoiceForPreview = async (data: InvoiceInvoice) => {
+        const response = await getInvoiceDetails(data.id);
+
+        setDataDetails(response.invoiceItems);
+        setDataDetailsPay(response.InvoicePayment);
+    }
 
     const remainingPay = (invoice: InvoiceInvoice | null): string => {
         if (!invoice) return '0.00';

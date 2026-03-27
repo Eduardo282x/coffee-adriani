@@ -1,7 +1,16 @@
-import { BodyInventory } from "@/interfaces/inventory.interface";
+import { BodyInventory, BodyInventorySimple } from "@/interfaces/inventory.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInventory = '/inventory';
+
+export interface InventoryHistoryFilter {
+    page: number;
+    limit: number;
+    startDate?: string;
+    endDate?: string;
+    typeMovement?: string;
+    typeProduct?: string;
+}
 
 export const getInventory = async () => {
     try {
@@ -11,9 +20,19 @@ export const getInventory = async () => {
     }
 }
 
-export const getInventoryHistory = async () => {
+export const getInventoryHistory = async (filter: InventoryHistoryFilter) => {
     try {
-        return await getDataApi(`${routeInventory}/history`);
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filter).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        return await getDataApi(`${routeInventory}/history?${query}`);
     } catch (err) {
         return err
     }
@@ -27,7 +46,7 @@ export const postInventory = async (data: BodyInventory) => {
     }
 }
 
-export const putInventory = async (id: number, data: BodyInventory) => {
+export const putInventory = async (id: number, data: BodyInventorySimple) => {
     try {
         return await putDataApi(`${routeInventory}/${id}`, data);
     } catch (err) {

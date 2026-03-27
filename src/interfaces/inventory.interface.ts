@@ -19,10 +19,20 @@ export interface IInventory {
     movementDate?: Date,
 }
 
+export interface BodyInventorySimple extends DetailInventory{
+    description?: string;
+}
+
 export interface BodyInventory {
+    controlNumber: string;
+    date: Date;
+    description?: string;
+    details: DetailInventory[];
+}
+
+export interface DetailInventory {
     productId: number;
     quantity: number;
-    date?: Date;
 }
 
 export interface GroupInventoryDate {
@@ -32,4 +42,37 @@ export interface GroupInventoryDate {
 export interface GroupInventory {
     allInventory: IInventory[],
     inventory: IInventory[]
+}
+
+
+export interface InventoryHistory {
+    history: History[];
+    pagination: PaginationHistory;
+}
+
+export interface History {
+    controlNumber: string;
+    description:   string;
+    movementType:  string;
+    movementDate:  Date;
+    details:       DetailHistory[];
+}
+
+export interface DetailHistory {
+    productId:    number;
+    name:         string;
+    presentation: string;
+    quantity:     number;
+    priceBs:      string;
+    priceUSD:     string;
+    date:         Date;
+}
+
+export interface PaginationHistory {
+    total:           number;
+    page:            number;
+    limit:           number;
+    totalPages:      number;
+    hasNextPage:     boolean;
+    hasPreviousPage: boolean;
 }

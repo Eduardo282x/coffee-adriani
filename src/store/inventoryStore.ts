@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { IInventory } from '@/interfaces/inventory.interface';
-import { getInventory, getInventoryHistory } from '@/services/inventory.service';
+import { getInventory } from '@/services/inventory.service';
 
 interface InventoryState {
     loading: boolean;
@@ -20,11 +20,10 @@ export const inventoryStore = create<InventoryState>((set) => ({
     getInventoryApi: async () => {
         set(() => ({ loading: true }))
         const response: IInventory[] = await getInventory();
-        const responseHistory: IInventory[] = await getInventoryHistory();
         if (response && response.length > 0) {
             set(() => ({
                 inventory: response,
-                inventoryHistory: responseHistory
+                inventoryHistory: []
             }))
         }
         set(() => ({ loading: false }))

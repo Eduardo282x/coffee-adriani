@@ -28,9 +28,11 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
 
     return (
         <div>
-            <Label className="mb-2">
+            {label !== '' && (
+                <Label className="mb-2">
                 {label}
             </Label>
+            )}
             <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button

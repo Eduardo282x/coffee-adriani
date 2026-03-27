@@ -1,33 +1,33 @@
-import { useCallback, useEffect, useState } from "react"
-import { extraColumn, inventoryColumns } from "./inventory.data"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { TableComponent } from "@/components/table/TableComponent"
-import { BodyInventory, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface"
-import { postInventory, putInventory } from "@/services/inventory.service"
-import { Filter } from "@/components/table/Filter"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Package, Plus } from "lucide-react"
-import { ScreenLoader } from "@/components/loaders/ScreenLoader"
-import { DialogComponent } from "@/components/dialog/DialogComponent"
-import { InventoryForm } from "./InventoryForm"
-import { IColumns } from "@/components/table/table.interface"
-import { InventoryCards } from "./InventoryCards"
-import { useSocket } from "@/services/socket.io"
-import { productStore } from "@/store/productStore"
-import { useOptimizedInventory } from "@/hooks/inventory.hook"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ProductType } from "@/interfaces/product.interface"
-import { getProductType } from "@/services/products.service"
+import { useCallback, useEffect, useState } from "react";
+import { inventoryColumnDetailHistory, inventoryColumns, inventoryColumnsHistory } from "./inventory.data";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { TableComponent } from "@/components/table/TableComponent";
+import { BodyInventory, BodyInventorySimple, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface";
+import { postInventory, putInventory } from "@/services/inventory.service";
+import { Filter } from "@/components/table/Filter";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown, Package, Plus } from "lucide-react";
+import { ScreenLoader } from "@/components/loaders/ScreenLoader";
+import { DialogComponent } from "@/components/dialog/DialogComponent";
+import { InventoryForm, InventoryFormUpdate } from "./InventoryForm";
+import { InventoryCards } from "./InventoryCards";
+import { useSocket } from "@/services/socket.io";
+import { productStore } from "@/store/productStore";
+import { useOptimizedInventory } from "@/hooks/inventory.hook";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProductType } from "@/interfaces/product.interface";
+import { getProductType } from "@/services/products.service";
+import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [column, setColumn] = useState<IColumns<IInventory>[]>(inventoryColumns)
-    const [type, setType] = useState<string>('Cafe');
+    const [openDialogUpdate, setOpenDialogUpdate] = useState<boolean>(false);
+
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
     const [history, setHistory] = useState<boolean>(false);
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
-    const [dataForm, setDataForm] = useState<BodyInventory>({
+    const [dataForm, setDataForm] = useState<BodyInventorySimple>({
         productId: 0,
         quantity: 0
     });
@@ -35,10 +35,18 @@ export const Inventory = () => {
 
     const {
         inventory,
-        inventoryHistory,
+
         isLoading,
         refetchInventory,
-        refetchInventoryHistory
+
+        inventoryHistory,
+        refetchInventoryHistory,
+        typeProduct,
+        setTypeProduct,
+        movementType,
+        setMovementType,
+        dateRange,
+        setDateRange
     } = useOptimizedInventory();
 
     const productOptions = productStore((state) => state.productOptions);
@@ -47,14 +55,6 @@ export const Inventory = () => {
 
     const toggleButton = (active: boolean) => {
         setHistory(active);
-        if (history === active) return;
-        if (active) {
-            setData({ allInventory: inventoryHistory, inventory: inventoryHistory })
-            setColumn((prev) => ([...prev.filter(col => col.icon == false), ...extraColumn]))
-        } else {
-            setData({ allInventory: inventory, inventory: inventory })
-            setColumn(inventoryColumns)
-        }
     }
 
     useEffect(() => {
@@ -73,47 +73,45 @@ export const Inventory = () => {
     }, [])
 
     useEffect(() => {
-        const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)
-        // const total: number = inventory.filter(inv => inv.product.type == type).reduce((acc, item) => acc + item.quantity, 0)
+        const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)
+        // const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + item.quantity, 0)
         const down: number = inventory.filter(pro => pro.quantity < 50).length;
         const zero: number = inventory.filter(pro => pro.quantity === 0).length;
         setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
         setData({ allInventory: inventory, inventory: inventory });
-    }, [inventory, type])
-
+    }, [inventory, typeProduct])
 
     const setInventoryFilter = (inventoryFilter: IInventory[]) => {
         setData((prev) => ({ ...prev, inventory: inventoryFilter }));
     }
 
     const actionDialog = async (data: BodyInventory) => {
-        if (dataForm.productId != 0 && inventorySelected) {
-            await putInventory(inventorySelected.id, data)
-        } else {
-            await postInventory(data)
-        }
+        await postInventory(data)
         setOpenDialog(false);
         await refetchInventory();
         await refetchInventoryHistory();
     }
 
+    const actionDialogUpdate = async (data: BodyInventorySimple) => {
+        if (inventorySelected) {
+            await putInventory(inventorySelected.id, data);
+        }
+        setOpenDialogUpdate(false);
+        await refetchInventory();
+        await refetchInventoryHistory();
+    }
+
     const newElement = () => {
-        setDataForm({ productId: 0, quantity: 0 });
-        setInventorySelected(null)
         setOpenDialog(true);
     }
 
     const getAction = (action: string, data: IInventory) => {
-        setInventorySelected(data);
-        if (action == 'Nuevo') {
-            setDataForm({ productId: 0, quantity: 0 })
-        }
-
         if (action == 'Editar') {
+            setInventorySelected(data);
             setDataForm({ productId: data.productId, quantity: data.quantity })
         }
         setTimeout(() => {
-            setOpenDialog(true);
+            setOpenDialogUpdate(true);
         }, 0);
     }
 
@@ -151,11 +149,13 @@ export const Inventory = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Inventario</h2>
 
-                    <div className="flex w-full max-w-lg items-center space-x-2">
-                        {/* <Label className="mb-2">Tipo de producto</Label> */}
-                        <Select value={type} onValueChange={setType}>
-                            <SelectTrigger className="w-32">
-                                <SelectValue placeholder="Producto" />
+                    <div className={`flex w-full ${history ? 'justify-end max-w-3xl' : 'max-w-lg'} items-center space-x-2`}>
+                        {history && (
+                            <DateRangePicker setDatePicker={setDateRange} datePicker={dateRange} label={''} />
+                        )}
+                        <Select value={typeProduct} onValueChange={setTypeProduct}>
+                            <SelectTrigger className="w-24">
+                                <SelectValue placeholder="Tipo de Producto" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
@@ -165,48 +165,97 @@ export const Inventory = () => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Filter dataBase={data.allInventory} columns={column} setDataFilter={setInventoryFilter} />
+                        {history && (
+                            <>
+                                <Select value={movementType} onValueChange={setMovementType}>
+                                    <SelectTrigger className="w-24">
+                                        <SelectValue placeholder="Tipo de Movimiento" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value={'ALL'}>Todos</SelectItem>
+                                            <SelectItem value={'IN'}>Entrada</SelectItem>
+                                            <SelectItem value={'OUT'}>Salida</SelectItem>
+                                            <SelectItem value={'EDIT'}>Edición</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </>
+                        )}
+                        {!history && (
+                            <Filter dataBase={data.allInventory} columns={inventoryColumns} setDataFilter={setInventoryFilter} />
+                        )}
                     </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3 mb-6">
-                    <InventoryCards
-                        title='Total de Productos'
-                        value={resumen.totalProducts}
-                        description='Productos en inventario'
-                        icon={Package}
-                        color='bg-blue-100 text-blue-800'
-                    ></InventoryCards>
-                    <InventoryCards
-                        title='Productos con Stock Bajo'
-                        value={resumen.downProducts}
-                        description='Productos en inventario'
-                        icon={ArrowUpDown}
-                        color='bg-yellow-100 text-yellow-800'
-                    ></InventoryCards>
-                    <InventoryCards
-                        title='Productos Agotados'
-                        value={resumen.zeroProducts}
-                        description='Productos en inventario'
-                        icon={Package}
-                        color='bg-red-100 text-red-800'
-                    ></InventoryCards>
-                </div>
+                {!history && (
+                    <div className="grid gap-4 md:grid-cols-3 mb-6">
+                        <InventoryCards
+                            title='Total de Productos'
+                            value={resumen.totalProducts}
+                            description='Productos en inventario'
+                            icon={Package}
+                            color='bg-blue-100 text-blue-800'
+                        ></InventoryCards>
+                        <InventoryCards
+                            title='Productos con Stock Bajo'
+                            value={resumen.downProducts}
+                            description='Productos en inventario'
+                            icon={ArrowUpDown}
+                            color='bg-yellow-100 text-yellow-800'
+                        ></InventoryCards>
+                        <InventoryCards
+                            title='Productos Agotados'
+                            value={resumen.zeroProducts}
+                            description='Productos en inventario'
+                            icon={Package}
+                            color='bg-red-100 text-red-800'
+                        ></InventoryCards>
+                    </div>
+                )}
 
                 <div>
-                    <TableComponent columns={column} dataBase={data.inventory} action={getAction}></TableComponent>
+                    {history ? (
+                        <TableComponent
+                            key="inventory-history"
+                            columns={inventoryColumnsHistory}
+                            dataBase={inventoryHistory}
+                            isExpansible={true}
+                            renderRow={
+                                (details) => (
+                                    <TableComponent
+                                        dataBase={details.details}
+                                        columns={inventoryColumnDetailHistory}>
+                                    </TableComponent>
+                                )
+                            }></TableComponent>
+                    ) : (
+                        <TableComponent key="inventory-list" columns={inventoryColumns} dataBase={data.inventory} action={getAction}></TableComponent>
+                    )}
                 </div>
 
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[30rem]"
+                    className="w-176"
                     label2="Actualizar Inventario"
                     label1="Actualizar Inventario"
                     isEdit={false}
 
                 >
-                    <InventoryForm onSubmit={actionDialog} products={productOptions} data={dataForm}></InventoryForm>
+                    <InventoryForm onSubmit={actionDialog} productOptions={productOptions} products={products.products} data={undefined}></InventoryForm>
+                </DialogComponent>
+
+                <DialogComponent
+                    open={openDialogUpdate}
+                    setOpen={setOpenDialogUpdate}
+                    className="w-120"
+                    label2="Actualizar Inventario"
+                    label1="Actualizar Inventario"
+                    isEdit={false}
+
+                >
+                    <InventoryFormUpdate onSubmit={actionDialogUpdate} productOptions={productOptions} products={products.products} data={dataForm}></InventoryFormUpdate>
                 </DialogComponent>
             </main>
         </div>
