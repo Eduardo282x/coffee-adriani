@@ -100,6 +100,9 @@ const setTranslateColumn = (data: History): string => {
     if (data.movementType === 'IN') {
         return 'Entrada'
     }
+    if (data.movementType === 'ADJUSTMENT') {
+        return 'Ajuste'
+    }
     if (data.movementType === 'OUT') {
         return 'Salida'
     }
@@ -112,6 +115,9 @@ const setTranslateColumn = (data: History): string => {
 const setClassNameHistoryColumn = (data: History): string => {
     if (data.movementType === 'IN') {
         return 'rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800'
+    }
+    if (data.movementType === 'ADJUSTMENT') {
+        return 'rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800'
     }
     if (data.movementType === 'OUT') {
         return 'rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800'

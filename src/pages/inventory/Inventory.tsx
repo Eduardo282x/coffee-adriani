@@ -211,6 +211,7 @@ export const Inventory = () => {
                                             <SelectItem value={'ALL'}>Todos</SelectItem>
                                             <SelectItem value={'IN'}>Entrada</SelectItem>
                                             <SelectItem value={'OUT'}>Salida</SelectItem>
+                                            <SelectItem value={'ADJUSTMENT'}>Ajuste</SelectItem>
                                             <SelectItem value={'EDIT'}>Edición</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
