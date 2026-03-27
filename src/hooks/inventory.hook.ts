@@ -32,6 +32,7 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
     const queryClient = useQueryClient();
     const [historyFilter, setHistoryFilter] = useState<InventoryHistoryFilter>(DEFAULT_HISTORY_FILTER);
     const [typeProduct, setTypeProduct] = useState<string>('Cafe');
+    const [controlNumber, setControlNumber] = useState<string>('');
     const [movementType, setMovementType] = useState<string>('ALL');
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const { pageSize = 50, enableHistory = true } = options;
@@ -62,7 +63,7 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
         hasNextPage,
         isFetchingNextPage,
     } = useInfiniteQuery({
-        queryKey: ['inventory-history', typeProduct, movementType, dateRange, historyFilter.limit],
+        queryKey: ['inventory-history', typeProduct, movementType, dateRange, controlNumber, historyFilter.limit],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InventoryHistoryFilter = {
@@ -72,6 +73,7 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
                     startDate: formatDateOnly(dateRange?.from),
                     endDate: formatDateOnly(dateRange?.to),
                 }),
+                ...(controlNumber && controlNumber !== '' && { controlNumber }),
                 ...(typeProduct && typeProduct !== 'ALL' && { typeProduct }),
                 ...(movementType && movementType !== 'ALL' && { typeMovement: movementType }),
             };
@@ -130,6 +132,8 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
         movementType,
         setMovementType,
         dateRange,
-        setDateRange
+        setDateRange,
+        controlNumber,
+        setControlNumber
     };
 };

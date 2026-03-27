@@ -10,6 +10,7 @@ export interface InventoryHistoryFilter {
     endDate?: string;
     typeMovement?: string;
     typeProduct?: string;
+    controlNumber?: string;
 }
 
 export const getInventory = async () => {

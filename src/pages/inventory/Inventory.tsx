@@ -18,6 +18,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { ProductType } from "@/interfaces/product.interface";
 import { getProductType } from "@/services/products.service";
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
@@ -27,6 +29,7 @@ export const Inventory = () => {
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
     const [history, setHistory] = useState<boolean>(false);
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
+    const [controlNumberInput, setControlNumberInput] = useState<string>('');
     const [dataForm, setDataForm] = useState<BodyInventorySimple>({
         productId: 0,
         quantity: 0
@@ -46,7 +49,9 @@ export const Inventory = () => {
         movementType,
         setMovementType,
         dateRange,
-        setDateRange
+        setDateRange,
+        controlNumber,
+        setControlNumber
     } = useOptimizedInventory();
 
     const productOptions = productStore((state) => state.productOptions);
@@ -80,6 +85,20 @@ export const Inventory = () => {
         setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
         setData({ allInventory: inventory, inventory: inventory });
     }, [inventory, typeProduct])
+
+    useEffect(() => {
+        setControlNumberInput(controlNumber);
+    }, [controlNumber]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (controlNumberInput !== controlNumber) {
+                setControlNumber(controlNumberInput);
+            }
+        }, 200);
+
+        return () => clearTimeout(timeout);
+    }, [controlNumberInput, controlNumber, setControlNumber]);
 
     const setInventoryFilter = (inventoryFilter: IInventory[]) => {
         setData((prev) => ({ ...prev, inventory: inventoryFilter }));
@@ -121,7 +140,11 @@ export const Inventory = () => {
         await refetchInventoryHistory();
     }, [refetchInventory, refetchInventoryHistory]);
 
-    useSocket('message', handleSocketMessage)
+    useSocket('message', handleSocketMessage);
+
+    const onChangeControlNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setControlNumberInput(e.target.value)
+    }
 
     return (
         <div className="flex flex-col">
@@ -151,7 +174,19 @@ export const Inventory = () => {
 
                     <div className={`flex w-full ${history ? 'justify-end max-w-3xl' : 'max-w-lg'} items-center space-x-2`}>
                         {history && (
-                            <DateRangePicker setDatePicker={setDateRange} datePicker={dateRange} label={''} />
+                            <>
+                                <div className="relative bg-white rounded-md w-60">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        className="pl-8"
+                                        value={controlNumberInput}
+                                        onChange={onChangeControlNumber}
+                                    />
+                                </div>
+                                <DateRangePicker setDatePicker={setDateRange} datePicker={dateRange} label={''} />
+                            </>
                         )}
                         <Select value={typeProduct} onValueChange={setTypeProduct}>
                             <SelectTrigger className="w-24">
