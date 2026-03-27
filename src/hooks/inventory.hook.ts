@@ -33,7 +33,7 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
     const [historyFilter, setHistoryFilter] = useState<InventoryHistoryFilter>(DEFAULT_HISTORY_FILTER);
     const [typeProduct, setTypeProduct] = useState<string>('Cafe');
     const [controlNumber, setControlNumber] = useState<string>('');
-    const [movementType, setMovementType] = useState<string>('ALL');
+    const [movementType, setMovementType] = useState<string>('IN');
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const { pageSize = 50, enableHistory = true } = options;
 
