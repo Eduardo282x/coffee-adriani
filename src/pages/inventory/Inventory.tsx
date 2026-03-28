@@ -20,6 +20,7 @@ import { getProductType } from "@/services/products.service";
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
@@ -28,7 +29,7 @@ export const Inventory = () => {
 
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
     const [history, setHistory] = useState<boolean>(false);
-    const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, downProducts: 0, zeroProducts: 0 });
+    const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, totalMoney: 0, downProducts: 0, zeroProducts: 0 });
     const [controlNumberInput, setControlNumberInput] = useState<string>('');
     const [dataForm, setDataForm] = useState<BodyInventorySimple>({
         productId: 0,
@@ -79,10 +80,11 @@ export const Inventory = () => {
 
     useEffect(() => {
         const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)
+        const totalMoney: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + ((item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity) * item.product.priceUSD), 0);
         // const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + item.quantity, 0)
         const down: number = inventory.filter(pro => pro.quantity < 50).length;
         const zero: number = inventory.filter(pro => pro.quantity === 0).length;
-        setResumen({ totalProducts: total, downProducts: down, zeroProducts: zero })
+        setResumen({ totalProducts: total, totalMoney: totalMoney, downProducts: down, zeroProducts: zero })
         setData({ allInventory: inventory, inventory: inventory });
     }, [inventory, typeProduct])
 
@@ -228,7 +230,7 @@ export const Inventory = () => {
                     <div className="grid gap-4 md:grid-cols-3 mb-6">
                         <InventoryCards
                             title='Total de Productos'
-                            value={resumen.totalProducts}
+                            value={`${resumen.totalProducts} ($${formatOnlyNumberWithDots(resumen.totalMoney)})`}
                             description='Productos en inventario'
                             icon={Package}
                             color='bg-blue-100 text-blue-800'

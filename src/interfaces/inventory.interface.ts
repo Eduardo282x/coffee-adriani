@@ -3,6 +3,7 @@ import { IProducts } from "./product.interface";
 
 export interface Resume {
     totalProducts: number;
+    totalMoney: number;
     downProducts: number;
     zeroProducts: number;
 }
