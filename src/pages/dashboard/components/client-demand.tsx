@@ -40,6 +40,7 @@ interface ClientBucketsProps {
     buckets: Buckets
 }
 export const ClientBuckets = ({ buckets }: ClientBucketsProps) => {
+    
     return (
         <div>
             <Accordion
@@ -49,19 +50,19 @@ export const ClientBuckets = ({ buckets }: ClientBucketsProps) => {
                 defaultValue="most"
             >
                 <AccordionItem value="most">
-                    <AccordionTrigger>Clientes con demanda de producto mayor a 100 bultos</AccordionTrigger>
+                    <AccordionTrigger>Clientes con demanda de producto mayor a 100 bultos ({buckets["101+"].length} Cliente{buckets["101+"].length > 1 ? "s" : ""})</AccordionTrigger>
                     <AccordionContent>
                         <ClientDemandComponent clientDemandData={buckets["101+"]}/>
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="middle">
-                    <AccordionTrigger>Clientes con demanda de producto entre 20 y 100 bultos</AccordionTrigger>
+                    <AccordionTrigger>Clientes con demanda de producto entre 20 y 100 bultos ({buckets["21-100"].length} Cliente{buckets["21-100"].length > 1 ? "s" : ""})</AccordionTrigger>
                     <AccordionContent>
                         <ClientDemandComponent clientDemandData={buckets["21-100"]}/>
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="less">
-                    <AccordionTrigger>Clientes con demanda de producto menor a 20 bulto</AccordionTrigger>
+                    <AccordionTrigger>Clientes con demanda de producto menor a 20 bultos ({buckets["0-20"].length} Cliente{buckets["0-20"].length > 1 ? "s" : ""})</AccordionTrigger>
                     <AccordionContent>
                         <ClientDemandComponent clientDemandData={buckets["0-20"]}/>
                     </AccordionContent>
