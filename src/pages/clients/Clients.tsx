@@ -20,6 +20,8 @@ import { DropdownColumnFilter } from "@/components/table/DropdownColumnFilter"
 import { IColumns } from "@/components/table/table.interface"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { RiFileExcel2Line } from "react-icons/ri"
+import { getProductType } from "@/services/products.service"
+import { ProductType } from "@/interfaces/product.interface"
 
 export const Clients = () => {
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
@@ -36,13 +38,21 @@ export const Clients = () => {
     const [dataDialog, setDataDialog] = useState<IClientsForm>(defaultValues);
     const [dataDialogBlock, setDataDialogBlock] = useState<Block | null>(null);
 
+    const [types, setTypes] = useState<ProductType[]>([]);
+
     const [edit, setEdit] = useState<boolean>(false);
 
     const { clients, loading, setLoading, setClients, getClientsApi, deleteClient, } = clientStore();
 
     const { blocks, setBlocks, blockOptions, getBlocksApi, deleteBlock, manipulateBlock } = blockStore();
 
+        const getProductsTypesApi = async () => {
+        const response = await getProductType();
+        setTypes(response);
+    }
+    
     useEffect(() => {
+        getProductsTypesApi();
         getClientDataStore();
     }, [])
 
@@ -121,6 +131,7 @@ export const Clients = () => {
     const generateReport = async (data: BodyReport) => {
         setLoading(true)
         const parseData: BodyReport = {
+            type: data.type,
             status: data.status,
             zone: data.zone == 'all' ? '' : data.zone,
             blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId)
@@ -166,7 +177,7 @@ export const Clients = () => {
 
     const exportPDF = () => {
         setOpenDropdown(false);
-        setTimeout(() => setOpenDialogReport(true), 0);
+        setOpenDialogReport(true);
     }
 
     const exportExcel = async () => {
@@ -273,7 +284,7 @@ export const Clients = () => {
                     label1="Editar Cliente"
                     isEdit={edit}
                 >
-                    <ClientsForm onSubmit={actionDialog} data={dataDialog} blocks={blockOptions}></ClientsForm>
+                    <ClientsForm onSubmit={actionDialog} data={dataDialog} blocks={blockOptions} types={[]}></ClientsForm>
                 </DialogComponent>
             )}
 
@@ -299,7 +310,7 @@ export const Clients = () => {
                     label1="Generar Reporte"
                     isEdit={false}
                 >
-                    <ReportForm onSubmit={generateReport} data={null} blocks={blockOptions}></ReportForm>
+                    <ReportForm onSubmit={generateReport} data={null} blocks={blockOptions} types={types}></ReportForm>
                 </DialogComponent>
             )}
 

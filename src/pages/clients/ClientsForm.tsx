@@ -9,9 +9,11 @@ import { FormSelect } from '@/components/form/FormSelect'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button';
 import { BodyBlock, BodyReport } from '@/interfaces/clients.interface'
+import { ProductType } from '@/interfaces/product.interface'
 
 interface ClientFormProps extends FromProps {
     blocks: IOptions[]
+    types: ProductType[]
 }
 
 export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => {
@@ -68,7 +70,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                     </div>
                     <div className="flex flex-col items-start justify-start gap-4 w-full">
                         <Label className="text-right">
-                            Dirección Secundaria 
+                            Dirección Secundaria
                         </Label>
                         <Input {...form.register('addressSecondary')} placeholder='(Opcional)' />
                     </div>
@@ -138,11 +140,12 @@ export const BlockForm: FC<FromProps> = ({ data, onSubmit }) => {
     )
 }
 
-export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
+export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => {
     const form = useForm<BodyReport>({
         defaultValues: {
             status: 'all',
             zone: '',
+            type: 'Cafe',
             blockId: 0
         }
     });
@@ -150,6 +153,7 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks }) => {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col justify-start items-start gap-4 w-full">
+                <FormSelect form={form} name='type' label='Tipo de Producto' placeholder='Seleccione un tipo de producto' options={types.map(type => ({ label: type.type, value: type.type }))} />
                 <FormSelect form={form} name='status' label='Estado' placeholder='Seleccione un estado' options={
                     [
                         { label: 'Todos', value: 'all' },

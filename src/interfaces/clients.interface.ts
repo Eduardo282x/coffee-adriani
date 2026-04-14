@@ -15,6 +15,7 @@ export interface BodyBlock {
 }
 
 export interface BodyReport {
+    type: string;
     zone: string;
     blockId: number;
     status: string;
