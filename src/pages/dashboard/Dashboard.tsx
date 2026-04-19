@@ -4,16 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Package, ShoppingCart, Users } from "lucide-react"
-import { SalesChart } from "./components/Sales-chart"
 import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
-import { RecentSales } from "./components/recent-sales"
 import { CardDashboard } from "./components/CardDashboard"
 import { getDashboard, getDashboardClientDemand, getDashboardReport } from "@/services/dashboard.service"
-import { ClientDemand, IDashboard } from "@/interfaces/dashboard.interface"
+import { Buckets, ClientDemand, IDashboard } from "@/interfaces/dashboard.interface"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
-import { DateRangeFilter, ExportDashboard } from "@/interfaces/invoice.interface"
+import { ExportDashboard } from "@/interfaces/invoice.interface"
 import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
@@ -26,13 +24,16 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { getProductType } from "@/services/products.service"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
+
+
 export const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [viewClient, setViewClient] = useState<boolean>(true);
     const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
-    const [clientDemandData, setClientDemandData] = useState<ClientDemand>({} as ClientDemand);
+    const [clientDemandData, setClientDemandData] = useState<ClientDemand | null>(null);
     const now = new Date();
     const [types, setTypes] = useState<ProductType[]>([]);
+    const [statusInvoice, setStatusInvoice] = useState<'all' | 'Pagado' | 'Pendiente' | 'Vencida'>('all');
     const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
 
     const [date, setDate] = useState<DateRange | undefined>({
@@ -42,10 +43,11 @@ export const Dashboard = () => {
 
     useEffect(() => {
         getDashboardApi();
-    }, [date?.to])
+        getDashboardClientDemandApi();
+        setStatusInvoice('all');
+    }, [date?.to, productTypeSelected])
 
     useEffect(() => {
-        getDashboardClientDemandApi();
         getProductsTypesApi()
     }, [])
 
@@ -54,11 +56,16 @@ export const Dashboard = () => {
         setTypes(response);
     }
 
+    const changeStatusInvoice = (status: string) => {
+        setStatusInvoice(status as 'all' | 'Pagado' | 'Pendiente' | 'Vencida');
+    }
+
     const getDashboardApi = async () => {
         setLoading(true);
-        const dateRange: DateRangeFilter = {
+        const dateRange: ExportDashboard = {
             startDate: new Date(date?.from as Date),
             endDate: new Date(date?.to as Date),
+            type: productTypeSelected
         }
         const response: IDashboard = await getDashboard(dateRange);
         setDashBoardData(response);
@@ -66,7 +73,12 @@ export const Dashboard = () => {
     }
 
     const getDashboardClientDemandApi = async () => {
-        const response: ClientDemand = await getDashboardClientDemand();
+        const dateRange: ExportDashboard = {
+            startDate: new Date(date?.from as Date).toISOString().slice(0, 10),
+            endDate: new Date(date?.to as Date).toISOString().slice(0, 10),
+            type: productTypeSelected
+        }
+        const response: ClientDemand = await getDashboardClientDemand(dateRange);
         setClientDemandData(response);
         // setLoading(false);
     }
@@ -94,6 +106,23 @@ export const Dashboard = () => {
         if (total === 0) return 0;
         const result = formatOnlyNumberWithDots(((part / total) * 100), 2);
         return result;
+    }
+
+    const separateName = (name: string) => {
+        if (name.includes("+")) {
+            const [firstPart] = name.split("+");
+            return `Mas de ${firstPart}`
+        }
+        const [firstPart, secondPart] = name.split("-");
+        return `Entre ${firstPart} y ${secondPart}`
+    }
+
+    const setColorPercent = (range: string) => {
+        const [percent] = range.split("-");
+        const percentNumber = parseFloat(percent);
+        if (percentNumber >= 70) return "bg-green-600";
+        else if (percentNumber >= 40) return "bg-yellow-600";
+        else return "bg-red-600";
     }
 
     return (
@@ -155,36 +184,14 @@ export const Dashboard = () => {
                     </div>
                 )}
 
-                <Tabs defaultValue="inventario" className="space-y-4">
+                <Tabs defaultValue="inventory" className="space-y-4">
                     <TabsList>
                         {/* <TabsTrigger value="ventas">Ventas</TabsTrigger> */}
-                        <TabsTrigger value="inventario">Inventario</TabsTrigger>
-                        <TabsTrigger value="facturas">Facturas</TabsTrigger>
-                        <TabsTrigger value="client">Demanda de clientes</TabsTrigger>
+                        <TabsTrigger value="inventory">Inventario</TabsTrigger>
+                        <TabsTrigger value="invoices">Facturas</TabsTrigger>
+                        <TabsTrigger value="clients">Demanda de clientes</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="ventas" className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                            <Card className="col-span-4">
-                                <CardHeader>
-                                    <CardTitle>Ventas por Período</CardTitle>
-                                    <CardDescription>Comparativa de ventas en el período seleccionado</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pl-2">
-                                    <SalesChart />
-                                </CardContent>
-                            </Card>
-                            <Card className="col-span-3">
-                                <CardHeader>
-                                    <CardTitle>Ventas Recientes</CardTitle>
-                                    <CardDescription>Últimas transacciones realizadas</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <RecentSales />
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="inventario" className="space-y-4">
+                    <TabsContent value="inventory" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                             <Card className="col-span-4">
                                 <CardHeader>
@@ -217,15 +224,32 @@ export const Dashboard = () => {
                             </Card>
                         </div>
                     </TabsContent>
-                    <TabsContent value="facturas" className="space-y-4">
+                    <TabsContent value="invoices" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                             <Card className="col-span-5">
                                 <CardHeader>
-                                    <CardTitle>Facturas Pendientes</CardTitle>
-                                    <CardDescription>Facturas que requieren seguimiento</CardDescription>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle>Ultimas 100 Facturas ({statusInvoice === 'all' ? '100' : dashBoardData.lastPending.filter(invoice => invoice.status === statusInvoice).length})</CardTitle>
+                                            <CardDescription>Facturas que requieren seguimiento</CardDescription>
+                                        </div>
+
+                                        <div className="flex items-center justify-between overflow-hidden rounded-md bg-[#d2c3b3] cursor-pointer text-sm font-medium">
+                                            {['all', 'Pagado', 'Pendiente', 'Vencida'].map((status) => (
+                                                <Button
+                                                variant='ghost'
+                                                    key={status}
+                                                    onClick={() => changeStatusInvoice(status)}
+                                                    className={`${statusInvoice === status ? 'bg-[#6f4e37] text-white' : ''} rounded-md text-sm px-2 py-1`}
+                                                >
+                                                    {status == 'all' ? 'Todas' : status}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <PendingInvoices invoicesData={dashBoardData.lastPending} />
+                                    <PendingInvoices invoicesData={dashBoardData.lastPending} status={statusInvoice} />
                                 </CardContent>
                             </Card>
                             <Card className="col-span-2">
@@ -258,12 +282,12 @@ export const Dashboard = () => {
                             </Card>
                         </div>
                     </TabsContent>
-                    <TabsContent value="client" className="space-y-4">
+                    <TabsContent value="clients" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                             <Card className="col-span-5">
                                 <CardHeader className="flex justify-between items-center">
                                     <div>
-                                        <CardTitle>Top de clientes ({clientDemandData.totalClientsConsidered})</CardTitle>
+                                        <CardTitle>Top de clientes ({clientDemandData?.topClients.length})</CardTitle>
                                         <CardDescription>Lista de clientes con mayor demanda de productos</CardDescription>
                                     </div>
 
@@ -274,10 +298,10 @@ export const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent>
                                     {viewClient &&
-                                        <ClientDemandComponent clientDemandData={clientDemandData.topClients} />
+                                        <ClientDemandComponent clientDemandData={clientDemandData?.topClients || []} />
                                     }
                                     {!viewClient &&
-                                        <ClientBuckets buckets={clientDemandData.buckets} />
+                                        <ClientBuckets buckets={clientDemandData?.buckets || {} as Buckets} />
                                     }
                                 </CardContent>
                             </Card>
@@ -287,25 +311,20 @@ export const Dashboard = () => {
                                     <CardDescription>Distribución de clientes según su Productos</CardDescription>
                                 </CardHeader>
                                 <CardContent className="pl-2">
-                                    <div className="h-full flex items-center justify-center">
-                                        <div className="text-center">
-                                            {clientDemandData.buckets && (
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center">
-                                                        <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                                                        <span>Mayor de 100 ({returnPercent(clientDemandData.buckets["101+"].length, clientDemandData.totalClientsConsidered)}%)</span>
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        <div className="w-4 h-4 rounded-full bg-yellow-500 mr-2"></div>
-                                                        <span>Entre 20-100 ({returnPercent(clientDemandData.buckets["21-100"].length, clientDemandData.totalClientsConsidered)}%)</span>
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
-                                                        <span>Menor a 20 ({returnPercent(clientDemandData.buckets["0-20"].length, clientDemandData.totalClientsConsidered)}%)</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
+                                    <div className="h-full px-4">
+                                        {clientDemandData?.buckets && (
+                                            <div className="flex flex-col-reverse gap-4">
+                                                {clientDemandData?.summary && clientDemandData.summary.map((item, index) => {
+                                                    if (item.count == 0) return null;
+                                                    else return (
+                                                        <div className="flex items-center" key={index}>
+                                                            <div className={`w-4 h-4 rounded-full ${setColorPercent(item.range)} mr-2`}></div>
+                                                            <span>{separateName(item.range)} ({returnPercent(clientDemandData.buckets[item.range].length, clientDemandData.topClients.length)}%)</span>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

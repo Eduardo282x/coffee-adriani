@@ -188,8 +188,8 @@ export interface DetailsInvoices {
 }
 
 export interface DateRangeFilter {
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | string;
+    endDate: Date | string;
 }
 
 export interface ExportDashboard extends DateRangeFilter {

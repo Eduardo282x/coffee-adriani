@@ -1,18 +1,19 @@
-import { getDataApi, postDataApi, postDataFileApi } from "./base.service";
-import { DateRangeFilter, ExportDashboard } from "@/interfaces/invoice.interface";
+import {  getDataApi, postDataApi, postDataFileApi } from "./base.service";
+import { ExportDashboard } from "@/interfaces/invoice.interface";
 
 const routeDashboard = '/dashboard';
 
-export const getDashboard = async (filter: DateRangeFilter) => {
+export const getDashboard = async (filter: ExportDashboard) => {
     try {
         return await postDataApi(`${routeDashboard}`, filter);
     } catch (err) {
         return err
     }
 }
-export const getDashboardClientDemand = async () => {
+export const getDashboardClientDemand = async (filter: ExportDashboard) => {
     try {
-        return await getDataApi(`${routeDashboard}/clients-demand`);
+        const query = `?type=${filter.type}&startDate=${filter.startDate}&endDate=${filter.endDate}`;
+        return await getDataApi(`${routeDashboard}/clients-demand${query}`);
     } catch (err) {
         return err
     }
