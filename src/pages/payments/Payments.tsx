@@ -20,7 +20,7 @@ import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { PaymentExpandible } from './PaymentExpandible';
 import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
-import { useOptimizedPayments } from '@/hooks/payment.hook';
+import { PaymentDateRangeFilter, useOptimizedPayments } from '@/hooks/payment.hook';
 import { InvoicePreview } from './InvoicePreview';
 
 export const Payments = () => {
@@ -81,10 +81,10 @@ export const Payments = () => {
     useEffect(() => {
         if (date?.to) {
             const filterDate: DateRangeFilter = {
-                startDate: date.from || new Date(),
-                endDate: date.to,
+                startDate: date.from || new Date() as Date,
+                endDate: date.to as Date,
             };
-            applyDateFilter(filterDate);
+            applyDateFilter(filterDate as PaymentDateRangeFilter);
         } else {
             applyDateFilter(null);
         }

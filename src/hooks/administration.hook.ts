@@ -16,8 +16,8 @@ export const useAdministration = (filtersDate: DateRangeFilter): UseAdministrati
 	const query = useQuery({
 		queryKey: [
 			'administration-expenses',
-			filtersDate.startDate?.getTime?.() ?? 0,
-			filtersDate.endDate?.getTime?.() ?? 0,
+			new Date(filtersDate.startDate)?.getTime?.() ?? 0,
+			new Date(filtersDate.endDate)?.getTime?.() ?? 0,
 		],
 		queryFn: async () => {
 			const response = await getExpenses(filtersDate) as IExpenses;

@@ -24,7 +24,7 @@ import { getProductType } from '@/services/products.service';
 import { AccountPay, DescriptionPayment, Method } from '@/interfaces/payment.interface';
 import { ProductType } from '@/interfaces/product.interface';
 
-interface PaymentDateRangeFilter {
+export interface PaymentDateRangeFilter {
     startDate?: Date;
     endDate?: Date;
 }
