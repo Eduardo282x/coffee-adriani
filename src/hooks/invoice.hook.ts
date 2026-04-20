@@ -2,6 +2,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DateRangeFilter, InvoiceStatus, IInvoiceForm, InvoiceAPINew } from '@/interfaces/invoice.interface';
+import { invalidateDashboardQueries } from '@/hooks/dashboard.hook';
 import {
     getInvoicesFilterPaginated,
     getInvoiceStatistics,
@@ -33,6 +34,15 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
 
     const queryClient = useQueryClient();
+
+    const invalidateInvoiceQueries = useCallback(async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] }),
+            queryClient.invalidateQueries({ queryKey: ['invoices-unordered'] }),
+            invalidateDashboardQueries(queryClient),
+        ]);
+    }, [queryClient]);
 
     // 1. Consulta infinita para facturas (paginación)
     const {
@@ -114,66 +124,42 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     // 3. Mutaciones
     const createInvoiceMutation = useMutation({
         mutationFn: postInvoice,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const updateInvoiceMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: IInvoiceForm }) => putInvoice(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const deleteInvoiceMutation = useMutation({
         mutationFn: deleteInvoice,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const payInvoiceMutation = useMutation({
         mutationFn: putPayInvoice,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const pendingInvoiceMutation = useMutation({
         mutationFn: putPendingInvoice,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const cleanInvoiceMutation = useMutation({
         mutationFn: putCleanInvoice,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const checkInvoiceMutation = useMutation({
         mutationFn: checkInvoicesPayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     const checkInvoicesMutation = useMutation({
         mutationFn: checkInvoices,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
-        },
+        onSuccess: invalidateInvoiceQueries,
     });
 
     // 4. Memoizar datos procesados

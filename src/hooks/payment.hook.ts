@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useMemo } from 'react';
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateDashboardQueries } from '@/hooks/dashboard.hook';
 import {
     getPaymentsPaginated,
     getPaymentStatistics,
@@ -21,7 +22,7 @@ import {
 import { getInvoiceUnordered } from '@/services/invoice.service';
 import { IInvoice } from '@/interfaces/invoice.interface';
 import { getProductType } from '@/services/products.service';
-import { AccountPay, DescriptionPayment, Method } from '@/interfaces/payment.interface';
+import { AccountPay, DescriptionPayment, IPayInvoiceForm, IPayments, Method, PayDisassociateBody, PaymentMutationResponse } from '@/interfaces/payment.interface';
 import { ProductType } from '@/interfaces/product.interface';
 
 export interface PaymentDateRangeFilter {
@@ -47,6 +48,38 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     const [selectedAssociation, setSelectedAssociation] = useState<'associated' | 'unassociated' | 'all'>('all');
 
     const queryClient = useQueryClient();
+
+    const syncPaymentInCache = useCallback((updatedPayment: IPayments) => {
+        queryClient.setQueriesData({ queryKey: ['payments'] }, (cachedData: any) => {
+            if (!cachedData?.pages) return cachedData;
+
+            return {
+                ...cachedData,
+                pages: cachedData.pages.map((page: any) => ({
+                    ...page,
+                    payments: page.payments.map((payment: IPayments) =>
+                        payment.id === updatedPayment.id ? { ...payment, ...updatedPayment } : payment
+                    )
+                }))
+            };
+        });
+    }, [queryClient]);
+
+    const invalidatePaymentQueries = useCallback(async (includeInvoices = false) => {
+        const invalidations = [
+            queryClient.invalidateQueries({ queryKey: ['payments'] }),
+            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] }),
+            invalidateDashboardQueries(queryClient),
+        ];
+
+        if (includeInvoices) {
+            invalidations.push(queryClient.invalidateQueries({ queryKey: ['invoices'] }));
+            invalidations.push(queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] }));
+            invalidations.push(queryClient.invalidateQueries({ queryKey: ['invoices-unordered'] }));
+        }
+
+        await Promise.all(invalidations);
+    }, [queryClient]);
 
     // 1. Consulta infinita para pagos (paginación)
     const {
@@ -178,55 +211,44 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     // 3. Mutaciones para pagos
     const createPaymentMutation = useMutation({
         mutationFn: registerPayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-        },
+        onSuccess: () => invalidatePaymentQueries(),
     });
 
     const updatePaymentMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: any }) => updatePayment(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-        },
+        onSuccess: () => invalidatePaymentQueries(),
     });
 
     const deletePaymentMutation = useMutation({
         mutationFn: deletePayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-            queryClient.invalidateQueries({ queryKey: ['invoices'] }); // Puede afectar facturas
-        },
+        onSuccess: () => invalidatePaymentQueries(true),
     });
 
     const associatePaymentMutation = useMutation({
-        mutationFn: postAssociatePayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
+        mutationFn: (data: IPayInvoiceForm) => postAssociatePayment(data) as Promise<PaymentMutationResponse>,
+        onSuccess: async (response: PaymentMutationResponse) => {
+            if (response?.data?.id) {
+                syncPaymentInCache(response.data);
+            }
+
+            await invalidatePaymentQueries(true);
         },
     });
 
     const disassociatePaymentMutation = useMutation({
-        mutationFn: putDisassociatePayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
-            queryClient.invalidateQueries({ queryKey: ['invoice-statistics'] });
+        mutationFn: (data: PayDisassociateBody) => putDisassociatePayment(data) as Promise<PaymentMutationResponse>,
+        onSuccess: async (response: PaymentMutationResponse) => {
+            if (response?.data?.id) {
+                syncPaymentInCache(response.data);
+            }
+
+            await invalidatePaymentQueries(true);
         },
     });
 
     const confirmZelleMutation = useMutation({
         mutationFn: putConfirmPayment,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payments'] });
-            queryClient.invalidateQueries({ queryKey: ['payment-statistics'] });
-        },
+        onSuccess: () => invalidatePaymentQueries(),
     });
 
     // const validatePaymentsMutation = useMutation({

@@ -7,11 +7,9 @@ import { Package, ShoppingCart, Users } from "lucide-react"
 import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
 import { CardDashboard } from "./components/CardDashboard"
-import { getDashboard, getDashboardClientDemand, getDashboardReport } from "@/services/dashboard.service"
-import { Buckets, ClientDemand, IDashboard } from "@/interfaces/dashboard.interface"
+import { Buckets } from "@/interfaces/dashboard.interface"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
-import { ExportDashboard } from "@/interfaces/invoice.interface"
 import { Button } from "@/components/ui/button"
 import { RiFileExcel2Line } from "react-icons/ri"
 import { ScreenLoader } from "@/components/loaders/ScreenLoader"
@@ -22,15 +20,13 @@ import { Label } from "@/components/ui/label"
 import { ProductType } from "@/interfaces/product.interface"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getProductType } from "@/services/products.service"
+import { useDashboard } from "@/hooks/dashboard.hook"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
 
 
 export const Dashboard = () => {
-    const [loading, setLoading] = useState<boolean>(false);
     const [viewClient, setViewClient] = useState<boolean>(true);
-    const [dashBoardData, setDashBoardData] = useState<IDashboard>({} as IDashboard);
-    const [clientDemandData, setClientDemandData] = useState<ClientDemand | null>(null);
     const now = new Date();
     const [types, setTypes] = useState<ProductType[]>([]);
     const [statusInvoice, setStatusInvoice] = useState<'all' | 'Pagado' | 'Pendiente' | 'Vencida'>('all');
@@ -41,9 +37,18 @@ export const Dashboard = () => {
         to: new Date(now.getFullYear(), now.getMonth(), now.getDate())
     })
 
+    const {
+        dashboardData: dashBoardData,
+        clientDemandData,
+        isLoading,
+        isExporting,
+        exportDashboard,
+    } = useDashboard({
+        dateRange: date,
+        productType: productTypeSelected,
+    });
+
     useEffect(() => {
-        getDashboardApi();
-        getDashboardClientDemandApi();
         setStatusInvoice('all');
     }, [date?.to, productTypeSelected])
 
@@ -60,37 +65,10 @@ export const Dashboard = () => {
         setStatusInvoice(status as 'all' | 'Pagado' | 'Pendiente' | 'Vencida');
     }
 
-    const getDashboardApi = async () => {
-        setLoading(true);
-        const dateRange: ExportDashboard = {
-            startDate: new Date(date?.from as Date),
-            endDate: new Date(date?.to as Date),
-            type: productTypeSelected
-        }
-        const response: IDashboard = await getDashboard(dateRange);
-        setDashBoardData(response);
-        setLoading(false);
-    }
-
-    const getDashboardClientDemandApi = async () => {
-        const dateRange: ExportDashboard = {
-            startDate: new Date(date?.from as Date).toISOString().slice(0, 10),
-            endDate: new Date(date?.to as Date).toISOString().slice(0, 10),
-            type: productTypeSelected
-        }
-        const response: ClientDemand = await getDashboardClientDemand(dateRange);
-        setClientDemandData(response);
-        // setLoading(false);
-    }
-
     const exportData = async () => {
-        setLoading(true)
-        const dateRange: ExportDashboard = {
-            startDate: new Date(date?.from as Date),
-            endDate: new Date(date?.to as Date),
-            type: productTypeSelected
-        }
-        const response = await getDashboardReport(dateRange) as Blob;
+        const response = await exportDashboard();
+        if (!response) return;
+
         const url = URL.createObjectURL(response)
         const link = window.document.createElement("a")
         link.href = url
@@ -99,7 +77,6 @@ export const Dashboard = () => {
         link.click()
         window.document.body.removeChild(link)
         URL.revokeObjectURL(url);
-        setLoading(false);
     }
 
     const returnPercent = (part: number, total: number) => {
@@ -128,7 +105,7 @@ export const Dashboard = () => {
     return (
         <div className="flex flex-col ">
 
-            {loading && <ScreenLoader />}
+            {(isLoading || isExporting) && <ScreenLoader />}
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -287,7 +264,7 @@ export const Dashboard = () => {
                             <Card className="col-span-5">
                                 <CardHeader className="flex justify-between items-center">
                                     <div>
-                                        <CardTitle>Top de clientes ({clientDemandData?.topClients.length})</CardTitle>
+                                        <CardTitle>Top de clientes ({clientDemandData.topClients.length})</CardTitle>
                                         <CardDescription>Lista de clientes con mayor demanda de productos</CardDescription>
                                     </div>
 
@@ -298,10 +275,10 @@ export const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent>
                                     {viewClient &&
-                                        <ClientDemandComponent clientDemandData={clientDemandData?.topClients || []} />
+                                        <ClientDemandComponent clientDemandData={clientDemandData.topClients} />
                                     }
                                     {!viewClient &&
-                                        <ClientBuckets buckets={clientDemandData?.buckets || {} as Buckets} />
+                                        <ClientBuckets buckets={clientDemandData.buckets || {} as Buckets} />
                                     }
                                 </CardContent>
                             </Card>
@@ -312,9 +289,9 @@ export const Dashboard = () => {
                                 </CardHeader>
                                 <CardContent className="pl-2">
                                     <div className="h-full px-4">
-                                        {clientDemandData?.buckets && (
+                                        {clientDemandData.buckets && (
                                             <div className="flex flex-col-reverse gap-4">
-                                                {clientDemandData?.summary && clientDemandData.summary.map((item, index) => {
+                                                {clientDemandData.summary.map((item, index) => {
                                                     if (item.count == 0) return null;
                                                     else return (
                                                         <div className="flex items-center" key={index}>

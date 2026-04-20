@@ -2,7 +2,6 @@ import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody } from '@/interfaces/payment.interface';
-import { postAssociatePayment, putDisassociatePayment } from '@/services/payment.service';
 import { useEffect, useState } from 'react'
 import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
@@ -55,6 +54,8 @@ export const Payments = () => {
         createPayment,
         updatePayment,
         removePayment,
+        associatePayment,
+        disassociatePayment,
         confirmZellePayment,
         handleChangeAccount,
         handleChangeMethod,
@@ -192,7 +193,7 @@ export const Payments = () => {
         }
     };
 
-    const disassociatePayment = async (data: boolean) => {
+    const handleDisassociatePayment = async (data: boolean) => {
         if (data === true && paymentDisassociate) {
             try {
                 const parseBody: PayDisassociateBody = {
@@ -200,7 +201,7 @@ export const Payments = () => {
                     invoiceId: paymentDisassociate.invoiceId,
                     paymentId: paymentDisassociate.paymentId
                 };
-                await putDisassociatePayment(parseBody);
+                await disassociatePayment(parseBody);
                 console.log('Pago desasociado');
             } catch (error) {
                 console.error('Error al desasociar pago:', error);
@@ -243,7 +244,7 @@ export const Payments = () => {
 
     const payInvoice = async (data: IPayInvoiceForm) => {
         try {
-            await postAssociatePayment(data);
+            await associatePayment(data);
             setOpenPayDialog(false);
             setPaymentSelected(null);
         } catch (error) {
@@ -416,7 +417,7 @@ export const Payments = () => {
                     label1="Desasociar pago"
                     isEdit={true}
                 >
-                    <AlertDialogPayment onSubmit={disassociatePayment} />
+                    <AlertDialogPayment onSubmit={handleDisassociatePayment} />
                 </DialogComponent>
             )}
 

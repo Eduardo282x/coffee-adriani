@@ -1,3 +1,4 @@
+import { BaseResponse } from "@/services/base.interface";
 import { IInvoice } from "./invoice.interface";
 
 export interface GroupPayments {
@@ -162,4 +163,8 @@ export interface PaymentStatisticsResponse {
         totalAmount: number;
         count: number;
     }>;
+}
+
+export interface PaymentMutationResponse extends BaseResponse {
+    data: IPayments;
 }
