@@ -12,10 +12,16 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { PiCoffeeBeanFill } from "react-icons/pi";
 import { LuEqualApproximately } from "react-icons/lu";
 import { useAdministration } from "@/hooks/administration.hook";
+import { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
+import { ProductType } from "@/interfaces/product.interface";
+import { getProductType } from "@/services/products.service";
+import { ExportDashboard } from "@/interfaces/invoice.interface";
 
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -31,45 +37,54 @@ const coffeeColors = {
 
 type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
 
-function getMonthsFrom2025() {
-    const months = [];
-    const now = new Date();
-    const startYear = 2025;
-    const startMonth = 0;
-    const endYear = now.getFullYear();
-    const endMonth = now.getMonth();
-
-    for (let year = startYear; year <= endYear; year++) {
-        const firstMonth = year === startYear ? startMonth : 0;
-        const lastMonth = year === endYear ? endMonth : 11;
-        for (let month = firstMonth; month <= lastMonth; month++) {
-            months.push({
-                value: `${year}-${month + 1}`,
-                label: `${new Date(year, month).toLocaleString('es-ES', { month: 'long' })} ${year}`,
-                year,
-                month,
-            });
-        }
-    }
-
-    return months;
-}
-
 export const Administration = () => {
     const now = new Date();
 
+    const [types, setTypes] = useState<ProductType[]>([]);
+    const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
     const [option, setOption] = useState<OptionAdministration>('earns')
-    const [filtersDate, setFiltersDate] = useState({
-        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-        endDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(now.getFullYear(), now.getMonth(), 1),
+        to: now,
     });
+    const [filtersDate, setFiltersDate] = useState<ExportDashboard>({
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+        endDate: now,
+        type: 'Cafe',
+    });
+
     const { expenses, isLoading, isFetching } = useAdministration(filtersDate);
 
-    const monthsList = useMemo(() => getMonthsFrom2025(), []);
+    useEffect(() => {
+        getProductsTypesApi();
+    }, []);
 
-    const [month, setMonth] = useState(() => {
-        return monthsList[monthsList.length - 1]?.value;
-    });
+    useEffect(() => {
+        if (!dateRange?.from || !dateRange?.to) return;
+
+        setFiltersDate((prev) => ({
+            ...prev,
+            startDate: dateRange.from as Date,
+            endDate: dateRange.to as Date,
+        }));
+    }, [dateRange?.from, dateRange?.to]);
+
+    useEffect(() => {
+        if (!productTypeSelected) return;
+
+        setFiltersDate((prev) => ({
+            ...prev,
+            type: productTypeSelected,
+        }));
+    }, [productTypeSelected]);
+
+    const getProductsTypesApi = async () => {
+        const response = await getProductType() as ProductType[];
+        setTypes(response);
+        if (response?.length > 0) {
+            setProductTypeSelected(response[0].type);
+        }
+    }
 
     const { totals, cardEarnsData, productSales } = useMemo<{
         totals: ITotals;
@@ -152,27 +167,29 @@ export const Administration = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Administración</h2>
 
                     <div className="flex gap-2 items-center">
-                        <Select value={month} onValueChange={(val) => {
-                            if (val === month) return;
-                            setMonth(val);
-                            const [year, m] = val.split('-').map(Number);
-                            setFiltersDate(prev => ({
-                                ...prev,
-                                startDate: new Date(year, m - 1, 1),
-                                endDate: new Date(year, m, 0),
-                            }));
-                        }}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Fecha" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {monthsList.map((m) => (
-                                    <SelectItem key={m.value} value={m.value}>
-                                        {m.label.charAt(0).toUpperCase() + m.label.slice(1)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="flex flex-col items-end justify-start gap-2">
+                            {/* <Label>Tipo de producto</Label> */}
+                            <Select value={productTypeSelected} onValueChange={setProductTypeSelected}>
+                                <SelectTrigger className="w-24">
+                                    <SelectValue placeholder="Producto" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {types.map((ty: ProductType, index: number) => (
+                                            <SelectItem key={index} value={ty.type}>{ty.type}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <DateRangePicker
+                            datePicker={{ from: dateRange?.from, to: dateRange?.to }}
+                            setDatePicker={setDateRange}
+                            label=""
+                            btnWidth="w-60"
+                            toDate={now}
+                        />
 
                         <TabsAdministration option={option} setOption={setOption} />
                     </div>

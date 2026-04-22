@@ -16,9 +16,10 @@ interface DateRangePickerProps {
     setDatePicker: (date: DateRange | undefined) => void;
     label: string;
     btnWidth?: string;
+    toDate?: Date;
 }
 
-export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDatePicker, label, btnWidth }) => {
+export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDatePicker, label, btnWidth, toDate }) => {
     const [date, setDate] = useState<DateRange | undefined>(datePicker)
     const [open, setOpen] = useState<boolean>(false);
 
@@ -67,6 +68,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
                         onSelect={setDate}
                         defaultMonth={date?.from}
                         captionLayout="dropdown"
+                        toDate={toDate}
                     />
                 </PopoverContent>
             </Popover>

@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { IExpenses } from '@/interfaces/adminitration.interface';
-import { DateRangeFilter } from '@/interfaces/invoice.interface';
+import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { getExpenses } from '@/services/expenses.service';
 
 interface UseAdministrationReturn {
@@ -12,17 +12,48 @@ interface UseAdministrationReturn {
 	refetch: () => void;
 }
 
-export const useAdministration = (filtersDate: DateRangeFilter): UseAdministrationReturn => {
+interface AdministrationQueryFilter {
+	startDate: string;
+	endDate: string;
+	type: string;
+}
+
+const formatDateOnly = (value: Date | string | null | undefined): string => {
+	if (!value) return '';
+
+	const date = value instanceof Date ? value : new Date(value);
+	if (Number.isNaN(date.getTime())) return '';
+
+	return date.toISOString().slice(0, 10);
+};
+
+const buildAdministrationFilter = (filtersDate: ExportDashboard): AdministrationQueryFilter => ({
+	startDate: formatDateOnly(filtersDate.startDate),
+	endDate: formatDateOnly(filtersDate.endDate),
+	type: filtersDate.type,
+});
+
+const buildAdministrationPayload = (filter: AdministrationQueryFilter): ExportDashboard => ({
+	startDate: new Date(filter.startDate),
+	endDate: new Date(filter.endDate),
+	type: filter.type,
+});
+
+export const useAdministration = (filtersDate: ExportDashboard): UseAdministrationReturn => {
+	const filter = buildAdministrationFilter(filtersDate);
+
 	const query = useQuery({
 		queryKey: [
 			'administration-expenses',
-			new Date(filtersDate.startDate)?.getTime?.() ?? 0,
-			new Date(filtersDate.endDate)?.getTime?.() ?? 0,
+			filter.startDate,
+			filter.endDate,
+			filter.type,
 		],
 		queryFn: async () => {
-			const response = await getExpenses(filtersDate) as IExpenses;
+			const response = await getExpenses(buildAdministrationPayload(filter)) as IExpenses;
 			return response;
 		},
+		enabled: Boolean(filter.startDate && filter.endDate && filter.type),
 		staleTime: 5 * 60 * 1000,
 		gcTime: 15 * 60 * 1000,
 		placeholderData: keepPreviousData,
