@@ -121,12 +121,12 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
 
     return (
         <div ref={expansibleRef} className={`w-full ${open ? 'h-auto' : 'h-10'} interpolate overflow-hidden border rounded-lg px-2 py-2 ease-in-out delay-100 duration-150 transition-all`}>
-            <div onClick={() => setOpen(!open)} className="w-full cursor-pointer grid grid-cols-5">
-                <span>{invoice.client.name}</span>
-                <span>{formatNumberWithDots(invoice.client.rif, '', '', true)}</span>
-                <span>{invoice.client.zone}</span>
-                <span>{invoice.client.block.name}</span>
-                <span className="py-1"><IoIosArrowDown className={`ease-in-out delay-100 duration-150 transition-all text-xl ${!open ? ' rotate-0' : 'rotate-180'}`} /></span>
+            <div onClick={() => setOpen(!open)} className="w-full cursor-pointer flex items-center justify-between gap-2">
+                <span className="max-w-1/5 w-1/5 overflow-hidden text-ellipsis">{invoice.client.name}</span>
+                <span className="max-w-1/5 w-1/5 overflow-hidden text-ellipsis">{formatNumberWithDots(invoice.client.rif, '', '', true)}</span>
+                <span className="max-w-1/5 w-1/5 overflow-hidden text-ellipsis">{invoice.client.zone}</span>
+                <span className="max-w-1/5 w-1/5 overflow-hidden text-ellipsis">{invoice.client.block.name}</span>
+                <span className="max-w-1/5 w-1/5 py-1"><IoIosArrowDown className={`ease-in-out delay-100 duration-150 transition-all text-xl ${!open ? ' rotate-0' : 'rotate-180'}`} /></span>
             </div>
             <div className="w-full mt-1">
                 <TableComponent

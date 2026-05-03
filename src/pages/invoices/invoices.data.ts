@@ -13,6 +13,7 @@ export const clientColumns: IColumns<InvoiceAPINewInvoice>[] = [
         element: (data: InvoiceAPINewInvoice) => data.client.name,
         orderBy: '',
         type: 'string',
+        className: () => 'max-w-20 text-ellipsis overflow-hidden text-blue-500',
         icon: false,
     },
     {
