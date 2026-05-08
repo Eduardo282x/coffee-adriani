@@ -131,7 +131,7 @@ export const Administration = () => {
                 {
                     title: 'Ganancias del Mes',
                     Icon: TrendingUp,
-                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$ (${totalItemsEarnMonth})`,
+                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$ (${totalItemsEarnMonth.toFixed(2)})`,
                     subtitle: 'Ganancias',
                     classNameCard: 'text-green-800',
                 },
@@ -240,7 +240,7 @@ export const Administration = () => {
                                             <div key={index} className="flex items-center justify-between text-[#6f4e37]">
                                                 <div className="flex items-center">
                                                     <PiCoffeeBeanFill className="h-4 w-4 mr-2 text-[#6f4e37]" />
-                                                    <span className="text-sm font-medium">{pro.name} {pro.presentation} ({pro.quantity})</span>
+                                                    <span className="text-sm font-medium">{pro.name} {pro.presentation} ({pro.quantity.toFixed(2)})</span>
                                                 </div>
                                                 <span className="text-sm font-bold">{formatOnlyNumberWithDots(pro.percentage)}%</span>
                                             </div>
@@ -269,15 +269,15 @@ export const Administration = () => {
                             </div>
                         </div>
                         {optionInvoice == 'invoicesEarn' ?
-                            <TableComponent dataBase={expenses.invoicesEarns?.invoiceEarns || []} columns={expenseInvoiceEarnColumns} isExpansible={false}
+                            <TableComponent key="invoices-earn" dataBase={expenses.invoicesEarns?.invoiceEarns || []} columns={expenseInvoiceEarnColumns} isExpansible={false}
                             />
                             :
-                            <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns}
+                            <TableComponent key="invoices-gift" dataBase={expenses.invoices || []} columns={expenseInvoiceColumns}
                                 isExpansible={true}
                                 renderRow={(item, index) => (
-                                    item.invoiceItems.filter(item => item.type == 'GIFT').length > 0
+                                    (item.invoiceItems || []).filter(item => item.type == 'GIFT').length > 0
                                         ? (
-                                            <TableComponent dataBase={item.invoiceItems.filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
+                                            <TableComponent dataBase={(item.invoiceItems || []).filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
                                         ) :
                                         <div className="bg-white text-center w-full py-2 font-semibold">
                                             <p>Sin regalos</p>
