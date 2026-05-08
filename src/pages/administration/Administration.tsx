@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { InvoiceEarn, ProductPercentage } from "@/interfaces/adminitration.interface";
 import { useEffect, useMemo, useState } from "react";
-import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
+import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, expenseInvoiceEarnColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
@@ -36,13 +36,15 @@ const coffeeColors = {
 }
 
 type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
+type OptionInvoice = 'invoicesEarn' | 'invoicesGift';
 
 export const Administration = () => {
     const now = new Date();
 
     const [types, setTypes] = useState<ProductType[]>([]);
     const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
-    const [option, setOption] = useState<OptionAdministration>('earns')
+    const [option, setOption] = useState<OptionAdministration>('earns');
+    const [optionInvoice, setOptionInvoice] = useState<OptionInvoice>('invoicesGift');
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: new Date(now.getFullYear(), now.getMonth(), 1),
         to: now,
@@ -105,13 +107,16 @@ export const Administration = () => {
             .reduce((acc, item) => acc + Number(item.subtotal), 0);
         const totalPayments = expenses.payments.reduce((acc, pay) => acc + Number(pay.amountUSD), 0);
         const totalExpenses = totalInvoice + totalInvoiceDetails + totalPayments;
-        const totalEarnMonth = Number(expenses.invoicesEarns.totalEarnMonth);
+        const totalEarnMonth = Number(expenses.invoicesEarns.totalEarnRange);
+        const totalItemsEarnMonth = Number(expenses.invoicesEarns.quantityProducts.totalEarnRange);
+        const totalInvoiceEarns = Number(expenses.invoicesEarns.invoiceEarns.reduce((acc, item) => acc + Number(item.earn), 0));
 
         return {
             totals: {
                 totalInvoice: formatOnlyNumberWithDots(totalInvoice + totalInvoiceDetails),
                 totalInvoiceRemaining: formatOnlyNumberWithDots(totalInvoice),
                 totalInvoiceDetails: formatOnlyNumberWithDots(totalInvoiceDetails),
+                totalInvoiceEarns: formatOnlyNumberWithDots(totalInvoiceEarns),
                 totalPayments: formatOnlyNumberWithDots(totalPayments),
                 total: formatOnlyNumberWithDots(totalExpenses),
             },
@@ -126,7 +131,7 @@ export const Administration = () => {
                 {
                     title: 'Ganancias del Mes',
                     Icon: TrendingUp,
-                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$`,
+                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$ (${totalItemsEarnMonth})`,
                     subtitle: 'Ganancias',
                     classNameCard: 'text-green-800',
                 },
@@ -219,7 +224,7 @@ export const Administration = () => {
                                 </CardHeader>
                                 <CardContent>
                                     {expenses && (
-                                        <GananciasChart gains={expenses.invoicesEarns.invoiceEarns} />
+                                        <GananciasChart gains={expenses.invoicesEarns?.invoiceEarns || []} />
                                     )}
                                 </CardContent>
                             </Card>
@@ -235,7 +240,7 @@ export const Administration = () => {
                                             <div key={index} className="flex items-center justify-between text-[#6f4e37]">
                                                 <div className="flex items-center">
                                                     <PiCoffeeBeanFill className="h-4 w-4 mr-2 text-[#6f4e37]" />
-                                                    <span className="text-sm font-medium">{pro.name}</span>
+                                                    <span className="text-sm font-medium">{pro.name} {pro.presentation} ({pro.quantity})</span>
                                                 </div>
                                                 <span className="text-sm font-bold">{formatOnlyNumberWithDots(pro.percentage)}%</span>
                                             </div>
@@ -248,23 +253,38 @@ export const Administration = () => {
                 )}
                 {option == 'invoices' && expenses && (
                     <div>
-                        <div className="flex items-center justify-start gap-2">
-                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
-                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Restante:</span> {totals.totalInvoiceRemaining} $</p>
-                            <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Regalos:</span> {totals.totalInvoiceDetails} $</p>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
+                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Restante:</span> {totals.totalInvoiceRemaining} $</p>
+                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Regalos:</span> {totals.totalInvoiceDetails} $</p>
+                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Ganancias:</span> {totals.totalInvoiceEarns} $</p>
+                            </div>
+
+                            <div className="w-auto mb-2">
+                                <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
+                                    <Button className={`${optionInvoice !== 'invoicesEarn' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesEarn')}>Facturas</Button>
+                                    <Button className={`${optionInvoice !== 'invoicesGift' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesGift')}>Regalos</Button>
+                                </div>
+                            </div>
                         </div>
-                        <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns}
-                            isExpansible={true}
-                            renderRow={(item, index) => (
-                                item.invoiceItems.filter(item => item.type == 'GIFT').length > 0
-                                    ? (
-                                        <TableComponent dataBase={item.invoiceItems.filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
-                                    ) :
-                                    <div className="bg-white text-center w-full py-2 font-semibold">
-                                        <p>Sin regalos</p>
-                                    </div>
-                            )}
-                        />
+                        {optionInvoice == 'invoicesEarn' ?
+                            <TableComponent dataBase={expenses.invoicesEarns?.invoiceEarns || []} columns={expenseInvoiceEarnColumns} isExpansible={false}
+                            />
+                            :
+                            <TableComponent dataBase={expenses.invoices} columns={expenseInvoiceColumns}
+                                isExpansible={true}
+                                renderRow={(item, index) => (
+                                    item.invoiceItems.filter(item => item.type == 'GIFT').length > 0
+                                        ? (
+                                            <TableComponent dataBase={item.invoiceItems.filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
+                                        ) :
+                                        <div className="bg-white text-center w-full py-2 font-semibold">
+                                            <p>Sin regalos</p>
+                                        </div>
+                                )}
+                            />
+                        }
                     </div>
                 )}
                 {option == 'pay' && expenses && (

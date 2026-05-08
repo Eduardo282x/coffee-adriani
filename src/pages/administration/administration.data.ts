@@ -1,5 +1,6 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters";
+import { InvoiceEarn } from "@/interfaces/adminitration.interface";
 import { IInvoice, InvoiceItems } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
 
@@ -7,6 +8,7 @@ export interface ITotals {
     totalInvoice: string;
     totalInvoiceRemaining: string;
     totalInvoiceDetails: string;
+    totalInvoiceEarns: string;
     totalPayments: string,
     total: string
 }
@@ -15,6 +17,7 @@ export const baseTotals: ITotals = {
     totalInvoice: '0',
     totalInvoiceRemaining: '0',
     totalInvoiceDetails: '0',
+    totalInvoiceEarns: '0',
     totalPayments: '0',
     total: '0'
 };
@@ -90,7 +93,7 @@ export const expenseInvoiceColumns: IColumns<IInvoice>[] = [
     {
         label: 'Regalos',
         column: 'gifts',
-        element: (data: IInvoice) => data.invoiceItems.filter(item => item.type == 'GIFT').reduce((acc, item) => acc + item.quantity, 0),
+        element: (data: IInvoice) => data.invoiceItems.filter(item => item.type == 'GIFT').reduce((acc, item) => acc + Number(item.quantity), 0),
         orderBy: '',
         type: 'string',
         icon: false,
@@ -189,4 +192,39 @@ export const expendePaymentsNoAssociatedColumns: IColumns<IPayments>[] = [
         type: 'string',
         icon: false,
     }
+];
+
+export const expenseInvoiceEarnColumns: IColumns<InvoiceEarn>[] = [
+    {
+        label: 'Factura',
+        column: 'controlNumber',
+        element: (data: InvoiceEarn) => data.controlNumber,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Cliente',
+        column: 'client.name',
+        element: (data: InvoiceEarn) => typeof data.client === 'string' ? data.client : data.client?.name ?? '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Ganancia',
+        column: 'earn',
+        element: (data: InvoiceEarn) => formatNumberWithDots(Number(data.earn).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    // {
+    //     label: 'Regalos',
+    //     column: 'gifts',
+    //     element: (data: InvoiceEarn) => data.invoiceItems.filter(item => item.type == 'GIFT').reduce((acc, item) => acc + Number(item.quantity), 0),
+    //     orderBy: '',
+    //     type: 'string',
+    //     icon: false,
+    // },
 ];
