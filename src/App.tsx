@@ -23,6 +23,7 @@ import { Collections } from './pages/collections/Collections';
 import { Profile } from './pages/profile/Profile';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Enterprise } from './pages/enterprise/Enterprise';
 // import { Analytics } from "@vercel/analytics/next"
 
 function AxiosInterceptorProvider() {
@@ -72,6 +73,7 @@ function App() {
               <Route path="/administracion" element={<Administration />} />
               <Route path="/cobranza" element={<Collections />} />
               <Route path="/pagos" element={<Payments />} />
+              <Route path="/empresa" element={<Enterprise />} />
               <Route path="/cuentas-pago" element={<Accounts />} />
               <Route path="/perfil" element={<Profile />} />
               <Route path="*" element={<Navigate to="/"  replace/>} />

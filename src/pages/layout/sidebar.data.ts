@@ -1,5 +1,6 @@
 import { BarChart3, Users, FileText, Package, User } from "lucide-react"
 import { BsCash } from "react-icons/bs";
+import { FaBuilding } from "react-icons/fa6";
 import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md";
 import { RiAdminLine } from "react-icons/ri";
 
@@ -24,6 +25,11 @@ export const menuItems = [
         title: "Pagos",
         icon: BsCash ,
         href: "/pagos",
+    },
+    {
+        title: "Empresa",
+        icon: FaBuilding  ,
+        href: "/empresa",
     },
     {
         title: "Cuentas de pago",

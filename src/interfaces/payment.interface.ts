@@ -168,3 +168,51 @@ export interface PaymentStatisticsResponse {
 export interface PaymentMutationResponse extends BaseResponse {
     data: IPayments;
 }
+
+// Enterprise Payment Interfaces
+export interface IPaymentEnterpriseItems {
+    id?: number;
+    productId: number;
+    quantity: number;
+    price: number;
+    product?: {
+        id: number;
+        name: string;
+        presentation: string;
+        type: string;
+    };
+}
+
+export interface IPaymentEnterprise {
+    id: number;
+    amount: string;
+    paymentDate: Date;
+    currency: string;
+    quantity: string;
+    description: string;
+    controlNumber: string;
+    items: IPaymentEnterpriseItems[];
+    dolar: string;
+    total: string;
+}
+
+export interface PaymentEnterpriseForm {
+    amount: number;
+    paymentDate: Date;
+    currency: string;
+    description: string;
+    controlNumber: string;
+    items: IPaymentEnterpriseItems[];
+}
+
+export interface PaginatedPaymentEnterpriseResponse {
+    paymentEnterprise: IPaymentEnterprise[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalCount: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+    };
+}

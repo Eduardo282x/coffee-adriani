@@ -156,14 +156,6 @@ export const inventoryColumnDetailHistory: IColumns<DetailHistory>[] = [
         type: 'string',
         icon: false,
     },
-    // {
-    //     column: 'price',
-    //     label: 'Precio',
-    //     element: (data: DetailHistory) => `${formatOnlyNumberWithDots(data.priceBs)} Bs`,
-    //     orderBy: '',
-    //     type: 'string',
-    //     icon: false,
-    // },
     {
         column: 'quantity',
         label: 'Cantidad',

@@ -1,4 +1,4 @@
-import { IPaymentForm, IPayInvoiceForm, PayDisassociateBody, PaymentMutationResponse } from "@/interfaces/payment.interface";
+import { IPaymentForm, IPayInvoiceForm, PayDisassociateBody, PaymentMutationResponse, PaymentEnterpriseForm } from "@/interfaces/payment.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 import { DateRangeFilter } from "@/interfaces/invoice.interface";
 import { AccountForm } from "@/pages/accounts/accounts.data";
@@ -178,6 +178,57 @@ export const putConfirmPayment = async (id: number) => {
 export const deletePayment = async (id: number) => {
     try {
         return await deleteDataApi(`${routePayment}/${id}`);
+    } catch (err) {
+        return err
+    }
+}
+
+//Payment Enterprise
+export interface FilterPaymentEnterprise {
+    page: number;
+    limit: number;
+    startDate?: string;
+    endDate?: string;
+    controlNumber?: string;
+    type?: string;
+}
+
+export const getPaymentsEnterprise = async (filters: FilterPaymentEnterprise) => {
+    try {
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filters).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+        return await getDataApi(`${routePayment}/enterprise?${query}`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const createPaymentsEnterprise = async (data: PaymentEnterpriseForm) => {
+    try {
+        return await postDataApi(`${routePayment}/enterprise`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const updatePaymentsEnterprise = async (id: number, data: PaymentEnterpriseForm) => {
+    try {
+        return await putDataApi(`${routePayment}/enterprise/${id}`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const deletePaymentsEnterprise = async (id: number) => {
+    try {
+        return await deleteDataApi(`${routePayment}/enterprise/${id}`);
     } catch (err) {
         return err
     }
