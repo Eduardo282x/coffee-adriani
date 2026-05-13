@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label';
-import { BodyInventory, BodyInventorySimple } from '@/interfaces/inventory.interface'
+import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory } from '@/interfaces/inventory.interface'
 import { Form } from '@/components/ui/form'
 import { DatePicker } from '@/components/datepicker/DatePicker'
 import { Autocomplete } from '@/components/autocomplete/Autocomplete'
@@ -17,7 +17,6 @@ interface InventoryFormProps extends FromProps {
     productOptions: IOptions[]
     products: IProducts[]
 }
-
 export interface ProductTable {
     id: number;
     name: string;
@@ -25,7 +24,7 @@ export interface ProductTable {
     quantity: number;
 }
 
-export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, productOptions, products, data }) => {
+export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, productOptions, products }) => {
     // const isEdit = data.productId !== 0 ? true : false;
     const [entryDate, setEntryDate] = useState<Date | undefined>(new Date());
     const [productsSelected, setProductsSelected] = useState<ProductTable[]>([]);
@@ -39,7 +38,10 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, productOptions
         },
     });
 
-    console.log(data);
+    const onChangeDateForm = (date: Date | undefined) => {
+        setEntryDate(date);
+        formAddInventory.setValue('date', date ? date : new Date());
+    }
 
     const onSubmitInventory = (formData: BodyInventory) => {
         const dataToSubmit = {
@@ -52,22 +54,6 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, productOptions
 
         onSubmit(dataToSubmit);
     }
-
-
-    // useEffect(() => {
-    //     if (data) {
-    //         setTimeout(() => {
-    //             form.reset({
-    //                 productId: data.productId,
-    //                 date: data.date
-    //             })
-    //         }, 0);
-    //     }
-    // }, [data, products])
-
-    // useEffect(() => {
-    //     formAddInventory.setValue('date', entryDate);
-    // }, [entryDate])
 
     const selectProduct = (data: string) => {
         const selectedProductData = products.find((pro) => pro.id === Number(data));
@@ -135,7 +121,7 @@ export const InventoryForm: FC<InventoryFormProps> = ({ onSubmit, productOptions
                 <DatePicker
                     label='Fecha de ingreso'
                     date={entryDate}
-                    setDate={setEntryDate}
+                    setDate={onChangeDateForm}
                     maxDate={undefined}
                     minDate={undefined}
                 />
@@ -187,6 +173,59 @@ export const InventoryFormUpdate: FC<InventoryFormProps> = ({ onSubmit, productO
                     </Label>
                     <Input type='number' min={0} {...formInventoryUpdate.register('quantity', { valueAsNumber: true })} />
                 </div>
+
+                <div className='w-full flex items-center justify-center'>
+                    <Button type='submit' variant='primary' className='w-40' >Enviar</Button>
+                </div>
+            </form>
+        </Form>
+    )
+}
+
+export const HistoryInventoryFormUpdate: FC<FromProps> = ({ onSubmit, data }) => {
+    const [entryDate, setEntryDate] = useState<Date | undefined>(new Date());
+    const formHistoryInventoryUpdate = useForm<BodyUpdateHistoryInventory>({
+        defaultValues: {
+            controlNumberOld: '',
+            controlNumber: '',
+            date: new Date(),
+        },
+    });
+
+    const onChangeDateForm = (date: Date | undefined) => {
+        setEntryDate(date);
+        formHistoryInventoryUpdate.setValue('date', date ? date : new Date());
+    }
+
+    useEffect(() => {
+        if (data) {
+            setTimeout(() => {
+                formHistoryInventoryUpdate.reset({
+                    controlNumberOld: data.controlNumber,
+                    controlNumber: data.controlNumber,
+                    date: data.date ? new Date(data.date) : new Date(),
+                })
+                setEntryDate(data.date ? new Date(data.date) : new Date());
+            }, 0);
+        }
+    }, [data])
+
+    return (
+        <Form {...formHistoryInventoryUpdate}>
+            <form onSubmit={formHistoryInventoryUpdate.handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full py-4">
+                <div className="space-y-4 w-full">
+                    <Label className="text-right w-full">
+                        Numero de control
+                    </Label>
+                    <Input className="w-full" {...formHistoryInventoryUpdate.register('controlNumber')} />
+                </div>
+                <DatePicker
+                    label='Fecha de ingreso'
+                    date={entryDate}
+                    setDate={onChangeDateForm}
+                    maxDate={undefined}
+                    minDate={undefined}
+                />
 
                 <div className='w-full flex items-center justify-center'>
                     <Button type='submit' variant='primary' className='w-40' >Enviar</Button>

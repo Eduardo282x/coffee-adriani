@@ -1,10 +1,17 @@
 export const formatDate = (dateToFormat: string | Date | number): string => {
+    if (typeof dateToFormat === 'string' && !dateToFormat.includes('T')) {
+        const date = dateToFormat.toString().replace(/-/g, '/');
+        const reverseDate = date.split("/").reverse().join("/");
+        return `${reverseDate}`;
+    }
+
     const date = new Date(dateToFormat);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan desde 0
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;
+
 }
 
 export const formatDateTime = (dateToFormat: string | Date): string => {
@@ -22,7 +29,7 @@ export const formatDateTime = (dateToFormat: string | Date): string => {
 export const formatDateWithDateTime = (dateToFormat: string | Date): string => {
     const date = new Date(dateToFormat);
     const getTime = dateToFormat.toString().split('T')[1];
-    let hours = Number(getTime.slice(0,2));
+    let hours = Number(getTime.slice(0, 2));
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const day = String(date.getDate()).padStart(2, '0');

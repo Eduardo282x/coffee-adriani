@@ -1,4 +1,4 @@
-import { BodyInventory, BodyInventorySimple } from "@/interfaces/inventory.interface";
+import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory } from "@/interfaces/inventory.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInventory = '/inventory';
@@ -58,6 +58,14 @@ export const putInventory = async (id: number, data: BodyInventorySimple) => {
 export const deleteInventory = async (id: number,) => {
     try {
         return await deleteDataApi(`${routeInventory}/${id}`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const putInventoryHistory = async (data: BodyUpdateHistoryInventory) => {
+    try {
+        return await putDataApi(`${routeInventory}/history`, data);
     } catch (err) {
         return err
     }

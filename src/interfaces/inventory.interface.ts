@@ -24,6 +24,12 @@ export interface BodyInventorySimple extends DetailInventory{
     description?: string;
 }
 
+export interface BodyUpdateHistoryInventory{
+    controlNumberOld: string;
+    controlNumber: string;
+    date: Date;
+}
+
 export interface BodyInventory {
     controlNumber: string;
     date: Date;

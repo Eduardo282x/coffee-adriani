@@ -32,6 +32,7 @@ interface FilterGroupsProps {
     setDateStart: (date: DateRange | undefined) => void;
     setDateEnd: (date: DateRange | undefined) => void;
     selectedBlock?: string;
+    selectedStatus?: string;
     selectedZone?: string;
     selectedTypeProduct?: string;
 }
@@ -50,6 +51,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     // invoice,
     clientColumns,
     selectedBlock,
+    selectedStatus,
     selectedZone,
     selectedTypeProduct
 }) => {
@@ -74,6 +76,7 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                     setDateStart={setDateStart}
                     setDateEnd={setDateEnd}
                     selectedZone={selectedZone}
+                    selectedStatus={selectedStatus}
                     selectedBlock={selectedBlock}
                     selectedTypeProduct={selectedTypeProduct}
                 />
@@ -95,6 +98,7 @@ const FiltersGroups = ({
     setDateStart,
     setDateEnd,
     selectedZone,
+    selectedStatus,
     selectedBlock,
     selectedTypeProduct
 }: FilterGroupsProps) => {
@@ -130,7 +134,7 @@ const FiltersGroups = ({
 
             <div className="w-full">
                 <Label className="mb-2">Estado Factura</Label>
-                <Select onValueChange={handleChangeStatusInvoice}>
+                <Select onValueChange={handleChangeStatusInvoice} value={selectedStatus}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Estado Factura" />
                     </SelectTrigger>

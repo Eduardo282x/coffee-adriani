@@ -94,6 +94,17 @@ export const inventoryColumnsHistory: IColumns<History>[] = [
         type: 'string',
         icon: false,
     },
+    {
+        column: '',
+        label: 'Editar',
+        element: () => '',
+        orderBy: '',
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Editar', icon: MdEdit, className: 'text-[#6f4e37]' },
+        ]
+    },
 ]
 
 const setTranslateColumn = (data: History): string => {
