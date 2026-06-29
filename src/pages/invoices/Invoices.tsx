@@ -32,7 +32,7 @@ export const InvoicesPage = () => {
 
     const inventory = useMemo<GroupInventoryDate>(() => {
         const parseInventory = inventoryList.map((inv) => ({
-            label: `${inv.product.name} - ${inv.product.presentation}`,
+            label: `${inv.product.name} ${inv.product.presentation} - ${inv.product.priceUSD}$`,
             value: inv.id
         }));
         return { allInventory: inventoryList, inventory: parseInventory };
