@@ -1,4 +1,4 @@
-import { DateRangeFilter, IInvoiceForm, InvoiceAPINew, InvoiceStatus } from "@/interfaces/invoice.interface";
+import { DateRangeFilter, ExportDashboard, IInvoiceForm, InvoiceAPINew, InvoiceStatus } from "@/interfaces/invoice.interface";
 import { deleteDataApi, getDataApi, postDataApi, postDataFileApi, putDataApi } from "./base.service";
 import { BaseResponse } from "./base.interface";
 
@@ -112,7 +112,7 @@ export const getInvoiceFilter = async (filter: DateRangeFilter) => {
     }
 }
 
-export const getInvoiceExcelFilter = async (filter?: DateRangeFilter) => {
+export const getInvoiceExcelFilter = async (filter: ExportDashboard) => {
     try {
         return await postDataFileApi(`${routeInvoice}/export`, filter);
     } catch (err) {
