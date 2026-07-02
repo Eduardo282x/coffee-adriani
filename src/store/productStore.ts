@@ -29,7 +29,7 @@ export const productStore = create<ProductState>((set) => ({
             set(() => ({
                 productOptions: response.map(pro => {
                     return {
-                        label: `${pro.name} ${pro.presentation}`,
+                        label: `${pro.name} ${pro.presentation} - ${pro.priceUSD}$`,
                         value: pro.id
                     }
                 }),
