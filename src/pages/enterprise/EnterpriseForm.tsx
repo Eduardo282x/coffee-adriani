@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Autocomplete } from "@/components/autocomplete/Autocomplete";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Input } from "@/components/ui/input";
@@ -10,61 +9,84 @@ import { FromProps, IOptions } from "@/interfaces/form.interface";
 import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
-import { IPaymentEnterprise, IPaymentEnterpriseItems } from "@/interfaces/payment.interface";
+import { IInventoryEntry } from "@/interfaces/inventory.interface";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IProducts } from "@/interfaces/product.interface";
+import { ISupplier } from "@/interfaces/inventory.interface";
+import { EnterpriseItem } from "./enterprise.data";
+import { FormSelect } from "@/components/form/FormSelect";
+import { useForm } from "react-hook-form";
+import { Form } from "@/components/ui/form";
+
+interface IEnterpriseForm {
+    controlNumber: string;
+    description: string;
+    supplierId: string;
+    entryDate: Date;
+}
 
 interface EnterpriseFormProps extends FromProps {
-    data?: IPaymentEnterprise | null;
+    data?: IInventoryEntry | null;
     productOptions: IOptions[];
-    products: IProducts[]
+    products: IProducts[];
+    suppliers: ISupplier[];
 }
 
-interface EnterpriseItem extends IPaymentEnterpriseItems {
-    productName?: string;
-    presentation?: string;
-    subtotal?: number;
-}
-
-export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, productOptions, products }) => {
-    const [controlNumber, setControlNumber] = useState<string>('');
-    const [paymentDate, setPaymentDate] = useState<Date | undefined>(new Date());
-    const [currency, setCurrency] = useState<string>('USD');
-    const [amount, setAmount] = useState<number>(0);
-    const [description, setDescription] = useState<string>('');
+export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, productOptions, products, suppliers }) => {
     const [items, setItems] = useState<EnterpriseItem[]>([]);
     const [total, setTotal] = useState<number>(0);
 
+    const suppliersOptions = suppliers.map((supplier) => ({
+        label: supplier.name,
+        value: supplier.id.toString()
+    }));
+
+    const form = useForm<IEnterpriseForm>({
+        defaultValues: {
+            controlNumber: '',
+            description: '',
+            supplierId: '',
+            entryDate: new Date(),
+        }
+    });
+
+    const entryDate = form.watch('entryDate');
+
     useEffect(() => {
         if (data) {
-            setControlNumber(data.controlNumber);
-            setPaymentDate(new Date(data.paymentDate));
-            setCurrency(data.currency);
-            setAmount(Number(data.amount));
-            setDescription(data.description);
+            form.reset({
+                controlNumber: data.controlNumber,
+                description: data.description || '',
+                supplierId: data.supplier?.id?.toString() || '',
+                entryDate: new Date(data.date),
+            });
 
-            const mappedItems = data.items.map(item => ({
-                ...item,
-                productName: item.product?.name || '',
-                presentation: item.product?.presentation || '',
-                subtotal: item.quantity * item.price
+            const mappedItems = data.details.map(detail => ({
+                productId: detail.productId,
+                productName: detail.product?.name || '',
+                presentation: detail.product?.presentation || '',
+                quantity: detail.quantity,
+                unitPrice: detail.unitPrice,
+                unitPriceUSD: detail.unitPriceUSD,
+                subtotal: Number(detail.subtotal)
             }));
             setItems(mappedItems);
         }
-    }, [data]);
+    }, [data, form]);
 
     const selectProduct = (data: string) => {
         const selectedProductData = products.find((pro) => pro.id === Number(data));
         if (selectedProductData) {
-            const selectedProduct = items.find((inv) => inv.id === selectedProductData.id);
+            const selectedProduct = items.find((inv) => inv.productId === selectedProductData.id);
             if (!selectedProduct) {
                 setItems((prev) => [...prev, {
+                    productId: selectedProductData.id,
                     productName: selectedProductData.name,
                     presentation: selectedProductData.presentation,
-                    subtotal: Number(selectedProductData.purchasePrice),
-                    price: selectedProductData.purchasePrice,
                     quantity: 1,
-                    productId: selectedProductData.id
+                    unitPrice: Number(selectedProductData.purchasePrice),
+                    unitPriceUSD: Number(selectedProductData.purchasePriceUSD),
+                    subtotal: Number(selectedProductData.purchasePriceUSD)
                 }])
             }
         }
@@ -74,7 +96,7 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
         if (action === 'editable') {
             setItems(prev => prev.map(item => {
                 if (item.productId === itemData.productId) {
-                    const subtotal = itemData.quantity * itemData.price;
+                    const subtotal = itemData.quantity * itemData.unitPriceUSD;
                     return { ...itemData, subtotal };
                 }
                 return item;
@@ -86,15 +108,7 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
         }
     };
 
-    const onSubmitForm = () => {
-        if (controlNumber === '') {
-            toast.custom(<Snackbar success={false} message={"Por favor, complete el número de control"} />, {
-                duration: 1500,
-                position: 'bottom-center'
-            });
-            return;
-        }
-
+    const onSubmitForm = (formData: IEnterpriseForm) => {
         if (items.length === 0) {
             toast.custom(<Snackbar success={false} message={"Por favor, agregue al menos un producto"} />, {
                 duration: 1500,
@@ -104,15 +118,15 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
         }
 
         const body = {
-            amount: Number(amount),
-            paymentDate: paymentDate,
-            currency: currency,
-            description: description,
-            controlNumber: controlNumber,
-            items: items.map(item => ({
+            controlNumber: formData.controlNumber,
+            description: formData.description,
+            date: formData.entryDate,
+            supplierId: Number(formData.supplierId),
+            details: items.map(item => ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
-                price: Number(item.price)
+                unitPrice: Number(item.unitPrice),
+                unitPriceUSD: Number(item.unitPriceUSD)
             }))
         };
 
@@ -127,92 +141,66 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
     }, [items]);
 
     return (
-        <div className="">
-            <div className="grid grid-cols-2 gap-4 w-full py-4">
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label className="text-right">
-                        Número de Control
-                    </Label>
-                    <Input
-                        className="w-full"
-                        value={controlNumber}
-                        onChange={(e) => setControlNumber(e.target.value)}
-                        placeholder="Ingrese el número de control"
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmitForm)} className="w-full py-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex flex-col items-start justify-start gap-2">
+                        <Label className="text-right">
+                            Número de Control
+                        </Label>
+                        <Input {...form.register('controlNumber')} />
+                    </div>
+
+                    <div className="flex flex-col items-start justify-start gap-2">
+                        <Label className="text-right">
+                            Descripción
+                        </Label>
+                        <Input {...form.register('description')} />
+                    </div>
+
+                    <div className="flex flex-col items-start justify-start gap-2">
+                        <FormSelect
+                            form={form}
+                            name='supplierId'
+                            label='Proveedor'
+                            placeholder='Seleccione un proveedor'
+                            options={suppliersOptions}></FormSelect>
+                    </div>
+
+                    <div className="flex flex-col items-start justify-start gap-2">
+                        <Label className="text-right">
+                            Producto
+                        </Label>
+                        <Autocomplete
+                            placeholder="Seleccione un producto"
+                            data={productOptions}
+                            onChange={selectProduct}
+                        />
+                    </div>
+
+                    <DatePicker
+                        date={entryDate}
+                        setDate={(date) => form.setValue('entryDate', date || new Date())}
+                        label="Fecha de Entrada"
+                        maxDate={new Date()}
+                        minDate={new Date(2000, 0, 1)}
                     />
                 </div>
 
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label className="text-right">
-                        Descripción
-                    </Label>
-                    <Input
-                        className="w-full"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Ingrese una descripción"
-                    />
-                </div>
-
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label className="text-right">
-                        Cantidad de pago
-                    </Label>
-                    <Input
-                        className="w-full"
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(Number(e.target.value))}
-                        placeholder="Ingrese la cantidad de pago"
-                    />
-                </div>
-
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label className="text-right">
-                        Moneda
-                    </Label>
-                    <select
-                        className="w-full p-2 border rounded"
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                    >
-                        <option value="USD">Dólares (USD)</option>
-                        <option value="BS">Bolívares (BS)</option>
-                    </select>
-                </div>
-
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label className="text-right">
-                        Producto
-                    </Label>
-                    <Autocomplete
-                        placeholder="Seleccione un producto"
-                        data={productOptions}
-                        onChange={selectProduct}
-                    />
-                </div>
-
-                <DatePicker
-                    setDate={setPaymentDate}
-                    date={paymentDate}
-                    label="Fecha de Pago"
-                    maxDate={new Date()}
-                    minDate={new Date(2000, 0, 1)}
+                <TableComponent
+                    columns={enterpriseItemColumns}
+                    total={formatOnlyNumberWithDots(total.toString())}
+                    dataBase={items}
+                    action={changeDataTable}
+                    includeFooter={true}
                 />
-            </div>
 
-            <TableComponent
-                columns={enterpriseItemColumns}
-                total={formatOnlyNumberWithDots(total.toString())}
-                dataBase={items}
-                action={changeDataTable}
-                includeFooter={true}
-            />
-
-            <div className="flex items-center justify-end mt-4">
-                <Button disabled={items.length === 0} onClick={onSubmitForm}>
-                    Guardar Pago Empresarial
-                </Button>
-            </div>
-        </div>
+                <div className="col-span-2 flex items-center justify-end mt-4">
+                    <Button disabled={items.length === 0} type="submit">
+                        Guardar Entrada
+                    </Button>
+                </div>
+            </form>
+        </Form>
     );
 };

@@ -2,14 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { inventoryColumnDetailHistory, inventoryColumns, inventoryColumnsHistory } from "./inventory.data";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TableComponent } from "@/components/table/TableComponent";
-import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface";
-import { postInventory, putInventory, putInventoryHistory } from "@/services/inventory.service";
+import { BodyInventory, BodyInventorySimple, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface";
+import { postInventory, putInventory } from "@/services/inventory.service";
 import { Filter } from "@/components/table/Filter";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Package, Plus } from "lucide-react";
 import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { DialogComponent } from "@/components/dialog/DialogComponent";
-import { HistoryInventoryFormUpdate, InventoryForm, InventoryFormUpdate } from "./InventoryForm";
+import { InventoryForm, InventoryFormUpdate } from "./InventoryForm";
 import { InventoryCards } from "./InventoryCards";
 import { useSocket } from "@/services/socket.io";
 import { productStore } from "@/store/productStore";
@@ -21,13 +21,12 @@ import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
-import { History } from "@/interfaces/inventory.interface";
+import { IInventoryEntry } from "@/interfaces/inventory.interface";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogUpdate, setOpenDialogUpdate] = useState<boolean>(false);
-    const [openDialogUpdateHistory, setOpenDialogUpdateHistory] = useState<boolean>(false);
 
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
     const [history, setHistory] = useState<boolean>(false);
@@ -38,7 +37,6 @@ export const Inventory = () => {
         quantity: 0
     });
     const [inventorySelected, setInventorySelected] = useState<IInventory | null>(null);
-    const [inventorySelectedHistory, setInventorySelectedHistory] = useState<History | null>(null);
 
     const {
         inventory,
@@ -46,7 +44,7 @@ export const Inventory = () => {
         isLoading,
         refetchInventory,
 
-        inventoryHistory,
+        inventoryEntries,
         refetchInventoryHistory,
         typeProduct,
         setTypeProduct,
@@ -84,7 +82,6 @@ export const Inventory = () => {
     useEffect(() => {
         const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)
         const totalMoney: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + ((item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity) * item.product.price), 0);
-        // const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + item.quantity, 0)
         const down: number = inventory.filter(inv => inv.product.type == typeProduct).filter(pro => pro.quantity < (total * 0.30)).length;
         const zero: number = inventory.filter(inv => inv.product.type == typeProduct).filter(pro => pro.quantity === 0).length;
         setResumen({ totalProducts: total, totalMoney: totalMoney, downProducts: down, zeroProducts: zero })
@@ -125,13 +122,6 @@ export const Inventory = () => {
         await refetchInventoryHistory();
     }
 
-    const actionDialogHistoryUpdate = async (data: BodyUpdateHistoryInventory) => {
-        await putInventoryHistory(data);
-        setOpenDialogUpdateHistory(false);
-        await refetchInventory();
-        await refetchInventoryHistory();
-    }
-
     const newElement = () => {
         setOpenDialog(true);
     }
@@ -146,13 +136,9 @@ export const Inventory = () => {
         }, 0);
     }
 
-    const getActionHistory = (action: string, data: History) => {
-        if (action == 'Editar') {
-            setInventorySelectedHistory(data);
-        }
-        setTimeout(() => {
-            setOpenDialogUpdateHistory(true);
-        }, 0);
+    const getActionHistory = (_action: string, data: IInventoryEntry) => {
+        // History edit not implemented for new entries system
+        console.log('Edit entry:', data);
     }
 
     const handleSocketMessage = useCallback(async (data: unknown) => {
@@ -276,13 +262,13 @@ export const Inventory = () => {
                         <TableComponent
                             key="inventory-history"
                             columns={inventoryColumnsHistory}
-                            dataBase={inventoryHistory}
+                            dataBase={inventoryEntries}
                             isExpansible={true}
                             action={getActionHistory}
                             renderRow={
-                                (details) => (
+                                (entry) => (
                                     <TableComponent
-                                        dataBase={details.details}
+                                        dataBase={entry.details}
                                         columns={inventoryColumnDetailHistory}>
                                     </TableComponent>
                                 )
@@ -315,20 +301,7 @@ export const Inventory = () => {
                 >
                     <InventoryFormUpdate onSubmit={actionDialogUpdate} productOptions={productOptions} products={products.products} data={dataForm}></InventoryFormUpdate>
                 </DialogComponent>
-
-                <DialogComponent
-                    open={openDialogUpdateHistory}
-                    setOpen={setOpenDialogUpdateHistory}
-                    className="w-120"
-                    label2="Actualizar Historial de Inventario"
-                    label1="Actualizar Historial de Inventario"
-                    isEdit={false}
-
-                >
-                    <HistoryInventoryFormUpdate onSubmit={actionDialogHistoryUpdate} data={inventorySelectedHistory}></HistoryInventoryFormUpdate>
-                </DialogComponent>
             </main>
         </div>
     )
 }
-

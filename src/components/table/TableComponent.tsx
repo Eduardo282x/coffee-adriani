@@ -161,7 +161,7 @@ export const TableComponent = <T,>({
                 ))}
             </div>
 
-            {(!hidePaginator && dataBase.length >= 5) && (
+            {(!hidePaginator && dataBase && dataBase.length >= 5) && (
                 <Paginator
                     page={page}
                     rowsPerPage={rowsPerPage}
@@ -291,7 +291,7 @@ const TableRowExpansible = <T,>({ index, columns, data, action, renderRow }: Tab
                     <div
                         className={`transition-all duration-300 ease-in-out w-full ${open ? 'h-auto px-4 py-2' : '!h-0'} interpolate overflow-hidden`}
                     >
-                        <p>{renderRow && renderRow(data, index)}</p>
+                        <div>{renderRow && renderRow(data, index)}</div>
                     </div>
                 </TableCell>
             </TableRow>

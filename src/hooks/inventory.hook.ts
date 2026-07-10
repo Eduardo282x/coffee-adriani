@@ -1,20 +1,20 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getInventory, getInventoryHistory, InventoryHistoryFilter } from '@/services/inventory.service';
-import { History, IInventory, InventoryHistory } from '@/interfaces/inventory.interface';
+import { getInventory, getInventoryEntries, InventoryHistoryFilter } from '@/services/inventory.service';
+import { IInventory, IInventoryEntry, PaginatedEntryResponse } from '@/interfaces/inventory.interface';
 import { useCallback, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 
 const EMPTY_INVENTORY: IInventory[] = [];
 
-const EMPTY_HISTORY: InventoryHistory = {
-    history: [],
+const EMPTY_ENTRIES: PaginatedEntryResponse = {
+    entries: [],
     pagination: {
-        total: 0,
         page: 1,
         limit: 50,
+        totalCount: 0,
         totalPages: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
+        hasNext: false,
+        hasPrev: false,
     },
 };
 
@@ -56,14 +56,14 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
     });
 
     const {
-        data: inventoryHistoryPages,
+        data: inventoryEntriesPages,
         isLoading: isLoadingInventoryHistory,
         refetch: refetchInventoryHistory,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
     } = useInfiniteQuery({
-        queryKey: ['inventory-history', typeProduct, movementType, dateRange, controlNumber, historyFilter.limit],
+        queryKey: ['inventory-entries', typeProduct, movementType, dateRange, controlNumber, historyFilter.limit],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InventoryHistoryFilter = {
@@ -78,23 +78,23 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
                 ...(movementType && movementType !== 'ALL' && { typeMovement: movementType }),
             };
 
-            return getInventoryHistory(params) as Promise<InventoryHistory>;
+            return getInventoryEntries(params) as Promise<PaginatedEntryResponse>;
         },
         getNextPageParam: (lastPage) => {
-            return lastPage.pagination.hasNextPage ? lastPage.pagination.page + 1 : undefined;
+            return lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined;
         },
         enabled: enableHistory,
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
     });
 
-    const inventoryHistory = useMemo<History[]>(() => {
-        if (!inventoryHistoryPages?.pages?.length) return [];
+    const inventoryEntries = useMemo<IInventoryEntry[]>(() => {
+        if (!inventoryEntriesPages?.pages?.length) return [];
 
-        return inventoryHistoryPages.pages.flatMap((page) => page.history);
-    }, [inventoryHistoryPages]);
+        return inventoryEntriesPages.pages.flatMap((page) => page.entries);
+    }, [inventoryEntriesPages]);
 
-    const inventoryHistoryPagination = inventoryHistoryPages?.pages?.[inventoryHistoryPages.pages.length - 1]?.pagination ?? EMPTY_HISTORY.pagination;
+    const inventoryHistoryPagination = inventoryEntriesPages?.pages?.[inventoryEntriesPages.pages.length - 1]?.pagination ?? EMPTY_ENTRIES.pagination;
 
     const applyHistoryFilter = useCallback((next: Partial<InventoryHistoryFilter>) => {
         setHistoryFilter((prev) => ({ ...prev, ...next, page: 1 }));
@@ -108,12 +108,12 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
 
     const invalidateInventory = async () => {
         await queryClient.invalidateQueries({ queryKey: ['inventory'] });
-        await queryClient.invalidateQueries({ queryKey: ['inventory-history'] });
+        await queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
     };
 
     return {
         inventory: inventoryData ?? EMPTY_INVENTORY,
-        inventoryHistory,
+        inventoryEntries,
         inventoryHistoryPagination,
         historyFilter,
         applyHistoryFilter,

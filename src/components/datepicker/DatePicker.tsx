@@ -46,7 +46,7 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
                         captionLayout="dropdown"
                         startMonth={minDate}
                         endMonth={maxDate}
-                        hidden={[{ before: new Date(minDate as Date), after: new Date(maxDate as Date) }]}
+                        hidden={[{ before: new Date(minDate as Date) }]}
                     />
                 </PopoverContent>
             </Popover>

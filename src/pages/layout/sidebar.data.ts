@@ -1,4 +1,4 @@
-import { BarChart3, Users, FileText, Package, User } from "lucide-react"
+import { BarChart3, Users, FileText, Package, User, Truck } from "lucide-react"
 import { BsCash } from "react-icons/bs";
 import { FaBuilding } from "react-icons/fa6";
 import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md";
@@ -45,6 +45,11 @@ export const menuItems = [
         title: "Inventario",
         icon: MdOutlineInventory2 ,
         href: "/inventario",
+    },
+    {
+        title: "Proveedores",
+        icon: Truck,
+        href: "/proveedores",
     },
     // {
     //     title: "Ventas",
