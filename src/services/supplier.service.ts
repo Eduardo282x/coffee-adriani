@@ -1,4 +1,4 @@
-import { BodySupplier, Supplier } from "@/interfaces/supplier.interface";
+import { BodySupplier, SupplierResponse } from "@/interfaces/supplier.interface";
 import { BaseResponse } from "./base.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
@@ -10,16 +10,16 @@ export interface SupplierFilterPaginate {
     search?: string;
 }
 
-export const getSuppliers = async (): Promise<Supplier | null> => {
+export const getSuppliers = async (): Promise<SupplierResponse> => {
     try {
         return await getDataApi(routeSupplier);
     } catch (err) {
         console.error('Error fetching suppliers:', err);
-        return null;
+        throw err;
     }
 }
 
-export const getSuppliersPaginated = async (filters: SupplierFilterPaginate): Promise<Supplier | null> => {
+export const getSuppliersPaginated = async (filters: SupplierFilterPaginate): Promise<SupplierResponse> => {
     try {
         const cleanFilters = Object.fromEntries(
             Object.entries(filters).filter(([, value]) =>
@@ -34,7 +34,7 @@ export const getSuppliersPaginated = async (filters: SupplierFilterPaginate): Pr
         return await getDataApi(`${routeSupplier}?${query}`);
     } catch (err) {
         console.error('Error fetching paginated suppliers:', err);
-        return null;
+        throw err;
     }
 }
 

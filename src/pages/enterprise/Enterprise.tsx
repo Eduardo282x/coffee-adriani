@@ -74,8 +74,12 @@ export const Enterprise = () => {
     }, [date?.from, date?.to]);
 
     const fetchSuppliers = async () => {
-        const response = await getSuppliers();
-        setSuppliers(response?.suppliers || []);
+        try {
+            const response = await getSuppliers();
+            setSuppliers(response?.suppliers || []);
+        } catch (err) {
+            console.error('Error fetching suppliers:', err);
+        }
     };
 
     const fetchAccounts = async () => {
