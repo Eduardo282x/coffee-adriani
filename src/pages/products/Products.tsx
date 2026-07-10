@@ -5,7 +5,6 @@ import { Plus } from "lucide-react"
 import { postProduct, putProduct } from "@/services/products.service"
 import { GroupProducts, IProducts } from "@/interfaces/product.interface"
 import { TableComponent } from "@/components/table/TableComponent"
-import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { Filter } from "@/components/table/Filter"
 import { defaultValues, IProductsForm, productsColumns } from "./products.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
@@ -107,11 +106,6 @@ export const Products = () => {
 
     return (
         <div className="flex flex-col">
-
-            {loading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -144,7 +138,7 @@ export const Products = () => {
                 </div>
 
                 <div>
-                    <TableComponent columns={columns.filter(col => col.visible == true)} dataBase={data.productsFilter} action={getAction}></TableComponent>
+                    <TableComponent loading={loading} columns={columns.filter(col => col.visible == true)} dataBase={data.productsFilter} action={getAction}></TableComponent>
                 </div>
             </main>
 

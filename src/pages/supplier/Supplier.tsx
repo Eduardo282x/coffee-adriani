@@ -5,7 +5,6 @@ import { TableComponent } from "@/components/table/TableComponent";
 import { ISupplier } from "@/interfaces/supplier.interface";
 import { Button } from "@/components/ui/button";
 import { Plus, Search } from "lucide-react";
-import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { DialogComponent } from "@/components/dialog/DialogComponent";
 import { SupplierForm } from "./SupplierForm";
 import { useSuppliers } from "@/hooks/supplier.hook";
@@ -78,10 +77,6 @@ export const Supplier = () => {
 
     return (
         <div className="flex flex-col">
-            {isLoading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] text-white h-14 lg:h-[60px] items-center gap-4 border-b px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -116,6 +111,7 @@ export const Supplier = () => {
                     <TableComponent
                         key="suppliers-list"
                         columns={supplierColumns}
+                        loading={isLoading}
                         dataBase={suppliers}
                         action={getAction}
                     />

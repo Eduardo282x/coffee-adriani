@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
 // import { UsersColumns, defaultValues, IUsersForm } from "./client.data"
 import { Filter } from "@/components/table/Filter"
@@ -99,10 +98,6 @@ export const Users = () => {
 
     return (
         <div className="flex flex-col">
-            {loading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -129,7 +124,7 @@ export const Users = () => {
                 </div>
 
                 <div>
-                    <TableComponent columns={usersColumns} dataBase={users.users} action={getAction}></TableComponent>
+                    <TableComponent loading={loading} columns={usersColumns} dataBase={users.users} action={getAction}></TableComponent>
                 </div>
             </main>
 

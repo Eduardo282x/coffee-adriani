@@ -1,4 +1,3 @@
-import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody } from '@/interfaces/payment.interface';
@@ -21,6 +20,7 @@ import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
 import { PaymentDateRangeFilter, useOptimizedPayments } from '@/hooks/payment.hook';
 import { InvoicePreview } from './InvoicePreview';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Payments = () => {
     // Estados locales específicos del componente
@@ -265,8 +265,6 @@ export const Payments = () => {
 
     return (
         <div className="flex flex-col">
-            {(isLoading || isMutating) && <ScreenLoader />}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -313,7 +311,12 @@ export const Payments = () => {
                 <div className=''>
                     <div className='w-full flex items-center justify-between my-2'>
                         <div className="flex items-center justify-start gap-2">
-                            {statistics && (
+                            {isLoading ? (
+                                <>
+                                    <Skeleton className="h-6 w-40" />
+                                    <Skeleton className="h-6 w-40" />
+                                </>
+                            ) : statistics && (
                                 <>
                                     <p className='text-lg'>
                                         <span className='font-semibold'>Total Bs:</span> {formatOnlyNumberWithDots(statistics.totals.totalBs)} Bs
@@ -326,16 +329,26 @@ export const Payments = () => {
                         </div>
 
                         <div className='flex items-center justify-start gap-2'>
-                            <p className=''>
-                                <span className='font-semibold'>Total:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.total) : ''} $
-                            </p>
-                            <p className=''>
-                                <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.remaining) : ''} $
-                            </p>
+                            {isLoading ? (
+                                <>
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-4 w-32" />
+                                </>
+                            ) : (
+                                <>
+                                    <p className=''>
+                                        <span className='font-semibold'>Total:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.total) : ''} $
+                                    </p>
+                                    <p className=''>
+                                        <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.remaining) : ''} $
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
 
                     <TableComponent
+                        loading={isLoading}
                         columns={columns.filter(col => col.visible === true)}
                         dataBase={payments}
                         isExpansible={true}

@@ -1,5 +1,4 @@
 import { DialogComponent } from '@/components/dialog/DialogComponent';
-import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { Filter } from '@/components/table/Filter';
 import { TableComponent } from '@/components/table/TableComponent';
 import { Button } from '@/components/ui/button';
@@ -88,10 +87,6 @@ export const Accounts = () => {
 
     return (
         <div className="flex flex-col">
-            {loading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -118,7 +113,7 @@ export const Accounts = () => {
                 </div>
 
                 <div>
-                    <TableComponent columns={accountsColumns} dataBase={accounts.accounts} action={getActions}></TableComponent>
+                    <TableComponent loading={loading} columns={accountsColumns} dataBase={accounts.accounts} action={getActions}></TableComponent>
                 </div>
             </main>
 

@@ -7,7 +7,6 @@ import { postInventory, putInventory } from "@/services/inventory.service";
 import { Filter } from "@/components/table/Filter";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Package, Plus } from "lucide-react";
-import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { DialogComponent } from "@/components/dialog/DialogComponent";
 import { InventoryForm, InventoryFormUpdate } from "./InventoryForm";
 import { InventoryCards } from "./InventoryCards";
@@ -155,10 +154,6 @@ export const Inventory = () => {
 
     return (
         <div className="flex flex-col">
-            {isLoading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] text-white h-14 lg:h-[60px] items-center gap-4 border-b px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -260,6 +255,7 @@ export const Inventory = () => {
                 <div>
                     {history ? (
                         <TableComponent
+                            loading={isLoading}
                             key="inventory-history"
                             columns={inventoryColumnsHistory}
                             dataBase={inventoryEntries}
@@ -274,7 +270,7 @@ export const Inventory = () => {
                                 )
                             }></TableComponent>
                     ) : (
-                        <TableComponent key="inventory-list" columns={inventoryColumns} dataBase={data.inventory} action={getAction}></TableComponent>
+                        <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory} action={getAction}></TableComponent>
                     )}
                 </div>
 

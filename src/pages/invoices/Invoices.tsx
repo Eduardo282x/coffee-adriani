@@ -10,7 +10,6 @@ import { IInvoiceForm, DateRangeFilter, InvoiceInvoice, ExportDashboard } from "
 import { getInvoiceExcelFilter } from "@/services/invoice.service"
 import { ExpansibleInvoice } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
-import { Loading } from "@/components/loaders/Loading"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
@@ -22,6 +21,7 @@ import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 // import { useOptimizedInvoices } from "./hooks/useOptimizedInvoices"
 import { useOptimizedInvoices } from '@/hooks/invoice.hook';
 import { useOptimizedInventory } from "@/hooks/inventory.hook";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -171,14 +171,14 @@ export const InvoicesPage = () => {
                 const filterDate: ExportDashboard = {
                     startDate: dateStart.from || new Date(),
                     endDate: dateStart.to ? dateStart.to : new Date(),
-                    type: selectedTypeProduct 
+                    type: selectedTypeProduct
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             } else {
                 const filterDate: ExportDashboard = {
                     startDate: new Date(),
                     endDate: new Date(),
-                    type: selectedTypeProduct 
+                    type: selectedTypeProduct
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             }
@@ -295,85 +295,91 @@ export const InvoicesPage = () => {
                 </div>
 
                 {isLoading && (
-                    <div className="text-center">
-                        <Loading />
+                    <div className="my-2 text-md flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-48" />
+                                <Skeleton className="h-4 w-48" />
+                            </div>
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                        </div>
+                        <Skeleton className="h-8 w-24" />
                     </div>
                 )}
 
-                {!isLoading && invoices.length > 0 && (
-                    <>
-                        {statistics && (
-                            <div className="my-2 text-md flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                    <div>
-                                        <p>
-                                            <span className="font-bold">Total de bultos: </span>
-                                            {formatOnlyNumberWithDots(statistics.package)} bultos
-                                        </p>
-                                        {/* <p>
+                <>
+                    {statistics && (
+                        <div className="my-2 text-md flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <div>
+                                    <p>
+                                        <span className="font-bold">Total de bultos: </span>
+                                        {formatOnlyNumberWithDots(statistics.package)} bultos
+                                    </p>
+                                    {/* <p>
                                             <span className="font-bold">Bultos Pagos: </span>
                                             {formatOnlyNumberWithDots(statistics.packagePaid, 4)} bultos
                                         </p> */}
-                                        <p>
-                                            <span className="font-bold">Bultos restantes: </span>
-                                            {formatOnlyNumberWithDots(statistics.packagePending, 4)} bultos
-                                        </p>
-                                    </div>
-                                    <DetailsPackage
-                                        detPackage={statistics.detPackage}
-                                        packagePaid={statistics.packagePaid}
-                                        packagePaidBS={statistics.packagePaidBS}
-                                        packagePaidUSD={statistics.packagePaidUSD}
-                                    />
+                                    <p>
+                                        <span className="font-bold">Bultos restantes: </span>
+                                        {formatOnlyNumberWithDots(statistics.packagePending, 4)} bultos
+                                    </p>
                                 </div>
-                                <DetailsPayments payments={statistics.payments} />
+                                <DetailsPackage
+                                    detPackage={statistics.detPackage}
+                                    packagePaid={statistics.packagePaid}
+                                    packagePaidBS={statistics.packagePaidBS}
+                                    packagePaidUSD={statistics.packagePaidUSD}
+                                />
                             </div>
-                        )}
-
-                        <div className="rounded-md border">
-                            <TableComponent
-                                dataBase={invoices}
-                                columns={clientColumns}
-                                colSpanColumns={true}
-                                totalElements={totalCount}
-                                renderRow={(inv, index) => (
-                                    <ExpansibleInvoice
-                                        key={index}
-                                        invoice={inv}
-                                        columns={invoiceColumns}
-                                        setLoading={setLoadingFile}
-                                        payInvoices={payInvoices}
-                                        pendingInvoices={pendingInvoices}
-                                        cleanInvoices={cleanInvoices}
-                                        checkInvoices={checkInvoice}
-                                        editInvoice={editInvoice}
-                                        deleteInvoice={deleteInvoiceHandler}
-                                    />
-                                )}
-                            />
+                            <DetailsPayments payments={statistics.payments} />
                         </div>
+                    )}
 
-                        {/* Botón para cargar más */}
-                        {hasMore && (
-                            <div className="text-center mt-4">
-                                <Button
-                                    onClick={handleLoadMore}
-                                    disabled={isLoadingMore}
-                                    variant="outline"
-                                >
-                                    {isLoadingMore ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Cargando más...
-                                        </>
-                                    ) : (
-                                        'Cargar más facturas'
-                                    )}
-                                </Button>
-                            </div>
-                        )}
-                    </>
-                )}
+                    <div className="rounded-md border">
+                        <TableComponent
+                            loading={isLoading}
+                            dataBase={invoices}
+                            columns={clientColumns}
+                            colSpanColumns={true}
+                            totalElements={totalCount}
+                            renderRow={(inv, index) => (
+                                <ExpansibleInvoice
+                                    key={index}
+                                    invoice={inv}
+                                    columns={invoiceColumns}
+                                    setLoading={setLoadingFile}
+                                    payInvoices={payInvoices}
+                                    pendingInvoices={pendingInvoices}
+                                    cleanInvoices={cleanInvoices}
+                                    checkInvoices={checkInvoice}
+                                    editInvoice={editInvoice}
+                                    deleteInvoice={deleteInvoiceHandler}
+                                />
+                            )}
+                        />
+                    </div>
+
+                    {/* Botón para cargar más */}
+                    {hasMore && (
+                        <div className="text-center mt-4">
+                            <Button
+                                onClick={handleLoadMore}
+                                disabled={isLoadingMore}
+                                variant="outline"
+                            >
+                                {isLoadingMore ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Cargando más...
+                                    </>
+                                ) : (
+                                    'Cargar más facturas'
+                                )}
+                            </Button>
+                        </div>
+                    )}
+                </>
 
                 {!isLoading && invoices.length === 0 && (
                     <div className="text-center w-full">

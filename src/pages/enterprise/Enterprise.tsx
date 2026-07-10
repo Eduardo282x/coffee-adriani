@@ -1,4 +1,3 @@
-import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { DateRangePicker } from '@/components/datepicker/DateRangePicker';
@@ -23,6 +22,7 @@ import { getEntryPayments } from '@/services/inventory.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import toast from 'react-hot-toast';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Enterprise = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -156,8 +156,6 @@ export const Enterprise = () => {
 
     return (
         <div className="flex flex-col">
-            {(isLoading || isMutating) && <ScreenLoader />}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -204,20 +202,27 @@ export const Enterprise = () => {
                 <div className=''>
                     <div className='w-full flex items-center justify-between my-2'>
                         <div className="flex items-center justify-start gap-2">
-                            <p className='text-lg'>
-                                <span className='font-semibold'>Total:</span> {entries.length} entradas
-                            </p>
+                            {isLoading ? (
+                                <Skeleton className="h-6 w-40" />
+                            ) : (
+                                <p className='text-lg'>
+                                    <span className='font-semibold'>Total:</span> {entries.length} entradas
+                                </p>
+                            )}
                         </div>
-                        {pagination && (
-                            <div className='flex items-center justify-start gap-2'>
+                        <div className='flex items-center justify-start gap-2'>
+                            {isLoading ? (
+                                <Skeleton className="h-4 w-48" />
+                            ) : pagination && (
                                 <p className=''>
                                     <span className='font-semibold'>Página:</span> {pagination.page} de {pagination.totalPages}
                                 </p>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
                     <TableComponent
+                        loading={isLoading}
                         columns={enterpriseColumns}
                         dataBase={entries}
                         totalElements={pagination?.totalCount || 0}

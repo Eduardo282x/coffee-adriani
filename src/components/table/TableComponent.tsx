@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ToolTip } from "../tooltip/ToolTip";
 import { IoIosArrowDown } from "react-icons/io";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TableProps<T> {
     className?: string;
@@ -24,6 +25,7 @@ interface TableProps<T> {
     isExpansible?: boolean;
     shortSpaces?: boolean;
     totalElements?: number;
+    loading?: boolean;
 }
 
 export const TableComponent = <T,>({
@@ -39,7 +41,8 @@ export const TableComponent = <T,>({
     hideColumns,
     isExpansible,
     shortSpaces,
-    totalElements
+    totalElements,
+    loading = false
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
@@ -128,7 +131,11 @@ export const TableComponent = <T,>({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {dataFilter && dataFilter.length === 0 ? (
+                        {loading ? (
+                            Array.from({ length: 8 }).map((_, i) => (
+                                <TableRowSkeleton key={i} columns={columns.length} />
+                            ))
+                        ) : dataFilter && dataFilter.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No se encontraron resultados.
@@ -156,9 +163,15 @@ export const TableComponent = <T,>({
             </div>
 
             <div className="block lg:hidden space-y-2">
-                {dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
-                    <CardDynamicMobile key={index} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
-                ))}
+                {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <CardSkeletonMobile key={i} columns={columns.length} />
+                    ))
+                ) : (
+                    dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+                        <CardDynamicMobile key={index} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
+                    ))
+                )}
             </div>
 
             {(!hidePaginator && dataBase && dataBase.length >= 5) && (
@@ -174,6 +187,27 @@ export const TableComponent = <T,>({
         </>
     )
 }
+
+const TableRowSkeleton = ({ columns }: { columns: number }) => (
+    <TableRow>
+        {Array.from({ length: columns }).map((_, i) => (
+            <TableCell key={i}>
+                <Skeleton className="h-4 w-full" />
+            </TableCell>
+        ))}
+    </TableRow>
+)
+
+const CardSkeletonMobile = ({ columns }: { columns: number }) => (
+    <div className="bg-white rounded-md p-4 shadow-md w-full space-y-3">
+        {Array.from({ length: Math.min(columns, 4) }).map((_, i) => (
+            <div key={i} className="flex gap-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-full" />
+            </div>
+        ))}
+    </div>
+)
 
 interface CardDynamicMobileProps<T> {
     data: T;

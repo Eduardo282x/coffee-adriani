@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { postClients, putClients, generateReportPDF, getClientsExcel } from "@/services/clients.service"
 import { Block, BodyBlock, BodyReport, IClients } from "@/interfaces/clients.interface"
-import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { TableComponent } from "@/components/table/TableComponent"
 import { blockColumns, clientsColumns, defaultValues, IClientsForm } from "./client.data"
 import { Filter } from "@/components/table/Filter"
@@ -194,10 +193,6 @@ export const Clients = () => {
 
     return (
         <div className="flex flex-col">
-            {loading && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -269,8 +264,8 @@ export const Clients = () => {
 
                 <div>
                     {showBlocks
-                        ? <TableComponent columns={blockColumns} dataBase={blocks.blocks} action={getActionBlocks}></TableComponent>
-                        : <TableComponent columns={columns.filter(col => col.visible == true)} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
+                        ? <TableComponent loading={loading} columns={blockColumns} dataBase={blocks.blocks} action={getActionBlocks}></TableComponent>
+                        : <TableComponent loading={loading} columns={columns.filter(col => col.visible == true)} dataBase={clients.clientsFilter} action={getAction}></TableComponent>
                     }
                 </div>
             </main>
