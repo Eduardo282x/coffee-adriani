@@ -22,7 +22,6 @@ import { getEntryPayments } from '@/services/inventory.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import toast from 'react-hot-toast';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export const Enterprise = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -168,7 +167,7 @@ export const Enterprise = () => {
 
                 <div className="flex items-center gap-4">
                     <DolarComponents />
-                    
+
                     <Button onClick={handleNewEntry} disabled={isMutating}>
                         <Plus className="mr-2 h-4 w-4" />
                         Registrar Entrada
@@ -179,7 +178,7 @@ export const Enterprise = () => {
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
             <main className="flex-1 p-4 md:p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
                         Gestión de Entradas de Inventario
                     </h2>
@@ -204,27 +203,6 @@ export const Enterprise = () => {
                 </div>
 
                 <div className=''>
-                    <div className='w-full flex items-center justify-between my-2'>
-                        <div className="flex items-center justify-start gap-2">
-                            {isLoading ? (
-                                <Skeleton className="h-6 w-40" />
-                            ) : (
-                                <p className='text-lg'>
-                                    <span className='font-semibold'>Total:</span> {entries.length} entradas
-                                </p>
-                            )}
-                        </div>
-                        <div className='flex items-center justify-start gap-2'>
-                            {isLoading ? (
-                                <Skeleton className="h-4 w-48" />
-                            ) : pagination && (
-                                <p className=''>
-                                    <span className='font-semibold'>Página:</span> {pagination.page} de {pagination.totalPages}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
                     <TableComponent
                         loading={isLoading}
                         columns={enterpriseColumns}

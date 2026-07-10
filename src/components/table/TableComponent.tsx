@@ -132,7 +132,7 @@ export const TableComponent = <T,>({
                     </TableHeader>
                     <TableBody>
                         {loading ? (
-                            Array.from({ length: 8 }).map((_, i) => (
+                            Array.from({ length: 50 }).map((_, i) => (
                                 <TableRowSkeleton key={i} columns={columns.length} />
                             ))
                         ) : dataFilter && dataFilter.length === 0 ? (
@@ -192,7 +192,7 @@ const TableRowSkeleton = ({ columns }: { columns: number }) => (
     <TableRow>
         {Array.from({ length: columns }).map((_, i) => (
             <TableCell key={i}>
-                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-7 w-full" />
             </TableCell>
         ))}
     </TableRow>
