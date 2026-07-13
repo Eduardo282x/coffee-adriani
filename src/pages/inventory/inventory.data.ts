@@ -79,6 +79,14 @@ export const inventoryColumnsHistory: IColumns<IInventoryEntry>[] = [
         icon: false,
     },
     {
+        label: 'Total de Bultos',
+        column: 'totalPackages',
+        element: (data: IInventoryEntry) => data.details.reduce((sum, detail) => sum + detail.quantity, 0).toString(),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         label: 'Fecha',
         column: 'date',
         element: (data: IInventoryEntry) => data.date ? formatDate(data.date) : '',

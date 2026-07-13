@@ -35,6 +35,14 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         className: () => 'font-semibold'
     },
     {
+        label: 'Total (Bultos)',
+        column: 'totalPackages',
+        element: (data: IInventoryEntry) => data.details.reduce((sum, detail) => sum + detail.quantity, 0).toString(),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'totalPaid',
         label: 'Pagado ($)',
         element: (data: IInventoryEntry) => `$ ${formatOnlyNumberWithDots(data.totalPaid)}`,
@@ -63,7 +71,7 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         icon: false,
         className: (data: IInventoryEntry) => getStatusClassName(data.status),
     },
-        {
+    {
         column: 'date',
         label: 'Fecha',
         element: (data: IInventoryEntry) => formatDate(data.date),

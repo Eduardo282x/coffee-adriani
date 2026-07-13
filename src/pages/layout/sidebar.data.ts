@@ -36,15 +36,15 @@ export const menuSections: MenuSection[] = [
         label: "Administración",
         items: [
             { title: "Pagos", icon: BsCash, href: "/pagos" },
-            { title: "Proveedores", icon: Truck, href: "/proveedores" },
             { title: "Empresa", icon: FaBuilding, href: "/empresa" },
+            { title: "Proveedores", icon: Truck, href: "/proveedores" },
         ],
     },
     {
         label: "Inventario",
         items: [
-            { title: "Productos", icon: Package, href: "/productos" },
             { title: "Inventario", icon: MdOutlineInventory2, href: "/inventario" },
+            { title: "Productos", icon: Package, href: "/productos" },
         ],
     },
     {

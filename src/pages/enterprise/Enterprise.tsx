@@ -14,10 +14,8 @@ import { EntryPaymentForm } from './EntryPaymentForm';
 import { useEnterpriseEntries } from '@/hooks/enterprise-entries.hook';
 import { IInventoryEntry, CreateInventoryEntryForm, EntryPaymentForm as EntryPaymentFormType, EntryPaymentsResponse } from '@/interfaces/inventory.interface';
 import { productStore } from '@/store/productStore';
-import { getSuppliers } from '@/services/supplier.service';
-import { getPaymentAccounts } from '@/services/payment.service';
-import { ISupplier } from '@/interfaces/inventory.interface';
-import { AccountPay } from '@/interfaces/payment.interface';
+import { useSuppliers } from '@/hooks/supplier.hook';
+import { useOptimizedPayments } from '@/hooks/payment.hook';
 import { getEntryPayments } from '@/services/inventory.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import toast from 'react-hot-toast';
@@ -30,12 +28,13 @@ export const Enterprise = () => {
     const [openPaymentsListDialog, setOpenPaymentsListDialog] = useState<boolean>(false);
     const [entrySelected, setEntrySelected] = useState<IInventoryEntry | null>(null);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
-    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
-    const [accounts, setAccounts] = useState<AccountPay[]>([]);
     const [entryPayments, setEntryPayments] = useState<EntryPaymentsResponse | null>(null);
 
     const { products, productOptions } = productStore((state) => state);
     const getProductsApi = productStore((state) => state.getProductsApi);
+
+    const { suppliers } = useSuppliers();
+    const { paymentAccounts } = useOptimizedPayments({ pageSize: 50 });
 
     const {
         entries,
@@ -57,11 +56,6 @@ export const Enterprise = () => {
     }, [products, getProductsApi])
 
     useEffect(() => {
-        fetchSuppliers();
-        fetchAccounts();
-    }, []);
-
-    useEffect(() => {
         if (date?.from && date?.to) {
             applyDateFilter({
                 startDate: date.from,
@@ -71,22 +65,6 @@ export const Enterprise = () => {
             applyDateFilter(null);
         }
     }, [date?.from, date?.to]);
-
-    const fetchSuppliers = async () => {
-        try {
-            const response = await getSuppliers();
-            setSuppliers(response?.suppliers || []);
-        } catch (err) {
-            console.error('Error fetching suppliers:', err);
-        }
-    };
-
-    const fetchAccounts = async () => {
-        const response = await getPaymentAccounts();
-        if (Array.isArray(response)) {
-            setAccounts(response);
-        }
-    };
 
     const getActions = async (action: string, data: IInventoryEntry) => {
         if (action === 'Ver Pagos') {
@@ -263,7 +241,7 @@ export const Enterprise = () => {
                 >
                     <EntryPaymentForm
                         entry={entrySelected}
-                        accounts={accounts}
+                        accounts={paymentAccounts}
                         onSubmit={handlePaymentSubmit}
                         onCancel={() => setOpenPaymentDialog(false)}
                     />

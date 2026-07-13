@@ -129,27 +129,27 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                 </div>
             </div>
 
-            <div className="flex flex-col items-start justify-start gap-2 w-full">
-                <Label>Cuenta de Pago</Label>
-                <Select
-                    value={accountId === 0 ? '' : accountId.toString()}
-                    onValueChange={(v) => setAccountId(Number(v))}
-                >
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Seleccione cuenta" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {accounts.map((account) => (
-                            <SelectItem key={account.id} value={account.id.toString()}>
-                                {account.name} - {account.bank} ({account.method?.currency})
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col items-start justify-start gap-2">
+                <div className="flex flex-col items-start justify-start gap-2 w-full">
+                    <Label>Cuenta de Pago</Label>
+                    <Select
+                        value={accountId === 0 ? '' : accountId.toString()}
+                        onValueChange={(v) => setAccountId(Number(v))}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccione cuenta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {accounts.map((account) => (
+                                <SelectItem key={account.id} value={account.id.toString()}>
+                                    {account.name} - {account.bank} ({account.method?.currency})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex flex-col items-start justify-start gap-2 w-full">
                     <Label>
                         Monto del Pago {isBS ? '(Bs)' : '($)'}
                     </Label>
@@ -162,29 +162,19 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                         onChange={(e) => setAmount(Number(e.target.value))}
                         placeholder={isBS ? "Monto en bolívares" : "Monto en dólares"}
                     />
-                    {amount > 0 && dolarRate > 0 && (
+                    {isBS && amount > 0 && dolarRate > 0 && (
                         <p className="text-xs text-gray-500">
-                            Equivalente a: {isBS ? `$ ${convertedAmount.toFixed(2)}` : `Bs ${convertedAmount.toFixed(2)}`}
+                            Equivalente a: $ {convertedAmount.toFixed(2)}
                             {' '}(tasa: {formatOnlyNumberWithDots(dolarRate)} Bs/$)
+                        </p>
+                    )}
+                    {!isBS && (
+                        <p className="text-xs text-gray-500">
+                            Máximo: $ {remaining.toFixed(2)}
                         </p>
                     )}
                 </div>
 
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label>
-                        Monto a Aplicar ($)
-                    </Label>
-                    <Input
-                        className="w-full"
-                        type="number"
-                        value={entryAmount.toFixed(2)}
-                        readOnly
-                    />
-                    <p className="text-xs text-gray-500">Max: ${remaining.toFixed(2)}</p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col items-start justify-start gap-2">
                     <Label>Referencia</Label>
                     <Input
@@ -195,30 +185,30 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                     />
                 </div>
 
-                <div className="flex flex-col items-start justify-start gap-2">
-                    <Label>Descripción</Label>
-                    <Input
-                        className="w-full"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Descripción del pago"
-                    />
-                </div>
+                <DatePicker
+                    setDate={setPaymentDate}
+                    date={paymentDate}
+                    label="Fecha de Pago"
+                    maxDate={new Date()}
+                    minDate={new Date(2000, 0, 1)}
+                />
             </div>
 
-            <DatePicker
-                setDate={setPaymentDate}
-                date={paymentDate}
-                label="Fecha de Pago"
-                maxDate={new Date()}
-                minDate={new Date(2000, 0, 1)}
-            />
+            <div className="flex flex-col items-start justify-start gap-2">
+                <Label>Descripción</Label>
+                <Input
+                    className="w-full"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Descripción del pago"
+                />
+            </div>
 
             <div className="flex items-center justify-end gap-2 mt-4">
                 <Button variant="outline" onClick={onCancel}>
                     Cancelar
                 </Button>
-                <Button onClick={onSubmitForm}>
+                <Button onClick={onSubmitForm} variant="default" className="bg-[#6f4e37] hover:bg-[#5a3e2e] text-white">
                     Registrar Pago
                 </Button>
             </div>
