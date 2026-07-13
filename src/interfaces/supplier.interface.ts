@@ -11,6 +11,7 @@ export interface ISupplier {
     rif: string;
     phone: string;
     address: string;
+    rubro: string;
     email: string;
     active: boolean;
     createdAt: Date;
@@ -23,6 +24,7 @@ export interface BodySupplier {
     phone: string;
     address: string;
     email: string;
+    rubro: string;
 }
 
 export interface SupplierResponse {

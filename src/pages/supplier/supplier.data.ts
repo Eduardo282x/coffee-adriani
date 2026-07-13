@@ -37,9 +37,9 @@ export const supplierColumns: IColumns<ISupplier>[] = [
         icon: false,
     },
     {
-        label: 'Email',
-        column: 'email',
-        element: (data: ISupplier) => data.email,
+        label: 'Rubro',
+        column: 'rubro',
+        element: (data: ISupplier) => data.rubro,
         orderBy: '',
         type: 'string',
         icon: false,

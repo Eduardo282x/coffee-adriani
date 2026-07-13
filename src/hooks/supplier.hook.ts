@@ -36,6 +36,7 @@ export const useSuppliers = (options: UseSuppliersOptions = {}) => {
                 page: Number(pageParam),
                 limit: pageSize,
                 ...(validSearch && { search: validSearch }),
+                active: true
             };
 
             return getSuppliersPaginated(params);

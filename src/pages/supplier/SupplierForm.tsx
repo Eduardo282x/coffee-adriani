@@ -15,6 +15,7 @@ export const SupplierForm: FC<FromProps> = ({ onSubmit, data }) => {
             phone: '',
             address: '',
             email: '',
+            rubro: '',
         },
     });
 
@@ -27,6 +28,7 @@ export const SupplierForm: FC<FromProps> = ({ onSubmit, data }) => {
                     phone: data.phone ?? '',
                     address: data.address ?? '',
                     email: data.email ?? '',
+                    rubro: data.rubro ?? '',
                 });
             }, 0);
         }
@@ -50,9 +52,14 @@ export const SupplierForm: FC<FromProps> = ({ onSubmit, data }) => {
                     <Input className="w-full" {...form.register('phone', { required: 'El teléfono es requerido' })} />
                 </div>
 
-                <div className="space-y-4 w-full">
+                {/* <div className="space-y-4 w-full">
                     <Label className="text-right">Email</Label>
                     <Input type="email" className="w-full" {...form.register('email', { required: 'El email es requerido' })} />
+                </div> */}
+
+                <div className="space-y-4 w-full">
+                    <Label className="text-right">Rubro</Label>
+                    <Input className="w-full" {...form.register('rubro', { required: 'El rubro es requerido' })} />
                 </div>
 
                 <div className="col-span-2 space-y-4 w-full">

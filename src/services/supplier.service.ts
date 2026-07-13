@@ -8,6 +8,7 @@ export interface SupplierFilterPaginate {
     page: number;
     limit: number;
     search?: string;
+    active: boolean;
 }
 
 export const getSuppliers = async (): Promise<SupplierResponse> => {
