@@ -55,7 +55,7 @@ export const Supplier = () => {
         }
     };
 
-    const actionDialog = async (formData: { name: string; rif: string; phone: string; address: string; email: string }) => {
+    const actionDialog = async (formData: { name: string; rif: string; phone: string; address: string; rubro: string, email: string }) => {
         if (edit && supplierSelected) {
             await updateSupplier({ id: supplierSelected.id, data: formData });
         } else {
