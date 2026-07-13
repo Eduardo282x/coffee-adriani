@@ -1,9 +1,9 @@
 import type { LucideIcon } from "lucide-react"
-import { BarChart3, Users, FileText, User, Truck } from "lucide-react"
+import { BarChart3, Users, FileText, Package, User, Truck } from "lucide-react"
 import type { IconType } from "react-icons"
 import { BsCash } from "react-icons/bs"
 import { FaBuilding } from "react-icons/fa6"
-import { MdAccountBalance, MdOutlineMessage } from "react-icons/md"
+import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md"
 import { RiAdminLine } from "react-icons/ri"
 
 export interface MenuItem {
@@ -38,6 +38,13 @@ export const menuSections: MenuSection[] = [
             { title: "Pagos", icon: BsCash, href: "/pagos" },
             { title: "Proveedores", icon: Truck, href: "/proveedores" },
             { title: "Empresa", icon: FaBuilding, href: "/empresa" },
+        ],
+    },
+    {
+        label: "Inventario",
+        items: [
+            { title: "Productos", icon: Package, href: "/productos" },
+            { title: "Inventario", icon: MdOutlineInventory2, href: "/inventario" },
         ],
     },
     {

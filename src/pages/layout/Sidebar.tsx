@@ -40,20 +40,19 @@ export const AppSidebar = () => {
 
     return (
         <Sidebar>
-            <SidebarHeader className="bg-[#6f4e37] text-white">
-                <div className="flex items-center gap-3 px-2 py-6 text-xl">
+            <SidebarHeader className="bg-[#6f4e37] text-white border-b border-[#ebe0d2]">
+                <div className="flex items-center gap-3 px-2 py-3 text-xl">
                     <div className="p-1 rounded-md bg-[#ebe0d2] text-[#6f4e37]">
                         <FaCoffee />
                     </div>
                     <div className="font-semibold">Sistema de Gestión</div>
                 </div>
             </SidebarHeader>
-            <div className="bg-[#ebe0d2] h-1">a</div>
-            <SidebarContent className="bg-[#6f4e37] text-gray-300 p-2 ">
+            <SidebarContent className="bg-[#6f4e37] text-gray-300 p-1">
                 {menuSections.map((section, index) => (
                     <div key={section.label}>
                         {index > 0 && (
-                            <div className="border-t border-white/10 my-2" />
+                            <div className="border-t border-white/10 my-1" />
                         )}
                         <div className="text-[10px] uppercase tracking-widest text-white/50 font-semibold px-2 mb-1">
                             {section.label}
