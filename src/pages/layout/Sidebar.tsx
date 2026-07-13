@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Link, useLocation, useNavigate } from 'react-router'
-import { menuItems } from "./sidebar.data"
+import { menuSections } from "./sidebar.data"
 import { useEffect, useState } from "react"
 import { validateToken } from "@/hooks/authtenticate"
 import { ITokenExp } from "@/interfaces/user.interface";
@@ -50,18 +50,28 @@ export const AppSidebar = () => {
             </SidebarHeader>
             <div className="bg-[#ebe0d2] h-1">a</div>
             <SidebarContent className="bg-[#6f4e37] text-gray-300 p-2 ">
-                <SidebarMenu>
-                    {menuItems.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                            <SidebarMenuButton asChild className="" isActive={location.pathname === item.href} tooltip={item.title}>
-                                <Link to={item.href}>
-                                    <item.icon className="h-5 w-5" />
-                                    <span>{item.title}</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
+                {menuSections.map((section, index) => (
+                    <div key={section.label}>
+                        {index > 0 && (
+                            <div className="border-t border-white/10 my-2" />
+                        )}
+                        <div className="text-[10px] uppercase tracking-widest text-white/50 font-semibold px-2 mb-1">
+                            {section.label}
+                        </div>
+                        <SidebarMenu>
+                            {section.items.map((item) => (
+                                <SidebarMenuItem key={item.href}>
+                                    <SidebarMenuButton asChild isActive={location.pathname === item.href} tooltip={item.title}>
+                                        <Link to={item.href}>
+                                            <item.icon className="h-5 w-5" />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </div>
+                ))}
             </SidebarContent>
 
             <SidebarFooter className="border-t">
