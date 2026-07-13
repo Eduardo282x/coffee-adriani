@@ -65,6 +65,7 @@ export const Payments = () => {
         // handleChangeStatus,
         handleChangeAssociation,
         handleChangeSearch,
+        handleChangeAccountType,
         hasMore,
         loadMore,
         isLoadingMore,
@@ -110,6 +111,9 @@ export const Payments = () => {
                 break;
             case 'associated':
                 handleChangeAssociation(value as 'associated' | 'unassociated' | 'all');
+                break;
+            case 'accountType':
+                handleChangeAccountType(value);
                 break;
             default:
                 break;

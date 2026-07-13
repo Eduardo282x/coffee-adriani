@@ -50,6 +50,16 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
 }) => {
     const optionsFilters: SelectFiltersOptions[] = [
         {
+            label: 'Tipo de cuenta',
+            value: filters.accountType,
+            name: 'accountType',
+            options: [
+                { label: 'Todos', value: 'all' },
+                { label: 'Entrada', value: 'INCOME' },
+                { label: 'Gastos/Salidas', value: 'EXPENSE' }
+            ]
+        },
+        {
             label: 'Cuentas de pago',
             value: filters.account,
             name: 'account',

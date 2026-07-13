@@ -304,9 +304,10 @@ export interface PaymentFilters {
     credit: string;
     type: string;
     typeDescription: string;
+    accountType: string;
 }
 
-export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit' | 'type' | 'typeDescription';
+export type PaymentFilterType = 'account' | 'associated' | 'method' | 'credit' | 'type' | 'typeDescription' | 'accountType';
 
 export const initialPaymentFilters: PaymentFilters = {
     account: 'all',
@@ -315,4 +316,5 @@ export const initialPaymentFilters: PaymentFilters = {
     credit: 'all',
     type: 'all',
     typeDescription: 'all',
+    accountType: 'INCOME',
 }

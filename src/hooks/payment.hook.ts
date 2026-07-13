@@ -46,6 +46,7 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     const [selectedAccount, setSelectedAccount] = useState<number | undefined>(undefined);
     // const [selectedStatus, setSelectedStatus] = useState<'CONFIRMED' | 'PENDING' | 'all'>('all');
     const [selectedAssociation, setSelectedAssociation] = useState<'associated' | 'unassociated' | 'all'>('all');
+    const [accountType, setAccountType] = useState<string>('INCOME');
 
     const queryClient = useQueryClient();
 
@@ -91,7 +92,7 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         error: paymentsError,
         refetch: refetchPayments
     } = useInfiniteQuery({
-        queryKey: ['payments', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation],
+        queryKey: ['payments', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation, accountType],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: FilterPaymentsPaginated = {
@@ -109,7 +110,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
                 ...(selectCredits !== 'all' && { credit: selectCredits }),
                 ...(selectedAssociation !== 'all' && {
                     associated: selectedAssociation == 'associated'
-                })
+                }),
+                ...(accountType !== 'all' && { accountType: accountType })
             };
 
             return getPaymentsPaginated(params);
@@ -134,7 +136,7 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['payment-statistics', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation],
+        queryKey: ['payment-statistics', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation, accountType],
         queryFn: () => getPaymentStatistics({
             startDate: formatDateOnly(dateFilter?.startDate),
             endDate: formatDateOnly(dateFilter?.endDate),
@@ -146,7 +148,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
             ...(selectCredits !== 'all' && { credit: selectCredits }),
             ...(selectedAssociation !== 'all' && {
                 associated: selectedAssociation == 'associated'
-            })
+            }),
+            ...(accountType !== 'all' && { accountType: accountType })
         }),
         enabled: enableStatistics,
         staleTime: 2 * 60 * 1000,
@@ -339,6 +342,10 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         setSelectedAssociation(association);
     }, []);
 
+    const handleChangeAccountType = useCallback((type: string) => {
+        setAccountType(type);
+    }, []);
+
     // 7. Funciones de mutación wrapper
     const createPayment = useCallback(async (data: any) => {
         return createPaymentMutation.mutateAsync(data);
@@ -436,10 +443,12 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         handleChangeTypeProduct,
         handleChangeTypeDescription,
         handleChangeSearch,
+        handleChangeAccountType,
         currentFilter: dateFilter,
         selectedAccount,
         // selectedStatus,
         selectedAssociation,
+        accountType,
 
         // Mutaciones de pagos
         createPayment,
