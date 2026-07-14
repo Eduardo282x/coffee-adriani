@@ -2,9 +2,9 @@ import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { InvoiceEarn, ProductPercentage } from "@/interfaces/adminitration.interface";
+import { IExpenseInvoice, ProductPercentage } from "@/interfaces/adminitration.interface";
 import { useEffect, useMemo, useState } from "react";
-import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceDetailsColumns, expenseInvoiceEarnColumns, ITotals } from "./administration.data";
+import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceColumnsDetail, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
@@ -107,9 +107,9 @@ export const Administration = () => {
             .reduce((acc, item) => acc + Number(item.subtotal), 0);
         const totalPayments = expenses.payments.reduce((acc, pay) => acc + Number(pay.amountUSD), 0);
         const totalExpenses = totalInvoice + totalInvoiceDetails + totalPayments;
-        const totalEarnMonth = Number(expenses.invoicesEarns.totalEarnRange);
-        const totalItemsEarnMonth = Number(expenses.invoicesEarns.quantityProducts.totalEarnRange);
-        const totalInvoiceEarns = Number(expenses.invoicesEarns.invoiceEarns.reduce((acc, item) => acc + Number(item.earn), 0));
+        const totalEarnMonth = Number(expenses.summary.totalEarnRange);
+        const totalItemsEarnMonth = Number(expenses.summary.quantityProducts.totalEarnRange);
+        const totalInvoiceEarns = expenses.invoices.reduce((acc, item) => acc + Number(item.earn), 0);
 
         return {
             totals: {
@@ -150,7 +150,7 @@ export const Administration = () => {
                     classNameCard: '',
                 },
             ],
-            productSales: expenses.invoicesEarns.productPercentages,
+            productSales: expenses.summary.productPercentages,
         };
     }, [expenses]);
 
@@ -224,7 +224,7 @@ export const Administration = () => {
                                 </CardHeader>
                                 <CardContent>
                                     {expenses && (
-                                        <GananciasChart gains={expenses.invoicesEarns?.invoiceEarns || []} />
+                                        <GananciasChart gains={expenses.invoices} />
                                     )}
                                 </CardContent>
                             </Card>
@@ -263,27 +263,39 @@ export const Administration = () => {
 
                             <div className="w-auto mb-2">
                                 <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
-                                    <Button className={`${optionInvoice !== 'invoicesEarn' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesEarn')}>Facturas</Button>
+                                    <Button className={`${optionInvoice !== 'invoicesEarn' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesEarn')}>Facturas (diferencia de tasa)</Button>
                                     <Button className={`${optionInvoice !== 'invoicesGift' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesGift')}>Regalos</Button>
                                 </div>
                             </div>
                         </div>
-                        {optionInvoice == 'invoicesEarn' ?
-                            <TableComponent key="invoices-earn" dataBase={expenses.invoicesEarns?.invoiceEarns || []} columns={expenseInvoiceEarnColumns} isExpansible={false}
+                        {/* {optionInvoice == 'invoicesEarn' &&
+                            <TableComponent key="invoices-earn" dataBase={expenses.invoices} columns={expenseInvoiceColumnsDetail} isExpansible={false}
                             />
-                            :
-                            <TableComponent key="invoices-gift" dataBase={expenses.invoices || []} columns={expenseInvoiceColumns}
-                                isExpansible={true}
-                                renderRow={(item, index) => (
-                                    (item.invoiceItems || []).filter(item => item.type == 'GIFT').length > 0
-                                        ? (
-                                            <TableComponent dataBase={(item.invoiceItems || []).filter(item => item.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
-                                        ) :
-                                        <div className="bg-white text-center w-full py-2 font-semibold">
-                                            <p>Sin regalos</p>
-                                        </div>
-                                )}
-                            />
+                        } */}
+                        {optionInvoice == 'invoicesGift' &&
+                        <TableComponent key="invoices-gift" dataBase={expenses.invoices.filter(item => item.hasGiftItems)} columns={expenseInvoiceColumns}
+                            isExpansible={true}
+                            renderRow={(item, index) => (
+                                (item.invoiceItems || []).filter(i => i.type == 'GIFT').length > 0
+                                    ? (
+                                        <TableComponent dataBase={(item.invoiceItems || []).filter(i => i.type == 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
+                                    ) :
+                                    <div className="bg-white text-center w-full py-2 font-semibold">
+                                        <p>Sin regalos</p>
+                                    </div>
+                            )}
+                        />
+                        }
+                        {optionInvoice == 'invoicesEarn' &&
+                        <TableComponent key="invoices-earn" dataBase={expenses.invoices.filter(item => item.invoiceItems.some(i => i.type !== 'GIFT'))} columns={expenseInvoiceColumnsDetail}
+                            isExpansible={true}
+                            renderRow={(item, index) => (
+                                (item.invoiceItems || []).filter(i => i.type !== 'GIFT').length > 0
+                                    ? (
+                                        <TableComponent dataBase={(item.invoiceItems || [])} key={index} columns={expenseInvoiceDetailsColumns} />
+                                    ) : null
+                            )}
+                        />
                         }
                     </div>
                 )}
@@ -347,7 +359,7 @@ const CardEarns = ({ title, subtitle, text, Icon, classNameCard }: CardEarnsProp
 }
 
 interface GananciasChartProps {
-    gains: InvoiceEarn[]
+    gains: IExpenseInvoice[]
 }
 
 function GananciasChart({ gains }: GananciasChartProps) {
@@ -381,7 +393,7 @@ function GananciasChart({ gains }: GananciasChartProps) {
                 >
                     <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                     <XAxis
-                        dataKey="createdAt"
+                        dataKey="dispatchDate"
                         tickFormatter={(value) => {
                             const parsedDate = new Date(value);
                             return Number.isNaN(parsedDate.getTime()) ? '' : `${parsedDate.getDate()}`;

@@ -68,6 +68,8 @@ export interface InvoiceAPINewInvoice {
 export interface InvoiceInvoice {
     id: number;
     clientId: number;
+    pendingItems: number;
+    totalItems: number;
     client?: IClients;
     dispatchDate: Date;
     dueDate: Date;
@@ -160,7 +162,7 @@ export interface Payments {
 
 export interface InvoiceItems {
     id: number;
-    invoiceId: number;
+    invoiceId?: number;
     productId: number;
     quantity: number;
     unitPrice: number;

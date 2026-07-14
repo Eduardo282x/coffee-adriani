@@ -58,20 +58,26 @@ export const invoiceColumns: IColumns<InvoiceInvoice>[] = [
         orderBy: '',
         type: 'string',
     },
+    // {
+    //     column: 'consignment',
+    //     label: 'Consignación',
+    //     element: (data: InvoiceInvoice) => data.consignment ? 'Si' : 'No',
+    //     orderBy: '',
+    //     type: 'string',
+    // },
     {
-        column: 'consignment',
-        label: 'Consignación',
-        element: (data: InvoiceInvoice) => data.consignment ? 'Si' : 'No',
+        column: 'pendingItems',
+        label: 'Pendientes',
+        element: (data: InvoiceInvoice) => data.pendingItems,
         orderBy: '',
         type: 'string',
     },
     {
-        column: 'totalAmount',
-        label: 'Estado',
-        element: (data: InvoiceInvoice) => data.status,
+        column: 'totalItems',
+        label: 'Bultos',
+        element: (data: InvoiceInvoice) => data.totalItems,
         orderBy: '',
         type: 'string',
-        className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
     },
     {
         column: 'remaining',
@@ -117,6 +123,14 @@ export const invoiceColumns: IColumns<InvoiceInvoice>[] = [
         element: (data: InvoiceInvoice) => formatDate(data.dueDate),
         orderBy: '',
         type: 'string',
+    },
+        {
+        column: 'status',
+        label: 'Estado',
+        element: (data: InvoiceInvoice) => data.status,
+        orderBy: '',
+        type: 'string',
+        className: (data: InvoiceInvoice) => getBadgeVariant(data.status)
     },
     {
         column: '',

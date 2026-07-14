@@ -1,35 +1,39 @@
-import { IInvoice } from "./invoice.interface";
+import { InvoiceItems } from "./invoice.interface";
 import { IPayments } from "./payment.interface";
 import { IClients } from "./clients.interface";
 
 export interface IExpenses {
-    invoicesEarns: InvoicesEarns;
-    invoices: IInvoice[];
+    invoices: IExpenseInvoice[];
+    summary: ISummary;
     payments: IPayments[];
     paymentsNoAssociated: PaymentsNoAssociated;
 }
 
-export interface InvoicesEarns {
-    productPercentages: ProductPercentage[];
-    invoiceEarns: InvoiceEarn[];
-    quantityProducts: QuantityProducts;
+export interface IExpenseInvoice {
+    id: number;
+    controlNumber: string;
+    dispatchDate: Date | string;
+    status: string;
+    client: IClients;
+    totalAmount: number;
+    remaining: number;
+    earn: number;
+    totalItems: number;
+    hasGiftItems: boolean;
+    invoiceItems: InvoiceItems[];
+}
+
+export interface ISummary {
     totalEarnDay: number;
     totalEarnMonth: number;
     totalEarnRange: number;
+    productPercentages: ProductPercentage[];
+    quantityProducts: QuantityProducts;
 }
 
 export interface QuantityProducts {
     totalEarnMonth: number;
     totalEarnRange: number;
-}
-
-
-export interface InvoiceEarn {
-    invoiceId: number;
-    controlNumber: string;
-    client: string | IClients;
-    earn: number;
-    createdAt: Date;
 }
 
 export interface ProductPercentage {
