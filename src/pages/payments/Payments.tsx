@@ -344,7 +344,7 @@ export const Payments = () => {
                                         <span className='font-semibold'>Total:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.total) : ''} $
                                     </p>
                                     <p className=''>
-                                        <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.remaining) : ''} $
+                                        <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.unassociatedAmount) : ''} $
                                     </p>
                                 </>
                             )}
