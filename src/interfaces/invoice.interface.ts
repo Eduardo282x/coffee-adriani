@@ -197,3 +197,9 @@ export interface DateRangeFilter {
 export interface ExportDashboard extends DateRangeFilter {
     type: string;
 }
+
+export interface ExportInvoicesDashboard {
+    type: string;
+    startDate?: Date | string;
+    endDate?: Date | string;
+}

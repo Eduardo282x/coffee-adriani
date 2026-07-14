@@ -6,7 +6,7 @@ import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
 import { MdUpdate } from "react-icons/md"
-import { IInvoiceForm, DateRangeFilter, InvoiceInvoice, ExportDashboard } from "@/interfaces/invoice.interface"
+import { IInvoiceForm, DateRangeFilter, InvoiceInvoice, ExportInvoicesDashboard } from "@/interfaces/invoice.interface"
 import { getInvoiceExcelFilter } from "@/services/invoice.service"
 import { ExpansibleInvoice } from "@/components/expansible/Expansible"
 import { DateRange } from "react-day-picker"
@@ -168,16 +168,14 @@ export const InvoicesPage = () => {
         try {
             let response: Blob;
             if (dateStart) {
-                const filterDate: ExportDashboard = {
+                const filterDate: ExportInvoicesDashboard = {
                     startDate: dateStart.from || new Date(),
                     endDate: dateStart.to ? dateStart.to : new Date(),
                     type: selectedTypeProduct
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             } else {
-                const filterDate: ExportDashboard = {
-                    startDate: new Date(),
-                    endDate: new Date(),
+                const filterDate: ExportInvoicesDashboard = {
                     type: selectedTypeProduct
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
