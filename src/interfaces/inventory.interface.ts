@@ -167,6 +167,7 @@ export interface EntryPaymentForm {
     paymentDate: Date;
     inventoryEntryId: number;
     entryAmount: number;
+    isProviderPayment: boolean;
 }
 
 export interface EntryPaymentsResponse {
