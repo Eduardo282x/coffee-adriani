@@ -6,7 +6,7 @@ import { BodyInventory, BodyInventorySimple, GroupInventory, IInventory, Resume 
 import { postInventory, putInventory } from "@/services/inventory.service";
 import { Filter } from "@/components/table/Filter";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Package, Plus } from "lucide-react";
+import { ArrowUpDown, Package } from "lucide-react";
 import { DialogComponent } from "@/components/dialog/DialogComponent";
 import { InventoryForm, InventoryFormUpdate } from "./InventoryForm";
 import { InventoryCards } from "./InventoryCards";
@@ -121,9 +121,9 @@ export const Inventory = () => {
         await refetchInventoryHistory();
     }
 
-    const newElement = () => {
-        setOpenDialog(true);
-    }
+    // const newElement = () => {
+    //     setOpenDialog(true);
+    // }
 
     const getAction = (action: string, data: IInventory) => {
         if (action == 'Editar') {
@@ -165,10 +165,10 @@ export const Inventory = () => {
                     <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
                 </div>
 
-                <Button onClick={newElement}>
+                {/* <Button onClick={newElement}>
                     <Plus className="mr-2 h-4 w-4" />
                     Actualizar inventario
-                </Button>
+                </Button> */}
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <div className="flex items-center justify-between mb-6">
