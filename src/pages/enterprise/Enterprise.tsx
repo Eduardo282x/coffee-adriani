@@ -126,10 +126,7 @@ export const Enterprise = () => {
             // The payment creation is handled by the entry-payments endpoint
             // We need to call it from here
             const { createEntryPayment } = await import('@/services/inventory.service');
-            await createEntryPayment({
-                ...data,
-                isProviderPayment: true
-            });
+            await createEntryPayment(data);
             setOpenPaymentDialog(false);
             setEntrySelected(null);
             await refetch();

@@ -106,7 +106,6 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
             paymentDate: paymentDate || new Date(),
             inventoryEntryId: entry.id,
             entryAmount: entryAmount,
-            isProviderPayment: true
         });
     };
 
