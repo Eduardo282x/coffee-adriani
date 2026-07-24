@@ -27,6 +27,14 @@ export const getProductDolar = async () => {
     }
 }
 
+export const getProductDolarFilter = async (date: string) => {
+    try {
+        return await getDataApi(`${routeProduct}/dolar-filter?date=${date} `);
+    } catch (err) {
+        return err
+    }
+}
+
 export const updateDolarAutomatic = async () => {
     try {
         return await postDataApi(`${routeProduct}/dolar/automatic`, {});

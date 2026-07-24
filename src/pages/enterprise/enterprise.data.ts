@@ -184,14 +184,6 @@ export const enterprisePaymentColumns: IColumns<IInventoryEntryPayment>[] = [
         orderBy: '',
         type: 'string',
         icon: false,
-    },
-    {
-        column: 'currency',
-        label: 'Moneda',
-        element: (data: IInventoryEntryPayment) => data.payment?.account?.method?.currency || '-',
-        orderBy: '',
-        type: 'string',
-        icon: false,
     }
 ];
 

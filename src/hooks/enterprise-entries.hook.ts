@@ -9,6 +9,7 @@ import {
     InventoryHistoryFilter
 } from '@/services/inventory.service';
 import { PaginatedEntryResponse, CreateInventoryEntryForm } from '@/interfaces/inventory.interface';
+import { formatDateOnly } from './formaters';
 
 interface UseEnterpriseEntriesOptions {
     pageSize?: number;
@@ -21,13 +22,6 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
     const [supplierId, setSupplierId] = useState<number | undefined>(undefined);
 
     const queryClient = useQueryClient();
-
-    const formatDateOnly = (value: Date | string | null | undefined): string => {
-        if (!value) return '';
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        return date.toISOString().slice(0, 10);
-    };
 
     const {
         data: entriesData,

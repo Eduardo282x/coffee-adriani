@@ -3,6 +3,7 @@ import { getInventory, getInventoryEntries, InventoryHistoryFilter } from '@/ser
 import { IInventory, IInventoryEntry, PaginatedEntryResponse } from '@/interfaces/inventory.interface';
 import { useCallback, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
+import { formatDateOnly } from './formaters';
 
 const EMPTY_INVENTORY: IInventory[] = [];
 
@@ -36,13 +37,6 @@ export const useOptimizedInventory = (options: UseInventoryOptions = {}) => {
     const [movementType, setMovementType] = useState<string>('IN');
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const { pageSize = 50, enableHistory = true } = options;
-
-    const formatDateOnly = (value: Date | string | null | undefined): string => {
-        if (!value) return '';
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        return date.toISOString().slice(0, 10);
-    };
 
     const {
         data: inventoryData,

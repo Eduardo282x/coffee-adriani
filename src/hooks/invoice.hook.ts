@@ -17,6 +17,7 @@ import {
     InvoiceFilterPaginate,
     checkInvoicesPayment,
 } from '@/services/invoice.service';
+import { formatDateOnly } from './formaters';
 
 interface UseInvoicesOptions {
     pageSize?: number;
@@ -100,13 +101,6 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
     });
-
-    const formatDateOnly = (value: Date | string | null | undefined): string => {
-        if (!value) return '';
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        return date.toISOString().slice(0, 10);
-    };
 
     // 2. Consulta separada para estadísticas
     const {

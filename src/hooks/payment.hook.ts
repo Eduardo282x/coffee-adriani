@@ -24,6 +24,7 @@ import { IInvoice } from '@/interfaces/invoice.interface';
 import { getProductType } from '@/services/products.service';
 import { AccountPay, DescriptionPayment, IPayInvoiceForm, IPayments, Method, PayDisassociateBody, PaymentMutationResponse } from '@/interfaces/payment.interface';
 import { ProductType } from '@/interfaces/product.interface';
+import { formatDateOnly } from './formaters';
 
 export interface PaymentDateRangeFilter {
     startDate?: Date;
@@ -122,13 +123,6 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         enabled: true,
         staleTime: 5 * 60 * 1000,
     });
-
-    const formatDateOnly = (value: Date | string | null | undefined): string => {
-        if (!value) return '';
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        return date.toISOString().slice(0, 10);
-    };
 
     // 2. Consulta separada para estadísticas
     const {

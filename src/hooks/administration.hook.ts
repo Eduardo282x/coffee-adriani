@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { IExpenses } from '@/interfaces/adminitration.interface';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { getExpenses } from '@/services/expenses.service';
+import { formatDateOnly } from './formaters';
 
 interface UseAdministrationReturn {
 	expenses: IExpenses | null;
@@ -17,15 +18,6 @@ interface AdministrationQueryFilter {
 	endDate: string;
 	type: string;
 }
-
-const formatDateOnly = (value: Date | string | null | undefined): string => {
-	if (!value) return '';
-
-	const date = value instanceof Date ? value : new Date(value);
-	if (Number.isNaN(date.getTime())) return '';
-
-	return date.toISOString().slice(0, 10);
-};
 
 const buildAdministrationFilter = (filtersDate: ExportDashboard): AdministrationQueryFilter => ({
 	startDate: formatDateOnly(filtersDate.startDate),

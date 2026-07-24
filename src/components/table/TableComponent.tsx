@@ -174,7 +174,7 @@ export const TableComponent = <T,>({
                 )}
             </div>
 
-            {(!hidePaginator && dataBase && dataBase.length >= 5) && (
+            {(!hidePaginator && dataBase && dataBase.length >= 50) && (
                 <Paginator
                     page={page}
                     rowsPerPage={rowsPerPage}

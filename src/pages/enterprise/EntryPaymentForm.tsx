@@ -6,11 +6,13 @@ import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
 import { IInventoryEntry } from "@/interfaces/inventory.interface";
-import { formatOnlyNumberWithDots } from "@/hooks/formaters";
+import { formatDateOnly, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { EntryPaymentForm as EntryPaymentFormType } from "@/interfaces/inventory.interface";
 import { AccountPay } from "@/interfaces/payment.interface";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProductDolar } from "@/hooks/product.hook";
+import { getProductDolarFilter } from "@/services/products.service";
+import { IDolar } from "@/interfaces/product.interface";
 
 interface EntryPaymentFormProps {
     entry: IInventoryEntry;
@@ -25,15 +27,37 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
     const [reference, setReference] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [paymentDate, setPaymentDate] = useState<Date | undefined>(new Date());
-
+    const [dolarOptions, setDolarOptions] = useState<{ label: string; value: string }[]>([]);
+    
     const { dolar } = useProductDolar();
-    const dolarRate = Number(dolar?.dolar || 0);
+    const dolarRateBase = Number(dolar?.dolar || 0);
+    const [dolarRate, setDolarRate] = useState<number>(dolarRateBase);
+    const [dolarId, setDolarId] = useState<number>(dolarRateBase);
 
     const remaining = Number(entry.remaining);
 
     const selectedAccount = useMemo(() => {
         return accounts.find(a => a.id === accountId);
     }, [accounts, accountId]);
+
+    const searchDolarOptions = async (date: Date | string) => {
+        const dolar = await getProductDolarFilter(formatDateOnly(date)) as IDolar[];
+        setDolarOptions(dolar.map((d: IDolar) => ({ label: d.dolar, value: d.id.toString() })));
+    }
+
+    const selectDolar = (value: string) => {
+        const dolar = dolarOptions.find(d => d.value === value);
+        if (dolar) {
+            setDolarRate(Number(dolar.label));
+            setDolarId(Number(dolar.value));
+        }
+    }
+
+    useEffect(() => {
+        if (paymentDate) {
+            searchDolarOptions(paymentDate);
+        }
+    }, [paymentDate]);
 
     const isBS = selectedAccount?.method?.currency === 'BS';
 
@@ -106,6 +130,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
             paymentDate: paymentDate || new Date(),
             inventoryEntryId: entry.id,
             entryAmount: entryAmount,
+            dolarId: dolarId
         });
     };
 
@@ -175,6 +200,33 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                     )}
                 </div>
 
+                <DatePicker
+                    setDate={setPaymentDate}
+                    date={paymentDate}
+                    label="Fecha de Pago"
+                    maxDate={new Date()}
+                    minDate={new Date(2000, 0, 1)}
+                />
+
+                <div className="flex flex-col items-start justify-start gap-2 w-full">
+                    <Label>Tasa de Dolar</Label>
+                    <Select
+                        value={dolarId === 0 ? '' : dolarId.toString()}
+                        onValueChange={selectDolar}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccione tasa de dólar" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {dolarOptions.map((dolar) => (
+                                <SelectItem key={dolar.value} value={dolar.value.toString()}>
+                                    {dolar.label} Bs
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
                 <div className="flex flex-col items-start justify-start gap-2">
                     <Label>Referencia</Label>
                     <Input
@@ -184,14 +236,6 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                         placeholder="Número de referencia"
                     />
                 </div>
-
-                <DatePicker
-                    setDate={setPaymentDate}
-                    date={paymentDate}
-                    label="Fecha de Pago"
-                    maxDate={new Date()}
-                    minDate={new Date(2000, 0, 1)}
-                />
             </div>
 
             <div className="flex flex-col items-start justify-start gap-2">

@@ -4,6 +4,7 @@ import { DateRange } from 'react-day-picker';
 import { ClientDemand, IDashboard } from '@/interfaces/dashboard.interface';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { getDashboard, getDashboardClientDemand, getDashboardReport } from '@/services/dashboard.service';
+import { formatDateOnly } from './formaters';
 
 interface UseDashboardOptions {
 	dateRange?: DateRange;
@@ -50,15 +51,6 @@ const EMPTY_CLIENT_DEMAND: ClientDemand = {
 	buckets: EMPTY_BUCKETS,
 	summary: [],
 	totalInvoices: 0,
-};
-
-const formatDateOnly = (value: Date | string | null | undefined): string => {
-	if (!value) return '';
-
-	const date = value instanceof Date ? value : new Date(value);
-	if (Number.isNaN(date.getTime())) return '';
-
-	return date.toISOString().slice(0, 10);
 };
 
 const buildDashboardFilter = (dateRange: DateRange | undefined, productType: string): DashboardQueryFilter => ({

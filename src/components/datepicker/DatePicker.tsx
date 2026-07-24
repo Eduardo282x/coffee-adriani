@@ -18,6 +18,11 @@ interface DatePickerProps {
 }
 
 export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate, minDate }) => {
+    const disabledDates = [
+        ...(minDate ? [{ before: minDate }] : []),
+        ...(maxDate ? [{ after: maxDate }] : []),
+    ];
+
     return (
         <div className='w-full'>
             <Label className="mb-2">
@@ -46,7 +51,7 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
                         captionLayout="dropdown"
                         startMonth={minDate}
                         endMonth={maxDate}
-                        hidden={[{ before: new Date(minDate as Date) }]}
+                        disabled={disabledDates}
                     />
                 </PopoverContent>
             </Popover>
