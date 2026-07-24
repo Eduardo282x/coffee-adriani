@@ -3,9 +3,9 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import { useEffect, useRef, useState } from "react";
 import { IColumns, IOptionActions, OrderBy } from "./table.interface";
 import { Paginator } from "./Paginator";
-import { ArrowUp } from "lucide-react";
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-// import { Button } from "../ui/button";
+import { ArrowUp, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ToolTip } from "../tooltip/ToolTip";
 import { IoIosArrowDown } from "react-icons/io";
@@ -380,7 +380,7 @@ const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
 const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
     return (
         <>
-            {column.optionActions ?
+            {column.optionActions && column.optionActions.length == 1 ?
                 <div className="flex justify-center gap-2">
                     {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
                         <div key={index} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
@@ -393,24 +393,23 @@ const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
                     ))}
                 </div>
                 :
-                <div></div>
-                // <DropdownMenu>
-                //     <DropdownMenuTrigger asChild>
-                //         <Button variant="ghost" size="icon">
-                //             <MoreHorizontal className="h-4 w-4" />
-                //             <span className="sr-only">Abrir menú</span>
-                //         </Button>
-                //     </DropdownMenuTrigger>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menú</span>
+                        </Button>
+                    </DropdownMenuTrigger>
 
-                //     <DropdownMenuContent align="end">
-                //         {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
-                //             <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
-                //                 <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
-                //                 <span className={`${icon.className}`}>{icon.label}</span>
-                //             </DropdownMenuItem>
-                //         ))}
-                //     </DropdownMenuContent>
-                // </DropdownMenu>
+                    <DropdownMenuContent align="end">
+                        {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                            <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
+                                <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
+                                <span className={`${icon.className}`}>{icon.label}</span>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             }
         </>
     )
