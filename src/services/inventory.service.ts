@@ -184,3 +184,19 @@ export const disassociateEntryPayment = async (data: { inventoryEntryId: number;
         return err
     }
 }
+
+export const updateEntryPayment = async (paymentId: number, data: EntryPaymentForm) => {
+    try {
+        return await putDataApi(`${routeEntryPayments}/${paymentId}`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const deleteEntryPayment = async (paymentId: number) => {
+    try {
+        return await deleteDataApi(`${routeEntryPayments}/${paymentId}`);
+    } catch (err) {
+        return err
+    }
+}

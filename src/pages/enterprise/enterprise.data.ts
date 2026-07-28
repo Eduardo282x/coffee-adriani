@@ -3,6 +3,7 @@ import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IInventoryEntry, IInventoryEntryDetail, IInventoryEntryPayment } from "@/interfaces/inventory.interface";
 import { Edit, Trash2 } from "lucide-react";
 import { HiOutlineCash } from "react-icons/hi";
+import { MdAddCard } from "react-icons/md";
 
 export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
     {
@@ -13,7 +14,7 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         visible: true,
         type: 'string',
         icon: false,
-        className: () => 'font-semibold text-blue-600'
+        className: () => 'flex font-semibold text-blue-600 max-w-32 text-ellipsis overflow-hidden'
     },
     {
         column: 'supplier',
@@ -23,6 +24,7 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         visible: true,
         type: 'string',
         icon: false,
+        className: () => 'flex max-w-60 text-ellipsis overflow-hidden'
     },
     {
         column: 'totalAmount',
@@ -36,8 +38,8 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
     },
     {
         label: 'Total (Bultos)',
-        column: 'totalPackages',
-        element: (data: IInventoryEntry) => data.details.reduce((sum, detail) => sum + detail.quantity, 0).toString(),
+        column: 'totalBultos',
+        element: (data: IInventoryEntry) => data.totalBultos.toString(),
         orderBy: '',
         type: 'string',
         icon: false,
@@ -90,9 +92,10 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         icon: true,
         optionActions: [
             { label: 'Ver Pagos', icon: HiOutlineCash, className: 'text-green-600' },
-            { label: 'Agregar Pago', icon: HiOutlineCash, className: 'text-blue-600' },
-            { label: 'Editar', icon: Edit, className: 'text-[#6f4e37]' },
-            { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
+            { label: 'Agregar Pago', icon: MdAddCard, className: 'text-blue-600' },
+            { label: 'Editar Factura', icon: Edit, className: 'text-[#6f4e37]' },
+            // { label: 'Editar Pago', icon: Edit, className: 'text-[#6f4e37]' },
+            // { label: 'Eliminar Pago', icon: Trash2, className: 'text-red-400' },
         ]
     }
 ];
@@ -154,9 +157,9 @@ export const enterpriseDetailColumns: IColumns<IInventoryEntryDetail>[] = [
 
 export const enterprisePaymentColumns: IColumns<IInventoryEntryPayment>[] = [
     {
-        column: 'createdAt',
-        label: 'Fecha',
-        element: (data: IInventoryEntryPayment) => formatDate(data.createdAt),
+        column: 'accountName',
+        label: 'Cuenta',
+        element: (data: IInventoryEntryPayment) => data.payment?.account?.name || '-',
         orderBy: '',
         type: 'string',
         icon: false,
@@ -170,20 +173,44 @@ export const enterprisePaymentColumns: IColumns<IInventoryEntryPayment>[] = [
         icon: false,
     },
     {
-        column: 'accountName',
-        label: 'Cuenta',
-        element: (data: IInventoryEntryPayment) => data.payment?.account?.name || '-',
-        orderBy: '',
-        type: 'string',
-        icon: false,
-    },
-    {
         column: 'reference',
         label: 'Referencia',
         element: (data: IInventoryEntryPayment) => data.payment?.reference || '-',
         orderBy: '',
         type: 'string',
         icon: false,
+    },
+    {
+        column: 'createdAt',
+        label: 'Fecha',
+        element: (data: IInventoryEntryPayment) => formatDate(data.createdAt),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: '',
+        label: 'Editar',
+        element: () => '',
+        orderBy: '',
+        visible: true,
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Editar', icon: Edit, className: 'text-blue-800' },
+        ]
+    },
+    {
+        column: '',
+        label: 'Eliminar',
+        element: () => '',
+        orderBy: '',
+        visible: true,
+        type: 'string',
+        icon: true,
+        optionActions: [
+            { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
+        ]
     }
 ];
 

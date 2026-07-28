@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/datepicker/DatePicker";
 import { Snackbar } from "@/components/snackbar/Snackbar";
 import toast from "react-hot-toast";
-import { IInventoryEntry } from "@/interfaces/inventory.interface";
+import { IInventoryEntry, IInventoryEntryPayment } from "@/interfaces/inventory.interface";
 import { formatDateOnly, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { EntryPaymentForm as EntryPaymentFormType } from "@/interfaces/inventory.interface";
 import { AccountPay } from "@/interfaces/payment.interface";
@@ -19,9 +19,10 @@ interface EntryPaymentFormProps {
     accounts: AccountPay[];
     onSubmit: (data: EntryPaymentFormType) => void;
     onCancel: () => void;
+    paymentToEdit?: IInventoryEntryPayment | null;
 }
 
-export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, onSubmit, onCancel }) => {
+export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, onSubmit, onCancel, paymentToEdit }) => {
     const [amount, setAmount] = useState<number>(0);
     const [accountId, setAccountId] = useState<number>(0);
     const [reference, setReference] = useState<string>('');
@@ -33,6 +34,19 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
     const dolarRateBase = Number(dolar?.dolar || 0);
     const [dolarRate, setDolarRate] = useState<number>(dolarRateBase);
     const [dolarId, setDolarId] = useState<number>(dolarRateBase);
+
+    const isEditing = !!paymentToEdit;
+
+    useEffect(() => {
+        if (paymentToEdit) {
+            setAmount(Number(paymentToEdit.payment.amount));
+            setAccountId(paymentToEdit.payment.accountId);
+            setReference(paymentToEdit.payment.reference);
+            setDescription(paymentToEdit.payment.description || '');
+            setPaymentDate(new Date(paymentToEdit.payment.paymentDate));
+            setDolarId(paymentToEdit.payment.dolarId);
+        }
+    }, [paymentToEdit]);
 
     const remaining = Number(entry.remaining);
 
@@ -253,7 +267,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                     Cancelar
                 </Button>
                 <Button onClick={onSubmitForm} variant="default" className="bg-[#6f4e37] hover:bg-[#5a3e2e] text-white">
-                    Registrar Pago
+                    {isEditing ? 'Actualizar Pago' : 'Registrar Pago'}
                 </Button>
             </div>
         </div>

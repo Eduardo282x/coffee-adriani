@@ -6,9 +6,11 @@ import {
     createInventoryEntry,
     updateInventoryEntry,
     deleteInventoryEntry,
-    InventoryHistoryFilter
+    InventoryHistoryFilter,
+    deleteEntryPayment as deleteEntryPaymentService,
+    updateEntryPayment as updateEntryPaymentService
 } from '@/services/inventory.service';
-import { PaginatedEntryResponse, CreateInventoryEntryForm } from '@/interfaces/inventory.interface';
+import { PaginatedEntryResponse, CreateInventoryEntryForm, EntryPaymentForm } from '@/interfaces/inventory.interface';
 import { formatDateOnly } from './formaters';
 
 interface UseEnterpriseEntriesOptions {
@@ -63,7 +65,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
     });
 
     const updateEntryMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: CreateInventoryEntryForm }) => 
+        mutationFn: ({ id, data }: { id: number; data: CreateInventoryEntryForm }) =>
             updateInventoryEntry(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
@@ -80,6 +82,23 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
     });
+
+    const deletePaymentMutation = useMutation({
+        mutationFn: deleteEntryPaymentService,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
+        },
+    })
+
+    const updatePaymentMutation = useMutation({
+        mutationFn: ({ paymentId, data }: { paymentId: number; data: EntryPaymentForm }) =>
+            updateEntryPaymentService(paymentId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
+        },
+    })
 
     const processedData = useMemo(() => {
         if (!entriesData) return null;
@@ -130,10 +149,19 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         return deleteEntryMutation.mutateAsync(id);
     }, [deleteEntryMutation]);
 
+    const deleteEntryPayment = useCallback(async (id: number) => {
+        return deletePaymentMutation.mutateAsync(id);
+    }, [deletePaymentMutation]);
+
+    const updatePayment = useCallback(async (paymentId: number, data: EntryPaymentForm) => {
+        return updatePaymentMutation.mutateAsync({ paymentId, data });
+    }, [updatePaymentMutation]);
+
     const isLoading = isLoadingEntries;
-    const isMutating = createEntryMutation.isPending || 
-        updateEntryMutation.isPending || 
-        deleteEntryMutation.isPending;
+    const isMutating = createEntryMutation.isPending ||
+        updateEntryMutation.isPending ||
+        deleteEntryMutation.isPending ||
+        updatePaymentMutation.isPending;
 
     return {
         entries: processedData?.entries || [],
@@ -142,22 +170,25 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         isLoading,
         isLoadingMore: isFetchingNextPage,
         isMutating,
-        
+
         hasMore: processedData?.hasMore || false,
         loadMore: loadMoreEntries,
-        
+
         applyDateFilter,
         handleChangeSearch,
         handleChangeSearchValue: search,
         handleChangeSupplier,
         supplierId,
-        
+
         createEntry,
         updateEntry,
         removeEntry: deleteEntry,
-        
+
+        deletePayment: deleteEntryPayment,
+        updatePayment,
+
         refetch: refetchEntries,
-        
+
         error: entriesError
     };
 };

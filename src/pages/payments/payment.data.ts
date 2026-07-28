@@ -2,7 +2,7 @@ import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IInvoice, IInvoiceForPay } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
-import { Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineCash } from "react-icons/hi";
 import { MdOutlinePlaylistRemove } from "react-icons/md";
@@ -138,7 +138,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         type: 'string',
         icon: true,
         optionActions: [
-            { label: 'Editar', icon: HiOutlineCash, className: 'text-blue-800' },
+            { label: 'Editar', icon: Edit, className: 'text-blue-800' },
             { label: 'Confirmar', icon: FaRegCheckCircle, className: 'text-blue-400' },
             { label: 'Pagar', icon: HiOutlineCash, className: 'text-green-400' },
             { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },

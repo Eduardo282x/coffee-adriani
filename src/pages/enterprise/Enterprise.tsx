@@ -12,7 +12,7 @@ import { enterpriseColumns, enterpriseDetailColumns, enterprisePaymentColumns } 
 import { EnterpriseForm } from './EnterpriseForm';
 import { EntryPaymentForm } from './EntryPaymentForm';
 import { useEnterpriseEntries } from '@/hooks/enterprise-entries.hook';
-import { IInventoryEntry, CreateInventoryEntryForm, EntryPaymentForm as EntryPaymentFormType, EntryPaymentsResponse } from '@/interfaces/inventory.interface';
+import { IInventoryEntry, CreateInventoryEntryForm, EntryPaymentForm as EntryPaymentFormType, EntryPaymentsResponse, IInventoryEntryPayment } from '@/interfaces/inventory.interface';
 import { productStore } from '@/store/productStore';
 import { useSuppliers } from '@/hooks/supplier.hook';
 import { useOptimizedPayments } from '@/hooks/payment.hook';
@@ -24,9 +24,11 @@ import { DolarComponents } from '@/components/dolar/DolarComponents';
 export const Enterprise = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+    const [openDeletePaymentDialog, setOpenDeletePaymentDialog] = useState<boolean>(false);
     const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
     const [openPaymentsListDialog, setOpenPaymentsListDialog] = useState<boolean>(false);
     const [entrySelected, setEntrySelected] = useState<IInventoryEntry | null>(null);
+    const [entryPaymentSelected, setEntryPaymentSelected] = useState<IInventoryEntryPayment | null>(null);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [entryPayments, setEntryPayments] = useState<EntryPaymentsResponse | null>(null);
 
@@ -44,6 +46,8 @@ export const Enterprise = () => {
         createEntry,
         updateEntry,
         removeEntry,
+        deletePayment,
+        updatePayment,
         applyDateFilter,
         handleChangeSearch,
         refetch,
@@ -84,13 +88,21 @@ export const Enterprise = () => {
             setEntrySelected(data);
             setTimeout(() => setOpenPaymentDialog(true), 0);
         }
-        if (action === 'Editar') {
+        if (action === 'Editar Factura') {
             setEntrySelected(data);
             setTimeout(() => setOpenDialog(true), 0);
         }
+    };
+
+    const getActionPayments = async (action: string, data: IInventoryEntryPayment) => {
+        if (action === 'Editar') {
+            setEntryPaymentSelected(data);
+            setOpenPaymentsListDialog(false);
+            setTimeout(() => setOpenPaymentDialog(true), 0);
+        }
         if (action === 'Eliminar') {
-            setEntrySelected(data);
-            setTimeout(() => setOpenDeleteDialog(true), 0);
+            setEntryPaymentSelected(data);
+            setTimeout(() => setOpenDeletePaymentDialog(true), 0);
         }
     };
 
@@ -117,21 +129,32 @@ export const Enterprise = () => {
         if (entrySelected) {
             await removeEntry(entrySelected.id);
         }
-        setOpenDeleteDialog(false);
+        setOpenDeletePaymentDialog(false);
         setEntrySelected(null);
+    };
+
+    const handleDeletePayment = async () => {
+        if (entryPaymentSelected) {
+            await deletePayment(entryPaymentSelected.payment.id);
+        }
+        setOpenDeletePaymentDialog(false);
+        setEntryPaymentSelected(null);
     };
 
     const handlePaymentSubmit = async (data: EntryPaymentFormType) => {
         try {
-            // The payment creation is handled by the entry-payments endpoint
-            // We need to call it from here
-            const { createEntryPayment } = await import('@/services/inventory.service');
-            await createEntryPayment(data);
+            if (entryPaymentSelected) {
+                await updatePayment(entryPaymentSelected.payment.id, data);
+            } else {
+                const { createEntryPayment } = await import('@/services/inventory.service');
+                await createEntryPayment(data);
+            }
             setOpenPaymentDialog(false);
             setEntrySelected(null);
+            setEntryPaymentSelected(null);
             await refetch();
         } catch (error) {
-            console.error('Error al registrar pago:', error);
+            console.error('Error al guardar pago:', error);
         }
     };
 
@@ -235,15 +258,19 @@ export const Enterprise = () => {
                     open={openPaymentDialog}
                     setOpen={setOpenPaymentDialog}
                     className="w-[40rem]"
-                    label2="Registrar Pago"
-                    label1="Registrar Pago"
-                    isEdit={false}
+                    label2={entryPaymentSelected ? "Actualizar Pago" : "Registrar Pago"}
+                    label1={entryPaymentSelected ? "Actualizar Pago" : "Registrar Pago"}
+                    isEdit={!!entryPaymentSelected}
                 >
                     <EntryPaymentForm
                         entry={entrySelected}
                         accounts={paymentAccounts}
                         onSubmit={handlePaymentSubmit}
-                        onCancel={() => setOpenPaymentDialog(false)}
+                        onCancel={() => {
+                            setOpenPaymentDialog(false);
+                            setEntryPaymentSelected(null);
+                        }}
+                        paymentToEdit={entryPaymentSelected}
                     />
                 </DialogComponent>
             )}
@@ -277,7 +304,8 @@ export const Enterprise = () => {
                         {entryPayments?.payments && entryPayments.payments.length > 0 ? (
                             <TableComponent
                                 dataBase={entryPayments.payments}
-                                columns={enterprisePaymentColumns}>
+                                columns={enterprisePaymentColumns}
+                                action={getActionPayments}>
                             </TableComponent>
                         ) : (
                             <p className="text-center text-gray-500 py-4">No hay pagos registrados</p>
@@ -305,6 +333,34 @@ export const Enterprise = () => {
                         </Button>
                         <Button
                             onClick={handleDelete}
+                            className="text-lg bg-red-500 hover:bg-red-800 text-white"
+                            disabled={isMutating}
+                        >
+                            {isMutating ? 'Eliminando...' : 'Eliminar'}
+                        </Button>
+                    </div>
+                </DialogComponent>
+            )}
+
+            {openDeletePaymentDialog && (
+                <DialogComponent
+                    open={openDeletePaymentDialog}
+                    setOpen={setOpenDeletePaymentDialog}
+                    className="w-[28rem]"
+                    label2=""
+                    label1="¿Deseas eliminar este pago?"
+                    isEdit={true}
+                >
+                    <div className="flex items-center justify-center gap-8 mt-5">
+                        <Button
+                            onClick={() => setOpenDeletePaymentDialog(false)}
+                            className="text-lg"
+                            disabled={isMutating}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleDeletePayment}
                             className="text-lg bg-red-500 hover:bg-red-800 text-white"
                             disabled={isMutating}
                         >
