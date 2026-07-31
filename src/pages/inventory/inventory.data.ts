@@ -81,7 +81,7 @@ export const inventoryColumnsHistory: IColumns<IInventoryEntry>[] = [
     {
         label: 'Total de Bultos',
         column: 'totalPackages',
-        element: (data: IInventoryEntry) => data.details.reduce((sum, detail) => sum + detail.quantity, 0).toString(),
+        element: (data: IInventoryEntry) => Number(data.totalBultos).toString(),
         orderBy: '',
         type: 'string',
         icon: false,
