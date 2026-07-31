@@ -18,6 +18,8 @@ import {
     checkInvoicesPayment,
 } from '@/services/invoice.service';
 import { formatDateOnly } from './formaters';
+import { useOptimizedInventory } from './inventory.hook';
+import { putInventory } from '@/services/inventory.service';
 
 interface UseInvoicesOptions {
     pageSize?: number;
@@ -35,6 +37,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
 
     const queryClient = useQueryClient();
+
+    const { inventory: inventoryList, invalidateInventory } = useOptimizedInventory({ enableHistory: false });
 
     const invalidateInvoiceQueries = useCallback(async () => {
         await Promise.all([
@@ -118,7 +122,23 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     // 3. Mutaciones
     const createInvoiceMutation = useMutation({
         mutationFn: postInvoice,
-        onSuccess: invalidateInvoiceQueries,
+        onSuccess: async (data: any) => {
+            await invalidateInvoiceQueries();
+            if (!data || data.success === false || !Array.isArray(data.details)) return;
+
+            await Promise.all(
+                data.details.map(async (detail: any) => {
+                    const item = inventoryList.find((inv) => inv.productId === detail.productId);
+                    if (!item) return;
+                    await putInventory(item.id, {
+                        productId: detail.productId,
+                        quantity: item.quantity - detail.quantity,
+                    });
+                })
+            );
+
+            await invalidateInventory();
+        },
     });
 
     const updateInvoiceMutation = useMutation({
