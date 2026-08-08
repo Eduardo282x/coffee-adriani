@@ -35,6 +35,7 @@ export interface IPayments {
     account: Account;
     amountUSD: string | number;
     amountBs: string;
+    type: string;
     InvoicePayment: InvoicePayment[];
 }
 
@@ -81,6 +82,7 @@ export interface IPaymentForm {
     time?: string;
     accountId: number;
     description?: string;
+    type?: string;
 }
 
 export interface AssociatePayInvoice {
@@ -149,6 +151,12 @@ export interface PaymentStatisticsResponse {
         totalUSD: number;
         totalRemainingBs: number;
         totalRemainingUSD: number;
+    };
+    expenses: {
+        totalBs: number;
+        totalUSD: number;
+        total: number;
+        count: number;
     };
     counts: {
         total: number;

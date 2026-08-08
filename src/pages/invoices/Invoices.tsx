@@ -97,11 +97,14 @@ export const InvoicesPage = () => {
 
     const generateInvoice = async (data: IInvoiceForm) => {
         try {
-            if (selectInvoice) {
-                await updateInvoice(selectInvoice.id, data);
-            } else {
-                await createInvoice(data);
+            const response = selectInvoice
+                ? await updateInvoice(selectInvoice.id, data)
+                : await createInvoice(data);
+
+            if (!response || response.success === false) {
+                return;
             }
+
             setOpenDialog(false);
             setSelectInvoice(null);
             socket.emit('message', 'Actualice inventario');

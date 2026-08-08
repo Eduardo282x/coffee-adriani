@@ -173,6 +173,14 @@ export const Payments = () => {
                     return notify('Este pago ya no posee fondos');
                 }
 
+                if (data.type === 'SUPPLIER') {
+                    return notify('No se puede asociar un pago a proveedor a una factura');
+                }
+
+                if (data.type === 'PERSONAL_EXPENSES') {
+                    return notify('No se puede asociar un gasto personal a una factura');
+                }
+
                 return setTimeout(() => setOpenPayDialog(true), 0);
 
             case 'Editar':
@@ -328,6 +336,11 @@ export const Payments = () => {
                                     <p className='text-lg'>
                                         <span className='font-semibold'>Total $:</span> {formatOnlyNumberWithDots(statistics.totals.totalUSD)} $
                                     </p>
+                                    {statistics.expenses && (
+                                        <p className='text-lg'>
+                                            <span className='font-semibold'>Gastos:</span> {formatOnlyNumberWithDots(statistics.expenses.total)} $
+                                        </p>
+                                    )}
                                 </>
                             )}
                         </div>

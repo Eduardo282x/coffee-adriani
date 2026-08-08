@@ -18,6 +18,7 @@ export interface FilterPayments {
     status?: string;
     associated?: boolean;
     accountType?: string;
+    paymentType?: string;
 }
 
 export const getPayment = async () => {

@@ -3,7 +3,9 @@ import axios from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 
 export const api = axios.create({
+    // baseURL: `https://qjf5hfj3-3000.use2.devtunnels.ms/api`
     baseURL: `${import.meta.env.VITE_BASE_URL_API}/api`
+    // baseURL: `http://185.237.253.171/api`
 })
 
 api.interceptors.request.use(
@@ -31,14 +33,6 @@ export const getDataFileApi = (endpoint: string) => {
     return api.get(endpoint, {
         responseType: 'blob',
     },).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response.data;
-    })
-}
-
-export const getParamsDataApi = (endpoint: string, params: string) => {
-    return api.get(endpoint, { params }).then((response) => {
         return response.data;
     }).catch(err => {
         return err.response.data;

@@ -31,8 +31,15 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
             time: defaultTime,
             accountId: 0,
             description: '',
+            type: 'INCOME',
         }
     });
+
+    const paymentTypeOptions = useMemo<IOptions[]>(() => [
+        { label: 'Entrada', value: 'INCOME' },
+        { label: 'Gasto de empresa', value: 'EXPENSE' },
+        { label: 'Gasto personal', value: 'PERSONAL_EXPENSES' },
+    ], []);
 
     const accountsOptions = useMemo<IOptions[]>(() => {
         return accounts.map(item => ({
@@ -56,6 +63,7 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
                 time: new Date(data.paymentDate).toISOString().split('T')[1].slice(0, 5),
                 accountId: Number(data.accountId),
                 description: data.description,
+                type: data.type || 'INCOME',
             }
             setDateDispatch(data.paymentDate);
 
@@ -69,8 +77,10 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
 
     useEffect(() => {
         const findAccount = accountsOptions.find(item => item.value == selectedAccountId?.toString());
-        setShowFieldDescription(findAccount?.label.includes('Gastos') as boolean)
-    }, [accountsOptions, selectedAccountId])
+        const isGastos = findAccount?.label.includes('Gastos') as boolean;
+        setShowFieldDescription(isGastos);
+        form.setValue('type', isGastos ? 'EXPENSE' : 'INCOME');
+    }, [accountsOptions, selectedAccountId, form])
 
     const onSubmitForm = (data: IPaymentForm) => {
         const dateObj = typeof paymentDate === 'string' ? new Date(paymentDate) : paymentDate;
@@ -82,6 +92,7 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
             accountId: Number(data.accountId),
             paymentDate: newPaymentDate,
             description: form.getValues('description'),
+            type: form.getValues('type'),
         }
         onSubmit(parseData)
     }
@@ -140,6 +151,13 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
 
                 {showFieldDescription && (
                     <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <FormSelect
+                            form={form}
+                            name='type'
+                            label='Tipo de pago'
+                            placeholder='Seleccione tipo'
+                            options={paymentTypeOptions}
+                        />
                         <Label className="text-right">
                             Tipo de gasto
                         </Label>
