@@ -20,6 +20,7 @@ import {
 import { formatDateOnly } from './formaters';
 import { useOptimizedInventory } from './inventory.hook';
 import { putInventory } from '@/services/inventory.service';
+import { invoiceFilterStore } from '@/store/invoiceFilterStore';
 
 interface UseInvoicesOptions {
     pageSize?: number;
@@ -30,11 +31,11 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const { pageSize = 50, enableStatistics = true } = options;
     const [dateFilter, setDateFilter] = useState<DateRangeFilter | null>(null);
     const [invoiceId, setInvoiceId] = useState<number | null>(null);
-    const [search, setSearch] = useState<string>('');
-    const [selectedZone, setSelectedZone] = useState<string>('all');
-    const [selectedBlock, setSelectedBlock] = useState<string>('all');
-    const [selectedTypeProduct, setSelectedTypeProduct] = useState<string>('Cafe');
-    const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>('all');
+    const search = invoiceFilterStore((state) => state.search);
+    const selectedZone = invoiceFilterStore((state) => state.selectedZone);
+    const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
+    const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
+    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
 
     const queryClient = useQueryClient();
 
@@ -201,23 +202,23 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     }, []);
 
     const handleChangeSearch = useCallback((filter: string) => {
-        setSearch(filter);
+        invoiceFilterStore.getState().setSearch(filter);
     }, []);
 
     const handleChangeBlock = useCallback((option: string) => {
-        setSelectedBlock(option);
+        invoiceFilterStore.getState().setSelectedBlock(option);
     }, []);
 
     const handleChangeZone = useCallback((option: string) => {
-        setSelectedZone(option);
+        invoiceFilterStore.getState().setSelectedZone(option);
     }, []);
 
     const handleChangeTypeProduct = useCallback((option: string) => {
-        setSelectedTypeProduct(option);
+        invoiceFilterStore.getState().setSelectedTypeProduct(option);
     }, []);
 
     const handleChangeStatusInvoice = useCallback((option: InvoiceStatus) => {
-        setSelectedStatus(option);
+        invoiceFilterStore.getState().setSelectedStatus(option);
     }, []);
 
     // 6. Funciones de mutación wrapper

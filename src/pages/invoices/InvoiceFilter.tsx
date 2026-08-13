@@ -7,74 +7,53 @@ import { Filter } from "@/components/table/Filter"
 import { Block } from "@/interfaces/clients.interface"
 import { FC, useEffect, useState } from "react"
 import { blockStore } from "@/store/clientStore"
-import { DateRange } from "react-day-picker"
-import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
+import { InvoiceApi, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 import { getProductType } from "@/services/products.service"
 import { ProductType } from "@/interfaces/product.interface"
+import { invoiceFilterStore } from "@/store/invoiceFilterStore"
 // useOptimizedInvoices removed to avoid creating a separate hook instance here
 
-interface IInvoiceFilter extends FilterGroupsProps {
+interface IInvoiceFilter {
     setInvoicesFilter: (value: InvoiceApi[]) => void;
     // invoice: InvoiceApi[];
-    clientColumns: IColumns<InvoiceAPINewInvoice>[];
-}
-
-interface FilterGroupsProps {
-    handleChangeStatusInvoice: (value: InvoiceStatus) => void;
-    handleChangeTypeProduct: (value: string) => void;
-    handleChangeZone: (value: string) => void;
-    handleChangeBlock: (value: string) => void;
-    handleChangeSearch: (value: string) => void;
-    dateStart: DateRange | undefined;
-    dateEnd: DateRange | undefined;
-    setDateStart: (date: DateRange | undefined) => void;
-    setDateEnd: (date: DateRange | undefined) => void;
-    selectedBlock?: string;
-    selectedStatus?: string;
-    selectedZone?: string;
-    selectedTypeProduct?: string;
+    clientColumns: IColumns<InvoiceApi>[];
 }
 
 export const InvoiceFilter: FC<IInvoiceFilter> = ({
     setInvoicesFilter,
-    handleChangeStatusInvoice,
-    handleChangeBlock,
-    handleChangeZone,
-    handleChangeSearch,
-    handleChangeTypeProduct,
-    dateStart,
-    dateEnd,
-    setDateStart,
-    setDateEnd,
-    // invoice,
-    clientColumns,
-    selectedBlock,
-    selectedStatus,
-    selectedZone,
-    selectedTypeProduct
+    clientColumns
 }) => {
+    const search = invoiceFilterStore((state) => state.search);
+    const setSearch = invoiceFilterStore((state) => state.setSearch);
+    const selectedZone = invoiceFilterStore((state) => state.selectedZone);
+    const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
+    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
+    const dateStart = invoiceFilterStore((state) => state.dateStart);
+    const setDateStart = invoiceFilterStore((state) => state.setDateStart);
+    const setSelectedZone = invoiceFilterStore((state) => state.setSelectedZone);
+    const setSelectedBlock = invoiceFilterStore((state) => state.setSelectedBlock);
+    const setSelectedStatus = invoiceFilterStore((state) => state.setSelectedStatus);
+    const setSelectedTypeProduct = invoiceFilterStore((state) => state.setSelectedTypeProduct);
 
     return (
         <div className="flex items-center gap-3">
 
             <div className="w-60">
                 <Label className="mb-2">Buscar</Label>
-                <Filter dataBase={[]} setSearch={handleChangeSearch} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} />
+                <Filter dataBase={[]} setSearch={setSearch} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} initialValue={search} />
             </div>
 
             <DropDownFilter>
                 <FiltersGroups
-                    handleChangeStatusInvoice={handleChangeStatusInvoice}
-                    handleChangeTypeProduct={handleChangeTypeProduct}
-                    handleChangeZone={handleChangeZone}
-                    handleChangeBlock={handleChangeBlock}
-                    handleChangeSearch={handleChangeSearch}
+                    handleChangeStatusInvoice={setSelectedStatus}
+                    handleChangeTypeProduct={setSelectedTypeProduct}
+                    handleChangeZone={setSelectedZone}
+                    handleChangeBlock={setSelectedBlock}
                     dateStart={dateStart}
-                    dateEnd={dateEnd}
                     setDateStart={setDateStart}
-                    setDateEnd={setDateEnd}
                     selectedZone={selectedZone}
                     selectedStatus={selectedStatus}
                     selectedBlock={selectedBlock}
@@ -94,14 +73,23 @@ const FiltersGroups = ({
     handleChangeTypeProduct,
     handleChangeZone,
     dateStart,
-    // dateEnd,
     setDateStart,
-    // setDateEnd,
     selectedZone,
     selectedStatus,
     selectedBlock,
     selectedTypeProduct
-}: FilterGroupsProps) => {
+}: {
+    handleChangeStatusInvoice: (value: InvoiceStatus) => void;
+    handleChangeTypeProduct: (value: string) => void;
+    handleChangeZone: (value: string) => void;
+    handleChangeBlock: (value: string) => void;
+    dateStart: import("react-day-picker").DateRange | undefined;
+    setDateStart: (date: import("react-day-picker").DateRange | undefined) => void;
+    selectedBlock?: string;
+    selectedStatus?: string;
+    selectedZone?: string;
+    selectedTypeProduct?: string;
+}) => {
     const { blocks, getBlocksApi } = blockStore();
     const [types, setTypes] = useState<ProductType[]>([]);
     const zones = [
@@ -141,12 +129,11 @@ const FiltersGroups = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectItem value='all'>Todos</SelectItem>
-                            {/* <SelectItem value='Creada'>Creada</SelectItem> */}
                             <SelectItem value='Pagado'>Pagado</SelectItem>
                             <SelectItem value='Pendiente'>Pendiente</SelectItem>
                             <SelectItem value='Abonadas'>Abonadas</SelectItem>
                             <SelectItem value='Vencida'>Vencida</SelectItem>
-                            {/* <SelectItem value='Cancelada'>Cancelada</SelectItem> */}
+                            <SelectItem value='Perdidas'>Perdidas</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>

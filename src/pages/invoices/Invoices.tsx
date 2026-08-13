@@ -8,7 +8,6 @@ import { InvoiceForm } from "./InvoiceForm"
 import { IInvoiceForm, DateRangeFilter, InvoiceInvoice, ExportInvoicesDashboard } from "@/interfaces/invoice.interface"
 import { getInvoiceExcelFilter } from "@/services/invoice.service"
 import { ExpansibleInvoice } from "@/components/expansible/Expansible"
-import { DateRange } from "react-day-picker"
 import { InvoiceFilter } from "./InvoiceFilter"
 import { TableComponent } from "@/components/table/TableComponent"
 import { socket, useSocket } from "@/services/socket.io"
@@ -21,12 +20,23 @@ import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { useOptimizedInvoices } from '@/hooks/invoice.hook';
 import { useOptimizedInventory } from "@/hooks/inventory.hook";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { blockStore } from "@/store/clientStore";
+import { format } from "date-fns";
+import { es } from "react-day-picker/locale";
+import { invoiceFilterStore } from "@/store/invoiceFilterStore";
 
 export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [selectInvoice, setSelectInvoice] = useState<InvoiceInvoice | null>(null);
     const [loadingFile, setLoadingFile] = useState<boolean>(false);
-    const [dateStart, setDateStart] = useState<DateRange | undefined>(undefined);
+    const dateStart = invoiceFilterStore((state) => state.dateStart);
+    const search = invoiceFilterStore((state) => state.search);
+    const selectedZone = invoiceFilterStore((state) => state.selectedZone);
+    const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
+    const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
+    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const { blocks } = blockStore();
     const { inventory: inventoryList } = useOptimizedInventory();
 
     const inventory = useMemo<GroupInventoryDate>(() => {
@@ -36,6 +46,39 @@ export const InvoicesPage = () => {
         }));
         return { allInventory: inventoryList, inventory: parseInventory };
     }, [inventoryList]);
+
+    const activeFilters = useMemo<{ id: string, label: string }[]>(() => {
+        const filters: { id: string, label: string }[] = [];
+
+        if (search) {
+            filters.push({ id: 'search', label: `Buscar: ${search}` });
+        }
+
+        if (selectedZone && selectedZone !== 'all') {
+            filters.push({ id: 'zone', label: `Zona: ${selectedZone}` });
+        }
+
+        if (selectedBlock && selectedBlock !== 'all') {
+            const blockName = blocks.allBlocks.find((b) => b.id.toString() === selectedBlock)?.name;
+            filters.push({ id: 'block', label: `Bloque: ${blockName ?? selectedBlock}` });
+        }
+
+        if (selectedTypeProduct && selectedTypeProduct !== 'Cafe') {
+            filters.push({ id: 'type', label: `Producto: ${selectedTypeProduct}` });
+        }
+
+        if (selectedStatus && selectedStatus !== 'all') {
+            filters.push({ id: 'status', label: `Estado: ${selectedStatus}` });
+        }
+
+        if (dateStart?.to) {
+            const from = dateStart.from ? format(dateStart.from, 'dd MMM', { locale: es }) : '';
+            const to = format(dateStart.to, 'dd MMM', { locale: es });
+            filters.push({ id: 'date', label: `Fecha: ${from} - ${to}` });
+        }
+
+        return filters;
+    }, [search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, dateStart, blocks.allBlocks]);
 
     // Hook optimizado
     const {
@@ -48,15 +91,6 @@ export const InvoicesPage = () => {
         hasMore,
         loadMore,
         applyDateFilter,
-        handleChangeBlock,
-        handleChangeSearch,
-        handleChangeStatusInvoice,
-        handleChangeTypeProduct,
-        handleChangeZone,
-        selectedZone,
-        selectedBlock,
-        selectedStatus,
-        selectedTypeProduct,
 
         createInvoice,
         updateInvoice,
@@ -233,6 +267,15 @@ export const InvoicesPage = () => {
 
                 <div className="flex items-center gap-2 lg:gap-4">
                     <DolarComponents />
+                    {activeFilters.length > 0 && (
+                        <div className="hidden lg:flex flex-wrap items-center gap-1">
+                            {activeFilters.map((filter) => (
+                                <Badge key={filter.id} variant="outline" className="bg-transparent border-[#ebe0d2]/40 text-[#ebe0d2]">
+                                    {filter.label}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
                     <Button onClick={newInvoices} disabled={isMutating}>
                         <Plus className="mr-2 h-4 w-4" />
                         <span className="hidden lg:block">Nueva Factura</span>
@@ -263,20 +306,6 @@ export const InvoicesPage = () => {
                         </Button>
                         <InvoiceFilter
                             setInvoicesFilter={() => { }} // Ya no necesario con el hook
-                            handleChangeStatusInvoice={handleChangeStatusInvoice}
-                            handleChangeBlock={handleChangeBlock}
-                            handleChangeTypeProduct={handleChangeTypeProduct}
-                            handleChangeZone={handleChangeZone}
-                            selectedBlock={selectedBlock}
-                            selectedStatus={selectedStatus}
-                            selectedZone={selectedZone}
-                            selectedTypeProduct={selectedTypeProduct}
-                            dateStart={dateStart}
-                            setDateStart={setDateStart}
-                            dateEnd={undefined}
-                            setDateEnd={() => { }}
-                            handleChangeSearch={handleChangeSearch}
-                            // invoice={invoices}
                             clientColumns={clientColumns}
                         />
                     </div>

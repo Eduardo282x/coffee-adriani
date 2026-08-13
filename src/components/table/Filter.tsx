@@ -15,10 +15,11 @@ interface IFilter {
     disabledEffect?: boolean;
     filterInvoices?: boolean;
     filterInvoicesPayments?: boolean;
+    initialValue?: string;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments }) => {
-    const [filter, setFilter] = useState<string>('');
+export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments, initialValue = '' }) => {
+    const [filter, setFilter] = useState<string>(initialValue);
 
     useEffect(() => {
         if (!disabledEffect) {
