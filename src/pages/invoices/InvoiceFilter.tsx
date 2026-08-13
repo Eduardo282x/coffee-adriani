@@ -7,7 +7,7 @@ import { Filter } from "@/components/table/Filter"
 import { Block } from "@/interfaces/clients.interface"
 import { FC, useEffect, useState } from "react"
 import { blockStore } from "@/store/clientStore"
-import { InvoiceApi, InvoiceStatus } from "@/interfaces/invoice.interface"
+import { InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 import { getProductType } from "@/services/products.service"
@@ -16,9 +16,9 @@ import { invoiceFilterStore } from "@/store/invoiceFilterStore"
 // useOptimizedInvoices removed to avoid creating a separate hook instance here
 
 interface IInvoiceFilter {
-    setInvoicesFilter: (value: InvoiceApi[]) => void;
-    // invoice: InvoiceApi[];
-    clientColumns: IColumns<InvoiceApi>[];
+    setInvoicesFilter: (value: InvoiceAPINewInvoice[]) => void;
+    // invoice: InvoiceAPINewInvoice[];
+    clientColumns: IColumns<InvoiceAPINewInvoice>[];
 }
 
 export const InvoiceFilter: FC<IInvoiceFilter> = ({
