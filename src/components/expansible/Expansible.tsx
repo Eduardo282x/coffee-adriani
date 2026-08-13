@@ -14,20 +14,21 @@ import { ToolTip } from "../tooltip/ToolTip";
 import { BsFillEraserFill } from "react-icons/bs";
 // import { useOptimizedInvoices } from "@/hooks/invoice.hook";
 import { getInvoiceDetails } from "@/services/invoice.service";
-
+import { IoIosRemoveCircle } from "react-icons/io";
 interface ExpansibleProps {
     invoice: InvoiceAPINewInvoice;
     columns: IColumns<InvoiceInvoice>[];
     setLoading: (load: boolean) => void;
     editInvoice: (data: InvoiceInvoice) => void;
     payInvoices: (data: InvoiceInvoice) => void;
+    lostInvoices: (data: InvoiceInvoice) => void;
     pendingInvoices: (data: InvoiceInvoice) => void;
     cleanInvoices: (data: InvoiceInvoice) => void;
     checkInvoices: (data: InvoiceInvoice) => void;
     deleteInvoice: (id: number) => void;
 }
 
-export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, columns, deleteInvoice, editInvoice, payInvoices, pendingInvoices, cleanInvoices, checkInvoices }) => {
+export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, columns, deleteInvoice, editInvoice, payInvoices, lostInvoices, pendingInvoices, cleanInvoices, checkInvoices }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogDelete, setOpenDialogDelete] = useState<boolean>(false);
@@ -89,6 +90,12 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
     const handlePayInvoice = () => {
         if (invoiceSelected) {
             payInvoices(invoiceSelected);
+            setOpenDialog(false);
+        }
+    }
+    const handleLostInvoice = () => {
+        if (invoiceSelected) {
+            lostInvoices(invoiceSelected);
             setOpenDialog(false);
         }
     }
@@ -173,6 +180,11 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
                             <ToolTip position="right" tooltip={"Marcar Pagada"}>
                                 <Button className="bg-green-700 hover:bg-green-600 text-white" onClick={handlePayInvoice}>
                                     <MdPayments />
+                                </Button>
+                            </ToolTip>
+                            <ToolTip position="right" tooltip={"Marcar Perdida"}>
+                                <Button className="bg-red-700 hover:bg-red-600 text-white" onClick={handleLostInvoice}>
+                                    <IoIosRemoveCircle />
                                 </Button>
                             </ToolTip>
                         </div>

@@ -23,7 +23,9 @@ export interface Statistics {
     packagePaidBS: number;
     packagePendingUSD: number;
     packagePendingBS: number;
+    packageLostTotal: number;
     detPackage: DetPackage[];
+    detPackageLost: DetPackage[];
     payments: Payments;
     summary: Summary;
 }

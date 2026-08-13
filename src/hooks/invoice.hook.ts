@@ -13,9 +13,9 @@ import {
     putPayInvoice,
     putPendingInvoice,
     putCleanInvoice,
-    checkInvoices,
     InvoiceFilterPaginate,
     checkInvoicesPayment,
+    putLostInvoices,
 } from '@/services/invoice.service';
 import { formatDateOnly } from './formaters';
 import { useOptimizedInventory } from './inventory.hook';
@@ -156,6 +156,11 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         onSuccess: invalidateInvoiceQueries,
     });
 
+    const lostInvoicesMutation = useMutation({
+        mutationFn: putLostInvoices,
+        onSuccess: invalidateInvoiceQueries,
+    });
+
     const pendingInvoiceMutation = useMutation({
         mutationFn: putPendingInvoice,
         onSuccess: invalidateInvoiceQueries,
@@ -168,11 +173,6 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
 
     const checkInvoiceMutation = useMutation({
         mutationFn: checkInvoicesPayment,
-        onSuccess: invalidateInvoiceQueries,
-    });
-
-    const checkInvoicesMutation = useMutation({
-        mutationFn: checkInvoices,
         onSuccess: invalidateInvoiceQueries,
     });
 
@@ -236,6 +236,10 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const payInvoice = useCallback(async (id: number) => {
         return payInvoiceMutation.mutateAsync(id);
     }, [payInvoiceMutation]);
+    
+    const lostInvoices = useCallback(async (id: number) => {
+        return lostInvoicesMutation.mutateAsync(id);
+    }, [lostInvoicesMutation]);
 
     const setPendingInvoice = useCallback(async (id: number) => {
         return pendingInvoiceMutation.mutateAsync(id);
@@ -249,20 +253,16 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         return checkInvoiceMutation.mutateAsync(id);
     }, [checkInvoiceMutation]);
 
-    const validateInvoices = useCallback(async () => {
-        return checkInvoicesMutation.mutateAsync();
-    }, [checkInvoicesMutation]);
-
     // 7. Estado de carga general
     const isLoading = isLoadingInvoices || isLoadingStatistics;
     const isMutating = createInvoiceMutation.isPending ||
         updateInvoiceMutation.isPending ||
         deleteInvoiceMutation.isPending ||
         payInvoiceMutation.isPending ||
+        lostInvoicesMutation.isPending ||
         pendingInvoiceMutation.isPending ||
         cleanInvoiceMutation.isPending ||
-        checkInvoiceMutation.isPending ||
-        checkInvoicesMutation.isPending;
+        checkInvoiceMutation.isPending
 
     return {
         // Datos
@@ -301,10 +301,10 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         updateInvoice,
         removeInvoice,
         payInvoice,
+        lostInvoices,
         setPendingInvoice,
         cleanInvoice,
         checkOneInvoice,
-        validateInvoices,
 
         // Control manual
         refetch: refetchInvoices,

@@ -168,6 +168,8 @@ export const getBadgeVariant = (estado: string) => {
             return "rounded-lg px-2 bg-red-100 text-red-800"
         case "Cancelada":
             return "rounded-lg px-2 bg-red-100 text-red-800"
+        case "Perdidas":
+            return "rounded-lg px-2 bg-red-100 text-red-800"
         default:
             return "rounded-lg px-2 bg-gray-100 text-gray-800"
     }

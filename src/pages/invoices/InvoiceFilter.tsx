@@ -94,9 +94,9 @@ const FiltersGroups = ({
     handleChangeTypeProduct,
     handleChangeZone,
     dateStart,
-    dateEnd,
+    // dateEnd,
     setDateStart,
-    setDateEnd,
+    // setDateEnd,
     selectedZone,
     selectedStatus,
     selectedBlock,
@@ -130,7 +130,7 @@ const FiltersGroups = ({
     return (
         <div className="flex flex-col items-start justify-start gap-2 p-1">
             <DateRangePicker setDatePicker={setDateStart} datePicker={dateStart} label={'Fecha de despacho'} />
-            <DateRangePicker setDatePicker={setDateEnd} datePicker={dateEnd} label={'Fecha de vencimiento'} />
+            {/* <DateRangePicker setDatePicker={setDateEnd} datePicker={dateEnd} label={'Fecha de vencimiento'} /> */}
 
             <div className="w-full">
                 <Label className="mb-2">Estado Factura</Label>

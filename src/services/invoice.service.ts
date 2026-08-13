@@ -96,14 +96,6 @@ export const checkInvoicesPayment = async (invoiceId: number) => {
     }
 }
 
-export const checkInvoices = async () => {
-    try {
-        return await postDataApi(`${routeInvoice}/check`, {});
-    } catch (err) {
-        return err
-    }
-}
-
 export const getInvoiceFilter = async (filter: DateRangeFilter) => {
     try {
         return await postDataApi(`${routeInvoice}/filter`, filter);
@@ -146,6 +138,13 @@ export const putInvoice = async (id: number, data: IInvoiceForm) => {
 export const putPayInvoice = async (id: number) => {
     try {
         return await putDataApi(`${routeInvoice}/pay/${id}`, {});
+    } catch (err) {
+        return err
+    }
+}
+export const putLostInvoices = async (id: number) => {
+    try {
+        return await putDataApi(`${routeInvoice}/lost/${id}`, {});
     } catch (err) {
         return err
     }

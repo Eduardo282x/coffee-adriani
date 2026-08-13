@@ -7,6 +7,7 @@ import { Package, ShoppingCart, Users } from "lucide-react"
 import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
 import { CardDashboard } from "./components/CardDashboard"
+import { DashboardSkeleton } from "./components/DashboardSkeleton"
 import { Buckets } from "@/interfaces/dashboard.interface"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
@@ -105,8 +106,8 @@ export const Dashboard = () => {
     return (
         <div className="flex flex-col ">
 
-            {(isLoading || isExporting) && <ScreenLoader />}
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
+            {isExporting && <ScreenLoader />}
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Dashboard</h1>
@@ -150,18 +151,22 @@ export const Dashboard = () => {
                 </div>
 
 
-                {dashBoardData && dashBoardData.invoices && (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {/* <CardDashboard title="Ventas Totales" mainNumber="$45,231.89" percent="+20.1%" icon={DollarSign} subtitle="desde el último período"></CardDashboard> */}
+                {isLoading ? (
+                    <DashboardSkeleton />
+                ) : (
+                    <>
+                        {dashBoardData && dashBoardData.invoices && (
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                {/* <CardDashboard title="Ventas Totales" mainNumber="$45,231.89" percent="+20.1%" icon={DollarSign} subtitle="desde el último período"></CardDashboard> */}
 
-                        <CardDashboard title="Total de Clientes" number={dashBoardData.invoices.totalClients} icon={Users}></CardDashboard>
-                        <CardDashboard title="Facturas Pagadas" number={dashBoardData.invoices.payed.amount} icon={Package}></CardDashboard>
-                        <CardDashboard title="Facturas Pendientes" number={dashBoardData.invoices.pending.amount} icon={ShoppingCart}></CardDashboard>
-                        <CardDashboard title="Facturas Vencidas" number={dashBoardData.invoices.expired.amount} icon={ShoppingCart}></CardDashboard>
-                    </div>
-                )}
+                                <CardDashboard title="Total de Clientes" number={dashBoardData.invoices.totalClients} icon={Users}></CardDashboard>
+                                <CardDashboard title="Facturas Pagadas" number={dashBoardData.invoices.payed.amount} icon={Package}></CardDashboard>
+                                <CardDashboard title="Facturas Pendientes" number={dashBoardData.invoices.pending.amount} icon={ShoppingCart}></CardDashboard>
+                                <CardDashboard title="Facturas Vencidas" number={dashBoardData.invoices.expired.amount} icon={ShoppingCart}></CardDashboard>
+                            </div>
+                        )}
 
-                <Tabs defaultValue="inventory" className="space-y-4">
+                        <Tabs defaultValue="inventory" className="space-y-4">
                     <TabsList>
                         {/* <TabsTrigger value="ventas">Ventas</TabsTrigger> */}
                         <TabsTrigger value="inventory">Inventario</TabsTrigger>
@@ -308,6 +313,8 @@ export const Dashboard = () => {
                         </div>
                     </TabsContent>
                 </Tabs>
+                    </>
+                )}
             </main>
         </div>
     )

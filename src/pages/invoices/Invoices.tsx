@@ -5,7 +5,6 @@ import { Download, Plus, Loader2 } from "lucide-react"
 import { clientColumns, invoiceColumns } from "./invoices.data"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { InvoiceForm } from "./InvoiceForm"
-import { MdUpdate } from "react-icons/md"
 import { IInvoiceForm, DateRangeFilter, InvoiceInvoice, ExportInvoicesDashboard } from "@/interfaces/invoice.interface"
 import { getInvoiceExcelFilter } from "@/services/invoice.service"
 import { ExpansibleInvoice } from "@/components/expansible/Expansible"
@@ -63,10 +62,10 @@ export const InvoicesPage = () => {
         updateInvoice,
         removeInvoice,
         payInvoice,
+        lostInvoices,
         setPendingInvoice,
         cleanInvoice,
         checkOneInvoice,
-        validateInvoices,
         error
     } = useOptimizedInvoices({
         pageSize: 50,
@@ -134,6 +133,14 @@ export const InvoicesPage = () => {
         }
     };
 
+    const lostInvoice = async (invoice: InvoiceInvoice) => {
+        try {
+            await lostInvoices(invoice.id);
+        } catch (error) {
+            console.error('Error al pagar factura:', error);
+        }
+    };
+
     const pendingInvoices = async (invoice: InvoiceInvoice) => {
         try {
             await setPendingInvoice(invoice.id);
@@ -155,14 +162,6 @@ export const InvoicesPage = () => {
             await checkOneInvoice(invoice.id);
         } catch (error) {
             console.error('Error al revisar factura:', error);
-        }
-    };
-
-    const checkInvoicesApi = async () => {
-        try {
-            await validateInvoices();
-        } catch (error) {
-            console.error('Error al validar facturas:', error);
         }
     };
 
@@ -233,18 +232,6 @@ export const InvoicesPage = () => {
                 </div>
 
                 <div className="flex items-center gap-2 lg:gap-4">
-                    <Button
-                        onClick={checkInvoicesApi}
-                        className="hidden lg:flex"
-                        disabled={isMutating}
-                    >
-                        {isMutating ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <MdUpdate className="mr-2 h-4 w-4" />
-                        )}
-                        Validar facturas
-                    </Button>
                     <DolarComponents />
                     <Button onClick={newInvoices} disabled={isMutating}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -328,9 +315,11 @@ export const InvoicesPage = () => {
                                 </div>
                                 <DetailsPackage
                                     detPackage={statistics.detPackage}
+                                    detPackageLost={statistics.detPackageLost}
                                     packagePaid={statistics.packagePaid}
                                     packagePaidBS={statistics.packagePaidBS}
                                     packagePaidUSD={statistics.packagePaidUSD}
+                                    packageLostTotal={statistics.packageLostTotal}
                                 />
                             </div>
                             <DetailsPayments payments={statistics.payments} />
@@ -350,6 +339,7 @@ export const InvoicesPage = () => {
                                     invoice={inv}
                                     columns={invoiceColumns}
                                     setLoading={setLoadingFile}
+                                    lostInvoices={lostInvoice}
                                     payInvoices={payInvoices}
                                     pendingInvoices={pendingInvoices}
                                     cleanInvoices={cleanInvoices}
