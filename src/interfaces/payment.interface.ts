@@ -146,13 +146,35 @@ export interface PaginatedPaymentResponse {
 }
 
 export interface PaymentStatisticsResponse {
+    totalLost: number;
     totals: {
         totalBs: number;
         totalUSD: number;
+        total: number;
+        remaining: number;
         totalRemainingBs: number;
         totalRemainingUSD: number;
+        unassociatedAmount: number;
     };
     expenses: {
+        totalBs: number;
+        totalUSD: number;
+        total: number;
+        count: number;
+    };
+    personalExpenses: {
+        totalBs: number;
+        totalUSD: number;
+        total: number;
+        count: number;
+    };
+    expensesGroup: {
+        totalBs: number;
+        totalUSD: number;
+        total: number;
+        count: number;
+    };
+    supplier: {
         totalBs: number;
         totalUSD: number;
         total: number;
@@ -163,14 +185,16 @@ export interface PaymentStatisticsResponse {
         associated: number;
         unassociated: number;
     };
-    byMethod: Array<{
-        accountId: number;
-        accountName: string;
-        method: string;
-        currency: string;
-        totalAmount: number;
-        count: number;
-    }>;
+    valores: {
+        originals: {
+            totalAmountBs: number;
+            totalAmountBsInUSD: number;
+        };
+        alter: {
+            totalAmountBs: number;
+            totalAmountBsInUSD: number;
+        };
+    };
 }
 
 export interface PaymentMutationResponse extends BaseResponse {

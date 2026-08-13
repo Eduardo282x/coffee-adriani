@@ -30,10 +30,10 @@ export const paymentsColumns: IColumns<IPayments>[] = [
     {
         column: 'associated',
         label: 'Asociado',
-        element: (data: IPayments) => data.associated ? 'Asociado' : 'Sin asociar',
+        element: (data: IPayments) => data.type == 'SUPPLIER' ? 'Pago Proveedor' : (data.associated ? 'Asociado' : 'Sin asociar'),
         orderBy: '',
         visible: true,
-        className: (data: IPayments) => getBadgeVariantAssociated(data.associated),
+        className: (data: IPayments) => data.type == 'SUPPLIER' ? 'rounded-lg px-2 bg-orange-100 text-orange-800' : getBadgeVariantAssociated(data.associated),
         type: 'string',
         icon: false,
     },

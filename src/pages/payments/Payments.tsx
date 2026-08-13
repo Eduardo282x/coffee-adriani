@@ -20,6 +20,7 @@ import { DropdownColumnFilter } from '@/components/table/DropdownColumnFilter';
 import { IColumns } from '@/components/table/table.interface';
 import { PaymentDateRangeFilter, useOptimizedPayments } from '@/hooks/payment.hook';
 import { InvoicePreview } from './InvoicePreview';
+import { PaymentStatisticsDetail } from './PaymentStatisticsDetail';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const Payments = () => {
@@ -331,34 +332,9 @@ export const Payments = () => {
                             ) : statistics && (
                                 <>
                                     <p className='text-lg'>
-                                        <span className='font-semibold'>Total Bs:</span> {formatOnlyNumberWithDots(statistics.totals.totalBs)} Bs
+                                        <span className='font-semibold'>Total Ingreso:</span> {formatOnlyNumberWithDots(statistics.totals.total)} $
                                     </p>
-                                    <p className='text-lg'>
-                                        <span className='font-semibold'>Total $:</span> {formatOnlyNumberWithDots(statistics.totals.totalUSD)} $
-                                    </p>
-                                    {statistics.expenses && (
-                                        <p className='text-lg'>
-                                            <span className='font-semibold'>Gastos:</span> {formatOnlyNumberWithDots(statistics.expenses.total)} $
-                                        </p>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        <div className='flex items-center justify-start gap-2'>
-                            {isLoading ? (
-                                <>
-                                    <Skeleton className="h-4 w-32" />
-                                    <Skeleton className="h-4 w-32" />
-                                </>
-                            ) : (
-                                <>
-                                    <p className=''>
-                                        <span className='font-semibold'>Total:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.total) : ''} $
-                                    </p>
-                                    <p className=''>
-                                        <span className='font-semibold'>Sobrante:</span> {statistics ? formatOnlyNumberWithDots(statistics.totals.unassociatedAmount) : ''} $
-                                    </p>
+                                    <PaymentStatisticsDetail statistics={statistics} />
                                 </>
                             )}
                         </div>
@@ -407,7 +383,7 @@ export const Payments = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[30rem]"
+                    className="w-200"
                     label2="Registrar Pago"
                     label1="Actualizar Pago"
                     isEdit={paymentSelected ? true : false}

@@ -178,3 +178,13 @@ export interface EntryPaymentsResponse {
     remaining: string;
     payments: IInventoryEntryPayment[];
 }
+
+export interface EntryStatisticsResponse {
+    totals: {
+        totalInvoices: number;
+        totalBultos: number;
+        totalPaid: string;
+        totalPending: string;
+        totalAmount: string;
+    };
+}

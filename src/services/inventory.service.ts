@@ -1,4 +1,4 @@
-import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse } from "@/interfaces/inventory.interface";
+import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse, EntryStatisticsResponse } from "@/interfaces/inventory.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInventory = '/inventory';
@@ -11,6 +11,7 @@ export interface InventoryHistoryFilter {
     typeMovement?: string;
     typeProduct?: string;
     controlNumber?: string;
+    supplierId?: string;
 }
 
 export const getInventory = async () => {
@@ -146,6 +147,26 @@ export const getEnterpriseEntryById = async (id: number) => {
         return await getDataApi(`${routeInventory}/enterprise/${id}`);
     } catch (err) {
         return err
+    }
+}
+
+export const getEntryStatistics = async (filter: Omit<InventoryHistoryFilter, 'page' | 'limit'>): Promise<EntryStatisticsResponse | null> => {
+    try {
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filter).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        const queryString = query ? `?${query}` : '';
+        return await getDataApi(`${routeInventory}/entries/statistics${queryString}`) as Promise<EntryStatisticsResponse>;
+    } catch (err) {
+        console.log(err);
+        return null;
     }
 }
 

@@ -154,7 +154,7 @@ export const Inventory = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex bg-[#6f4e37] text-white h-14 lg:h-[60px] items-center gap-4 border-b px-6">
+            <header className="flex bg-[#6f4e37] text-white h-14 lg:h-15 items-center gap-4 border-b px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Inventario</h1>

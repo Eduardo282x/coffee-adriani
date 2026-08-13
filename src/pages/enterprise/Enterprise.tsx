@@ -3,6 +3,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { DateRangePicker } from '@/components/datepicker/DateRangePicker';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from '@/components/table/Filter';
 import { DialogComponent } from '@/components/dialog/DialogComponent';
 import { DateRange } from 'react-day-picker';
@@ -18,8 +19,10 @@ import { useSuppliers } from '@/hooks/supplier.hook';
 import { useOptimizedPayments } from '@/hooks/payment.hook';
 import { getEntryPayments } from '@/services/inventory.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
+import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
+import { formatOnlyNumberWithDots } from '@/hooks/formaters';
 
 export const Enterprise = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -42,6 +45,8 @@ export const Enterprise = () => {
         entries,
         pagination,
         isLoading,
+        isLoadingStatistics,
+        statistics,
         isMutating,
         createEntry,
         updateEntry,
@@ -50,6 +55,8 @@ export const Enterprise = () => {
         updatePayment,
         applyDateFilter,
         handleChangeSearch,
+        handleChangeSupplier,
+        supplierId,
         refetch,
     } = useEnterpriseEntries({ pageSize: 50 });
 
@@ -160,7 +167,7 @@ export const Enterprise = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Entradas de Inventario</h1>
@@ -190,6 +197,25 @@ export const Enterprise = () => {
                             datePicker={date}
                             label={'Rango de Fecha'}
                         />
+                        <div>
+                            <Label className="mb-2">Proveedor</Label>
+                            <Select
+                                value={supplierId?.toString() || ''}
+                                onValueChange={(value) => handleChangeSupplier(value ? Number(value) : undefined)}
+                            >
+                                <SelectTrigger className="w-56">
+                                    <SelectValue placeholder="Todos los proveedores" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">Todos los proveedores</SelectItem>
+                                    {suppliers.map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                                            {supplier.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="w-60">
                             <Label className="mb-2">Buscar</Label>
                             <Filter
@@ -204,6 +230,48 @@ export const Enterprise = () => {
                 </div>
 
                 <div className=''>
+                    <div className='w-full flex items-center justify-between my-2'>
+                        <div className="flex items-center justify-start gap-2">
+                            {isLoadingStatistics ? (
+                                <>
+                                    <Skeleton className="h-6 w-40" />
+                                    <Skeleton className="h-6 w-40" />
+                                </>
+                            ) : statistics && (
+                                <>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Facturas:</span> {statistics.totals.totalInvoices}
+                                    </p>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Bultos:</span> {formatOnlyNumberWithDots(statistics.totals.totalBultos)}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+
+                        <div className='flex items-center justify-start gap-2'>
+                            {isLoadingStatistics ? (
+                                <>
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-4 w-32" />
+                                </>
+                            ) : statistics && (
+                                <>
+                                    <p className=''>
+                                        <span className='font-semibold'>Total:</span> {formatOnlyNumberWithDots(statistics.totals.totalAmount)} $
+                                    </p>
+                                    <p className='text-green-600'>
+                                        <span className='font-semibold'>Pagado:</span> {formatOnlyNumberWithDots(statistics.totals.totalPaid)} $
+                                    </p>
+                                    <p className='text-red-600'>
+                                        <span className='font-semibold '>Pendiente:</span> {formatOnlyNumberWithDots(statistics.totals.totalPending)} $
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
                     <TableComponent
                         loading={isLoading}
                         columns={enterpriseColumns}

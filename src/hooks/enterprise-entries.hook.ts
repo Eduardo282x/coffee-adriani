@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useMemo } from 'react';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     getEnterpriseEntries,
+    getEntryStatistics,
     createInventoryEntry,
     updateInventoryEntry,
     deleteInventoryEntry,
@@ -55,10 +56,27 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         staleTime: 5 * 60 * 1000,
     });
 
+    const {
+        data: statisticsData,
+        isLoading: isLoadingStatistics,
+        refetch: refetchStatistics
+    } = useQuery({
+        queryKey: ['enterprise-entries-statistics', dateFilter, search, supplierId],
+        queryFn: () => getEntryStatistics({
+            ...(dateFilter?.startDate && { startDate: dateFilter.startDate }),
+            ...(dateFilter?.endDate && { endDate: dateFilter.endDate }),
+            ...(search && { controlNumber: search }),
+            ...(supplierId && { supplierId: supplierId.toString() })
+        }),
+        staleTime: 2 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+    });
+
     const createEntryMutation = useMutation({
         mutationFn: (data: CreateInventoryEntryForm) => createInventoryEntry(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries-statistics'] });
             queryClient.invalidateQueries({ queryKey: ['inventory'] });
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
@@ -69,6 +87,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
             updateInventoryEntry(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries-statistics'] });
             queryClient.invalidateQueries({ queryKey: ['inventory'] });
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
@@ -78,6 +97,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         mutationFn: deleteInventoryEntry,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries-statistics'] });
             queryClient.invalidateQueries({ queryKey: ['inventory'] });
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
@@ -87,6 +107,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         mutationFn: deleteEntryPaymentService,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries-statistics'] });
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
     })
@@ -96,6 +117,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
             updateEntryPaymentService(paymentId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['enterprise-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['enterprise-entries-statistics'] });
             queryClient.invalidateQueries({ queryKey: ['inventory-entries'] });
         },
     })
@@ -167,7 +189,9 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         entries: processedData?.entries || [],
         pagination: entriesData?.pages[0]?.pagination || null,
         totalCount: processedData?.totalCount || 0,
+        statistics: statisticsData,
         isLoading,
+        isLoadingStatistics,
         isLoadingMore: isFetchingNextPage,
         isMutating,
 
@@ -188,6 +212,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         updatePayment,
 
         refetch: refetchEntries,
+        refetchStatistics,
 
         error: entriesError
     };

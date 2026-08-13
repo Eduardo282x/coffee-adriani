@@ -56,6 +56,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
             options: [
                 { label: 'Todos', value: 'all' },
                 { label: 'Entrada', value: 'INCOME' },
+                { label: 'Proveedores', value: 'SUPPLIER' },
                 { label: 'Gastos/Salidas', value: 'EXPENSE' },
                 { label: 'Gastos Personales', value: 'PERSONAL_EXPENSES' }
             ]

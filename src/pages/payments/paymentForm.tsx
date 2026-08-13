@@ -2,6 +2,7 @@ import { InputAutocomplete } from '@/components/autocomplete/InputAutocomplete'
 import { DatePicker } from '@/components/datepicker/DatePicker'
 import { FormSelect } from '@/components/form/FormSelect'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,7 +20,6 @@ interface PaymentFormProps extends FromProps {
 
 export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, descriptions }) => {
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
-    const [showFieldDescription, setShowFieldDescription] = useState<boolean>(false);
     const today = new Date();
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
@@ -78,7 +78,6 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
     useEffect(() => {
         const findAccount = accountsOptions.find(item => item.value == selectedAccountId?.toString());
         const isGastos = findAccount?.label.includes('Gastos') as boolean;
-        setShowFieldDescription(isGastos);
         form.setValue('type', isGastos ? 'EXPENSE' : 'INCOME');
     }, [accountsOptions, selectedAccountId, form])
 
@@ -103,75 +102,73 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitForm)} className="flex flex-col items-start justify-start gap-5 w-full py-4">
+            <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-4 w-full">
 
-                <FormSelect
-                    form={form}
-                    name='accountId'
-                    label='Cuenta de pago'
-                    placeholder='Seleccione cuenta'
-                    options={accountsOptions}></FormSelect>
+                <Card>
+                    <CardHeader className="text-[#6f4e37]">
+                        <CardTitle className='font-semibold'>Información del Pago</CardTitle>
+                        {/* <CardDescription>Datos generales del movimiento a registrar</CardDescription> */}
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <FormSelect
+                                    form={form}
+                                    name='accountId'
+                                    label='Cuenta de pago'
+                                    placeholder='Seleccione cuenta'
+                                    options={accountsOptions}></FormSelect>
+                            </div>
 
-                <DatePicker date={paymentDate} setDate={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
+                            <div className="flex flex-col items-start justify-start gap-2 w-full">
+                                <Label>Cantidad</Label>
+                                <Input type="number" step="0.01" min={0} placeholder="Monto en $ o Bs" {...form.register('amount')} />
+                            </div>
 
+                            <FormSelect
+                                form={form}
+                                name='type'
+                                label='Tipo de pago'
+                                placeholder='Seleccione tipo'
+                                options={paymentTypeOptions}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
 
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Hora
-                    </Label>
-                    <Input {...form.register('time')} type='time' />
-                </div>
+                <Card>
+                    <CardHeader className="text-[#6f4e37]">
+                        <CardTitle>Fecha y Referencia</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                            <DatePicker date={paymentDate} setDate={setDateDispatch} label="Fecha de Pago" maxDate={new Date()} minDate={new Date(2000)} />
 
-                {/* <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Hora
-                    </Label>
-                    <TimePicker
-                        onChange={(value) => console.log(value)}
-                        // value={form.watch('time')}
-                        format="hh:mm a"
-                        disableClock
-                        clearIcon={null}
-                    />
-                </div> */}
+                            <div className="flex flex-col items-start justify-start gap-2 w-full">
+                                <Label>Hora</Label>
+                                <Input type='time' {...form.register('time')} />
+                            </div>
 
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Cantidad
-                    </Label>
-                    <Input {...form.register('amount')} />
-                </div>
+                            <div className="flex flex-col items-start justify-start gap-2 w-full">
+                                <Label>Referencia</Label>
+                                <Input autoComplete='off' placeholder="Número de referencia" {...form.register('reference')} />
+                            </div>
 
-                <div className="flex flex-col items-start justify-start gap-4 w-full">
-                    <Label className="text-right">
-                        Referencia
-                    </Label>
-                    <Input autoComplete='off' {...form.register('reference')} />
-                </div>
+                            <div className="flex flex-col gap-2">
+                                <Label>Tipo de gasto</Label>
+                                <InputAutocomplete
+                                    data={descriptionOptions}
+                                    placeholder='Seleccione o escriba un gasto'
+                                    fullSize={true}
+                                    valueDefault={form.getValues('description')}
+                                    onChange={changeFiltersDescription}
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                {showFieldDescription && (
-                    <div className="flex flex-col items-start justify-start gap-4 w-full">
-                        <FormSelect
-                            form={form}
-                            name='type'
-                            label='Tipo de pago'
-                            placeholder='Seleccione tipo'
-                            options={paymentTypeOptions}
-                        />
-                        <Label className="text-right">
-                            Tipo de gasto
-                        </Label>
-                        <InputAutocomplete
-                            data={descriptionOptions}
-                            placeholder=''
-                            fullSize={true}
-                            valueDefault={form.getValues('description')}
-                            onChange={changeFiltersDescription}
-                        />
-                    </div>
-                )}
-
-                <div className='w-full flex justify-center'>
+                <div className='w-full flex justify-center pt-2'>
                     <Button
                         className="bg-green-700 hover:bg-green-600 text-white w-32"
                         type='submit'

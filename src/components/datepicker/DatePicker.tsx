@@ -25,7 +25,7 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
 
     return (
         <div className='w-full'>
-            <Label className="mb-2">
+            <Label className="mb-3">
                 {label}
             </Label>
             <Popover modal={true}>
@@ -33,7 +33,7 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
                     <Button
                         variant={"outline"}
                         className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal border-gray-400",
                             !date && "text-muted-foreground"
                         )}
                     >
@@ -41,7 +41,7 @@ export const DatePicker: FC<DatePickerProps> = ({ date, setDate, label, maxDate,
                         {date ? format(date, "PPP", { locale: es }) : <span>Selecciona una fecha</span>}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
+                <PopoverContent className="w-full p-0 border-gray-400" align="start">
                     <Calendar
                         className='w-full'
                         locale={es}
