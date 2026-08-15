@@ -2,9 +2,8 @@ import { TableComponent } from '@/components/table/TableComponent';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { InvoicePayment, IPayInvoiceForm, IPaymentForm, IPayments, PayDisassociateBody } from '@/interfaces/payment.interface';
 import { useEffect, useState } from 'react'
-import { initialPaymentFilters, PaymentFilters, PaymentFilterType, paymentsColumns } from './payment.data';
+import { paymentsColumns } from './payment.data';
 import { PaymentFilter } from './PaymentFilter';
-import { DateRange } from 'react-day-picker';
 import { DateRangeFilter, InvoiceInvoice } from '@/interfaces/invoice.interface';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -22,6 +21,8 @@ import { PaymentDateRangeFilter, useOptimizedPayments } from '@/hooks/payment.ho
 import { InvoicePreview } from './InvoicePreview';
 import { PaymentStatisticsDetail } from './PaymentStatisticsDetail';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paymentFilterStore } from '@/store/paymentFilterStore';
+import { FilterBadges } from './FilterBadges';
 
 export const Payments = () => {
     // Estados locales específicos del componente
@@ -34,9 +35,8 @@ export const Payments = () => {
     const [openView, setOpenView] = useState<boolean>(false);
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
-    const [date, setDate] = useState<DateRange | undefined>(undefined);
-    const [filter, setFilters] = useState<PaymentFilters>(initialPaymentFilters);
     const [invoice, setInvoice] = useState<InvoiceInvoice | null>(null);
+    const dateStart = paymentFilterStore((state) => state.dateStart);
 
 
     // Hook optimizado
@@ -58,15 +58,6 @@ export const Payments = () => {
         associatePayment,
         disassociatePayment,
         confirmZellePayment,
-        handleChangeAccount,
-        handleChangeMethod,
-        handleChangeCredit,
-        handleChangeTypeProduct,
-        handleChangeTypeDescription,
-        // handleChangeStatus,
-        handleChangeAssociation,
-        handleChangeSearch,
-        handleChangeAccountType,
         hasMore,
         loadMore,
         isLoadingMore,
@@ -82,48 +73,16 @@ export const Payments = () => {
 
     // Aplicar filtro de fecha cuando cambia
     useEffect(() => {
-        if (date?.to) {
+        if (dateStart?.to) {
             const filterDate: DateRangeFilter = {
-                startDate: date.from || new Date() as Date,
-                endDate: date.to as Date,
+                startDate: dateStart.from || new Date(),
+                endDate: dateStart.to,
             };
             applyDateFilter(filterDate as PaymentDateRangeFilter);
         } else {
             applyDateFilter(null);
         }
-    }, [date?.from, date?.to, applyDateFilter]);
-
-    const handleChangeFilter = (filter: PaymentFilterType, value: string) => {
-        switch (filter) {
-            case 'account':
-                handleChangeAccount(Number(value));
-                break;
-            case 'method':
-                handleChangeMethod(Number(value));
-                break;
-            case 'credit':
-                handleChangeCredit(value as 'credit' | 'noCredit' | 'all');
-                break;
-            case 'type':
-                handleChangeTypeProduct(value);
-                break;
-            case 'typeDescription':
-                handleChangeTypeDescription(value);
-                break;
-            case 'associated':
-                handleChangeAssociation(value as 'associated' | 'unassociated' | 'all');
-                break;
-            case 'accountType':
-                handleChangeAccountType(value);
-                break;
-            default:
-                break;
-        };
-        setFilters(prev => ({
-            ...prev,
-            [filter]: value
-        }));
-    };
+    }, [dateStart?.from, dateStart?.to, applyDateFilter]);
 
     const savePayments = async (data: IPaymentForm) => {
         try {
@@ -305,40 +264,36 @@ export const Payments = () => {
                     <div className="flex items-end gap-2">
                         <DropdownColumnFilter columns={columns} setColumns={setColumns} />
                         <PaymentFilter
-                            filters={filter}
-                            handleChangeFilter={handleChangeFilter}
                             paymentsColumns={paymentsColumns}
                             setPaymentsFilter={setPaymentsFilter}
-                            handleChangeSearch={handleChangeSearch}
                             methods={paymentMethods}
                             accounts={paymentAccounts}
                             types={productTypes}
                             typeDescription={paymentDescriptions}
-                            payments={[]}
-                            date={date}
-                            setDate={setDate}
                         />
                     </div>
                 </div>
 
                 <div className=''>
                     <div className='w-full flex items-center justify-between my-2'>
-                        <div className="flex items-center justify-start gap-2">
-                            {isLoading ? (
-                                <>
-                                    <Skeleton className="h-6 w-40" />
-                                    <Skeleton className="h-6 w-40" />
-                                </>
-                            ) : statistics && (
-                                <>
-                                    <p className='text-lg'>
-                                        <span className='font-semibold'>Total Ingreso:</span> {formatOnlyNumberWithDots(statistics.totals.total)} $
-                                    </p>
-                                    <PaymentStatisticsDetail statistics={statistics} />
-                                </>
-                            )}
-                        </div>
+                    <div className="flex items-center justify-start gap-2">
+                        {isLoading ? (
+                            <>
+                                <Skeleton className="h-6 w-40" />
+                                <Skeleton className="h-6 w-40" />
+                            </>
+                        ) : statistics && (
+                            <>
+                                <p className='text-lg'>
+                                    <span className='font-semibold'>Total Ingreso:</span> {formatOnlyNumberWithDots(statistics.totals.total)} $
+                                </p>
+                                <PaymentStatisticsDetail statistics={statistics} />
+                            </>
+                        )}
                     </div>
+
+                    <FilterBadges />
+                </div>
 
                     <TableComponent
                         loading={isLoading}

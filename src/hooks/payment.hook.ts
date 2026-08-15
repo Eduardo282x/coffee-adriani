@@ -25,6 +25,7 @@ import { getProductType } from '@/services/products.service';
 import { AccountPay, DescriptionPayment, IPayInvoiceForm, IPayments, Method, PayDisassociateBody, PaymentMutationResponse } from '@/interfaces/payment.interface';
 import { ProductType } from '@/interfaces/product.interface';
 import { formatDateOnly } from './formaters';
+import { paymentFilterStore } from '@/store/paymentFilterStore';
 
 export interface PaymentDateRangeFilter {
     startDate?: Date;
@@ -39,15 +40,14 @@ interface UsePaymentsOptions {
 export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
     const { pageSize = 50, enableStatistics = true } = options;
     const [dateFilter, setDateFilter] = useState<PaymentDateRangeFilter | null>(null);
-    const [selectedMethod, setSelectedMethod] = useState<number | undefined>(undefined);
-    const [search, setSearch] = useState<string>('');
-    const [typeProduct, setTypeProduct] = useState<string>('');
-    const [typeDescription, setTypeDescription] = useState<string>('');
-    const [selectCredits, setSelectCredits] = useState<'credit' | 'noCredit' | 'all'>('all');
-    const [selectedAccount, setSelectedAccount] = useState<number | undefined>(undefined);
-    // const [selectedStatus, setSelectedStatus] = useState<'CONFIRMED' | 'PENDING' | 'all'>('all');
-    const [selectedAssociation, setSelectedAssociation] = useState<'associated' | 'unassociated' | 'all'>('all');
-    const [accountType, setAccountType] = useState<string>('INCOME');
+    const search = paymentFilterStore((state) => state.search);
+    const selectedAccount = paymentFilterStore((state) => state.selectedAccount);
+    const selectedMethod = paymentFilterStore((state) => state.selectedMethod);
+    const selectCredits = paymentFilterStore((state) => state.selectCredits);
+    const typeProduct = paymentFilterStore((state) => state.typeProduct);
+    const typeDescription = paymentFilterStore((state) => state.typeDescription);
+    const selectedAssociation = paymentFilterStore((state) => state.selectedAssociation);
+    const accountType = paymentFilterStore((state) => state.accountType);
 
     const queryClient = useQueryClient();
 
@@ -104,8 +104,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
                     endDate: formatDateOnly(dateFilter.endDate)
                 }),
                 search: search,
-                ...(selectedAccount && { accountId: selectedAccount }),
-                ...(selectedMethod && { methodId: selectedMethod }),
+                ...(selectedAccount !== 'all' && { accountId: Number(selectedAccount) }),
+                ...(selectedMethod !== 'all' && { methodId: Number(selectedMethod) }),
                 ...(typeDescription !== 'all' && { typeDescription: typeDescription }),
                 ...(typeProduct !== 'all' && { type: typeProduct }),
                 ...(selectCredits !== 'all' && { credit: selectCredits }),
@@ -135,8 +135,8 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
             startDate: formatDateOnly(dateFilter?.startDate),
             endDate: formatDateOnly(dateFilter?.endDate),
             search: search,
-            ...(selectedAccount && { accountId: selectedAccount }),
-            ...(selectedMethod && { methodId: selectedMethod }),
+            ...(selectedAccount !== 'all' && { accountId: Number(selectedAccount) }),
+            ...(selectedMethod !== 'all' && { methodId: Number(selectedMethod) }),
             ...(typeProduct !== 'all' && { type: typeProduct }),
             ...(typeDescription !== 'all' && { typeDescription: typeDescription }),
             ...(selectCredits !== 'all' && { credit: selectCredits }),
@@ -305,39 +305,39 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         setDateFilter(filter);
     }, []);
 
-    const handleChangeMethod = useCallback((methodId: number | undefined) => {
-        setSelectedMethod(methodId);
+    const handleChangeMethod = useCallback((methodId: string) => {
+        paymentFilterStore.getState().setSelectedMethod(methodId);
     }, []);
 
-    const handleChangeTypeProduct = useCallback((search: string) => {
-        setTypeProduct(search);
+    const handleChangeTypeProduct = useCallback((value: string) => {
+        paymentFilterStore.getState().setTypeProduct(value);
     }, []);
 
-    const handleChangeTypeDescription = useCallback((search: string) => {
-        setTypeDescription(search);
+    const handleChangeTypeDescription = useCallback((value: string) => {
+        paymentFilterStore.getState().setTypeDescription(value);
     }, []);
 
-    const handleChangeSearch = useCallback((search: string) => {
-        setSearch(search);
+    const handleChangeSearch = useCallback((value: string) => {
+        paymentFilterStore.getState().setSearch(value);
     }, []);
 
-    const handleChangeAccount = useCallback((accountId: number | undefined) => {
-        setSelectedAccount(accountId);
+    const handleChangeAccount = useCallback((accountId: string) => {
+        paymentFilterStore.getState().setSelectedAccount(accountId);
     }, []);
 
     // const handleChangeStatus = useCallback((status: 'CONFIRMED' | 'PENDING' | 'all') => {
     //     setSelectedStatus(status);
     // }, []);
     const handleChangeCredit = useCallback((credit: 'credit' | 'noCredit' | 'all') => {
-        setSelectCredits(credit);
+        paymentFilterStore.getState().setSelectCredits(credit);
     }, []);
 
     const handleChangeAssociation = useCallback((association: 'associated' | 'unassociated' | 'all') => {
-        setSelectedAssociation(association);
+        paymentFilterStore.getState().setSelectedAssociation(association);
     }, []);
 
     const handleChangeAccountType = useCallback((type: string) => {
-        setAccountType(type);
+        paymentFilterStore.getState().setAccountType(type);
     }, []);
 
     // 7. Funciones de mutación wrapper
@@ -439,7 +439,12 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         handleChangeSearch,
         handleChangeAccountType,
         currentFilter: dateFilter,
+        search,
         selectedAccount,
+        selectedMethod,
+        selectCredits,
+        typeProduct,
+        typeDescription,
         // selectedStatus,
         selectedAssociation,
         accountType,
