@@ -159,18 +159,21 @@ export interface PaymentStatisticsResponse {
     expenses: {
         totalBs: number;
         totalUSD: number;
+        totalBsInUSD: number;
         total: number;
         count: number;
     };
     personalExpenses: {
         totalBs: number;
         totalUSD: number;
+        totalBsInUSD: number;
         total: number;
         count: number;
     };
     expensesGroup: {
         totalBs: number;
         totalUSD: number;
+        totalBsInUSD: number;
         total: number;
         count: number;
     };
