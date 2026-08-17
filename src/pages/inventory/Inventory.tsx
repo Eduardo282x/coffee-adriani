@@ -21,6 +21,9 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IInventoryEntry } from "@/interfaces/inventory.interface";
+import { useEnterpriseEntries } from "@/hooks/enterprise-entries.hook";
+import { DateRange } from "react-day-picker";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
@@ -55,6 +58,14 @@ export const Inventory = () => {
         setControlNumber
     } = useOptimizedInventory();
 
+    const {
+        statistics,
+        isLoadingStatistics,
+        applyDateFilter,
+        handleTypeProduct,
+        handleTypeMovement,
+    } = useEnterpriseEntries()
+
     const productOptions = productStore((state) => state.productOptions);
     const products = productStore((state) => state.products);
     const getProductsApi = productStore((state) => state.getProductsApi);
@@ -76,6 +87,8 @@ export const Inventory = () => {
 
     useEffect(() => {
         getProductsTypesApi();
+        handleTypeProduct('Cafe');
+        handleTypeMovement('IN');
     }, [])
 
     useEffect(() => {
@@ -85,7 +98,7 @@ export const Inventory = () => {
         const zero: number = inventory.filter(inv => inv.product.type == typeProduct).filter(pro => pro.quantity === 0).length;
         setResumen({ totalProducts: total, totalMoney: totalMoney, downProducts: down, zeroProducts: zero })
         setData({ allInventory: inventory, inventory: inventory });
-    }, [inventory, typeProduct])
+    }, [inventory, typeProduct]);
 
     useEffect(() => {
         setControlNumberInput(controlNumber);
@@ -121,9 +134,20 @@ export const Inventory = () => {
         await refetchInventoryHistory();
     }
 
-    // const newElement = () => {
-    //     setOpenDialog(true);
-    // }
+    const changeTypeProduct = (type: string) => {
+        setTypeProduct(type);
+        handleTypeProduct(type);
+    }
+
+    const changeTypeMovement = (type: string) => {
+        setMovementType(type);
+        handleTypeMovement(type);
+    }
+
+    const changeDateRange = (range: DateRange | undefined | null) => {
+        applyDateFilter({ startDate: range?.from, endDate: range?.to });
+        setDateRange(range ? range : undefined);
+    }
 
     const getAction = (action: string, data: IInventory) => {
         if (action == 'Editar') {
@@ -187,10 +211,10 @@ export const Inventory = () => {
                                         onChange={onChangeControlNumber}
                                     />
                                 </div>
-                                <DateRangePicker setDatePicker={setDateRange} datePicker={dateRange} label={''} />
+                                <DateRangePicker setDatePicker={changeDateRange} datePicker={dateRange} label={''} />
                             </>
                         )}
-                        <Select value={typeProduct} onValueChange={setTypeProduct}>
+                        <Select value={typeProduct} onValueChange={changeTypeProduct}>
                             <SelectTrigger className="w-24">
                                 <SelectValue placeholder="Tipo de Producto" />
                             </SelectTrigger>
@@ -204,7 +228,7 @@ export const Inventory = () => {
                         </Select>
                         {history && (
                             <>
-                                <Select value={movementType} onValueChange={setMovementType}>
+                                <Select value={movementType} onValueChange={changeTypeMovement}>
                                     <SelectTrigger className="w-24">
                                         <SelectValue placeholder="Tipo de Movimiento" />
                                     </SelectTrigger>
@@ -254,23 +278,42 @@ export const Inventory = () => {
 
                 <div>
                     {history ? (
-                        <TableComponent
-                            loading={isLoading}
-                            key="inventory-history"
-                            columns={inventoryColumnsHistory}
-                            dataBase={inventoryEntries}
-                            isExpansible={true}
-                            action={getActionHistory}
-                            renderRow={
-                                (entry) => (
-                                    <TableComponent
-                                        dataBase={entry.details}
-                                        columns={inventoryColumnDetailHistory}>
-                                    </TableComponent>
-                                )
-                            }></TableComponent>
+                        <>
+                            <div className="flex items-center justify-start gap-2 mb-2">
+                                {isLoadingStatistics ? (
+                                    <>
+                                        <Skeleton className="h-6 w-40" />
+                                        <Skeleton className="h-6 w-40" />
+                                    </>
+                                ) : statistics && (
+                                    <>
+                                        <p className='text-lg'>
+                                            <span className='font-semibold'>Facturas:</span> {statistics.totals.totalInvoices}
+                                        </p>
+                                        <p className='text-lg'>
+                                            <span className='font-semibold'>Bultos:</span> {formatOnlyNumberWithDots(statistics.totals.totalBultos)}
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                            <TableComponent
+                                loading={isLoading}
+                                key="inventory-history"
+                                columns={inventoryColumnsHistory}
+                                dataBase={inventoryEntries}
+                                isExpansible={true}
+                                action={getActionHistory}
+                                renderRow={
+                                    (entry) => (
+                                        <TableComponent
+                                            dataBase={entry.details}
+                                            columns={inventoryColumnDetailHistory}>
+                                        </TableComponent>
+                                    )
+                                }></TableComponent>
+                        </>
                     ) : (
-                        <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory} action={getAction}></TableComponent>
+                        <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory.filter(item => item.product.type == typeProduct)} action={getAction}></TableComponent>
                     )}
                 </div>
 

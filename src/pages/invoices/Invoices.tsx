@@ -218,7 +218,7 @@ export const InvoicesPage = () => {
         <div className="flex flex-col">
             {(loadingFile || isMutating) && <ScreenLoader />}
 
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-2 lg:gap-4 text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-2 lg:gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Facturas</h1>
@@ -364,7 +364,7 @@ export const InvoicesPage = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[90%] lg:w-[46rem] px-4 max-h-[80vh] overflow-y-auto"
+                    className="w-[90%] lg:w-184 px-4 max-h-[80vh] overflow-y-auto"
                     label2="Agregar Factura"
                     label1="Editar Factura"
                     isEdit={selectInvoice !== null}

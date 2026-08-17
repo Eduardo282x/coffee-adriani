@@ -237,7 +237,7 @@ export const Payments = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Pagos</h1>
@@ -386,7 +386,7 @@ export const Payments = () => {
                 <DialogComponent
                     open={openConfirmDialog}
                     setOpen={setOpenConfirmDialog}
-                    className="w-[28rem]"
+                    className="w-md"
                     label2=""
                     label1="Deseas confirmar el pago ?"
                     isEdit={true}
@@ -414,7 +414,7 @@ export const Payments = () => {
                 <DialogComponent
                     open={openDialogDelete}
                     setOpen={setOpenDialogDelete}
-                    className="w-[28rem]"
+                    className="w-md"
                     label2=""
                     label1="Deseas eliminar el pago ?"
                     isEdit={true}

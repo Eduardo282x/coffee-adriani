@@ -22,6 +22,8 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
     const { pageSize = 50 } = options;
     const [dateFilter, setDateFilter] = useState<{ startDate?: string; endDate?: string } | null>(null);
     const [search, setSearch] = useState<string>('');
+    const [typeProduct, setTypeProduct] = useState<string>('');
+    const [typeMovement, setTypeMovement] = useState<string>('');
     const [supplierId, setSupplierId] = useState<number | undefined>(undefined);
 
     const queryClient = useQueryClient();
@@ -61,11 +63,13 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['enterprise-entries-statistics', dateFilter, search, supplierId],
+        queryKey: ['enterprise-entries-statistics', dateFilter, search, supplierId, typeProduct, typeMovement],
         queryFn: () => getEntryStatistics({
             ...(dateFilter?.startDate && { startDate: dateFilter.startDate }),
             ...(dateFilter?.endDate && { endDate: dateFilter.endDate }),
             ...(search && { controlNumber: search }),
+            ...(typeMovement !== 'ALL' && { typeMovement }),
+            ...(typeProduct && { typeProduct }),
             ...(supplierId && { supplierId: supplierId.toString() })
         }),
         staleTime: 2 * 60 * 1000,
@@ -151,6 +155,14 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         }
     }, []);
 
+    const handleTypeProduct = useCallback((search: string) => {
+        setTypeProduct(search);
+    }, []);
+
+    const handleTypeMovement = useCallback((search: string) => {
+        setTypeMovement(search);
+    }, []);
+
     const handleChangeSearch = useCallback((search: string) => {
         setSearch(search);
     }, []);
@@ -202,6 +214,8 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         handleChangeSearch,
         handleChangeSearchValue: search,
         handleChangeSupplier,
+        handleTypeProduct,
+        handleTypeMovement,
         supplierId,
 
         createEntry,
