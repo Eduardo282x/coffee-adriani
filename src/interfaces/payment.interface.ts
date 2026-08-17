@@ -150,6 +150,7 @@ export interface PaymentStatisticsResponse {
     totals: {
         totalBs: number;
         totalUSD: number;
+        totalBsInUSD: number;
         total: number;
         remaining: number;
         totalRemainingBs: number;

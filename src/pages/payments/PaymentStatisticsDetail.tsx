@@ -72,7 +72,7 @@ export const PaymentStatisticsDetail = ({ statistics }: PaymentStatisticsDetailP
                         <div>
                             <SectionTitle title="Totales" />
                             <div className="grid grid-cols-2 gap-2">
-                                {renderMoneyBlock({ label: 'Ingresos', totalBs: statistics.totals.totalBs, totalUSD: statistics.totals.totalUSD, total: statistics.totals.total })}
+                                {renderMoneyBlock({ label: 'Ingresos', totalBs: statistics.totals.totalBs, totalBsInUSD: statistics.totals.totalBsInUSD, totalUSD: statistics.totals.totalUSD, total: statistics.totals.total })}
                                 {renderMoneyBlock({ label: 'Pendiente', totalBs: statistics.totals.totalRemainingBs, totalUSD: statistics.totals.totalRemainingUSD, total: statistics.totals.remaining })}
                                 {renderMoneyBlock({ label: 'Sin Asociar', total: statistics.totals.unassociatedAmount })}
                                 {renderMoneyBlock({ label: 'Pérdidas', total: statistics.totalLost })}
