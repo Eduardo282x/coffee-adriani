@@ -306,7 +306,7 @@ export const Enterprise = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[50rem]"
+                    className="w-200"
                     label2="Registrar Entrada de Inventario"
                     label1="Actualizar Entrada de Inventario"
                     isEdit={entrySelected ? true : false}
@@ -325,7 +325,7 @@ export const Enterprise = () => {
                 <DialogComponent
                     open={openPaymentDialog}
                     setOpen={setOpenPaymentDialog}
-                    className="w-[40rem]"
+                    className="w-160"
                     label2={entryPaymentSelected ? "Actualizar Pago" : "Registrar Pago"}
                     label1={entryPaymentSelected ? "Actualizar Pago" : "Registrar Pago"}
                     isEdit={!!entryPaymentSelected}
@@ -347,7 +347,7 @@ export const Enterprise = () => {
                 <DialogComponent
                     open={openPaymentsListDialog}
                     setOpen={setOpenPaymentsListDialog}
-                    className="w-[50rem]"
+                    className="w-200"
                     label2="Pagos de la Entrada"
                     label1="Pagos de la Entrada"
                     isEdit={true}
@@ -386,7 +386,7 @@ export const Enterprise = () => {
                 <DialogComponent
                     open={openDeleteDialog}
                     setOpen={setOpenDeleteDialog}
-                    className="w-[28rem]"
+                    className="w-md"
                     label2=""
                     label1="¿Deseas eliminar esta entrada?"
                     isEdit={true}
@@ -414,7 +414,7 @@ export const Enterprise = () => {
                 <DialogComponent
                     open={openDeletePaymentDialog}
                     setOpen={setOpenDeletePaymentDialog}
-                    className="w-[28rem]"
+                    className="w-md"
                     label2=""
                     label1="¿Deseas eliminar este pago?"
                     isEdit={true}
