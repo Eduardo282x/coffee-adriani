@@ -6,6 +6,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Package, ShoppingCart, Users } from "lucide-react"
 import { InventoryStatus } from "./components/inventory-status"
 import { PendingInvoices } from "./components/pending-invoices"
+import { DashboardSnapshots } from "./components/dashboard-snapshots"
 import { CardDashboard } from "./components/CardDashboard"
 import { DashboardSkeleton } from "./components/DashboardSkeleton"
 import { Buckets } from "@/interfaces/dashboard.interface"
@@ -41,9 +42,12 @@ export const Dashboard = () => {
     const {
         dashboardData: dashBoardData,
         clientDemandData,
+        snapshotsData,
         isLoading,
         isExporting,
+        isDownloading,
         exportDashboard,
+        downloadSnapshot,
     } = useDashboard({
         dateRange: date,
         productType: productTypeSelected,
@@ -80,6 +84,20 @@ export const Dashboard = () => {
         URL.revokeObjectURL(url);
     }
 
+    const downloadSnapshotFile = async (id: number, fileName: string) => {
+        const response = await downloadSnapshot(id);
+        if (!response) return;
+
+        const url = URL.createObjectURL(response)
+        const link = window.document.createElement("a")
+        link.href = url
+        link.download = fileName
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        URL.revokeObjectURL(url);
+    }
+
     const returnPercent = (part: number, total: number) => {
         if (total === 0) return 0;
         const result = formatOnlyNumberWithDots(((part / total) * 100), 2);
@@ -107,6 +125,7 @@ export const Dashboard = () => {
         <div className="flex flex-col ">
 
             {isExporting && <ScreenLoader />}
+            {isDownloading && <ScreenLoader />}
             <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -172,6 +191,7 @@ export const Dashboard = () => {
                         <TabsTrigger value="inventory">Inventario</TabsTrigger>
                         <TabsTrigger value="invoices">Facturas</TabsTrigger>
                         <TabsTrigger value="clients">Demanda de clientes</TabsTrigger>
+                        <TabsTrigger value="reports">Reportes</TabsTrigger>
                     </TabsList>
                     <TabsContent value="inventory" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -311,6 +331,21 @@ export const Dashboard = () => {
                                 </CardContent>
                             </Card>
                         </div>
+                    </TabsContent>
+                    <TabsContent value="reports" className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Reportes Generados</CardTitle>
+                                <CardDescription>Reportes semanales generados para el tipo de producto y rango seleccionado</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <DashboardSnapshots
+                                    snapshots={snapshotsData}
+                                    isDownloading={isDownloading}
+                                    onDownload={downloadSnapshotFile}
+                                />
+                            </CardContent>
+                        </Card>
                     </TabsContent>
                 </Tabs>
                     </>

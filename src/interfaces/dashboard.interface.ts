@@ -98,3 +98,12 @@ export interface Invoice {
     totalElements: number;
 }
 
+export interface DashboardSnapshot {
+    id: number;
+    type: string;
+    weekStart: string;
+    weekEnd: string;
+    fileName: string;
+    createdAt: string;
+}
+

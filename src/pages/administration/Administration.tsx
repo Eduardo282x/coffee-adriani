@@ -218,7 +218,7 @@ export const Administration = () => {
                 <ScreenLoader />
             )}
 
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Administración</h1>
@@ -464,7 +464,7 @@ function GananciasChart({ gains }: GananciasChartProps) {
     if (!mounted) return null;
 
     return (
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                     data={chartData}

@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { keepPreviousData, QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { DateRange } from 'react-day-picker';
-import { ClientDemand, IDashboard } from '@/interfaces/dashboard.interface';
+import { ClientDemand, DashboardSnapshot, IDashboard } from '@/interfaces/dashboard.interface';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
-import { getDashboard, getDashboardClientDemand, getDashboardReport } from '@/services/dashboard.service';
+import { getDashboard, getDashboardClientDemand, getDashboardReport, getDashboardSnapshots, downloadDashboardSnapshot } from '@/services/dashboard.service';
 import { formatDateOnly } from './formaters';
 
 interface UseDashboardOptions {
@@ -77,6 +77,7 @@ export const dashboardQueryKeys = {
 	all: ['dashboard'] as const,
 	summary: (filter: DashboardQueryFilter) => ['dashboard', 'summary', filter] as const,
 	clientDemand: (filter: DashboardQueryFilter) => ['dashboard', 'client-demand', filter] as const,
+	snapshots: (filter: DashboardQueryFilter) => ['dashboard', 'snapshots', filter] as const,
 };
 
 export const invalidateDashboardQueries = async (queryClient: QueryClient) => {
@@ -125,15 +126,40 @@ export const useDashboard = ({ dateRange, productType }: UseDashboardOptions) =>
 		return exportDashboardMutation.mutateAsync(filter);
 	}, [enabled, exportDashboardMutation, filter]);
 
+	const {
+		data: snapshotsData,
+		isLoading: isLoadingSnapshots,
+	} = useQuery({
+		queryKey: dashboardQueryKeys.snapshots(filter),
+		queryFn: async () => getDashboardSnapshots(buildDashboardClientDemandPayload(filter)) as Promise<DashboardSnapshot[]>,
+		enabled,
+		placeholderData: keepPreviousData,
+		staleTime: 5 * 60 * 1000,
+	});
+
+	const downloadSnapshotMutation = useMutation({
+		mutationFn: async (id: number) => {
+			return downloadDashboardSnapshot(id) as Promise<Blob>;
+		},
+	});
+
+	const downloadSnapshot = useCallback(async (id: number) => {
+		return downloadSnapshotMutation.mutateAsync(id);
+	}, [downloadSnapshotMutation]);
+
 	return {
 		dashboardData: dashboardData ?? EMPTY_DASHBOARD,
 		clientDemandData: clientDemandData ?? EMPTY_CLIENT_DEMAND,
+		snapshotsData: snapshotsData ?? [],
 		isLoading: isLoadingDashboard || isLoadingClientDemand,
 		isFetching: isFetchingDashboard || isFetchingClientDemand,
 		isLoadingDashboard,
 		isLoadingClientDemand,
+		isLoadingSnapshots,
 		isExporting: exportDashboardMutation.isPending,
+		isDownloading: downloadSnapshotMutation.isPending,
 		exportDashboard,
+		downloadSnapshot,
 		refetchDashboard,
 		refetchClientDemand,
 		filter,
