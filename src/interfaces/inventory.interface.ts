@@ -188,3 +188,38 @@ export interface EntryStatisticsResponse {
         totalAmount: string;
     };
 }
+
+// Inventory Cuts
+export interface InventoryCutDetail {
+    productId: number;
+    name: string;
+    presentation: string;
+    type: string;
+    amount: number;
+}
+
+type PeriodInventoryCut = 'WEEK' | 'MONTH'
+export interface InventoryCut {
+    id: number;
+    type: string;
+    status: string;
+    period: PeriodInventoryCut;
+    startDate: string;
+    endDate: string;
+    initialAmount: number;
+    closeAmount: number;
+    initialDetail: InventoryCutDetail[];
+    closeDetail: InventoryCutDetail[];
+}
+
+export interface PaginatedCutResponse {
+    cuts: InventoryCut[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}

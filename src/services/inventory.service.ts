@@ -1,4 +1,4 @@
-import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse, EntryStatisticsResponse } from "@/interfaces/inventory.interface";
+import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse, EntryStatisticsResponse, PaginatedCutResponse } from "@/interfaces/inventory.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInventory = '/inventory';
@@ -12,6 +12,14 @@ export interface InventoryHistoryFilter {
     typeProduct?: string;
     controlNumber?: string;
     supplierId?: string;
+}
+
+export interface InventoryCutFilter {
+    type?: string;
+    startDate?: Date | string;
+    endDate?: Date | string;
+    page?: number;
+    limit?: number;
 }
 
 export const getInventory = async () => {
@@ -219,5 +227,27 @@ export const deleteEntryPayment = async (paymentId: number) => {
         return await deleteDataApi(`${routeEntryPayments}/${paymentId}`);
     } catch (err) {
         return err
+    }
+}
+
+//Inventory Cuts
+
+export const getInventoryCut = async (filter: InventoryCutFilter): Promise<PaginatedCutResponse | null> => {
+    try {
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filter).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        const queryString = query ? `?${query}` : '';
+        return await getDataApi(`${routeInventory}/cuts${queryString}`) as Promise<PaginatedCutResponse>;
+    } catch (err) {
+        console.log(err);
+        return null;
     }
 }

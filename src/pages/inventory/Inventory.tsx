@@ -24,6 +24,7 @@ import { IInventoryEntry } from "@/interfaces/inventory.interface";
 import { useEnterpriseEntries } from "@/hooks/enterprise-entries.hook";
 import { DateRange } from "react-day-picker";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InventoryCuts } from "./InventoryCuts";
 
 export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
@@ -31,7 +32,7 @@ export const Inventory = () => {
     const [openDialogUpdate, setOpenDialogUpdate] = useState<boolean>(false);
 
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
-    const [history, setHistory] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<'inventario' | 'historial' | 'cortes'>('inventario');
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, totalMoney: 0, downProducts: 0, zeroProducts: 0 });
     const [controlNumberInput, setControlNumberInput] = useState<string>('');
     const [dataForm, setDataForm] = useState<BodyInventorySimple>({
@@ -69,10 +70,6 @@ export const Inventory = () => {
     const productOptions = productStore((state) => state.productOptions);
     const products = productStore((state) => state.products);
     const getProductsApi = productStore((state) => state.getProductsApi);
-
-    const toggleButton = (active: boolean) => {
-        setHistory(active);
-    }
 
     useEffect(() => {
         if (!products || products.products.length == 0) {
@@ -185,8 +182,9 @@ export const Inventory = () => {
                 </div>
 
                 <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
-                    <Button className={`${history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(false)}>Inventario</Button>
-                    <Button className={`${!history ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => toggleButton(true)}>Historial</Button>
+                    <Button className={`${activeTab !== 'inventario' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('inventario')}>Inventario</Button>
+                    <Button className={`${activeTab !== 'historial' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('historial')}>Historial</Button>
+                    <Button className={`${activeTab !== 'cortes' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('cortes')}>Cortes</Button>
                 </div>
 
                 {/* <Button onClick={newElement}>
@@ -198,21 +196,21 @@ export const Inventory = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Inventario</h2>
 
-                    <div className={`flex w-full ${history ? 'justify-end max-w-3xl' : 'max-w-lg'} items-center space-x-2`}>
-                        {history && (
-                            <>
-                                <div className="relative bg-white rounded-md w-60">
-                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        className="pl-8"
-                                        value={controlNumberInput}
-                                        onChange={onChangeControlNumber}
-                                    />
-                                </div>
-                                <DateRangePicker setDatePicker={changeDateRange} datePicker={dateRange} label={''} />
-                            </>
+                    <div className={`flex w-full ${activeTab === 'inventario' ? 'max-w-lg' : 'justify-end max-w-3xl'} items-center space-x-2`}>
+                        {activeTab === 'historial' && (
+                            <div className="relative bg-white rounded-md w-60">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="text"
+                                    placeholder="Buscar..."
+                                    className="pl-8"
+                                    value={controlNumberInput}
+                                    onChange={onChangeControlNumber}
+                                />
+                            </div>
+                        )}
+                        {activeTab !== 'inventario' && (
+                            <DateRangePicker setDatePicker={changeDateRange} datePicker={dateRange} label={''} />
                         )}
                         <Select value={typeProduct} onValueChange={changeTypeProduct}>
                             <SelectTrigger className="w-24">
@@ -226,31 +224,29 @@ export const Inventory = () => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        {history && (
-                            <>
-                                <Select value={movementType} onValueChange={changeTypeMovement}>
-                                    <SelectTrigger className="w-24">
-                                        <SelectValue placeholder="Tipo de Movimiento" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem value={'ALL'}>Todos</SelectItem>
-                                            <SelectItem value={'IN'}>Entrada</SelectItem>
-                                            <SelectItem value={'OUT'}>Salida</SelectItem>
-                                            <SelectItem value={'ADJUSTMENT'}>Ajuste</SelectItem>
-                                            <SelectItem value={'EDIT'}>Edición</SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </>
+                        {activeTab === 'historial' && (
+                            <Select value={movementType} onValueChange={changeTypeMovement}>
+                                <SelectTrigger className="w-24">
+                                    <SelectValue placeholder="Tipo de Movimiento" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value={'ALL'}>Todos</SelectItem>
+                                        <SelectItem value={'IN'}>Entrada</SelectItem>
+                                        <SelectItem value={'OUT'}>Salida</SelectItem>
+                                        <SelectItem value={'ADJUSTMENT'}>Ajuste</SelectItem>
+                                        <SelectItem value={'EDIT'}>Edición</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                         )}
-                        {!history && (
+                        {activeTab === 'inventario' && (
                             <Filter dataBase={data.allInventory} columns={inventoryColumns} setDataFilter={setInventoryFilter} />
                         )}
                     </div>
                 </div>
 
-                {!history && (
+                {activeTab === 'inventario' && (
                     <div className="grid gap-4 md:grid-cols-3 mb-6">
                         <InventoryCards
                             title='Total de Productos'
@@ -277,7 +273,7 @@ export const Inventory = () => {
                 )}
 
                 <div>
-                    {history ? (
+                    {activeTab === 'historial' ? (
                         <>
                             <div className="flex items-center justify-start gap-2 mb-2">
                                 {isLoadingStatistics ? (
@@ -312,6 +308,8 @@ export const Inventory = () => {
                                     )
                                 }></TableComponent>
                         </>
+                    ) : activeTab === 'cortes' ? (
+                        <InventoryCuts typeProduct={typeProduct} dateRange={dateRange} />
                     ) : (
                         <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory.filter(item => item.product.type == typeProduct)} action={getAction}></TableComponent>
                     )}
