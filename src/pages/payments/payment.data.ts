@@ -1,9 +1,8 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { IInvoice, IInvoiceForPay } from "@/interfaces/invoice.interface";
-import { IPayments } from "@/interfaces/payment.interface";
+import { IPayments, TypePayment } from "@/interfaces/payment.interface";
 import { Edit, Trash2 } from "lucide-react";
-import { FaRegCheckCircle } from "react-icons/fa";
 import { HiOutlineCash } from "react-icons/hi";
 import { MdOutlinePlaylistRemove } from "react-icons/md";
 import { FiFileText } from "react-icons/fi";
@@ -33,7 +32,7 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         element: (data: IPayments) => data.type == 'SUPPLIER' ? 'Pago Proveedor' : (data.associated ? 'Asociado' : 'Sin asociar'),
         orderBy: '',
         visible: true,
-        className: (data: IPayments) => data.type == 'SUPPLIER' ? 'rounded-lg px-2 bg-orange-100 text-orange-800' : getBadgeVariantAssociated(data.associated),
+        className: (data: IPayments) => data.type == 'SUPPLIER' ? 'rounded-lg px-2 bg-blue-100 text-blue-800' : getBadgeVariantAssociated(data.associated),
         type: 'string',
         icon: false,
     },
@@ -47,12 +46,12 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         icon: false,
     },
     {
-        column: 'status',
-        label: 'Estado',
-        element: (data: IPayments) => data.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
+        column: 'type',
+        label: 'Tipo',
+        element: (data: IPayments) => translateType(data.type),
         orderBy: '',
-        visible: false,
-        className: (data: IPayments) => getBadgeVariant(data.status),
+        visible: true,
+        className: (data: IPayments) => getBadgeType(data.type),
         type: 'string',
         icon: false,
     },
@@ -139,8 +138,8 @@ export const paymentsColumns: IColumns<IPayments>[] = [
         icon: true,
         optionActions: [
             { label: 'Editar', icon: Edit, className: 'text-blue-800' },
-            { label: 'Confirmar', icon: FaRegCheckCircle, className: 'text-blue-400' },
-            { label: 'Pagar', icon: HiOutlineCash, className: 'text-green-400' },
+            // { label: 'Confirmar', icon: FaRegCheckCircle, className: 'text-blue-400' },
+            { label: 'Asociar', icon: HiOutlineCash, className: 'text-green-400' },
             { label: 'Eliminar', icon: Trash2, className: 'text-red-400' },
         ]
     }
@@ -153,14 +152,33 @@ const getBadgeVariantAssociated = (status: boolean) => {
         return "rounded-lg px-2 bg-gray-200 text-gray-800"
     }
 }
-const getBadgeVariant = (estado: string) => {
-    switch (estado) {
-        case "CONFIRMED":
+
+const getBadgeType = (type: TypePayment) => {
+    switch (type) {
+        case "INCOME":
             return "rounded-lg px-2 bg-green-100 text-green-800"
-        case "PENDING":
-            return "rounded-lg px-2 bg-yellow-100 text-yellow-800"
+        case "EXPENSE":
+            return "rounded-lg px-2 bg-orange-100 text-orange-800"
+        case "SUPPLIER":
+            return "rounded-lg px-2 bg-blue-100 text-blue-800"
+        case "PERSONAL_EXPENSES":
+            return "rounded-lg px-2 bg-red-100 text-red-800"
         default:
             return "rounded-lg px-2 bg-gray-100 text-gray-800"
+    }
+}
+const translateType = (type: TypePayment) => {
+    switch (type) {
+        case "INCOME":
+            return "Entrada"
+        case "EXPENSE":
+            return "Gasto factura"
+        case "SUPPLIER":
+            return "Pago Proveedor"
+        case "PERSONAL_EXPENSES":
+            return "Gasto Personal"
+        default:
+            return "Sin tipo"
     }
 }
 

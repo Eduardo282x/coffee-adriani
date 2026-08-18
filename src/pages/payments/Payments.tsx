@@ -216,6 +216,15 @@ export const Payments = () => {
 
     const payInvoice = async (data: IPayInvoiceForm) => {
         try {
+            if (paymentSelected?.type === 'SUPPLIER' || paymentSelected?.type === 'PERSONAL_EXPENSES') {
+                toast.custom(<Snackbar success={false} message="Este tipo de pago no puede asociarse a una factura" />, {
+                    position: 'bottom-center',
+                    duration: 1500,
+                });
+                setOpenPayDialog(false);
+                return;
+            }
+
             await associatePayment(data);
             setOpenPayDialog(false);
             setPaymentSelected(null);

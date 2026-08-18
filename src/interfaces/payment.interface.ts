@@ -35,9 +35,11 @@ export interface IPayments {
     account: Account;
     amountUSD: string | number;
     amountBs: string;
-    type: string;
+    type: TypePayment;
     InvoicePayment: InvoicePayment[];
 }
+
+export type TypePayment = 'INCOME' | 'EXPENSE' | 'SUPPLIER' | 'PERSONAL_EXPENSES';
 
 export interface InvoicePayment {
     id: number;

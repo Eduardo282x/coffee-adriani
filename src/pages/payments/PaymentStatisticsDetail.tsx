@@ -101,7 +101,7 @@ export const PaymentStatisticsDetail = ({ statistics }: PaymentStatisticsDetailP
                                     <p>{statistics.counts.associated}</p>
                                 </div>
                                 <div className="border-2 border-gray-300 rounded-md p-3">
-                                    <p className="font-bold">Pagos Sin asociar</p>
+                                    <p className="font-bold">Pagos sin asociar</p>
                                     <p>{statistics.counts.unassociated}</p>
                                 </div>
                             </div>
