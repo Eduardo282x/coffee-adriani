@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { IExpenseInvoice, ProductPercentage } from "@/interfaces/adminitration.interface";
 import { useEffect, useMemo, useState } from "react";
-import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceColumnsDetail, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
+import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceColumnsAssociated, expenseInvoiceColumnsDetail, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowDownLeft, ArrowUpRight, TrendingUp, TrendingDown, Truck, User, Wallet } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { PiCoffeeBeanFill } from "react-icons/pi";
 import { LuEqualApproximately } from "react-icons/lu";
@@ -17,6 +18,7 @@ import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
 import { ProductType } from "@/interfaces/product.interface";
 import { getProductType } from "@/services/products.service";
 import { ExportDashboard } from "@/interfaces/invoice.interface";
+import { IPayments } from "@/interfaces/payment.interface";
 
 import {
     Select,
@@ -36,7 +38,13 @@ const coffeeColors = {
 }
 
 type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
-type OptionInvoice = 'invoicesEarn' | 'invoicesGift';
+type OptionInvoice = 'invoicesGift' | 'invoicesRate' | 'invoicesExpense';
+
+const invoiceTabDescriptions: Record<OptionInvoice, string> = {
+    invoicesGift: 'Facturas que incluyen productos de regalo (GIFT).',
+    invoicesRate: 'Facturas pagadas cuya tasa aplicada dejó una diferencia pendiente.',
+    invoicesExpense: 'Estos son gastos asociados a facturas que reducen su ganancia.',
+};
 
 export const Administration = () => {
     const now = new Date();
@@ -88,16 +96,20 @@ export const Administration = () => {
         }
     }
 
-    const { totals, cardEarnsData, productSales } = useMemo<{
+    const { totals, cardEarnsData, productSales, paymentsExpenses, totalPaymentsExpenses } = useMemo<{
         totals: ITotals;
         cardEarnsData: CardEarnsProps[];
         productSales: ProductPercentage[];
+        paymentsExpenses: IPayments[];
+        totalPaymentsExpenses: number;
     }>(() => {
         if (!expenses) {
             return {
                 totals: baseTotals,
                 cardEarnsData: [],
                 productSales: [],
+                paymentsExpenses: [],
+                totalPaymentsExpenses: 0,
             };
         }
 
@@ -110,6 +122,12 @@ export const Administration = () => {
         const totalEarnMonth = Number(expenses.summary.totalEarnRange);
         const totalItemsEarnMonth = Number(expenses.summary.quantityProducts.totalEarnRange);
         const totalInvoiceEarns = expenses.invoices.reduce((acc, item) => acc + Number(item.earn), 0);
+        const totalInvoiceNetEarns = expenses.invoices.reduce((acc, item) => acc + Number(item.netEarn), 0);
+        const totalExpenseAssociated = expenses.invoices.reduce((acc, item) => acc + Number(item.expenseAssociatedAmount), 0);
+        const paymentsExpenses = expenses.paymentsExpenses.payments.filter(
+            (pay) => pay.type === 'EXPENSE' || pay.type === 'PERSONAL_EXPENSES'
+        );
+        const totalPaymentsExpenses = paymentsExpenses.reduce((acc, pay) => acc + Number(pay.amountUSD), 0);
 
         return {
             totals: {
@@ -117,40 +135,80 @@ export const Administration = () => {
                 totalInvoiceRemaining: formatOnlyNumberWithDots(totalInvoice),
                 totalInvoiceDetails: formatOnlyNumberWithDots(totalInvoiceDetails),
                 totalInvoiceEarns: formatOnlyNumberWithDots(totalInvoiceEarns),
+                totalInvoiceNetEarns: formatOnlyNumberWithDots(totalInvoiceNetEarns),
+                totalExpenseAssociated: formatOnlyNumberWithDots(totalExpenseAssociated),
                 totalPayments: formatOnlyNumberWithDots(totalPayments),
                 total: formatOnlyNumberWithDots(totalExpenses),
             },
             cardEarnsData: [
                 {
-                    title: 'Total del Mes',
-                    Icon: DollarSign,
-                    text: `${formatOnlyNumberWithDots(totalEarnMonth - totalExpenses)}$`,
-                    subtitle: 'Total',
+                    title: 'Ganancias del Mes',
+                    Icon: TrendingUp,
+                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$`,
+                    subtitle: 'Ganancia neta estimada del período',
+                    classNameCard: 'text-green-800',
+                    featured: true,
+                    badges: [
+                        { label: 'bultos', value: formatOnlyNumberWithDots(totalItemsEarnMonth) },
+                        { label: 'facturas', value: String(expenses.invoices.length) },
+                    ],
+                },
+                {
+                    title: 'Saldo',
+                    Icon: Wallet,
+                    text: `${formatOnlyNumberWithDots(expenses.bank.balance)}$`,
+                    subtitle: 'Entrada menos egresos',
+                    classNameCard: 'text-green-800',
+                },
+                {
+                    title: 'Entrada',
+                    Icon: ArrowDownLeft,
+                    text: `${formatOnlyNumberWithDots(expenses.bank.entrance)}$`,
+                    subtitle: 'Ingresos (INCOME)',
                     classNameCard: 'text-[#6f4e37]',
                 },
                 {
-                    title: 'Ganancias del Mes',
-                    Icon: TrendingUp,
-                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$ (${totalItemsEarnMonth.toFixed(2)})`,
-                    subtitle: 'Ganancias',
-                    classNameCard: 'text-green-800',
+                    title: 'Egreso Total',
+                    Icon: ArrowUpRight,
+                    text: `${formatOnlyNumberWithDots(expenses.bank.outflow)}$`,
+                    subtitle: 'Gastos + proveedores + personales',
+                    classNameCard: 'text-red-800',
                 },
                 {
                     title: 'Gastos del Mes',
                     Icon: TrendingDown,
-                    text: `${formatOnlyNumberWithDots(totalExpenses)}$`,
-                    subtitle: 'Gastos',
+                    text: `${formatOnlyNumberWithDots(expenses.bank.expenses)}$`,
+                    subtitle: 'Gastos asociados a facturas',
                     classNameCard: 'text-red-800',
+                },
+                {
+                    title: 'Gastos Personales',
+                    Icon: User,
+                    text: `${formatOnlyNumberWithDots(expenses.bank.personalExpenses)}$`,
+                    subtitle: 'Gastos personales',
+                    classNameCard: 'text-[#6f4e37]',
+                },
+                {
+                    title: 'Proveedores',
+                    Icon: Truck,
+                    text: `${formatOnlyNumberWithDots(expenses.bank.supplier)}$`,
+                    subtitle: 'Pagos a proveedores',
+                    classNameCard: 'text-[#6f4e37]',
                 },
                 {
                     title: 'Pagos sin asociar',
                     Icon: LuEqualApproximately,
-                    text: `${formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)}$ (${expenses.paymentsNoAssociated.payments.length})`,
-                    subtitle: 'Pagos no asociados',
+                    text: `${formatOnlyNumberWithDots(expenses.bank.unassociatedAmount)}$`,
+                    subtitle: 'Pagos INCOME sin factura',
                     classNameCard: '',
+                    badges: [
+                        { label: 'pagos', value: String(expenses.paymentsNoAssociated.payments.length) },
+                    ],
                 },
             ],
             productSales: expenses.summary.productPercentages,
+            paymentsExpenses,
+            totalPaymentsExpenses,
         };
     }, [expenses]);
 
@@ -212,6 +270,8 @@ export const Administration = () => {
                                     text={card.text}
                                     Icon={card.Icon}
                                     classNameCard={card.classNameCard}
+                                    badges={card.badges}
+                                    featured={card.featured}
                                 />
                             ))}
                         </div>
@@ -253,25 +313,26 @@ export const Administration = () => {
                 )}
                 {option == 'invoices' && expenses && (
                     <div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalInvoice} $</p>
-                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Restante:</span> {totals.totalInvoiceRemaining} $</p>
-                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Regalos:</span> {totals.totalInvoiceDetails} $</p>
-                                <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total Ganancias:</span> {totals.totalInvoiceEarns} $</p>
-                            </div>
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between gap-4 flex-wrap">
+                                <div className="flex items-center gap-4 whitespace-nowrap">
+                                    <span className="text-base"><span className="font-semibold">Facturas:</span> {totals.totalInvoice} $</span>
+                                    <span className="text-base"><span className="font-semibold">Diferencia de tasa:</span> {totals.totalInvoiceRemaining} $</span>
+                                    <span className="text-base"><span className="font-semibold">Regalos:</span> {totals.totalInvoiceDetails} $</span>
+                                    <span className="text-base"><span className="font-semibold">Ganancia Real:</span> {totals.totalInvoiceNetEarns} $</span>
+                                    <span className="text-base"><span className="font-semibold">Gasto Asociado:</span> {totals.totalExpenseAssociated} $</span>
+                                </div>
 
-                            <div className="w-auto mb-2">
-                                <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
-                                    <Button className={`${optionInvoice !== 'invoicesEarn' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesEarn')}>Facturas (diferencia de tasa)</Button>
-                                    <Button className={`${optionInvoice !== 'invoicesGift' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesGift')}>Regalos</Button>
+                                <div className="w-auto">
+                                    <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
+                                        <Button className={`${optionInvoice !== 'invoicesGift' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesGift')}>Regalos</Button>
+                                        <Button className={`${optionInvoice !== 'invoicesRate' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesRate')}>Diferencia de tasa</Button>
+                                        <Button className={`${optionInvoice !== 'invoicesExpense' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesExpense')}>Gasto asociado</Button>
+                                    </div>
                                 </div>
                             </div>
+                            <p className="text-black ml-1 mb-1">{invoiceTabDescriptions[optionInvoice]}</p>
                         </div>
-                        {/* {optionInvoice == 'invoicesEarn' &&
-                            <TableComponent key="invoices-earn" dataBase={expenses.invoices} columns={expenseInvoiceColumnsDetail} isExpansible={false}
-                            />
-                        } */}
                         {optionInvoice == 'invoicesGift' &&
                         <TableComponent key="invoices-gift" dataBase={expenses.invoices.filter(item => item.hasGiftItems)} columns={expenseInvoiceColumns}
                             isExpansible={true}
@@ -286,13 +347,24 @@ export const Administration = () => {
                             )}
                         />
                         }
-                        {optionInvoice == 'invoicesEarn' &&
-                        <TableComponent key="invoices-earn" dataBase={expenses.invoices.filter(item => item.invoiceItems.some(i => i.type !== 'GIFT'))} columns={expenseInvoiceColumnsDetail}
+                        {optionInvoice == 'invoicesRate' &&
+                        <TableComponent key="invoices-rate" dataBase={expenses.invoices.filter(item => item.hasRateDifference)} columns={expenseInvoiceColumnsDetail}
                             isExpansible={true}
                             renderRow={(item, index) => (
                                 (item.invoiceItems || []).filter(i => i.type !== 'GIFT').length > 0
                                     ? (
-                                        <TableComponent dataBase={(item.invoiceItems || [])} key={index} columns={expenseInvoiceDetailsColumns} />
+                                        <TableComponent dataBase={(item.invoiceItems || []).filter(i => i.type !== 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
+                                    ) : null
+                            )}
+                        />
+                        }
+                        {optionInvoice == 'invoicesExpense' &&
+                        <TableComponent key="invoices-expense" dataBase={expenses.invoices.filter(item => item.hasExpenseAssociated)} columns={expenseInvoiceColumnsAssociated}
+                            isExpansible={true}
+                            renderRow={(item, index) => (
+                                (item.invoiceItems || []).filter(i => i.type !== 'GIFT').length > 0
+                                    ? (
+                                        <TableComponent dataBase={(item.invoiceItems || []).filter(i => i.type !== 'GIFT')} key={index} columns={expenseInvoiceDetailsColumns} />
                                     ) : null
                             )}
                         />
@@ -301,13 +373,14 @@ export const Administration = () => {
                 )}
                 {option == 'pay' && expenses && (
                     <div>
-                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {totals.totalPayments} $</p>
-                        <TableComponent dataBase={expenses.payments} columns={expendePaymentsColumns} />
+                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Gastos:</span> {formatOnlyNumberWithDots(totalPaymentsExpenses)} $</p>
+                        <TableComponent dataBase={paymentsExpenses} columns={expendePaymentsColumns}
+                        />
                     </div>
                 )}
                 {option == 'paymentsNoAssociated' && expenses && (
                     <div>
-                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Total:</span> {formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)} $</p>
+                        <p className="text-lg mb-2 ml-2"><span className="font-semibold">Pagos No Asociados:</span> {formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)} $</p>
                         <TableComponent dataBase={expenses.paymentsNoAssociated.payments} columns={expendePaymentsNoAssociatedColumns} />
                     </div>
                 )}
@@ -341,17 +414,28 @@ interface CardEarnsProps {
     text: string;
     subtitle: string;
     classNameCard: string;
-    Icon: React.ComponentType<{ className?: string }>
+    Icon: React.ComponentType<{ className?: string }>;
+    badges?: { label: string; value: string }[];
+    featured?: boolean;
 }
-const CardEarns = ({ title, subtitle, text, Icon, classNameCard }: CardEarnsProps) => {
+const CardEarns = ({ title, subtitle, text, Icon, classNameCard, badges, featured }: CardEarnsProps) => {
     return (
-        <Card className={`coffee-shadow ${classNameCard}`}>
+        <Card className={`coffee-shadow ${classNameCard} ${featured ? 'lg:col-span-4 border-2 border-[#6f4e37]/40' : ''}`}>
             <CardHeader className="flex items-center justify-between -mb-6">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 <Icon className={`font-bold text-xl`} />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{text}</div>
+                <div className={`font-bold ${featured ? 'text-3xl' : 'text-2xl'}`}>{text}</div>
+                {badges && badges.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                        {badges.map((badge, index) => (
+                            <Badge key={index} variant="secondary" className="bg-[#ebe0d2]/60 text-[#6f4e37]">
+                                {badge.value} {badge.label}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
                 <p className="text-xs text-[#ae8958]">{subtitle}</p>
             </CardContent>
         </Card>
@@ -368,7 +452,7 @@ function GananciasChart({ gains }: GananciasChartProps) {
     const chartData = useMemo(
         () => gains.map((item) => ({
             ...item,
-            ganancias: Number(item.earn ?? 0),
+            ganancias: Number(item.netEarn ?? 0),
         })),
         [gains]
     );

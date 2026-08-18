@@ -9,6 +9,8 @@ export interface ITotals {
     totalInvoiceRemaining: string;
     totalInvoiceDetails: string;
     totalInvoiceEarns: string;
+    totalInvoiceNetEarns: string;
+    totalExpenseAssociated: string;
     totalPayments: string,
     total: string
 }
@@ -18,11 +20,21 @@ export const baseTotals: ITotals = {
     totalInvoiceRemaining: '0',
     totalInvoiceDetails: '0',
     totalInvoiceEarns: '0',
+    totalInvoiceNetEarns: '0',
+    totalExpenseAssociated: '0',
     totalPayments: '0',
     total: '0'
 };
 
 export const expendePaymentsColumns: IColumns<IPayments>[] = [
+    {
+        label: 'Tipo',
+        column: 'type',
+        element: (data: IPayments) => data.type === 'EXPENSE' ? 'Gasto' : (data.type === 'PERSONAL_EXPENSES' ? 'Gasto personal' : data.type),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
     {
         label: 'Cuenta',
         column: 'account.name',
@@ -83,7 +95,7 @@ export const expenseInvoiceColumns: IColumns<IExpenseInvoice>[] = [
         icon: false,
     },
     {
-        label: 'Restante',
+        label: 'Diferencia de tasa',
         column: 'remaining',
         element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.remaining).toFixed(2), '', '$'),
         orderBy: '',
@@ -118,7 +130,7 @@ export const expenseInvoiceColumnsDetail: IColumns<IExpenseInvoice>[] = [
         icon: false,
     },
     {
-        label: 'Restante',
+        label: 'Diferencia de tasa',
         column: 'remaining',
         element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.remaining).toFixed(2), '', '$'),
         orderBy: '',
@@ -153,6 +165,65 @@ export const expenseInvoiceColumnsDetail: IColumns<IExpenseInvoice>[] = [
         label: 'Ganancia',
         column: 'earn',
         element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.earn).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+];
+
+export const expenseInvoiceColumnsAssociated: IColumns<IExpenseInvoice>[] = [
+    {
+        label: 'Factura',
+        column: 'controlNumber',
+        element: (data: IExpenseInvoice) => data.controlNumber,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Cliente',
+        column: 'client.name',
+        element: (data: IExpenseInvoice) => data.client?.name ?? '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Bultos',
+        column: 'totalItems',
+        element: (data: IExpenseInvoice) => data.totalItems,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Total',
+        column: 'totalAmount',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.totalAmount).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Gasto Asociado',
+        column: 'expenseAssociatedAmount',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.expenseAssociatedAmount).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Ganancia',
+        column: 'earn',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.earn).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Ganancia Real',
+        column: 'netEarn',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.netEarn).toFixed(2), '', '$'),
         orderBy: '',
         type: 'string',
         icon: false,
