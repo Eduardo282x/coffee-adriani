@@ -124,7 +124,7 @@ export const Payments = () => {
 
                 return setTimeout(() => setOpenConfirmDialog(true), 0);
 
-            case 'Pagar':
+            case 'Asociar':
                 if (status === 'PENDING') {
                     return notify('Solo puede asociar pagos que estén confirmados');
                 }
