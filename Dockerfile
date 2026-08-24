@@ -1,7 +1,7 @@
 # Stage 1: Build
 FROM node:20-slim AS builder
 
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm@10
 
 WORKDIR /app
 
