@@ -244,6 +244,23 @@ export const Payments = () => {
         }
     };
 
+    const accountType = paymentFilterStore((state) => state.accountType);
+
+    console.log(accountType)
+
+    useEffect(() => {
+        if (accountType == 'PERSONAL_EXPENSES' || accountType ==  'SUPPLIER') {
+            setColumns(current => current.map(col => {
+                return {
+                    ...col,
+                    visible: col.column == 'associated' ? false : col.visible
+                }
+            }))
+        } else {
+            setColumns(paymentsColumns)
+        }
+    }, [accountType])
+
     return (
         <div className="flex flex-col">
             <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 text-white px-6">
@@ -285,24 +302,24 @@ export const Payments = () => {
 
                 <div className=''>
                     <div className='w-full flex items-center justify-between my-2'>
-                    <div className="flex items-center justify-start gap-2">
-                        {isLoading ? (
-                            <>
-                                <Skeleton className="h-6 w-40" />
-                                <Skeleton className="h-6 w-40" />
-                            </>
-                        ) : statistics && (
-                            <>
-                                <p className='text-lg'>
-                                    <span className='font-semibold'>Total Ingreso:</span> {formatOnlyNumberWithDots(statistics.totals.total)} $
-                                </p>
-                                <PaymentStatisticsDetail statistics={statistics} />
-                            </>
-                        )}
-                    </div>
+                        <div className="flex items-center justify-start gap-2">
+                            {isLoading ? (
+                                <>
+                                    <Skeleton className="h-6 w-40" />
+                                    <Skeleton className="h-6 w-40" />
+                                </>
+                            ) : statistics && (
+                                <>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Total Ingreso:</span> {formatOnlyNumberWithDots(statistics.totals.total)} $
+                                    </p>
+                                    <PaymentStatisticsDetail statistics={statistics} />
+                                </>
+                            )}
+                        </div>
 
-                    <FilterBadges />
-                </div>
+                        <FilterBadges />
+                    </div>
 
                     <TableComponent
                         loading={isLoading}

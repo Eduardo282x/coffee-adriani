@@ -80,6 +80,7 @@ export interface IBank {
 
 export interface IPaymentForm {
     amount: number;
+    dolar: number;
     reference: string;
     time?: string;
     accountId: number;

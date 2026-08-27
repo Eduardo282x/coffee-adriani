@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useProductDolar } from '@/hooks/product.hook'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { AccountPay, DescriptionPayment, IPaymentForm } from '@/interfaces/payment.interface'
 import { FC, useEffect, useMemo, useState } from 'react'
@@ -21,6 +22,7 @@ interface PaymentFormProps extends FromProps {
 export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, descriptions }) => {
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
     const today = new Date();
+    const { dolar } = useProductDolar();
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
 
@@ -28,6 +30,7 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
         defaultValues: {
             reference: '',
             amount: 0,
+            dolar: Number(dolar?.dolar),
             time: defaultTime,
             accountId: 0,
             description: '',
@@ -88,6 +91,7 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
         const parseData = {
             reference: data.reference,
             amount: Number(data.amount),
+            dolar: Number(data.dolar),
             accountId: Number(data.accountId),
             paymentDate: newPaymentDate,
             description: form.getValues('description'),
@@ -110,8 +114,8 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
                         {/* <CardDescription>Datos generales del movimiento a registrar</CardDescription> */}
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="col-span-2">
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-3">
                                 <FormSelect
                                     form={form}
                                     name='accountId'
@@ -123,6 +127,11 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
                             <div className="flex flex-col items-start justify-start gap-2 w-full">
                                 <Label>Cantidad</Label>
                                 <Input type="number" step="0.01" min={0} placeholder="Monto en $ o Bs" {...form.register('amount')} />
+                            </div>
+
+                            <div className="flex flex-col items-start justify-start gap-2 w-full">
+                                <Label>Tasa Dolar</Label>
+                                <Input type="number" step="0.01" min={0} placeholder="" {...form.register('dolar')} />
                             </div>
 
                             <FormSelect
