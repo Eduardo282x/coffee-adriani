@@ -37,7 +37,7 @@ export const Payments = () => {
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     const [invoice, setInvoice] = useState<InvoiceInvoice | null>(null);
     const dateStart = paymentFilterStore((state) => state.dateStart);
-
+    const accountType = paymentFilterStore((state) => state.accountType);
 
     // Hook optimizado
     const {
@@ -174,7 +174,6 @@ export const Payments = () => {
                     paymentId: paymentDisassociate.paymentId
                 };
                 await disassociatePayment(parseBody);
-                console.log('Pago desasociado');
             } catch (error) {
                 console.error('Error al desasociar pago:', error);
             }
@@ -244,12 +243,8 @@ export const Payments = () => {
         }
     };
 
-    const accountType = paymentFilterStore((state) => state.accountType);
-
-    console.log(accountType)
-
     useEffect(() => {
-        if (accountType == 'PERSONAL_EXPENSES' || accountType ==  'SUPPLIER') {
+        if (accountType == 'PERSONAL_EXPENSES' || accountType == 'SUPPLIER') {
             setColumns(current => current.map(col => {
                 return {
                     ...col,

@@ -4,7 +4,6 @@ import { DateRange } from 'react-day-picker';
 import { ClientDemand, DashboardSnapshot, IDashboard } from '@/interfaces/dashboard.interface';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { getDashboard, getDashboardClientDemand, getDashboardReport, getDashboardSnapshots, downloadDashboardSnapshot } from '@/services/dashboard.service';
-import { formatDateOnly } from './formaters';
 
 interface UseDashboardOptions {
 	dateRange?: DateRange;
@@ -54,8 +53,8 @@ const EMPTY_CLIENT_DEMAND: ClientDemand = {
 };
 
 const buildDashboardFilter = (dateRange: DateRange | undefined, productType: string): DashboardQueryFilter => ({
-	startDate: formatDateOnly(dateRange?.from),
-	endDate: formatDateOnly(dateRange?.to),
+	startDate: new Date(dateRange?.from as Date).toString(),
+	endDate: new Date(dateRange?.to as Date).toString(),
 	type: productType,
 });
 
