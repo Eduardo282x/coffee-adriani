@@ -1,6 +1,6 @@
 import { IPaymentForm, IPayInvoiceForm, PayDisassociateBody, PaymentMutationResponse } from "@/interfaces/payment.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
-import { DateRangeFilter } from "@/interfaces/invoice.interface";
+import { DateRangeFilter, ExportDashboard } from "@/interfaces/invoice.interface";
 import { AccountForm } from "@/pages/accounts/accounts.data";
 
 const routePayment = '/payments';
@@ -180,6 +180,14 @@ export const putConfirmPayment = async (id: number) => {
 export const deletePayment = async (id: number) => {
     try {
         return await deleteDataApi(`${routePayment}/${id}`);
+    } catch (err) {
+        return err
+    }
+}
+
+export const getPaymentItemsAnalytics = async (data: ExportDashboard) => {
+    try {
+        return await postDataApi(`${routePayment}/analysis`, data);
     } catch (err) {
         return err
     }

@@ -5,6 +5,7 @@ import { BsCash } from "react-icons/bs"
 import { FaBuilding } from "react-icons/fa6"
 import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-icons/md"
 import { RiAdminLine } from "react-icons/ri"
+import { CiBoxes } from "react-icons/ci";
 
 export interface MenuItem {
     title: string
@@ -23,6 +24,7 @@ export const menuSections: MenuSection[] = [
         items: [
             { title: "Dashboard", icon: BarChart3, href: "/" },
             { title: "Facturas", icon: FileText, href: "/facturas" },
+            { title: "Bultos Pagos", icon: CiBoxes, href: "/bultos" },
         ],
     },
     {

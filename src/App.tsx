@@ -25,6 +25,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Enterprise } from './pages/enterprise/Enterprise';
 import { Supplier } from './pages/supplier/Supplier';
+import { ItemsPage } from './pages/items/ItemsPage';
 // import { Analytics } from "@vercel/analytics/next"
 
 function AxiosInterceptorProvider() {
@@ -66,6 +67,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/clientes" element={<Clients />} />
               <Route path="/facturas" element={<InvoicesPage />} />
+              <Route path="/bultos" element={<ItemsPage />} />
               <Route path="/productos" element={<Products />} />
               {/* <Route path="/productos/historial" element={<Products />} /> */}
               {/* <Route path="/ventas" element={<Sales />} /> */}
