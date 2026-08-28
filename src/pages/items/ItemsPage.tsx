@@ -74,7 +74,7 @@ export const ItemsPage = () => {
 
             <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold tracking-tight text-[#6f4e37]">Analisis de Bultos</h2>
+                    <h2 className="text-2xl font-semibold tracking-tight text-[#6f4e37]">Bultos Pagados</h2>
                     <div className="flex items-start gap-4">
                         <div className="flex flex-col items-end justify-start gap-2">
                             <Label>Tipo de producto</Label>
@@ -126,8 +126,9 @@ export const ItemsPage = () => {
 
                 <Tabs defaultValue="daily" className="space-y-4">
                     <TabsList>
-                        <TabsTrigger value="daily">Elementos por dia</TabsTrigger>
+                        <TabsTrigger value="daily">Bultos Pagados por dia</TabsTrigger>
                         <TabsTrigger value="invoices">Facturas</TabsTrigger>
+                        <TabsTrigger value="general">General</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="daily">
@@ -164,6 +165,41 @@ export const ItemsPage = () => {
                                     columns={analyticsInvoiceColumns}
                                     loading={isLoading}
                                 />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="general" className="w-130">
+                        <Card>
+                            <CardContent>
+                                {isLoading ? (
+                                    <div className="space-y-4">
+                                        {Array.from({ length: 4 }).map((_, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <Skeleton className="h-2 w-2 rounded-full" />
+                                                <Skeleton className="h-4 w-40" />
+                                                <Skeleton className="h-4 flex-1" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="space-y-8 border-t pt-4">
+                                            {itemsAnalytics.generalItems.detailItems.map((item, index) => (
+                                                <div key={index} className="flex items-center">
+                                                    <div className="w-2 h-2 rounded-full bg-[#6f4e37] mr-2"></div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium leading-none">{item.product}</p>
+                                                    </div>
+                                                    <div className="text-right space-y-1">
+                                                        <p className="text-sm font-medium leading-none">Elementos: {formatOnlyNumberWithDots(item.totalElements)}</p>
+                                                        <p className="text-sm text-muted-foreground">Precio unitario: {formatOnlyNumberWithDots(item.unitPrice)} $ · Total {formatOnlyNumberWithDots(item.totalAmount)} $y</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>

@@ -3,8 +3,15 @@ export interface ItemsAnalyticsResponse {
     startDate: string;
     endDate: string;
     totals: ItemsTotals;
+    generalItems: ItemsGeneral;
     daily: ItemsDaily[];
     invoices: ItemsInvoice[];
+}
+
+export interface ItemsGeneral {
+    totalItems: number;
+    totalAmount: number;
+    detailItems: ItemsDetail[];
 }
 
 export interface ItemsTotals {

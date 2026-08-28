@@ -3,7 +3,6 @@ import { DateRange } from 'react-day-picker';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { ItemsAnalyticsResponse } from '@/interfaces/itemsAnalytics.interface';
 import { getPaymentItemsAnalytics } from '@/services/payment.service';
-import { formatDateOnly } from './formaters';
 
 interface UseItemsAnalyticsOptions {
 	dateRange?: DateRange;
@@ -26,13 +25,18 @@ const EMPTY_ITEMS_ANALYTICS: ItemsAnalyticsResponse = {
 		totalInvoices: 0,
 		totalPayments: 0,
 	},
+	generalItems: {
+		totalItems: 0,
+		totalAmount: 0,
+		detailItems: [],
+	},
 	daily: [],
 	invoices: [],
 };
 
 const buildItemsAnalyticsFilter = (dateRange: DateRange | undefined, productType: string): ItemsAnalyticsQueryFilter => ({
-	startDate: dateRange?.from ? formatDateOnly(dateRange.from) : '',
-	endDate: dateRange?.to ? formatDateOnly(dateRange.to) : '',
+	startDate: dateRange?.from ? new Date(dateRange.from as Date).toString() : '',
+	endDate: dateRange?.to ? new Date(dateRange.to as Date).toString() : '',
 	type: productType,
 });
 
