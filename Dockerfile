@@ -11,6 +11,9 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
+ARG VITE_BASE_URL_API
+ENV VITE_BASE_URL_API=$VITE_BASE_URL_API
+
 RUN pnpm build
 
 # Stage 2: Production
