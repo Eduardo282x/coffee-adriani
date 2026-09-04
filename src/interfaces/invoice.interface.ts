@@ -204,4 +204,7 @@ export interface ExportInvoicesDashboard {
     type: string;
     startDate?: Date | string;
     endDate?: Date | string;
+    zone?: string;
+    status?: string;
+    blockId?: string;
 }

@@ -30,6 +30,10 @@ export const InvoicesPage = () => {
     const dateStart = invoiceFilterStore((state) => state.dateStart);
     const { inventory: inventoryList } = useOptimizedInventory();
 
+    const selectedZone = invoiceFilterStore((state) => state.selectedZone);
+    const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
+    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+
     const inventory = useMemo<GroupInventoryDate>(() => {
         const parseInventory = inventoryList.map((inv) => ({
             label: `${inv.product.name} ${inv.product.presentation} - ${inv.product.priceUSD}$`,
@@ -166,12 +170,19 @@ export const InvoicesPage = () => {
                 const filterDate: ExportInvoicesDashboard = {
                     startDate: dateStart.from || new Date(),
                     endDate: dateStart.to ? dateStart.to : new Date(),
-                    type: selectedTypeProduct
+                    type: selectedTypeProduct,
+                    ...(selectedZone !== 'all' && { zone: selectedZone }),
+                    ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
+                    ...(selectedStatus !== 'all' && { status: selectedStatus })
                 };
+
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             } else {
                 const filterDate: ExportInvoicesDashboard = {
-                    type: selectedTypeProduct
+                    type: selectedTypeProduct,
+                    ...(selectedZone !== 'all' && { zone: selectedZone }),
+                    ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
+                    ...(selectedStatus !== 'all' && { status: selectedStatus })
                 };
                 response = await getInvoiceExcelFilter(filterDate) as Blob;
             }
