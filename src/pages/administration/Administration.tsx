@@ -119,10 +119,9 @@ export const Administration = () => {
             .reduce((acc, item) => acc + Number(item.subtotal), 0);
         const totalPayments = expenses.payments.reduce((acc, pay) => acc + Number(pay.amountUSD), 0);
         const totalExpenses = totalInvoice + totalInvoiceDetails + totalPayments;
-        const totalEarnMonth = Number(expenses.summary.totalEarnRange);
         const totalItemsEarnMonth = Number(expenses.summary.quantityProducts.totalEarnRange);
         const totalInvoiceEarns = expenses.invoices.reduce((acc, item) => acc + Number(item.earn), 0);
-        const totalInvoiceNetEarns = expenses.invoices.reduce((acc, item) => acc + Number(item.netEarn), 0);
+        const totalInvoiceNetEarns = Number(expenses.summary.earns?.real ?? 0);
         const totalExpenseAssociated = expenses.invoices.reduce((acc, item) => acc + Number(item.expenseAssociatedAmount), 0);
         const paymentsExpenses = expenses.paymentsExpenses.payments.filter(
             (pay) => pay.type === 'EXPENSE' || pay.type === 'PERSONAL_EXPENSES'
@@ -142,16 +141,23 @@ export const Administration = () => {
             },
             cardEarnsData: [
                 {
-                    title: 'Ganancias del Mes',
+                    title: 'Ganancias',
                     Icon: TrendingUp,
-                    text: `${formatOnlyNumberWithDots(totalEarnMonth)}$`,
-                    subtitle: 'Ganancia neta estimada del período',
+                    text: `${formatOnlyNumberWithDots(expenses.summary.earns.real)}$`,
+                    subtitle: 'Ganancia real del período',
                     classNameCard: 'text-green-800',
                     featured: true,
                     badges: [
                         { label: 'bultos', value: formatOnlyNumberWithDots(totalItemsEarnMonth) },
                         { label: 'facturas', value: String(expenses.invoices.length) },
                     ],
+                },
+                {
+                    title: 'Ganancia estimada',
+                    Icon: TrendingUp,
+                    text: `${formatOnlyNumberWithDots(expenses.summary.earns.estimated)}$`,
+                    subtitle: 'Ganancia neta estimada del período',
+                    classNameCard: 'text-green-800',
                 },
                 {
                     title: 'Saldo',
@@ -316,11 +322,11 @@ export const Administration = () => {
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center justify-between gap-4 flex-wrap">
                                 <div className="flex items-center gap-4 whitespace-nowrap">
-                                    <span className="text-base"><span className="font-semibold">Facturas:</span> {totals.totalInvoice} $</span>
-                                    <span className="text-base"><span className="font-semibold">Diferencia de tasa:</span> {totals.totalInvoiceRemaining} $</span>
-                                    <span className="text-base"><span className="font-semibold">Regalos:</span> {totals.totalInvoiceDetails} $</span>
                                     <span className="text-base"><span className="font-semibold">Ganancia Real:</span> {totals.totalInvoiceNetEarns} $</span>
-                                    <span className="text-base"><span className="font-semibold">Gasto Asociado:</span> {totals.totalExpenseAssociated} $</span>
+                                    <span className="text-base"><span className="font-semibold">Total (diferencia de tasa + regalos):</span> {totals.totalInvoice} $</span>
+                                    <span className="text-base text-red-600"><span className="font-semibold">Diferencia de tasa:</span> {totals.totalInvoiceRemaining} $</span>
+                                    <span className="text-base text-red-600"><span className="font-semibold">Regalos:</span> {totals.totalInvoiceDetails} $</span>
+                                    <span className="text-base text-red-600"><span className="font-semibold">Gasto Asociado:</span> {totals.totalExpenseAssociated} $</span>
                                 </div>
 
                                 <div className="w-auto">

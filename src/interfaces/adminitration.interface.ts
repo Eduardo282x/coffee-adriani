@@ -43,8 +43,14 @@ export interface ISummary {
     totalEarnDay: number;
     totalEarnMonth: number;
     totalEarnRange: number;
+    earns: IEarns;
     productPercentages: ProductPercentage[];
     quantityProducts: QuantityProducts;
+}
+
+export interface IEarns {
+    estimated: number;
+    real: number;
 }
 
 export interface QuantityProducts {
