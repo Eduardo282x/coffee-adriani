@@ -1,4 +1,3 @@
-import { ScreenLoader } from "@/components/loaders/ScreenLoader";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,12 +12,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { PiCoffeeBeanFill } from "react-icons/pi";
 import { LuEqualApproximately } from "react-icons/lu";
 import { useAdministration } from "@/hooks/administration.hook";
-import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker";
 import { ProductType } from "@/interfaces/product.interface";
 import { getProductType } from "@/services/products.service";
 import { ExportDashboard } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
+import { administrationFilterStore, OptionAdministration, OptionInvoice } from "@/store/administrationFilterStore";
+import { FilterBadges } from "./FilterBadges";
 
 import {
     Select,
@@ -37,9 +37,6 @@ const coffeeColors = {
     espresso: "#3E2723",
 }
 
-type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
-type OptionInvoice = 'invoicesGift' | 'invoicesRate' | 'invoicesExpense';
-
 const invoiceTabDescriptions: Record<OptionInvoice, string> = {
     invoicesGift: 'Facturas que incluyen productos de regalo (GIFT).',
     invoicesRate: 'Facturas pagadas cuya tasa aplicada dejó una diferencia pendiente.',
@@ -50,50 +47,40 @@ export const Administration = () => {
     const now = new Date();
 
     const [types, setTypes] = useState<ProductType[]>([]);
-    const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
-    const [option, setOption] = useState<OptionAdministration>('earns');
-    const [optionInvoice, setOptionInvoice] = useState<OptionInvoice>('invoicesGift');
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: new Date(now.getFullYear(), now.getMonth(), 1),
-        to: now,
-    });
-    const [filtersDate, setFiltersDate] = useState<ExportDashboard>({
-        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-        endDate: now,
-        type: 'Cafe',
-    });
 
-    const { expenses, isLoading, isFetching } = useAdministration(filtersDate);
+    const productTypeSelected = administrationFilterStore((s) => s.productTypeSelected);
+    const dateRange = administrationFilterStore((s) => s.dateRange);
+    const option = administrationFilterStore((s) => s.option);
+    const optionInvoice = administrationFilterStore((s) => s.optionInvoice);
+    const setProductTypeSelected = administrationFilterStore((s) => s.setProductTypeSelected);
+    const setDateRange = administrationFilterStore((s) => s.setDateRange);
+    const setOption = administrationFilterStore((s) => s.setOption);
+    const setOptionInvoice = administrationFilterStore((s) => s.setOptionInvoice);
+
+    const filtersDate = useMemo<ExportDashboard>(() => {
+        const current = new Date();
+        return {
+            startDate: dateRange?.from ?? new Date(current.getFullYear(), current.getMonth(), 1),
+            endDate: dateRange?.to ?? current,
+            type: productTypeSelected || 'Cafe',
+        };
+    }, [dateRange?.from, dateRange?.to, productTypeSelected]);
+
+    const { expenses, isLoading } = useAdministration(filtersDate);
 
     useEffect(() => {
         getProductsTypesApi();
     }, []);
 
     useEffect(() => {
-        if (!dateRange?.from || !dateRange?.to) return;
-
-        setFiltersDate((prev) => ({
-            ...prev,
-            startDate: dateRange.from as Date,
-            endDate: dateRange.to as Date,
-        }));
-    }, [dateRange?.from, dateRange?.to]);
-
-    useEffect(() => {
-        if (!productTypeSelected) return;
-
-        setFiltersDate((prev) => ({
-            ...prev,
-            type: productTypeSelected,
-        }));
-    }, [productTypeSelected]);
+        if (!productTypeSelected && types.length > 0) {
+            setProductTypeSelected(types[0].type);
+        }
+    }, [productTypeSelected, types, setProductTypeSelected]);
 
     const getProductsTypesApi = async () => {
         const response = await getProductType() as ProductType[];
         setTypes(response);
-        if (response?.length > 0) {
-            setProductTypeSelected(response[0].type);
-        }
     }
 
     const { totals, cardEarnsData, productSales, paymentsExpenses, totalPaymentsExpenses } = useMemo<{
@@ -159,7 +146,7 @@ export const Administration = () => {
                     subtitle: 'Ganancia neta estimada del período',
                     classNameCard: 'text-green-800',
                 },
-                {
+                ...(productTypeSelected === 'Queso' ? [{
                     title: 'Mermas',
                     Icon: TrendingDown,
                     text: `${formatOnlyNumberWithDots(expenses.summary.losses?.total ?? 0)}$`,
@@ -168,7 +155,7 @@ export const Administration = () => {
                     badges: [
                         { label: 'registros', value: String(expenses.summary.losses?.count ?? 0) },
                     ],
-                },
+                }] : []),
                 {
                     title: 'Saldo',
                     Icon: Wallet,
@@ -226,14 +213,10 @@ export const Administration = () => {
             paymentsExpenses,
             totalPaymentsExpenses,
         };
-    }, [expenses]);
+    }, [expenses, productTypeSelected]);
 
     return (
         <div className="flex flex-col">
-            {isLoading || isFetching && (
-                <ScreenLoader />
-            )}
-
             <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -272,6 +255,10 @@ export const Administration = () => {
 
                         <TabsAdministration option={option} setOption={setOption} />
                     </div>
+                </div>
+
+                <div className="mb-4">
+                    <FilterBadges />
                 </div>
 
 
@@ -350,7 +337,7 @@ export const Administration = () => {
                             <p className="text-black ml-1 mb-1">{invoiceTabDescriptions[optionInvoice]}</p>
                         </div>
                         {optionInvoice == 'invoicesGift' &&
-                        <TableComponent key="invoices-gift" dataBase={expenses.invoices.filter(item => item.hasGiftItems)} columns={expenseInvoiceColumns}
+                        <TableComponent key="invoices-gift" loading={isLoading} dataBase={expenses.invoices.filter(item => item.hasGiftItems)} columns={expenseInvoiceColumns}
                             isExpansible={true}
                             renderRow={(item, index) => (
                                 (item.invoiceItems || []).filter(i => i.type == 'GIFT').length > 0
@@ -364,7 +351,7 @@ export const Administration = () => {
                         />
                         }
                         {optionInvoice == 'invoicesRate' &&
-                        <TableComponent key="invoices-rate" dataBase={expenses.invoices.filter(item => item.hasRateDifference)} columns={expenseInvoiceColumnsDetail}
+                        <TableComponent key="invoices-rate" loading={isLoading} dataBase={expenses.invoices.filter(item => item.hasRateDifference)} columns={expenseInvoiceColumnsDetail}
                             isExpansible={true}
                             renderRow={(item, index) => (
                                 (item.invoiceItems || []).filter(i => i.type !== 'GIFT').length > 0
@@ -375,7 +362,7 @@ export const Administration = () => {
                         />
                         }
                         {optionInvoice == 'invoicesExpense' &&
-                        <TableComponent key="invoices-expense" dataBase={expenses.invoices.filter(item => item.hasExpenseAssociated)} columns={expenseInvoiceColumnsAssociated}
+                        <TableComponent key="invoices-expense" loading={isLoading} dataBase={expenses.invoices.filter(item => item.hasExpenseAssociated)} columns={expenseInvoiceColumnsAssociated}
                             isExpansible={true}
                             renderRow={(item, index) => (
                                 (item.invoiceItems || []).filter(i => i.type !== 'GIFT').length > 0
@@ -390,14 +377,14 @@ export const Administration = () => {
                 {option == 'pay' && expenses && (
                     <div>
                         <p className="text-lg mb-2 ml-2"><span className="font-semibold">Gastos:</span> {formatOnlyNumberWithDots(totalPaymentsExpenses)} $</p>
-                        <TableComponent dataBase={paymentsExpenses} columns={expendePaymentsColumns}
+                        <TableComponent loading={isLoading} dataBase={paymentsExpenses} columns={expendePaymentsColumns}
                         />
                     </div>
                 )}
                 {option == 'paymentsNoAssociated' && expenses && (
                     <div>
                         <p className="text-lg mb-2 ml-2"><span className="font-semibold">Pagos No Asociados:</span> {formatOnlyNumberWithDots(expenses.paymentsNoAssociated.total)} $</p>
-                        <TableComponent dataBase={expenses.paymentsNoAssociated.payments} columns={expendePaymentsNoAssociatedColumns} />
+                        <TableComponent loading={isLoading} dataBase={expenses.paymentsNoAssociated.payments} columns={expendePaymentsNoAssociatedColumns} />
                     </div>
                 )}
                 {/* {isFetching && expenses && (
