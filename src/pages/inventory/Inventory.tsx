@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { inventoryColumnDetailHistory, inventoryColumns, inventoryColumnsHistory } from "./inventory.data";
+import { inventoryColumnDetailHistory, inventoryColumns, inventoryColumnsHistory, inventoryLossColumns } from "./inventory.data";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TableComponent } from "@/components/table/TableComponent";
-import { BodyInventory, BodyInventorySimple, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface";
-import { postInventory, putInventory } from "@/services/inventory.service";
+import { BodyInventory, BodyInventoryLoss, BodyInventorySimple, GroupInventory, IInventory, Resume } from "@/interfaces/inventory.interface";
+import { createInventoryLoss, postInventory, putInventory } from "@/services/inventory.service";
 import { Filter } from "@/components/table/Filter";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Package } from "lucide-react";
 import { DialogComponent } from "@/components/dialog/DialogComponent";
 import { InventoryForm, InventoryFormUpdate } from "./InventoryForm";
+import { InventoryLossForm } from "./InventoryLossForm";
 import { InventoryCards } from "./InventoryCards";
 import { useSocket } from "@/services/socket.io";
 import { productStore } from "@/store/productStore";
-import { useOptimizedInventory } from "@/hooks/inventory.hook";
+import { useOptimizedInventory, useInventoryLoss } from "@/hooks/inventory.hook";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductType } from "@/interfaces/product.interface";
 import { getProductType } from "@/services/products.service";
@@ -30,9 +31,10 @@ export const Inventory = () => {
     const [data, setData] = useState<GroupInventory>({ allInventory: [], inventory: [], });
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [openDialogUpdate, setOpenDialogUpdate] = useState<boolean>(false);
+    const [openDialogLoss, setOpenDialogLoss] = useState<boolean>(false);
 
     const [typesProduct, setTypesProduct] = useState<ProductType[]>([]);
-    const [activeTab, setActiveTab] = useState<'inventario' | 'historial' | 'cortes'>('inventario');
+    const [activeTab, setActiveTab] = useState<'inventario' | 'historial' | 'cortes' | 'mermas'>('inventario');
     const [resumen, setResumen] = useState<Resume>({ totalProducts: 0, totalMoney: 0, downProducts: 0, zeroProducts: 0 });
     const [controlNumberInput, setControlNumberInput] = useState<string>('');
     const [dataForm, setDataForm] = useState<BodyInventorySimple>({
@@ -66,6 +68,14 @@ export const Inventory = () => {
         handleTypeProduct,
         handleTypeMovement,
     } = useEnterpriseEntries()
+
+    const {
+        losses,
+        isLoadingLosses,
+        refetchLosses,
+        setLossType,
+        setLossDateRangeFilter,
+    } = useInventoryLoss();
 
     const productOptions = productStore((state) => state.productOptions);
     const products = productStore((state) => state.products);
@@ -111,6 +121,14 @@ export const Inventory = () => {
         return () => clearTimeout(timeout);
     }, [controlNumberInput, controlNumber, setControlNumber]);
 
+    useEffect(() => {
+        setLossType(typeProduct ?? 'ALL');
+    }, [typeProduct, setLossType]);
+
+    useEffect(() => {
+        setLossDateRangeFilter(dateRange ?? undefined);
+    }, [dateRange, setLossDateRangeFilter]);
+
     const setInventoryFilter = (inventoryFilter: IInventory[]) => {
         setData((prev) => ({ ...prev, inventory: inventoryFilter }));
     }
@@ -129,6 +147,14 @@ export const Inventory = () => {
         setOpenDialogUpdate(false);
         await refetchInventory();
         await refetchInventoryHistory();
+    }
+
+    const actionDialogLoss = async (data: BodyInventoryLoss) => {
+        await createInventoryLoss(data);
+        setOpenDialogLoss(false);
+        await refetchInventory();
+        await refetchInventoryHistory();
+        await refetchLosses();
     }
 
     const changeTypeProduct = (type: string) => {
@@ -151,8 +177,17 @@ export const Inventory = () => {
             setInventorySelected(data);
             setDataForm({ productId: data.productId, quantity: data.quantity })
         }
+
+        if (action == 'Merma') {
+            setInventorySelected(data);
+        }
+
         setTimeout(() => {
-            setOpenDialogUpdate(true);
+            if (action == 'Merma') {
+                setOpenDialogLoss(true);
+            } else {
+                setOpenDialogUpdate(true);
+            }
         }, 0);
     }
 
@@ -165,7 +200,8 @@ export const Inventory = () => {
         console.log(data);
         await refetchInventory();
         await refetchInventoryHistory();
-    }, [refetchInventory, refetchInventoryHistory]);
+        await refetchLosses();
+    }, [refetchInventory, refetchInventoryHistory, refetchLosses]);
 
     useSocket('message', handleSocketMessage);
 
@@ -185,6 +221,7 @@ export const Inventory = () => {
                     <Button className={`${activeTab !== 'inventario' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('inventario')}>Inventario</Button>
                     <Button className={`${activeTab !== 'historial' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('historial')}>Historial</Button>
                     <Button className={`${activeTab !== 'cortes' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('cortes')}>Cortes</Button>
+                    <Button className={`${activeTab !== 'mermas' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setActiveTab('mermas')}>Mermas</Button>
                 </div>
 
                 {/* <Button onClick={newElement}>
@@ -310,6 +347,13 @@ export const Inventory = () => {
                         </>
                     ) : activeTab === 'cortes' ? (
                         <InventoryCuts typeProduct={typeProduct} dateRange={dateRange} />
+                    ) : activeTab === 'mermas' ? (
+                        <TableComponent
+                            loading={isLoadingLosses}
+                            key="inventory-losses"
+                            columns={inventoryLossColumns}
+                            dataBase={losses}
+                        ></TableComponent>
                     ) : (
                         <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory.filter(item => item.product.type == typeProduct)} action={getAction}></TableComponent>
                     )}
@@ -337,6 +381,17 @@ export const Inventory = () => {
 
                 >
                     <InventoryFormUpdate onSubmit={actionDialogUpdate} productOptions={productOptions} products={products.products} data={dataForm}></InventoryFormUpdate>
+                </DialogComponent>
+
+                <DialogComponent
+                    open={openDialogLoss}
+                    setOpen={setOpenDialogLoss}
+                    className="w-120"
+                    label2="Indique la cantidad de merma a guardar/restar"
+                    label1="Indique la cantidad de merma a guardar/restar"
+                    isEdit={false}
+                >
+                    <InventoryLossForm onSubmit={actionDialogLoss} data={inventorySelected}></InventoryLossForm>
                 </DialogComponent>
             </main>
         </div>

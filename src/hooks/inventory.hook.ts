@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getInventory, getInventoryEntries, getInventoryCut, InventoryHistoryFilter, InventoryCutFilter } from '@/services/inventory.service';
-import { IInventory, IInventoryEntry, PaginatedEntryResponse, InventoryCut, PaginatedCutResponse } from '@/interfaces/inventory.interface';
+import { getInventory, getInventoryEntries, getInventoryCut, getInventoryLosses, InventoryHistoryFilter, InventoryCutFilter, InventoryLossFilter } from '@/services/inventory.service';
+import { IInventory, IInventoryEntry, PaginatedEntryResponse, InventoryCut, PaginatedCutResponse, IInventoryLoss, PaginatedLossResponse } from '@/interfaces/inventory.interface';
 import { useCallback, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { formatDateOnly } from './formaters';
@@ -212,5 +212,77 @@ export const useInventoryCut = (options: UseInventoryCutOptions = {}) => {
         hasMoreCuts: !!hasNextPage,
         loadMoreCuts,
         refetchCuts: refetch,
+    };
+};
+
+interface UseInventoryLossOptions {
+    pageSize?: number;
+}
+
+export const useInventoryLoss = (options: UseInventoryLossOptions = {}) => {
+    const { pageSize = 50 } = options;
+    const [lossType, setLossType] = useState<string>('ALL');
+    const [lossDateRange, setLossDateRange] = useState<DateRange | undefined>(undefined);
+
+    const {
+        data: lossPages,
+        isLoading,
+        refetch,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ['inventory-losses', lossType, lossDateRange],
+        initialPageParam: 1,
+        queryFn: async ({ pageParam = 1 }) => {
+            const params: InventoryLossFilter = {
+                page: Number(pageParam),
+                limit: pageSize,
+                ...(lossType && lossType !== 'ALL' && { typeProduct: lossType }),
+                ...(lossDateRange && {
+                    startDate: formatDateOnly(lossDateRange?.from),
+                    endDate: formatDateOnly(lossDateRange?.to),
+                }),
+            };
+
+            return getInventoryLosses(params) as Promise<PaginatedLossResponse>;
+        },
+        getNextPageParam: (lastPage) => {
+            return lastPage?.pagination?.hasNextPage ? lastPage.pagination.page + 1 : undefined;
+        },
+        staleTime: 2 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+    });
+
+    const losses = useMemo<IInventoryLoss[]>(() => {
+        if (!lossPages?.pages?.length) return [];
+
+        return lossPages.pages.flatMap((page) => page.losses);
+    }, [lossPages]);
+
+    const lossPagination = lossPages?.pages?.[lossPages.pages.length - 1]?.pagination;
+
+    const setLossDateRangeFilter = useCallback((range: DateRange | undefined) => {
+        setLossDateRange(range);
+    }, []);
+
+    const loadMoreLosses = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+    return {
+        losses,
+        lossPagination,
+        lossType,
+        setLossType,
+        lossDateRange,
+        setLossDateRangeFilter,
+        isLoadingLosses: isLoading,
+        isLoadingMoreLosses: isFetchingNextPage,
+        hasMoreLosses: !!hasNextPage,
+        loadMoreLosses,
+        refetchLosses: refetch,
     };
 };

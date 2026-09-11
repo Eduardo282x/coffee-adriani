@@ -160,6 +160,16 @@ export const Administration = () => {
                     classNameCard: 'text-green-800',
                 },
                 {
+                    title: 'Mermas',
+                    Icon: TrendingDown,
+                    text: `${formatOnlyNumberWithDots(expenses.summary.losses?.total ?? 0)}$`,
+                    subtitle: 'Pérdidas por merma descontadas',
+                    classNameCard: 'text-red-800',
+                    badges: [
+                        { label: 'registros', value: String(expenses.summary.losses?.count ?? 0) },
+                    ],
+                },
+                {
                     title: 'Saldo',
                     Icon: Wallet,
                     text: `${formatOnlyNumberWithDots(expenses.bank.balance)}$`,

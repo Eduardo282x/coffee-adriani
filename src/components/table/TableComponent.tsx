@@ -378,11 +378,19 @@ const ColumnType = <T,>({ column, data, action }: ColumnProps<T>) => {
 }
 
 const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
+    const actions = (column.optionActions ?? []).filter(
+        (optionAction) => !optionAction.visible || optionAction.visible(data),
+    );
+
+    if (actions.length === 0) {
+        return null;
+    }
+
     return (
         <>
-            {column.optionActions && column.optionActions.length == 1 ?
+            {actions.length == 1 ?
                 <div className="flex justify-center gap-2">
-                    {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                    {actions.map((icon: IOptionActions<T>, index: number) => (
                         <div key={index} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
                             <ToolTip tooltip={icon.label}>
                                 <div className="p-1 hover:bg-gray-300 rounded-md cursor-pointer">
@@ -402,7 +410,7 @@ const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-                        {column.optionActions && column.optionActions.map((icon: IOptionActions, index: number) => (
+                        {actions.map((icon: IOptionActions<T>, index: number) => (
                             <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
                                 <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
                                 <span className={`${icon.className}`}>{icon.label}</span>

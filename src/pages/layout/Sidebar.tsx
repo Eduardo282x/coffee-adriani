@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarRail,
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Link, useLocation, useNavigate } from 'react-router'
 import { menuSections } from "./sidebar.data"
@@ -80,7 +80,6 @@ export const AppSidebar = () => {
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton>
                                     <Avatar className="h-6 w-6">
-                                        <AvatarImage src="/placeholder-user.jpg" alt="Usuario" />
                                         <AvatarFallback><User /></AvatarFallback>
                                     </Avatar>
                                     <span>{userData?.name} {userData?.lastName}</span>

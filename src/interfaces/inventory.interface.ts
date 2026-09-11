@@ -223,3 +223,35 @@ export interface PaginatedCutResponse {
         hasPreviousPage: boolean;
     };
 }
+
+// Inventory Losses (merma)
+export interface BodyInventoryLoss {
+    productId: number;
+    quantity: number;
+    reason?: string;
+    date?: Date;
+}
+
+export interface IInventoryLoss {
+    id: number;
+    productId: number;
+    quantity: number;
+    unitCost: number;
+    totalCost: number;
+    reason: string;
+    date: Date;
+    createdAt: Date;
+    product: IProducts;
+}
+
+export interface PaginatedLossResponse {
+    losses: IInventoryLoss[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}

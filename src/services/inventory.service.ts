@@ -1,4 +1,4 @@
-import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse, EntryStatisticsResponse, PaginatedCutResponse } from "@/interfaces/inventory.interface";
+import { BodyInventory, BodyInventorySimple, BodyUpdateHistoryInventory, CreateInventoryEntryForm, EntryPaymentForm, PaginatedEntryResponse, EntryPaymentsResponse, EntryStatisticsResponse, PaginatedCutResponse, BodyInventoryLoss, PaginatedLossResponse } from "@/interfaces/inventory.interface";
 import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
 
 const routeInventory = '/inventory';
@@ -16,6 +16,14 @@ export interface InventoryHistoryFilter {
 
 export interface InventoryCutFilter {
     type?: string;
+    startDate?: Date | string;
+    endDate?: Date | string;
+    page?: number;
+    limit?: number;
+}
+
+export interface InventoryLossFilter {
+    typeProduct?: string;
     startDate?: Date | string;
     endDate?: Date | string;
     page?: number;
@@ -246,6 +254,36 @@ export const getInventoryCut = async (filter: InventoryCutFilter): Promise<Pagin
 
         const queryString = query ? `?${query}` : '';
         return await getDataApi(`${routeInventory}/cuts${queryString}`) as Promise<PaginatedCutResponse>;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+// Inventory Losses (merma)
+
+export const createInventoryLoss = async (data: BodyInventoryLoss) => {
+    try {
+        return await postDataApi(`${routeInventory}/losses`, data);
+    } catch (err) {
+        return err
+    }
+}
+
+export const getInventoryLosses = async (filter: InventoryLossFilter): Promise<PaginatedLossResponse | null> => {
+    try {
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filter).filter(([, value]) =>
+                value !== undefined && value !== null && value !== ''
+            )
+        );
+
+        const query = Object.keys(cleanFilters)
+            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+            .join('&');
+
+        const queryString = query ? `?${query}` : '';
+        return await getDataApi(`${routeInventory}/losses${queryString}`) as Promise<PaginatedLossResponse>;
     } catch (err) {
         console.log(err);
         return null;

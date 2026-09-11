@@ -1,7 +1,7 @@
 import { IColumns } from "@/components/table/table.interface";
 import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters";
-import { IInventoryEntry, IInventoryEntryDetail, IInventory, InventoryCut, InventoryCutDetail } from "@/interfaces/inventory.interface";
-import { Trash2 } from "lucide-react";
+import { IInventoryEntry, IInventoryEntryDetail, IInventory, InventoryCut, InventoryCutDetail, IInventoryLoss } from "@/interfaces/inventory.interface";
+import { PackageMinus, Trash2 } from "lucide-react";
 import { MdEdit } from "react-icons/md";
 import { ProductTable } from "./InventoryForm";
 
@@ -40,14 +40,71 @@ export const inventoryColumns: IColumns<IInventory>[] = [
     },
     {
         column: '',
-        label: 'Editar',
+        label: 'Acciones',
         element: () => '',
         orderBy: '',
         type: 'string',
         icon: true,
         optionActions: [
             { label: 'Editar', icon: MdEdit, className: 'text-[#6f4e37]' },
+            {
+                label: 'Merma',
+                icon: PackageMinus,
+                className: 'text-red-600',
+                visible: (data: IInventory) => data.product.type.toLowerCase() === 'queso',
+            },
         ]
+    },
+]
+
+export const inventoryLossColumns: IColumns<IInventoryLoss>[] = [
+    {
+        label: 'Producto',
+        column: 'product.name',
+        element: (data: IInventoryLoss) => `${data.product.name} - ${data.product.presentation}`,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'quantity',
+        label: 'Cantidad',
+        element: (data: IInventoryLoss) => formatOnlyNumberWithDots(data.quantity),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'unitCost',
+        label: 'Costo Unitario ($)',
+        element: (data: IInventoryLoss) => formatNumberWithDots(data.unitCost, '', ' $'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        column: 'totalCost',
+        label: 'Costo Total ($)',
+        element: (data: IInventoryLoss) => formatNumberWithDots(data.totalCost, '', ' $'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Motivo',
+        column: 'reason',
+        element: (data: IInventoryLoss) => data.reason || '-',
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Fecha',
+        column: 'date',
+        element: (data: IInventoryLoss) => data.date ? formatDate(data.date) : '',
+        orderBy: '',
+        type: 'string',
+        icon: false,
     },
 ]
 

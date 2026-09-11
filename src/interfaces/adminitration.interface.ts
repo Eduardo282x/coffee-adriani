@@ -44,8 +44,14 @@ export interface ISummary {
     totalEarnMonth: number;
     totalEarnRange: number;
     earns: IEarns;
+    losses?: IInventoryLossSummary;
     productPercentages: ProductPercentage[];
     quantityProducts: QuantityProducts;
+}
+
+export interface IInventoryLossSummary {
+    total: number;
+    count: number;
 }
 
 export interface IEarns {
