@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Boxes, FileText, HandCoins, Scale } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ProductType } from "@/interfaces/product.interface"
@@ -15,6 +14,8 @@ import { TableComponent } from "@/components/table/TableComponent"
 import { analyticsInvoiceColumns, dailyItemsColumns, detailItemsColumns } from "./items.data"
 import { ItemsDaily } from "@/interfaces/itemsAnalytics.interface"
 import { Skeleton } from "@/components/ui/skeleton"
+import { itemsFilterStore } from "@/store/itemsFilterStore"
+import { FilterBadges } from "./FilterBadges"
 
 interface StatCardProps {
     title: string;
@@ -37,14 +38,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon }) => {
 }
 
 export const ItemsPage = () => {
-    const now = new Date();
     const [types, setTypes] = useState<ProductType[]>([]);
-    const [productTypeSelected, setProductTypeSelected] = useState<string>('Cafe');
 
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7),
-        to: new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    })
+    const productTypeSelected = itemsFilterStore((s) => s.productTypeSelected);
+    const date = itemsFilterStore((s) => s.dateRange);
+    const setProductTypeSelected = itemsFilterStore((s) => s.setProductTypeSelected);
+    const setDate = itemsFilterStore((s) => s.setDateRange);
 
     const {
         itemsAnalytics,
@@ -100,6 +99,10 @@ export const ItemsPage = () => {
                             />
                         </div>
                     </div>
+                </div>
+
+                <div className="mb-4">
+                    <FilterBadges />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
