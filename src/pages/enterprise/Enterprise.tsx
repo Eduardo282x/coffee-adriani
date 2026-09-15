@@ -243,7 +243,10 @@ export const Enterprise = () => {
                                         <span className='font-semibold'>Facturas:</span> {statistics.totals.totalInvoices}
                                     </p>
                                     <p className='text-lg'>
-                                        <span className='font-semibold'>Bultos:</span> {formatOnlyNumberWithDots(statistics.totals.totalBultos)}
+                                        <span className='font-semibold'>Total Bultos (Entrada):</span> {formatOnlyNumberWithDots(statistics.totals.totalBultos)}
+                                    </p>
+                                    <p className='text-lg'>
+                                        <span className='font-semibold'>Bultos Pendientes:</span> {formatOnlyNumberWithDots(statistics.totals.totalPendingBultos)}
                                     </p>
                                 </>
                             )}

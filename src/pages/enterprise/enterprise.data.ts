@@ -45,6 +45,14 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
         icon: false,
     },
     {
+        label: 'Bultos Pendientes',
+        column: 'pendingBultos',
+        element: (data: IInventoryEntry) => data.pendingBultos.toString(),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         column: 'totalPaid',
         label: 'Pagado ($)',
         element: (data: IInventoryEntry) => `$ ${formatOnlyNumberWithDots(data.totalPaid)}`,

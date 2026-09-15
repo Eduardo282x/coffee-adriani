@@ -124,6 +124,7 @@ export interface IInventoryEntry {
     movementType: string;
     totalAmount: string;
     totalBultos: number;
+    pendingBultos: number;
     totalPaid: string;
     remaining: string;
     supplier: ISupplier | null;
@@ -183,6 +184,7 @@ export interface EntryStatisticsResponse {
     totals: {
         totalInvoices: number;
         totalBultos: number;
+        totalPendingBultos: number;
         totalPaid: string;
         totalPending: string;
         totalAmount: string;
