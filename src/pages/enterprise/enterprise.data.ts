@@ -47,7 +47,7 @@ export const enterpriseColumns: IColumns<IInventoryEntry>[] = [
     {
         label: 'Bultos Pendientes',
         column: 'pendingBultos',
-        element: (data: IInventoryEntry) => data.pendingBultos.toString(),
+        element: (data: IInventoryEntry) => data.pendingBultos ? data.pendingBultos.toString() : '',
         orderBy: '',
         type: 'string',
         icon: false,
