@@ -222,8 +222,15 @@ export const invoiceItemsPaymentColumns: IColumns<IInvoicePayment>[] = [
         type: 'string',
     },
     {
+        column: 'payment.paymentDate',
+        label: 'Fecha del Pago',
+        element: (data: IInvoicePayment) => formatDate(data.payment.paymentDate),
+        orderBy: '',
+        type: 'string',
+    },
+    {
         column: 'createdAt',
-        label: 'Fecha',
+        label: 'Fecha de asociación',
         element: (data: IInvoicePayment) => formatDate(data.createdAt),
         orderBy: '',
         type: 'string',
