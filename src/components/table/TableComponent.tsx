@@ -26,6 +26,8 @@ interface TableProps<T> {
     shortSpaces?: boolean;
     totalElements?: number;
     loading?: boolean;
+    pageSize?: number;
+    onPageSizeChange?: (size: number) => void;
 }
 
 export const TableComponent = <T,>({
@@ -42,18 +44,21 @@ export const TableComponent = <T,>({
     isExpansible,
     shortSpaces,
     totalElements,
-    loading = false
+    loading = false,
+    pageSize,
+    onPageSizeChange
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
+    const [localRowsPerPage, setLocalRowsPerPage] = useState(50);
+
+    const rowsPerPage = pageSize ?? localRowsPerPage;
 
     useEffect(() => {
         setDataFilter(dataBase)
         setPage(0)
-        setRowsPerPage(50)
     }, [dataBase])
 
     useEffect(() => {
@@ -61,8 +66,13 @@ export const TableComponent = <T,>({
     }, [columns])
 
     const handleChangePage = (page: number, newPage: number) => {
+        if (onPageSizeChange && newPage !== rowsPerPage) {
+            onPageSizeChange(newPage);
+            setPage(0);
+            return;
+        }
         setPage(page);
-        setRowsPerPage(newPage);
+        setLocalRowsPerPage(newPage);
     };
 
     const handleChangeOrder = (col: IColumns<T>) => {

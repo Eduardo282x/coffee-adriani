@@ -36,6 +36,7 @@ export const Payments = () => {
     const [paymentDisassociate, setPaymentDisassociate] = useState<InvoicePayment | null>(null);
     const [columns, setColumns] = useState<IColumns<IPayments>[]>(paymentsColumns);
     const [invoice, setInvoice] = useState<InvoiceInvoice | null>(null);
+    const [pageSize, setPageSize] = useState<number>(50);
     const dateStart = paymentFilterStore((state) => state.dateStart);
     const accountType = paymentFilterStore((state) => state.accountType);
 
@@ -62,7 +63,7 @@ export const Payments = () => {
         loadMore,
         isLoadingMore,
     } = useOptimizedPayments({
-        pageSize: 50,
+        pageSize,
         enableStatistics: true
     });
 
@@ -322,6 +323,8 @@ export const Payments = () => {
                         dataBase={payments}
                         isExpansible={true}
                         totalElements={totalCount}
+                        pageSize={pageSize}
+                        onPageSizeChange={setPageSize}
                         renderRow={(pay, index) => (
                             <PaymentExpandible
                                 key={index}

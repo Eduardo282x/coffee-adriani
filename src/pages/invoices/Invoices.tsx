@@ -27,6 +27,7 @@ export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [selectInvoice, setSelectInvoice] = useState<InvoiceInvoice | null>(null);
     const [loadingFile, setLoadingFile] = useState<boolean>(false);
+    const [pageSize, setPageSize] = useState<number>(50);
     const dateStart = invoiceFilterStore((state) => state.dateStart);
     const { inventory: inventoryList } = useOptimizedInventory();
 
@@ -65,7 +66,7 @@ export const InvoicesPage = () => {
         checkOneInvoice,
         error
     } = useOptimizedInvoices({
-        pageSize: 50,
+        pageSize,
         enableStatistics: true
     });
 
@@ -327,6 +328,8 @@ export const InvoicesPage = () => {
                             columns={clientColumns}
                             colSpanColumns={true}
                             totalElements={totalCount}
+                            pageSize={pageSize}
+                            onPageSizeChange={setPageSize}
                             renderRow={(inv, index) => (
                                 <ExpansibleInvoice
                                     key={index}

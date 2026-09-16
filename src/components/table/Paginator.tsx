@@ -24,7 +24,7 @@ type TypeDirection = 'back' | 'next';
 export const Paginator: FC<IPaginator> = ({ page, rowsPerPage, changePage, maxPage, totalElements }) => {
 
     const changeValueSelect = (value: string) => {
-        changePage(page, Number(value));
+        changePage(0, Number(value));
     }
 
     const arrowBtns = (direction: TypeDirection) => {

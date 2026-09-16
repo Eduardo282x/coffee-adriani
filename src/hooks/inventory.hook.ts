@@ -149,7 +149,7 @@ export const useInventoryCut = (options: UseInventoryCutOptions = {}) => {
         hasNextPage,
         isFetchingNextPage,
     } = useInfiniteQuery({
-        queryKey: ['inventory-cuts', cutType, cutDateRange],
+        queryKey: ['inventory-cuts', cutType, cutDateRange, pageSize],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InventoryCutFilter = {
@@ -232,7 +232,7 @@ export const useInventoryLoss = (options: UseInventoryLossOptions = {}) => {
         hasNextPage,
         isFetchingNextPage,
     } = useInfiniteQuery({
-        queryKey: ['inventory-losses', lossType, lossDateRange],
+        queryKey: ['inventory-losses', lossType, lossDateRange, pageSize],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InventoryLossFilter = {

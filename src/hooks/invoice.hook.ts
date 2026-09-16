@@ -60,7 +60,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         error: invoicesError,
         refetch: refetchInvoices
     } = useInfiniteQuery({
-        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus],
+        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InvoiceFilterPaginate = {

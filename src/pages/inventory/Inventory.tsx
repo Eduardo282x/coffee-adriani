@@ -42,6 +42,7 @@ export const Inventory = () => {
         quantity: 0
     });
     const [inventorySelected, setInventorySelected] = useState<IInventory | null>(null);
+    const [pageSize, setPageSize] = useState<number>(50);
 
     const {
         inventory,
@@ -51,6 +52,7 @@ export const Inventory = () => {
 
         inventoryEntries,
         refetchInventoryHistory,
+        applyHistoryFilter,
         typeProduct,
         setTypeProduct,
         movementType,
@@ -75,7 +77,7 @@ export const Inventory = () => {
         refetchLosses,
         setLossType,
         setLossDateRangeFilter,
-    } = useInventoryLoss();
+    } = useInventoryLoss({ pageSize });
 
     const productOptions = productStore((state) => state.productOptions);
     const products = productStore((state) => state.products);
@@ -170,6 +172,11 @@ export const Inventory = () => {
     const changeDateRange = (range: DateRange | undefined | null) => {
         applyDateFilter({ startDate: range?.from, endDate: range?.to });
         setDateRange(range ? range : undefined);
+    }
+
+    const handlePageSizeChange = (size: number) => {
+        setPageSize(size);
+        applyHistoryFilter({ limit: size });
     }
 
     const getAction = (action: string, data: IInventory) => {
@@ -336,6 +343,8 @@ export const Inventory = () => {
                                 dataBase={inventoryEntries}
                                 isExpansible={true}
                                 action={getActionHistory}
+                                pageSize={pageSize}
+                                onPageSizeChange={handlePageSizeChange}
                                 renderRow={
                                     (entry) => (
                                         <TableComponent
@@ -353,6 +362,8 @@ export const Inventory = () => {
                             key="inventory-losses"
                             columns={inventoryLossColumns}
                             dataBase={losses}
+                            pageSize={pageSize}
+                            onPageSizeChange={setPageSize}
                         ></TableComponent>
                     ) : (
                         <TableComponent loading={isLoading} key="inventory-list" columns={inventoryColumns} dataBase={data.inventory.filter(item => item.product.type == typeProduct)} action={getAction}></TableComponent>

@@ -45,7 +45,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
         error: entriesError,
         refetch: refetchEntries
     } = useInfiniteQuery({
-        queryKey: ['enterprise-entries', dateFilter, search, supplierId],
+        queryKey: ['enterprise-entries', dateFilter, search, supplierId, pageSize],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: InventoryHistoryFilter = {

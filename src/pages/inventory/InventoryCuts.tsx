@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { TableComponent } from "@/components/table/TableComponent";
 import { useInventoryCut } from "@/hooks/inventory.hook";
@@ -11,12 +11,13 @@ interface InventoryCutsProps {
 }
 
 export const InventoryCuts = ({ typeProduct, dateRange }: InventoryCutsProps) => {
+    const [pageSize, setPageSize] = useState<number>(50);
     const {
         cuts,
         isLoadingCuts,
         setCutType,
         setCutDateRangeFilter,
-    } = useInventoryCut();
+    } = useInventoryCut({ pageSize });
 
     useEffect(() => {
         setCutType(typeProduct ?? 'ALL');
@@ -56,6 +57,8 @@ export const InventoryCuts = ({ typeProduct, dateRange }: InventoryCutsProps) =>
             columns={inventoryCutColumns}
             dataBase={cuts}
             isExpansible={true}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
             renderRow={(cut) => renderCutDetail(cut)}
         />
     );

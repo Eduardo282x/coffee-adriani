@@ -93,7 +93,7 @@ export const useOptimizedPayments = (options: UsePaymentsOptions = {}) => {
         error: paymentsError,
         refetch: refetchPayments
     } = useInfiniteQuery({
-        queryKey: ['payments', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation, accountType],
+        queryKey: ['payments', dateFilter, search, typeDescription, typeProduct, selectedMethod, selectedAccount, selectCredits, selectedAssociation, accountType, pageSize],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }) => {
             const params: FilterPaymentsPaginated = {

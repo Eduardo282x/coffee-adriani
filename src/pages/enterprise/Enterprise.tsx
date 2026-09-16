@@ -34,6 +34,7 @@ export const Enterprise = () => {
     const [entrySelected, setEntrySelected] = useState<IInventoryEntry | null>(null);
     const [entryPaymentSelected, setEntryPaymentSelected] = useState<IInventoryEntryPayment | null>(null);
     const [entryPayments, setEntryPayments] = useState<EntryPaymentsResponse | null>(null);
+    const [pageSize, setPageSize] = useState<number>(50);
 
     const search = enterpriseFilterStore((state) => state.search);
     const supplierId = enterpriseFilterStore((state) => state.supplierId);
@@ -62,7 +63,7 @@ export const Enterprise = () => {
         handleChangeSearch,
         handleChangeSupplier,
         refetch,
-    } = useEnterpriseEntries({ pageSize: 50, useGlobalFilters: true });
+    } = useEnterpriseEntries({ pageSize, useGlobalFilters: true });
 
     useEffect(() => {
         if (!products || products.products.length == 0) {
@@ -290,6 +291,8 @@ export const Enterprise = () => {
                         columns={enterpriseColumns}
                         dataBase={entries}
                         totalElements={pagination?.totalCount || 0}
+                        pageSize={pageSize}
+                        onPageSizeChange={setPageSize}
                         action={getActions}
                         isExpansible={true}
                         renderRow={
