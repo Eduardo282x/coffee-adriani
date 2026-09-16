@@ -76,35 +76,34 @@ export const TableComponent = <T,>({
     };
 
     const handleChangeOrder = (col: IColumns<T>) => {
-        if (!col.icon) {
-            let newOrderBy: OrderBy = "";
+        if (col.icon) return;
 
-            setColumnData((prev) =>
-                prev.map((co) => {
-                    if (co.column === col.column) {
-                        newOrderBy = co.orderBy === 'asc' ? 'desc' : (co.orderBy === 'desc' ? '' : 'asc');
-                        return { ...co, orderBy: newOrderBy };
-                    } else {
-                        return { ...co, orderBy: '' };
-                    }
-                })
-            );
+        const current = columnData.find((co) => co.column === col.column);
+        const newOrderBy: OrderBy = current?.orderBy === 'asc'
+            ? 'desc'
+            : current?.orderBy === 'desc'
+                ? ''
+                : 'asc';
 
-            let orderedData;
+        setColumnData((prev) =>
+            prev.map((co) =>
+                co.column === col.column ? { ...co, orderBy: newOrderBy } : { ...co, orderBy: '' }
+            )
+        );
 
-            if (newOrderBy === "") {
-                orderedData = dataBase;
-            } else {
-                orderedData = [...dataBase].sort((a, b) => {
-                    const valA = getNestedValue(a, col.column);
-                    const valB = getNestedValue(b, col.column);
-
-                    return newOrderBy === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                });
-            }
-
-            setDataFilter(orderedData);
+        if (newOrderBy === '') {
+            setDataFilter(dataBase);
+            return;
         }
+
+        const orderedData = [...dataBase].sort((a, b) =>
+            compareValues(
+                getNestedRawValue(a, col.column),
+                getNestedRawValue(b, col.column),
+            ) * (newOrderBy === 'asc' ? 1 : -1)
+        );
+
+        setDataFilter(orderedData);
     }
 
 
@@ -440,6 +439,36 @@ const getNestedValue = (obj: any, path: string): string => {
     } catch {
         return '';
     }
+}
+
+// Obtener el valor crudo (sin coercionar a string) para ordenar correctamente
+const getNestedRawValue = (obj: any, path: string): unknown => {
+    try {
+        return path.split('.').reduce((acc, key) => acc?.[key], obj);
+    } catch {
+        return undefined;
+    }
+}
+
+const compareValues = (a: unknown, b: unknown): number => {
+    if (a === undefined || a === null) return b === undefined || b === null ? 0 : 1;
+    if (b === undefined || b === null) return -1;
+
+    if (a instanceof Date || b instanceof Date) {
+        const ta = a instanceof Date ? a.getTime() : new Date(a as string).getTime();
+        const tb = b instanceof Date ? b.getTime() : new Date(b as string).getTime();
+        if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta - tb;
+    }
+
+    const na = typeof a === 'number' ? a : Number(a);
+    const nb = typeof b === 'number' ? b : Number(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb) &&
+        ((typeof a === 'number' && typeof b === 'number') ||
+            (typeof a === 'string' && (a as string).trim() !== '' && typeof b === 'string' && (b as string).trim() !== ''))) {
+        return na - nb;
+    }
+
+    return String(a).localeCompare(String(b));
 }
 
 // Función helper para establecer valores anidados dinámicamente
