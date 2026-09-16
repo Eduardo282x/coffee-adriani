@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from '@/components/table/Filter';
 import { DialogComponent } from '@/components/dialog/DialogComponent';
-import { DateRange } from 'react-day-picker';
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { enterpriseColumns, enterpriseDetailColumns, enterprisePaymentColumns } from './enterprise.data';
@@ -23,6 +22,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
 import { DolarComponents } from '@/components/dolar/DolarComponents';
 import { formatOnlyNumberWithDots } from '@/hooks/formaters';
+import { enterpriseFilterStore } from '@/store/enterpriseFilterStore';
+import { FilterBadges } from './FilterBadges';
 
 export const Enterprise = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -32,8 +33,12 @@ export const Enterprise = () => {
     const [openPaymentsListDialog, setOpenPaymentsListDialog] = useState<boolean>(false);
     const [entrySelected, setEntrySelected] = useState<IInventoryEntry | null>(null);
     const [entryPaymentSelected, setEntryPaymentSelected] = useState<IInventoryEntryPayment | null>(null);
-    const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [entryPayments, setEntryPayments] = useState<EntryPaymentsResponse | null>(null);
+
+    const search = enterpriseFilterStore((state) => state.search);
+    const supplierId = enterpriseFilterStore((state) => state.supplierId);
+    const dateStart = enterpriseFilterStore((state) => state.dateStart);
+    const setDateStart = enterpriseFilterStore((state) => state.setDateStart);
 
     const { products, productOptions } = productStore((state) => state);
     const getProductsApi = productStore((state) => state.getProductsApi);
@@ -56,9 +61,8 @@ export const Enterprise = () => {
         applyDateFilter,
         handleChangeSearch,
         handleChangeSupplier,
-        supplierId,
         refetch,
-    } = useEnterpriseEntries({ pageSize: 50 });
+    } = useEnterpriseEntries({ pageSize: 50, useGlobalFilters: true });
 
     useEffect(() => {
         if (!products || products.products.length == 0) {
@@ -67,15 +71,15 @@ export const Enterprise = () => {
     }, [products, getProductsApi])
 
     useEffect(() => {
-        if (date?.from && date?.to) {
+        if (dateStart?.from && dateStart?.to) {
             applyDateFilter({
-                startDate: date.from,
-                endDate: date.to
+                startDate: dateStart.from,
+                endDate: dateStart.to
             });
         } else {
             applyDateFilter(null);
         }
-    }, [date?.from, date?.to]);
+    }, [dateStart?.from, dateStart?.to]);
 
     const getActions = async (action: string, data: IInventoryEntry) => {
         if (action === 'Ver Pagos') {
@@ -193,15 +197,15 @@ export const Enterprise = () => {
 
                     <div className="flex items-end gap-2">
                         <DateRangePicker
-                            setDatePicker={setDate}
-                            datePicker={date}
+                            setDatePicker={setDateStart}
+                            datePicker={dateStart}
                             label={'Rango de Fecha'}
                         />
                         <div>
                             <Label className="mb-2">Proveedor</Label>
                             <Select
-                                value={supplierId?.toString() || ''}
-                                onValueChange={(value) => handleChangeSupplier(value ? Number(value) : undefined)}
+                                value={supplierId || ''}
+                                onValueChange={(value) => handleChangeSupplier(value)}
                             >
                                 <SelectTrigger className="w-56">
                                     <SelectValue placeholder="Todos los proveedores" />
@@ -224,28 +228,34 @@ export const Enterprise = () => {
                                 setDataFilter={() => { }}
                                 setSearch={handleChangeSearch}
                                 filterInvoices={false}
+                                initialValue={search}
                             />
                         </div>
                     </div>
                 </div>
 
                 <div className=''>
+                    <div className="flex justify-end">
+                        <FilterBadges />
+                    </div>
+
                     <div className='w-full flex items-center justify-between my-2'>
                         <div className="flex items-center justify-start gap-2">
                             {isLoadingStatistics ? (
                                 <>
                                     <Skeleton className="h-6 w-40" />
                                     <Skeleton className="h-6 w-40" />
+                                    <Skeleton className="h-6 w-40" />
                                 </>
                             ) : statistics && (
                                 <>
-                                    <p className='text-lg'>
+                                    <p className=''>
                                         <span className='font-semibold'>Facturas:</span> {statistics.totals.totalInvoices}
                                     </p>
-                                    <p className='text-lg'>
+                                    <p className=''>
                                         <span className='font-semibold'>Total Bultos (Entrada):</span> {formatOnlyNumberWithDots(statistics.totals.totalBultos)}
                                     </p>
-                                    <p className='text-lg'>
+                                    <p className=''>
                                         <span className='font-semibold'>Bultos Pendientes:</span> {formatOnlyNumberWithDots(statistics.totals.totalPendingBultos)}
                                     </p>
                                 </>

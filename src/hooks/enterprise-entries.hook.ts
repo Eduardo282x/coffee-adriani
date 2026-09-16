@@ -13,18 +13,26 @@ import {
 } from '@/services/inventory.service';
 import { PaginatedEntryResponse, CreateInventoryEntryForm, EntryPaymentForm } from '@/interfaces/inventory.interface';
 import { formatDateOnly } from './formaters';
+import { enterpriseFilterStore } from '@/store/enterpriseFilterStore';
 
 interface UseEnterpriseEntriesOptions {
     pageSize?: number;
+    useGlobalFilters?: boolean;
 }
 
 export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) => {
-    const { pageSize = 50 } = options;
+    const { pageSize = 50, useGlobalFilters = false } = options;
     const [dateFilter, setDateFilter] = useState<{ startDate?: string; endDate?: string } | null>(null);
-    const [search, setSearch] = useState<string>('');
+    const [localSearch, setLocalSearch] = useState<string>('');
     const [typeProduct, setTypeProduct] = useState<string>('');
     const [typeMovement, setTypeMovement] = useState<string>('');
-    const [supplierId, setSupplierId] = useState<number | undefined>(undefined);
+    const [localSupplierId, setLocalSupplierId] = useState<number | undefined>(undefined);
+
+    const globalSearch = enterpriseFilterStore((state) => state.search);
+    const globalSupplierId = enterpriseFilterStore((state) => state.supplierId);
+
+    const search = useGlobalFilters ? globalSearch : localSearch;
+    const supplierId = useGlobalFilters ? globalSupplierId : (localSupplierId !== undefined ? localSupplierId.toString() : '');
 
     const queryClient = useQueryClient();
 
@@ -46,7 +54,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
                 ...(dateFilter?.startDate && { startDate: formatDateOnly(dateFilter.startDate) }),
                 ...(dateFilter?.endDate && { endDate: formatDateOnly(dateFilter.endDate) }),
                 ...(search && { controlNumber: search }),
-                ...(supplierId && { supplierId: supplierId.toString() })
+                ...(supplierId && { supplierId })
             };
 
             return getEnterpriseEntries(params) as Promise<PaginatedEntryResponse>;
@@ -70,7 +78,7 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
             ...(search && { controlNumber: search }),
             ...(typeMovement !== 'ALL' && { typeMovement }),
             ...(typeProduct && { typeProduct }),
-            ...(supplierId && { supplierId: supplierId.toString() })
+            ...(supplierId && { supplierId })
         }),
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
@@ -164,12 +172,20 @@ export const useEnterpriseEntries = (options: UseEnterpriseEntriesOptions = {}) 
     }, []);
 
     const handleChangeSearch = useCallback((search: string) => {
-        setSearch(search);
-    }, []);
+        if (useGlobalFilters) {
+            enterpriseFilterStore.getState().setSearch(search);
+        } else {
+            setLocalSearch(search);
+        }
+    }, [useGlobalFilters]);
 
-    const handleChangeSupplier = useCallback((supplierId: number | undefined) => {
-        setSupplierId(supplierId);
-    }, []);
+    const handleChangeSupplier = useCallback((supplierId: string) => {
+        if (useGlobalFilters) {
+            enterpriseFilterStore.getState().setSupplierId(supplierId);
+        } else {
+            setLocalSupplierId(supplierId ? Number(supplierId) : undefined);
+        }
+    }, [useGlobalFilters]);
 
     const createEntry = useCallback(async (data: CreateInventoryEntryForm) => {
         return createEntryMutation.mutateAsync(data);
