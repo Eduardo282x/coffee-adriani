@@ -161,6 +161,21 @@ export const rifOptions: IOptions[] = [
     { label: 'P', value: 'P' },
 ]
 
+export const reportOrderByOptions: IOptions[] = [
+    { label: 'Nombre', value: 'name' },
+    { label: 'Dirección', value: 'address' },
+    { label: 'Bloque', value: 'block' },
+    { label: 'Deuda', value: 'debt' },
+    { label: 'Total pagado', value: 'totalPaid' },
+    { label: 'Total facturas', value: 'totalInvoices' },
+    { label: 'Fecha de despacho', value: 'dispatchDate' },
+];
+
+export const reportOrderDirectionOptions: IOptions[] = [
+    { label: 'Ascendente', value: 'asc' },
+    { label: 'Descendente', value: 'desc' },
+]
+
 export interface IClientsForm {
     id?: number;
     name: string;

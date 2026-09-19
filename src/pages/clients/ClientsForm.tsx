@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
-import { clientsZones, defaultValues, IClientsForm, rifOptions, TypesClientsForm } from './client.data'
+import { clientsZones, defaultValues, IClientsForm, reportOrderByOptions, reportOrderDirectionOptions, rifOptions, TypesClientsForm } from './client.data'
 import { FC, useEffect } from 'react'
 import { InputSelect } from '@/components/form/InputSelect'
 import { Form } from '@/components/ui/form'
@@ -146,14 +146,20 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
             status: 'all',
             zone: '',
             type: 'Cafe',
-            blockId: 0
+            blockId: 0,
+            orderBy: '',
+            orderDirection: '',
         }
     });
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col justify-start items-start gap-4 w-full">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-4 w-full">
                 <FormSelect form={form} name='type' label='Tipo de Producto' placeholder='Seleccione un tipo de producto' options={types.map(type => ({ label: type.type, value: type.type }))} />
+                
+                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
+                <FormSelect form={form} name='orderBy' label='Ordenar por (Opcional)' placeholder='Seleccione un campo' options={reportOrderByOptions} />
+                
                 <FormSelect form={form} name='status' label='Estado' placeholder='Seleccione un estado' options={
                     [
                         { label: 'Todos', value: 'all' },
@@ -161,10 +167,11 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
                         { label: 'Sin deuda', value: 'clean' },
                     ]
                 } />
-                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
                 <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
 
-                <div className='w-full flex items-center justify-center'>
+                <FormSelect form={form} name='orderDirection' label='Dirección (Opcional)' placeholder='Seleccione una dirección' options={reportOrderDirectionOptions} />
+
+                <div className='col-span-3 w-full flex items-center justify-center'>
                     <Button type='submit' variant='primary' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
                 </div>
             </form>

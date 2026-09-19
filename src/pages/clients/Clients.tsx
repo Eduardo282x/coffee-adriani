@@ -135,6 +135,14 @@ export const Clients = () => {
             zone: data.zone == 'all' ? '' : data.zone,
             blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId)
         }
+
+        if (data.orderBy) {
+            parseData.orderBy = data.orderBy
+        }
+        if (data.orderDirection) {
+            parseData.orderDirection = data.orderDirection
+        }
+
         const response = await generateReportPDF(parseData) as Blob;
         const url = URL.createObjectURL(response);
         const link = window.document.createElement("a");
@@ -193,7 +201,7 @@ export const Clients = () => {
 
     return (
         <div className="flex flex-col">
-            <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
+            <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
                     <h1 className="text-lg font-semibold">Clientes</h1>
@@ -274,7 +282,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialog}
                     setOpen={setOpenDialog}
-                    className="w-[90%] lg:w-[48rem]"
+                    className="w-[90%] lg:w-3xl"
                     label2="Agregar Cliente"
                     label1="Editar Cliente"
                     isEdit={edit}
@@ -287,7 +295,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialogBlock}
                     setOpen={setOpenDialogBlock}
-                    className="w-[90%] lg:w-[45rem]"
+                    className="w-[90%] lg:w-180"
                     label2="Agregar Bloque"
                     label1="Editar Bloque"
                     isEdit={edit}
@@ -300,7 +308,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDialogReport}
                     setOpen={setOpenDialogReport}
-                    className="w-[90%] lg:w-[20rem]"
+                    className="w-[90%] lg:w-180"
                     label2="Generar Reporte"
                     label1="Generar Reporte"
                     isEdit={false}
@@ -313,7 +321,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDeleteDialog}
                     setOpen={setOpenDeleteDialog}
-                    className="w-[90%] lg:w-[28rem]"
+                    className="w-[90%] lg:w-md"
                     label2=""
                     label1="Estas seguro que deseas eliminar este cliente?"
                     isEdit={true}
@@ -329,7 +337,7 @@ export const Clients = () => {
                 <DialogComponent
                     open={openDeleteDialogBlock}
                     setOpen={setOpenDeleteDialogBlock}
-                    className="w-[90%] lg:w-[28rem]"
+                    className="w-[90%] lg:w-md"
                     label2=""
                     label1="Estas seguro que deseas eliminar este bloque?"
                     isEdit={true}

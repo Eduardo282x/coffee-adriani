@@ -14,11 +14,23 @@ export interface BodyBlock {
     address: string;
 }
 
+export type ReportOrderBy =
+  | ''
+  | 'name'
+  | 'address'
+  | 'block'
+  | 'debt'
+  | 'totalPaid'
+  | 'totalInvoices'
+  | 'dispatchDate';
+
 export interface BodyReport {
     type: string;
     zone: string;
     blockId: number;
     status: string;
+    orderDirection?: 'asc' | 'desc' | '';
+    orderBy?: ReportOrderBy
 }
 
 export interface GroupClientsOptions {
