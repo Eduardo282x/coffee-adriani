@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -8,11 +8,11 @@ import { DateRangePicker } from "@/components/datepicker/DateRangePicker"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ProductType } from "@/interfaces/product.interface"
 import { getProductType } from "@/services/products.service"
-import { formatOnlyNumberWithDots } from "@/hooks/formaters"
+import { formatDate, formatOnlyNumberWithDots } from "@/hooks/formaters"
 import { useItemsAnalytics } from "@/hooks/itemsAnalytics.hook"
 import { TableComponent } from "@/components/table/TableComponent"
-import { analyticsInvoiceColumns, dailyItemsColumns, detailItemsColumns } from "./items.data"
-import { ItemsDaily } from "@/interfaces/itemsAnalytics.interface"
+import { dailyInvoiceColumns, dailyItemsColumns, detailItemsColumns } from "./items.data"
+import { ItemsDaily, ItemsInvoice } from "@/interfaces/itemsAnalytics.interface"
 import { Skeleton } from "@/components/ui/skeleton"
 import { itemsFilterStore } from "@/store/itemsFilterStore"
 import { FilterBadges } from "./FilterBadges"
@@ -61,6 +61,18 @@ export const ItemsPage = () => {
         const response = await getProductType();
         setTypes(response);
     }
+
+    const invoicesByDay = useMemo(() => {
+        const map: Record<string, { date: string; day: string; invoices: ItemsInvoice[] }> = {};
+        for (const invoice of itemsAnalytics.invoices) {
+            const key = invoice.date;
+            if (!map[key]) {
+                map[key] = { date: invoice.date, day: invoice.day, invoices: [] };
+            }
+            map[key].invoices.push(invoice);
+        }
+        return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
+    }, [itemsAnalytics.invoices]);
 
     return (
         <div className="flex h-full flex-col">
@@ -153,6 +165,19 @@ export const ItemsPage = () => {
                                                 hidePaginator
                                                 shortSpaces
                                             />
+                                            {day.invoices && day.invoices.length > 0 && (
+                                                <div className="mt-4">
+                                                    <p className="mb-2 text-sm font-semibold text-[#6f4e37]">
+                                                        Facturas pagadas
+                                                    </p>
+                                                    <TableComponent
+                                                        dataBase={day.invoices}
+                                                        columns={dailyInvoiceColumns}
+                                                        hidePaginator
+                                                        shortSpaces
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 />
@@ -163,11 +188,34 @@ export const ItemsPage = () => {
                     <TabsContent value="invoices">
                         <Card>
                             <CardContent>
-                                <TableComponent
-                                    dataBase={itemsAnalytics.invoices}
-                                    columns={analyticsInvoiceColumns}
-                                    loading={isLoading}
-                                />
+                                {isLoading ? (
+                                    <div className="space-y-4">
+                                        {Array.from({ length: 4 }).map((_, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <Skeleton className="h-2 w-2 rounded-full" />
+                                                <Skeleton className="h-4 w-40" />
+                                                <Skeleton className="h-4 flex-1" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {invoicesByDay.map((group) => (
+                                            <div key={group.date}>
+                                                <div className="mb-2 flex items-center gap-2 border-b pb-1">
+                                                    <h3 className="text-sm font-semibold text-[#6f4e37]">{group.day}</h3>
+                                                    <span className="text-xs text-muted-foreground">{formatDate(group.date)}</span>
+                                                </div>
+                                                <TableComponent
+                                                    dataBase={group.invoices}
+                                                    columns={dailyInvoiceColumns}
+                                                    hidePaginator
+                                                    shortSpaces
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>

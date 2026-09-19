@@ -27,6 +27,7 @@ export interface ItemsDaily {
     totalItems: number;
     totalAmount: number;
     detailItems: ItemsDetail[];
+    invoices: ItemsInvoice[];
 }
 
 export interface ItemsDetail {
@@ -40,10 +41,14 @@ export interface ItemsInvoice {
     controlNumber: string;
     client: string;
     block: string;
+    zone: string;
+    blockId: number;
     status: string;
     dispatchDate: string;
     dueDate: string;
     totalBultos: number;
     totalAmount: number;
     remaining: number;
+    date: string;
+    day: string;
 }

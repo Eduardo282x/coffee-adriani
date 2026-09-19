@@ -67,6 +67,13 @@ export const detailItemsColumns: IColumns<ItemsDetail>[] = [
 
 export const analyticsInvoiceColumns: IColumns<ItemsInvoice>[] = [
     {
+        column: 'day',
+        label: 'Día',
+        element: (data: ItemsInvoice) => data.day,
+        orderBy: '',
+        type: 'string',
+    },
+    {
         column: 'controlNumber',
         label: 'N° Factura',
         element: (data: ItemsInvoice) => data.controlNumber,
@@ -84,6 +91,13 @@ export const analyticsInvoiceColumns: IColumns<ItemsInvoice>[] = [
         column: 'block',
         label: 'Bloque',
         element: (data: ItemsInvoice) => data.block,
+        orderBy: '',
+        type: 'string',
+    },
+    {
+        column: 'zone',
+        label: 'Zona',
+        element: (data: ItemsInvoice) => data.zone,
         orderBy: '',
         type: 'string',
     },
@@ -131,3 +145,6 @@ export const analyticsInvoiceColumns: IColumns<ItemsInvoice>[] = [
         type: 'string',
     },
 ];
+
+export const dailyInvoiceColumns: IColumns<ItemsInvoice>[] =
+    analyticsInvoiceColumns.filter((c) => c.column !== 'day');
