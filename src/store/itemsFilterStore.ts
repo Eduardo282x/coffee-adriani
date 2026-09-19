@@ -10,14 +10,24 @@ interface ItemsFilterState {
     resetFilters: () => void;
 }
 
-const now = new Date();
+const getDefaultDateRange = (): DateRange => {
+    const now = new Date();
+    const day = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + (day === 0 ? -6 : 1 - day));
+    monday.setHours(0, 0, 0, 0);
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    saturday.setHours(23, 59, 59, 999);
+    return {
+        from: monday,
+        to: saturday,
+    };
+};
 
 const defaultFilters = {
     productTypeSelected: 'Cafe',
-    dateRange: {
-        from: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7),
-        to: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-    } as DateRange | undefined,
+    dateRange: getDefaultDateRange() as DateRange | undefined,
 };
 
 const serializeDateRange = (range: DateRange | undefined) => {
@@ -41,7 +51,7 @@ export const itemsFilterStore = create<ItemsFilterState>()(
         (set) => ({
             ...defaultFilters,
             setProductTypeSelected: (productTypeSelected) => set({ productTypeSelected }),
-            setDateRange: (dateRange) => set({ dateRange }),
+            setDateRange: (dateRange) => set({ dateRange: dateRange ?? getDefaultDateRange() }),
             resetFilters: () => set({ ...defaultFilters }),
         }),
         {

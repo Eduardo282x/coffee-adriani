@@ -17,14 +17,17 @@ interface AdministrationFilterState {
     resetFilters: () => void;
 }
 
-const now = new Date();
+const getDefaultDateRange = (): DateRange => {
+    const now = new Date();
+    return {
+        from: new Date(now.getFullYear(), now.getMonth(), 1),
+        to: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
+    };
+};
 
 const defaultFilters = {
     productTypeSelected: '',
-    dateRange: {
-        from: new Date(now.getFullYear(), now.getMonth(), 1),
-        to: now,
-    } as DateRange | undefined,
+    dateRange: getDefaultDateRange() as DateRange | undefined,
     option: 'earns' as OptionAdministration,
     optionInvoice: 'invoicesGift' as OptionInvoice,
 };
@@ -50,7 +53,7 @@ export const administrationFilterStore = create<AdministrationFilterState>()(
         (set) => ({
             ...defaultFilters,
             setProductTypeSelected: (productTypeSelected) => set({ productTypeSelected }),
-            setDateRange: (dateRange) => set({ dateRange }),
+            setDateRange: (dateRange) => set({ dateRange: dateRange ?? getDefaultDateRange() }),
             setOption: (option) => set({ option }),
             setOptionInvoice: (optionInvoice) => set({ optionInvoice }),
             resetFilters: () => set({ ...defaultFilters }),

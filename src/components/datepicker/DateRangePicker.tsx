@@ -27,6 +27,10 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({ datePicker, setDateP
         setDatePicker(date as DateRange | undefined)
     }, [date])
 
+    useEffect(() => {
+        setDate(datePicker)
+    }, [datePicker])
+
     return (
         <div>
             {label !== '' && (
