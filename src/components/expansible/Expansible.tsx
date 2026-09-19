@@ -1,4 +1,4 @@
-import { formatDate, formatNumberWithDots } from "@/hooks/formaters";
+import { formatDate, formatNumberWithDots, formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { InvoiceItems, IInvoicePayment, InvoiceAPINewInvoice, InvoiceInvoice } from "@/interfaces/invoice.interface";
 import { FC, useEffect, useRef, useState } from "react"
 import { IoIosArrowDown, IoMdCheckmark } from "react-icons/io";
@@ -36,6 +36,7 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
     const expansibleRef = useRef<HTMLDivElement>(null);
     const [dataDetails, setDataDetails] = useState<InvoiceItems[]>([]);
     const [dataDetailsPay, setDataDetailsPay] = useState<IInvoicePayment[]>([]);
+    const [paidItems, setPaidItems] = useState<string>('0.00');
     const [invoiceSelected, setInvoiceSelected] = useState<InvoiceInvoice | null>(null);
     const [showDetails, setShowDetails] = useState<boolean>(true);
 
@@ -58,6 +59,7 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
         const response = await getInvoiceDetails(data.id);
         setDataDetails(response.invoiceItems);
         setDataDetailsPay(response.InvoicePayment);
+        setPaidItems(response.paidItems);
         const invoiceData = {
             ...data,
             invoiceItems: response.invoiceItems,
@@ -215,6 +217,7 @@ export const ExpansibleInvoice: FC<ExpansibleProps> = ({ setLoading, invoice, co
                             <p><strong>Total:</strong> {formatNumberWithDots(Number(Number(invoiceSelected?.totalAmount).toFixed(2)), '', ' $')}</p>
                             <p><strong>Pagado:</strong> {formatNumberWithDots(Number(remainingPay(invoiceSelected)), '', ' $')}</p>
                             <p><strong>Debe:</strong> {formatNumberWithDots(Number(invoiceSelected?.remaining), '', ' $')}</p>
+                            <p><strong>Bultos Pagados:</strong> {formatOnlyNumberWithDots(Number(paidItems))}</p>
                         </div>
                     </div>
 

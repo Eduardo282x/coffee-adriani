@@ -222,6 +222,13 @@ export const invoiceItemsPaymentColumns: IColumns<IInvoicePayment>[] = [
         type: 'string',
     },
     {
+        column: 'paidItems',
+        label: 'Bultos Pagados',
+        element: (data: IInvoicePayment) => formatOnlyNumberWithDots(Number(data.paidItems)),
+        orderBy: '',
+        type: 'string',
+    },
+    {
         column: 'payment.paymentDate',
         label: 'Fecha del Pago',
         element: (data: IInvoicePayment) => formatDate(data.payment.paymentDate),

@@ -140,6 +140,7 @@ export interface IInvoicePayment {
     paymentId: number;
     payment: IPayments;
     amount: string;
+    paidItems: number;
     createdAt: Date;
 }
 
