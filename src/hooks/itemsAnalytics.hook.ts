@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { ExportDashboard } from '@/interfaces/invoice.interface';
 import { ItemsAnalyticsResponse } from '@/interfaces/itemsAnalytics.interface';
@@ -35,8 +36,8 @@ const EMPTY_ITEMS_ANALYTICS: ItemsAnalyticsResponse = {
 };
 
 const buildItemsAnalyticsFilter = (dateRange: DateRange | undefined, productType: string): ItemsAnalyticsQueryFilter => ({
-	startDate: dateRange?.from ? new Date(dateRange.from as Date).toString() : '',
-	endDate: dateRange?.to ? new Date(dateRange.to as Date).toString() : '',
+	startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : '',
+	endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : '',
 	type: productType,
 });
 

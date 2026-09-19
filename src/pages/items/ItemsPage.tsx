@@ -120,7 +120,7 @@ export const ItemsPage = () => {
                     ) : (
                         <>
                             <StatCard title="Total Bultos" value={formatOnlyNumberWithDots(itemsAnalytics.totals.totalItems)} icon={Boxes} />
-                            <StatCard title="Total Monto" value={`${formatOnlyNumberWithDots(itemsAnalytics.totals.totalAmount)} $`} icon={Scale} />
+                            <StatCard title="Total Ganancia" value={`${formatOnlyNumberWithDots(itemsAnalytics.totals.totalAmount)} $`} icon={Scale} />
                             <StatCard title="Total Facturas" value={formatOnlyNumberWithDots(itemsAnalytics.totals.totalInvoices)} icon={FileText} />
                             <StatCard title="Total Pagos" value={formatOnlyNumberWithDots(itemsAnalytics.totals.totalPayments)} icon={HandCoins} />
                         </>
@@ -172,7 +172,7 @@ export const ItemsPage = () => {
                         </Card>
                     </TabsContent>
 
-                    <TabsContent value="general" className="w-130">
+                    <TabsContent value="general">
                         <Card>
                             <CardContent>
                                 {isLoading ? (
@@ -187,16 +187,16 @@ export const ItemsPage = () => {
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
-                                        <div className="space-y-8 border-t pt-4">
+                                        <div className="grid grid-cols-3 gap-4 border-t pt-4">
                                             {itemsAnalytics.generalItems.detailItems.map((item, index) => (
-                                                <div key={index} className="flex items-center">
-                                                    <div className="w-2 h-2 rounded-full bg-[#6f4e37] mr-2"></div>
+                                                <div key={index} className="flex items-center border rounded-lg px-2 py-4 gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-[#6f4e37]"></div>
                                                     <div className="flex-1">
                                                         <p className="text-sm font-medium leading-none">{item.product}</p>
                                                     </div>
                                                     <div className="text-right space-y-1">
                                                         <p className="text-sm font-medium leading-none">Elementos: {formatOnlyNumberWithDots(item.totalElements)}</p>
-                                                        <p className="text-sm text-muted-foreground">Precio unitario: {formatOnlyNumberWithDots(item.unitPrice)} $ · Total {formatOnlyNumberWithDots(item.totalAmount)} $y</p>
+                                                        <p className="text-sm text-muted-foreground">Ganancia unitaria: {formatOnlyNumberWithDots(item.unitPrice)} $ · Ganancia {formatOnlyNumberWithDots(item.totalAmount)} $</p>
                                                     </div>
                                                 </div>
                                             ))}

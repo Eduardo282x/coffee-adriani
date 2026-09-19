@@ -27,7 +27,7 @@ export const dailyItemsColumns: IColumns<ItemsDaily>[] = [
     },
     {
         column: 'totalAmount',
-        label: 'Monto',
+        label: 'Ganancia',
         element: (data: ItemsDaily) => `${formatOnlyNumberWithDots(data.totalAmount)} $`,
         orderBy: '',
         type: 'string',
@@ -51,14 +51,14 @@ export const detailItemsColumns: IColumns<ItemsDetail>[] = [
     },
     {
         column: 'unitPrice',
-        label: 'Precio Unitario',
+        label: 'Ganancia Unitaria',
         element: (data: ItemsDetail) => `${formatOnlyNumberWithDots(data.unitPrice)} $`,
         orderBy: '',
         type: 'string',
     },
     {
         column: 'totalAmount',
-        label: 'Total',
+        label: 'Ganancia',
         element: (data: ItemsDetail) => `${formatOnlyNumberWithDots(data.totalAmount)} $`,
         orderBy: '',
         type: 'string',
