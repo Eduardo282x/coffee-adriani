@@ -131,6 +131,13 @@ export const analyticsInvoiceColumns: IColumns<ItemsInvoice>[] = [
         type: 'string',
     },
     {
+        column: 'totalBultosPagados',
+        label: 'Bultos Pagados',
+        element: (data: ItemsInvoice) => formatOnlyNumberWithDots(data.totalBultosPagados),
+        orderBy: '',
+        type: 'string',
+    },
+    {
         column: 'totalAmount',
         label: 'Monto',
         element: (data: ItemsInvoice) => `${formatOnlyNumberWithDots(data.totalAmount)} $`,

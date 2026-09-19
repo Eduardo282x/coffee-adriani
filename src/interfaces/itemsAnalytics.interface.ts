@@ -47,6 +47,7 @@ export interface ItemsInvoice {
     dispatchDate: string;
     dueDate: string;
     totalBultos: number;
+    totalBultosPagados: number;
     totalAmount: number;
     remaining: number;
     date: string;
