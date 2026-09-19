@@ -52,6 +52,7 @@ export const InvoicesPage = () => {
         page,
         setPage,
         isLoading,
+        isLoadingInvoices,
         isMutating,
         applyDateFilter,
         selectedTypeProduct,
@@ -316,7 +317,7 @@ export const InvoicesPage = () => {
 
                     <div className="rounded-md border">
                         <TableComponent
-                            loading={isLoading}
+                            loading={isLoadingInvoices}
                             dataBase={invoices}
                             columns={clientColumns}
                             colSpanColumns={true}

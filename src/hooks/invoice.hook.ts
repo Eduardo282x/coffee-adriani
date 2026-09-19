@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DateRangeFilter, InvoiceStatus, IInvoiceForm, InvoiceAPINew } from '@/interfaces/invoice.interface';
 import { invalidateDashboardQueries } from '@/hooks/dashboard.hook';
@@ -32,6 +32,10 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const [dateFilter, setDateFilter] = useState<DateRangeFilter | null>(null);
     const [page, setPage] = useState(0);
     const [invoiceId, setInvoiceId] = useState<number | null>(null);
+    const pageRef = useRef(page);
+    const pageSizeRef = useRef(pageSize);
+    const skipFirstRefetch = useRef(true);
+    const [isChangingPage, setIsChangingPage] = useState(false);
     const search = invoiceFilterStore((state) => state.search);
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
@@ -54,15 +58,16 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     // 1. Consulta paginada para facturas (paginación por servidor)
     const {
         data: invoicesData,
-        isLoading: isLoadingInvoices,
+        isLoading: isLoadingInvoicesQuery,
+        isFetching: isFetchingInvoices,
         error: invoicesError,
         refetch: refetchInvoices
     } = useQuery({
-        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize, page],
+        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus],
         queryFn: async () => {
             const params: InvoiceFilterPaginate = {
-                page: page + 1,
-                limit: pageSize,
+                page: pageRef.current + 1,
+                limit: pageSizeRef.current,
                 ...(dateFilter && {
                     startDate: formatDateOnly(dateFilter.startDate),
                     endDate: formatDateOnly(dateFilter.endDate)
@@ -186,6 +191,24 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         setPage(0);
     }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize]);
 
+    // Refetch manual al cambiar página o tamaño (no están en el queryKey)
+    useEffect(() => {
+        if (skipFirstRefetch.current) {
+            skipFirstRefetch.current = false;
+            return;
+        }
+        pageRef.current = page;
+        pageSizeRef.current = pageSize;
+        setIsChangingPage(true);
+        refetchInvoices();
+    }, [page, pageSize, refetchInvoices]);
+
+    useEffect(() => {
+        if (isChangingPage && !isFetchingInvoices) {
+            setIsChangingPage(false);
+        }
+    }, [isFetchingInvoices, isChangingPage]);
+
     // 5. Funciones de control
     const applyDateFilter = useCallback((filter: DateRangeFilter | null) => {
         setDateFilter(filter);
@@ -245,7 +268,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     }, [checkInvoiceMutation]);
 
     // 7. Estado de carga general
-    const isLoading = isLoadingInvoices || isLoadingStatistics;
+    const isLoading = isLoadingInvoicesQuery || isLoadingStatistics;
+    const isLoadingInvoices = isLoadingInvoicesQuery || isChangingPage;
     const isMutating = createInvoiceMutation.isPending ||
         updateInvoiceMutation.isPending ||
         deleteInvoiceMutation.isPending ||
@@ -265,6 +289,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
 
         // Estados de carga
         isLoading,
+        isLoadingInvoices,
         isLoadingStatistics,
         isLoadingDetails,
         isMutating,
