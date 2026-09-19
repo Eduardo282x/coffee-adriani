@@ -28,6 +28,9 @@ interface TableProps<T> {
     loading?: boolean;
     pageSize?: number;
     onPageSizeChange?: (size: number) => void;
+    page?: number;
+    onPageChange?: (page: number) => void;
+    totalPages?: number;
 }
 
 export const TableComponent = <T,>({
@@ -46,33 +49,49 @@ export const TableComponent = <T,>({
     totalElements,
     loading = false,
     pageSize,
-    onPageSizeChange
+    onPageSizeChange,
+    page,
+    onPageChange,
+    totalPages
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
     const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
 
-    const [page, setPage] = useState(0);
+    const [internalPage, setInternalPage] = useState(0);
     const [localRowsPerPage, setLocalRowsPerPage] = useState(50);
 
     const rowsPerPage = pageSize ?? localRowsPerPage;
+    const currentPage = onPageChange ? (page ?? 0) : internalPage;
+
+    const maxPage = Math.max(1, totalPages
+        ?? (totalElements ? Math.ceil(totalElements / rowsPerPage) : Math.ceil(dataBase.length / rowsPerPage)));
+
+    const displayedData = onPageChange
+        ? dataFilter
+        : dataFilter.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage);
 
     useEffect(() => {
         setDataFilter(dataBase)
-        setPage(0)
+        setInternalPage(0)
     }, [dataBase])
 
     useEffect(() => {
         setColumnData(columns)
     }, [columns])
 
-    const handleChangePage = (page: number, newPage: number) => {
-        if (onPageSizeChange && newPage !== rowsPerPage) {
-            onPageSizeChange(newPage);
-            setPage(0);
+    const handleChangePage = (newPage: number, newRowsPerPage: number) => {
+        if (onPageSizeChange && newRowsPerPage !== rowsPerPage) {
+            onPageSizeChange(newRowsPerPage);
+            onPageChange?.(0);
+            setInternalPage(0);
             return;
         }
-        setPage(page);
-        setLocalRowsPerPage(newPage);
+        if (onPageChange) {
+            onPageChange(newPage);
+        } else {
+            setInternalPage(newPage);
+        }
+        setLocalRowsPerPage(newRowsPerPage);
     };
 
     const handleChangeOrder = (col: IColumns<T>) => {
@@ -151,7 +170,7 @@ export const TableComponent = <T,>({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            dataFilter && dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index: number) => (
+                            displayedData.map((data, index: number) => (
                                 isExpansible ?
                                     <TableRowExpansible key={index} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                                     :
@@ -177,18 +196,18 @@ export const TableComponent = <T,>({
                         <CardSkeletonMobile key={i} columns={columns.length} />
                     ))
                 ) : (
-                    dataFilter.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+                    displayedData.map((item, index) => (
                         <CardDynamicMobile key={index} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
                     ))
                 )}
             </div>
 
-            {(!hidePaginator && dataBase && dataBase.length >= 50) && (
+            {(!hidePaginator && (totalElements ? totalElements > 0 : (dataBase && dataBase.length >= 50))) && (
                 <Paginator
-                    page={page}
+                    page={currentPage}
                     rowsPerPage={rowsPerPage}
                     changePage={handleChangePage}
-                    maxPage={Math.ceil(dataBase.length / rowsPerPage)}
+                    maxPage={maxPage}
                     totalElements={totalElements ? totalElements : dataBase.length}
                 >
                 </Paginator>

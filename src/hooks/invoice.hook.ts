@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useMemo } from 'react';
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DateRangeFilter, InvoiceStatus, IInvoiceForm, InvoiceAPINew } from '@/interfaces/invoice.interface';
 import { invalidateDashboardQueries } from '@/hooks/dashboard.hook';
 import {
@@ -30,6 +30,7 @@ interface UseInvoicesOptions {
 export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const { pageSize = 50, enableStatistics = true } = options;
     const [dateFilter, setDateFilter] = useState<DateRangeFilter | null>(null);
+    const [page, setPage] = useState(0);
     const [invoiceId, setInvoiceId] = useState<number | null>(null);
     const search = invoiceFilterStore((state) => state.search);
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
@@ -50,21 +51,17 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         ]);
     }, [queryClient]);
 
-    // 1. Consulta infinita para facturas (paginación)
+    // 1. Consulta paginada para facturas (paginación por servidor)
     const {
         data: invoicesData,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
         isLoading: isLoadingInvoices,
         error: invoicesError,
         refetch: refetchInvoices
-    } = useInfiniteQuery({
-        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize],
-        initialPageParam: 1,
-        queryFn: async ({ pageParam = 1 }) => {
+    } = useQuery({
+        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize, page],
+        queryFn: async () => {
             const params: InvoiceFilterPaginate = {
-                page: Number(pageParam),
+                page: page + 1,
                 limit: pageSize,
                 ...(dateFilter && {
                     startDate: formatDateOnly(dateFilter.startDate),
@@ -77,10 +74,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
                 ...(selectedStatus !== 'all' && { status: selectedStatus })
             };
 
-            return getInvoicesFilterPaginated(params) as Promise<InvoiceAPINew[]>;
-        },
-        getNextPageParam: (lastPage: any) => {
-            return lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined;
+            return getInvoicesFilterPaginated(params) as unknown as InvoiceAPINew;
         },
         enabled: true,
         staleTime: 5 * 60 * 1000,
@@ -181,22 +175,18 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const processedData = useMemo(() => {
         if (!invoicesData) return null;
 
-        const allInvoices = invoicesData.pages.flatMap((page: any) => page.invoices);
-
         return {
-            invoices: allInvoices,
-            totalCount: (invoicesData.pages[0] as any).pagination?.totalCount ?? 0,
-            hasMore: hasNextPage
+            invoices: invoicesData.invoices ?? [],
+            totalCount: invoicesData.pagination?.totalCount ?? 0,
+            totalPages: invoicesData.pagination?.totalPages ?? 0,
         };
-    }, [invoicesData, hasNextPage]);
+    }, [invoicesData]);
+
+    useEffect(() => {
+        setPage(0);
+    }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize]);
 
     // 5. Funciones de control
-    const loadMoreInvoices = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
     const applyDateFilter = useCallback((filter: DateRangeFilter | null) => {
         setDateFilter(filter);
     }, []);
@@ -271,17 +261,17 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         statistics: statisticsData,
         invoicesDetails: invoicesDetails,
         totalCount: processedData?.totalCount || 0,
+        totalPages: processedData?.totalPages || 0,
 
         // Estados de carga
         isLoading,
         isLoadingStatistics,
         isLoadingDetails,
-        isLoadingMore: isFetchingNextPage,
         isMutating,
 
         // Control de paginación
-        hasMore: processedData?.hasMore || false,
-        loadMore: loadMoreInvoices,
+        page,
+        setPage,
 
         // Filtros
         applyDateFilter,

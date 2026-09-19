@@ -48,11 +48,11 @@ export const InvoicesPage = () => {
         invoices,
         statistics,
         totalCount,
+        totalPages,
+        page,
+        setPage,
         isLoading,
-        isLoadingMore,
         isMutating,
-        hasMore,
-        loadMore,
         applyDateFilter,
         selectedTypeProduct,
 
@@ -208,13 +208,6 @@ export const InvoicesPage = () => {
         setSelectInvoice(null);
     };
 
-    // Función para cargar más facturas (scroll infinito)
-    const handleLoadMore = () => {
-        if (!isLoadingMore && hasMore) {
-            loadMore();
-        }
-    };
-
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh]">
@@ -330,6 +323,9 @@ export const InvoicesPage = () => {
                             totalElements={totalCount}
                             pageSize={pageSize}
                             onPageSizeChange={setPageSize}
+                            page={page}
+                            onPageChange={setPage}
+                            totalPages={totalPages}
                             renderRow={(inv, index) => (
                                 <ExpansibleInvoice
                                     key={index}
@@ -347,9 +343,6 @@ export const InvoicesPage = () => {
                             )}
                         />
                     </div>
-
-                    {/* Botón para cargar más */}
-                    
                 </>
 
                 {!isLoading && invoices.length === 0 && (
