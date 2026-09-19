@@ -18,10 +18,8 @@ export const Layout = () => {
 
     return (
         <div className="h-full w-full">
-            <SidebarProvider>
+            <SidebarProvider className="h-full">
                 <AppSidebar />
-                {/* <div className="w-full h-full bg-[#6f4e37]"> */}
-                {/* <div className="w-full h-full bg-[#ebe0d2]"> */}
                 <div className="w-full h-full bg-[#ebe0d2] overflow-hidden">
                     <Outlet />
                 </div>

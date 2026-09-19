@@ -122,7 +122,7 @@ export const Dashboard = () => {
     }
 
     return (
-        <div className="flex flex-col ">
+        <div className="flex h-full flex-col">
 
             {isExporting && <ScreenLoader />}
             {isDownloading && <ScreenLoader />}
@@ -139,7 +139,7 @@ export const Dashboard = () => {
                 </div>
             </header>
 
-            <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
+            <main className="flex-1 min-h-0 space-y-4 p-4 md:px-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-semibold tracking-tight text-[#6f4e37]">Resumen</h2>
                     <div className="flex items-start gap-4">

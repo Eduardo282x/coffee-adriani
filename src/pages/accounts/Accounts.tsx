@@ -86,7 +86,7 @@ export const Accounts = () => {
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex h-full flex-col">
             <header className="flex bg-[#6f4e37] h-14 lg:h-[60px] items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -101,7 +101,7 @@ export const Accounts = () => {
                 </div>
             </header>
 
-            <main className="flex-1 p-4 md:p-6">
+            <main className="flex-1 min-h-0 overflow-y-auto p-4 md:px-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">Gestión de Cuentas</h2>
                     <div className="flex items-center gap-8">

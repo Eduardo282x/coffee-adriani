@@ -56,7 +56,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className='w-screen h-screen overflow-y-auto bg-[#ebe0d2]'>
+      <div className='w-screen h-screen overflow-hidden bg-[#ebe0d2]'>
         <Toaster />
         <BrowserRouter>
           <AxiosInterceptorProvider />

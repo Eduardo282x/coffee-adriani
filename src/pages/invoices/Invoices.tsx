@@ -227,7 +227,7 @@ export const InvoicesPage = () => {
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex h-full flex-col">
             {(loadingFile || isMutating) && <ScreenLoader />}
 
             <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-2 lg:gap-4 text-white px-6">
@@ -247,7 +247,7 @@ export const InvoicesPage = () => {
 
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
-            <main className="flex-1 p-4 md:p-6 min-h-[80vh]">
+            <main className="flex-1 min-h-0 overflow-y-auto p-4 md:px-6">
                 <div className="flex flex-wrap items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
                         Gestión de Facturas
@@ -349,24 +349,7 @@ export const InvoicesPage = () => {
                     </div>
 
                     {/* Botón para cargar más */}
-                    {hasMore && (
-                        <div className="text-center mt-4">
-                            <Button
-                                onClick={handleLoadMore}
-                                disabled={isLoadingMore}
-                                variant="outline"
-                            >
-                                {isLoadingMore ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Cargando más...
-                                    </>
-                                ) : (
-                                    'Cargar más facturas'
-                                )}
-                            </Button>
-                        </div>
-                    )}
+                    
                 </>
 
                 {!isLoading && invoices.length === 0 && (

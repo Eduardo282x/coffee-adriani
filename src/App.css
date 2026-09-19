@@ -1,10 +1,6 @@
 ::-webkit-scrollbar {
-    background-color: #ebe0d2;
-    border-radius: 1rem;
-}
-
-::-webkit-scrollbar:vertical {
-    width: .65rem;
+    width: .4rem;
+    height: .4rem;
 }
 
 ::-webkit-scrollbar-button:increment,
@@ -13,14 +9,17 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    /* background-color: #ebe0d2; */
     background-color: #6f4e37;
     border-radius: 1rem;
-    /* border: 1px solid #f1f2f3; */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #5a3f2e;
 }
 
 ::-webkit-scrollbar-track {
-    border-radius: 10px;
+    background-color: transparent;
+    border-radius: 1rem;
 }
 
 input[type=number]::-webkit-inner-spin-button,

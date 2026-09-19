@@ -63,7 +63,7 @@ export const ItemsPage = () => {
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex h-full flex-col">
             <header className="flex bg-[#6f4e37] h-14 lg:h-15 items-center gap-4 border-b text-white px-6">
                 <SidebarTrigger />
                 <div className="flex-1">
@@ -71,7 +71,7 @@ export const ItemsPage = () => {
                 </div>
             </header>
 
-            <main className="flex-1 space-y-4 p-4 md:p-6 overflow-y-auto">
+            <main className="flex-1 min-h-0 space-y-4 p-4 md:px-6 overflow-y-auto">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-semibold tracking-tight text-[#6f4e37]">Bultos Pagados</h2>
                     <div className="flex items-start gap-4">
