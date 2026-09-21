@@ -33,7 +33,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
     const { dolar } = useProductDolar();
     const dolarRateBase = Number(dolar?.dolar || 0);
     const [dolarRate, setDolarRate] = useState<number>(dolarRateBase);
-    const [dolarId, setDolarId] = useState<number>(dolarRateBase);
+    const [dolarId, setDolarId] = useState<number>(Number(dolar?.id) || 0);
 
     const isEditing = !!paymentToEdit;
 
@@ -45,8 +45,16 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
             setDescription(paymentToEdit.payment.description || '');
             setPaymentDate(new Date(paymentToEdit.payment.paymentDate));
             setDolarId(paymentToEdit.payment.dolarId);
+            setDolarRate(Number(paymentToEdit.payment.dolar?.dolar));
         }
     }, [paymentToEdit]);
+
+    useEffect(() => {
+        if (dolar && !paymentToEdit) {
+            setDolarId(Number(dolar.id));
+            setDolarRate(Number(dolar.dolar));
+        }
+    }, [dolar, paymentToEdit]);
 
     const remaining = Number(entry.remaining);
 
