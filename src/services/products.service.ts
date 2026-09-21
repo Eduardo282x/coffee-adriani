@@ -29,7 +29,7 @@ export const getProductDolar = async () => {
 
 export const getProductDolarFilter = async (date: string) => {
     try {
-        return await getDataApi(`${routeProduct}/dolar-filter?date=${date} `);
+        return await getDataApi(`${routeProduct}/dolar-filter?date=${date}`);
     } catch (err) {
         return err
     }

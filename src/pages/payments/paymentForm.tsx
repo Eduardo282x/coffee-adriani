@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Snackbar } from '@/components/snackbar/Snackbar'
 import { useProductDolar } from '@/hooks/product.hook'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { AccountPay, DescriptionPayment, IPaymentForm } from '@/interfaces/payment.interface'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 // import TimePicker from 'react-time-picker';
 
@@ -21,8 +23,10 @@ interface PaymentFormProps extends FromProps {
 
 export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, descriptions }) => {
     const [paymentDate, setDateDispatch] = useState<Date | undefined>(new Date());
+    const [dolarError, setDolarError] = useState<string | null>(null);
     const today = new Date();
     const { dolar } = useProductDolar();
+    const currentDolarRate = Number(dolar?.dolar || 0);
     // const defaultDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
     const defaultTime = today.toTimeString().slice(0, 5); // "HH:mm"
 
@@ -104,6 +108,20 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
         form.setValue('description', value)
     }
 
+    const validateDolarRate = (e: React.FocusEvent<HTMLInputElement>) => {
+        const value = Number(e.target.value);
+        const minAllowed = currentDolarRate * 0.8;
+        if (currentDolarRate > 0 && value > 0 && value < minAllowed) {
+            setDolarError(`La tasa de dólar es muy baja. El mínimo permitido es ${minAllowed.toFixed(2)} Bs`);
+            toast.custom(
+                <Snackbar success={false} message={`La tasa de dólar es muy baja. El mínimo permitido es ${minAllowed.toFixed(2)} Bs`} />,
+                { duration: 2000, position: 'bottom-center' }
+            );
+        } else {
+            setDolarError(null);
+        }
+    }
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-4 w-full">
@@ -131,7 +149,18 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
 
                             <div className="flex flex-col items-start justify-start gap-2 w-full">
                                 <Label>Tasa Dolar</Label>
-                                <Input type="number" step="0.01" min={0} placeholder="" {...form.register('dolar')} />
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    min={0}
+                                    placeholder=""
+                                    {...form.register('dolar')}
+                                    onBlur={validateDolarRate}
+                                    className={dolarError ? 'border-red-500' : ''}
+                                />
+                                {dolarError && (
+                                    <p className="text-xs text-red-600">{dolarError}</p>
+                                )}
                             </div>
 
                             <FormSelect
