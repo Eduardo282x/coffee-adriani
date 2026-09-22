@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { IExpenseInvoice, ProductPercentage } from "@/interfaces/adminitration.interface";
 import { useEffect, useMemo, useState } from "react";
-import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceColumns, expenseInvoiceColumnsAssociated, expenseInvoiceColumnsDetail, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
+import { baseTotals, expendePaymentsColumns, expendePaymentsNoAssociatedColumns, expenseInvoiceAllColumns, expenseInvoiceColumns, expenseInvoiceColumnsAssociated, expenseInvoiceColumnsDetail, expenseInvoiceDetailsColumns, ITotals } from "./administration.data";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ const coffeeColors = {
 }
 
 const invoiceTabDescriptions: Record<OptionInvoice, string> = {
+    invoicesAll: 'Todas las facturas pagadas en el período con su ganancia individual.',
     invoicesGift: 'Facturas que incluyen productos de regalo (GIFT).',
     invoicesRate: 'Facturas pagadas cuya tasa aplicada dejó una diferencia pendiente.',
     invoicesExpense: 'Estos son gastos asociados a facturas que reducen su ganancia.',
@@ -328,6 +329,7 @@ export const Administration = () => {
 
                                 <div className="w-auto">
                                     <div className="border border-[#ebe0d2] rounded-lg p-1 bg-[#6f4e37]/20 flex items-center justify-center gap-2">
+                                        <Button className={`${optionInvoice !== 'invoicesAll' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesAll')}>Todas</Button>
                                         <Button className={`${optionInvoice !== 'invoicesGift' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesGift')}>Regalos</Button>
                                         <Button className={`${optionInvoice !== 'invoicesRate' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesRate')}>Diferencia de tasa</Button>
                                         <Button className={`${optionInvoice !== 'invoicesExpense' ? 'bg-transparent' : 'bg-[#ebe0d2]'} hover:bg-[#ebe0d2]/90`} onClick={() => setOptionInvoice('invoicesExpense')}>Gasto asociado</Button>
@@ -336,6 +338,17 @@ export const Administration = () => {
                             </div>
                             <p className="text-black ml-1 mb-1">{invoiceTabDescriptions[optionInvoice]}</p>
                         </div>
+                        {optionInvoice == 'invoicesAll' &&
+                        <TableComponent key="invoices-all" loading={isLoading} dataBase={expenses.invoices} columns={expenseInvoiceAllColumns}
+                            isExpansible={true}
+                            renderRow={(item, index) => (
+                                (item.invoiceItems || []).length > 0
+                                    ? (
+                                        <TableComponent dataBase={(item.invoiceItems || [])} key={index} columns={expenseInvoiceDetailsColumns} />
+                                    ) : null
+                            )}
+                        />
+                        }
                         {optionInvoice == 'invoicesGift' &&
                         <TableComponent key="invoices-gift" loading={isLoading} dataBase={expenses.invoices.filter(item => item.hasGiftItems)} columns={expenseInvoiceColumns}
                             isExpansible={true}
@@ -453,10 +466,23 @@ function GananciasChart({ gains }: GananciasChartProps) {
     const [mounted, setMounted] = useState(false)
 
     const chartData = useMemo(
-        () => gains.map((item) => ({
-            ...item,
-            ganancias: Number(item.netEarn ?? 0),
-        })),
+        () => {
+            const byDay = new Map<string, { date: Date; ganancias: number }>();
+            for (const invoice of gains) {
+                const parsedDate = new Date(invoice.dispatchDate);
+                if (Number.isNaN(parsedDate.getTime())) continue;
+                const key = `${parsedDate.getFullYear()}-${parsedDate.getMonth()}-${parsedDate.getDate()}`;
+                const current = byDay.get(key) ?? {
+                    date: new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()),
+                    ganancias: 0,
+                };
+                current.ganancias += Number(invoice.netEarn ?? 0);
+                byDay.set(key, current);
+            }
+            return Array.from(byDay.values())
+                .map((item) => ({ ...item, ganancias: Number(item.ganancias.toFixed(2)) }))
+                .sort((a, b) => a.date.getTime() - b.date.getTime());
+        },
         [gains]
     );
 
@@ -468,50 +494,56 @@ function GananciasChart({ gains }: GananciasChartProps) {
 
     return (
         <div className="h-75 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                    data={chartData}
-                    margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                    }}
-                >
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis
-                        dataKey="dispatchDate"
-                        tickFormatter={(value) => {
-                            const parsedDate = new Date(value);
-                            return Number.isNaN(parsedDate.getTime()) ? '' : `${parsedDate.getDate()}`;
+            {chartData.length === 0 ?
+                <div className="flex h-full w-full items-center justify-center text-sm text-[#ae8958]">
+                    Sin datos para el período seleccionado.
+                </div>
+                :
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                        data={chartData}
+                        margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
                         }}
-                    />
-                    <YAxis tickFormatter={(value) => `$${formatOnlyNumberWithDots(value)}`} />
-                    <Tooltip
-                        formatter={(value: number | string) => [
-                            `$${formatOnlyNumberWithDots(Number(value || 0))}`,
-                            "Ganancias",
-                        ]}
-                        labelFormatter={(label) => {
-                            const parsedDate = new Date(label);
-                            return Number.isNaN(parsedDate.getTime()) ? `Día ${label}` : `Día ${parsedDate.getDate()}`;
-                        }}
-                        contentStyle={{
-                            backgroundColor: "rgba(255, 250, 240, 0.95)",
-                            borderColor: coffeeColors.mediumRoast,
-                            borderRadius: "4px",
-                        }}
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="ganancias"
-                        stroke={coffeeColors.darkRoast}
-                        strokeWidth={2}
-                        activeDot={{ r: 6, fill: coffeeColors.espresso }}
-                        name="ganancias"
-                    />
-                </LineChart>
-            </ResponsiveContainer>
+                    >
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                        <XAxis
+                            dataKey="date"
+                            tickFormatter={(value) => {
+                                const parsedDate = new Date(value);
+                                return Number.isNaN(parsedDate.getTime()) ? '' : `${parsedDate.getDate()}`;
+                            }}
+                        />
+                        <YAxis tickFormatter={(value) => `$${formatOnlyNumberWithDots(value)}`} />
+                        <Tooltip
+                            formatter={(value: number | string) => [
+                                `$${formatOnlyNumberWithDots(Number(value || 0))}`,
+                                "Ganancias",
+                            ]}
+                            labelFormatter={(label) => {
+                                const parsedDate = new Date(label);
+                                return Number.isNaN(parsedDate.getTime()) ? `Día ${label}` : `Día ${parsedDate.getDate()}`;
+                            }}
+                            contentStyle={{
+                                backgroundColor: "rgba(255, 250, 240, 0.95)",
+                                borderColor: coffeeColors.mediumRoast,
+                                borderRadius: "4px",
+                            }}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="ganancias"
+                            stroke={coffeeColors.darkRoast}
+                            strokeWidth={2}
+                            activeDot={{ r: 6, fill: coffeeColors.espresso }}
+                            name="ganancias"
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
+            }
         </div>
     )
 }

@@ -324,7 +324,7 @@ export const expendePaymentsNoAssociatedColumns: IColumns<IPayments>[] = [
     }
 ];
 
-export const expenseInvoiceEarnColumns: IColumns<IExpenseInvoice>[] = [
+export const expenseInvoiceAllColumns: IColumns<IExpenseInvoice>[] = [
     {
         label: 'Factura',
         column: 'controlNumber',
@@ -342,9 +342,49 @@ export const expenseInvoiceEarnColumns: IColumns<IExpenseInvoice>[] = [
         icon: false,
     },
     {
+        label: 'Fecha',
+        column: 'dispatchDate',
+        element: (data: IExpenseInvoice) => formatDate(data.dispatchDate),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Bultos',
+        column: 'totalItems',
+        element: (data: IExpenseInvoice) => data.totalItems,
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Total',
+        column: 'totalAmount',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.totalAmount).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Diferencia de tasa',
+        column: 'remaining',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.remaining).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
         label: 'Ganancia',
         column: 'earn',
         element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.earn).toFixed(2), '', '$'),
+        orderBy: '',
+        type: 'string',
+        icon: false,
+    },
+    {
+        label: 'Ganancia Real',
+        column: 'netEarn',
+        element: (data: IExpenseInvoice) => formatNumberWithDots(Number(data.netEarn).toFixed(2), '', '$'),
         orderBy: '',
         type: 'string',
         icon: false,

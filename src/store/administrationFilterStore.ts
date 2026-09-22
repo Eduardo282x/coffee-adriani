@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { DateRange } from 'react-day-picker'
 
 export type OptionAdministration = 'pay' | 'invoices' | 'earns' | 'paymentsNoAssociated';
-export type OptionInvoice = 'invoicesGift' | 'invoicesRate' | 'invoicesExpense';
+export type OptionInvoice = 'invoicesAll' | 'invoicesGift' | 'invoicesRate' | 'invoicesExpense';
 
 interface AdministrationFilterState {
     productTypeSelected: string;
@@ -29,7 +29,7 @@ const defaultFilters = {
     productTypeSelected: '',
     dateRange: getDefaultDateRange() as DateRange | undefined,
     option: 'earns' as OptionAdministration,
-    optionInvoice: 'invoicesGift' as OptionInvoice,
+    optionInvoice: 'invoicesAll' as OptionInvoice,
 };
 
 const serializeDateRange = (range: DateRange | undefined) => {
