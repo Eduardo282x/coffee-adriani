@@ -20,7 +20,6 @@ export const InvoicePreview = ({ openDialog, setOpenDialog, invoice }: InvoicePr
     const [dataDetailsPay, setDataDetailsPay] = useState<IInvoicePayment[]>([]);
 
     useEffect(() => {
-        console.log(invoice);
         if (invoice) {
             getDetailsInvoiceForPreview(invoice)
         }

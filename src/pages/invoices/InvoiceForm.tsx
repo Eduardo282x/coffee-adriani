@@ -60,21 +60,24 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 return {
                     ...findInventory,
                     product: {
-                        ...inv.product,
-                        price: Number(inv.unitPrice),
-                        priceUSD: Number(inv.unitPriceUSD),
+                        ...findInventory.product,
+                        price: Number(inv.unitPrice) || Number(findInventory.product.price),
+                        priceUSD: Number(inv.product?.priceUSD) || Number(findInventory.product.priceUSD),
                     },
-                    quantity: inv.quantity,
-                    subtotal: inv.quantity * inv.unitPrice || 0
+                    quantity: Number(inv.quantity) || findInventory.quantity,
+                    subtotal: Number(inv.quantity) * (Number(inv.unitPrice) || Number(findInventory.product.price)) || 0
                 };
             });
 
-            setGiftData(parseData.invoiceItems.filter(item => item.type == 'GIFT').map((inv) => ({
-                productId: inv.productId,
-                quantity: inv.quantity,
-                price: inv.product.price,
-                priceUSD: inv.product.priceUSD,
-            })))
+            setGiftData(parseData.invoiceItems.filter(item => item.type == 'GIFT').map((inv) => {
+                const findInventory = inventory.allInventory.find((invData) => invData.productId === inv.productId);
+                return {
+                    productId: inv.productId,
+                    quantity: inv.quantity,
+                    price: Number(inv.product?.price) || Number(findInventory?.product?.price) || 0,
+                    priceUSD: Number(inv.product?.priceUSD) || Number(findInventory?.product?.priceUSD) || 0,
+                }
+            }))
 
             setTimeout(() => {
                 setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);

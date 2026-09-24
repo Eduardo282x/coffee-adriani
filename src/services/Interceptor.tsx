@@ -34,7 +34,6 @@ export const useAxiosInterceptor = () => {
             (error) => {
                 if (['post', 'put', 'delete'].includes(error.config?.method || '')) {
                     const message = error.response?.data;
-                    console.log(error.response);
 
                     if (isValidMessage(message?.message)) {
                         toast.custom(<Snackbar success={message.success} message={message.message} />, {

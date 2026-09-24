@@ -181,6 +181,7 @@ export interface IInvoiceForm {
     controlNumber: string;
     consignment: boolean;
     priceUSD: boolean;
+    dispatchDate: Date;
     dueDate: Date;
     details: DetailsInvoices[];
 }
@@ -190,6 +191,7 @@ export interface DetailsInvoices {
     quantity: number;
     price: number;
     priceUSD: number;
+    type?: 'GIFT' | 'SALE';
 }
 
 export interface DateRangeFilter {
