@@ -2,6 +2,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 import { getAccessToken, getRefreshToken, isAccessTokenExpiring, saveSession, clearSession } from './token.store';
+import { disconnectSocket } from './socket.io';
 
 const baseURL = `${import.meta.env.VITE_BASE_URL_API}/api`;
 
@@ -32,6 +33,8 @@ let refreshPromise: Promise<string> | null = null;
 let proactiveRefreshFailedFor: string | null = null;
 
 export const forceLogout = (): void => {
+    // Sesión inválida (401 sin refresh posible): cerrar también el WebSocket.
+    disconnectSocket();
     clearSession();
     refreshPromise = null;
     proactiveRefreshFailedFor = null;

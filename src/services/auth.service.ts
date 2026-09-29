@@ -1,6 +1,7 @@
 import { authApi, api, getErrorPayload } from './base.service';
 import { BaseResponse, BaseResponseLogin } from './base.interface';
 import { clearSession, getAccessToken, getRefreshToken, saveSession } from './token.store';
+import { connectSocket, disconnectSocket } from './socket.io';
 
 export interface LoginBody {
     username: string;
@@ -30,6 +31,8 @@ const persistSession = (data: BaseResponseLogin): void => {
 export const login = async (credentials: LoginBody): Promise<BaseResponseLogin> => {
     const { data } = await authApi.post<BaseResponseLogin>('/auth', credentials);
     persistSession(data);
+    // Recién ahora hay token: el handshake usa el access token vigente vía el callback auth.
+    connectSocket();
     return data;
 };
 
@@ -40,6 +43,9 @@ export const recoverPassword = async (body: RecoverBody): Promise<BaseResponse> 
 
 export const logout = async (): Promise<BaseResponse | undefined> => {
     const refreshToken = getRefreshToken();
+    // Se corta el WebSocket antes de revocar: si no, el servidor sigue viendo conectado
+    // a un usuario que ya cerró sesión.
+    disconnectSocket();
     clearSession();
 
     if (!refreshToken) {
@@ -59,6 +65,7 @@ export const logoutAll = async (): Promise<BaseResponse> => {
     const token = getAccessToken();
 
     if (!token) {
+        disconnectSocket();
         clearSession();
         throw new Error('No hay sesión activa');
     }
@@ -66,6 +73,7 @@ export const logoutAll = async (): Promise<BaseResponse> => {
     const { data } = await api.post<BaseResponse>('/auth/logout-all', {}, {
         headers: { Authorization: token },
     });
+    disconnectSocket();
     clearSession();
     return data;
 };

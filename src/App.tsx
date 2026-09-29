@@ -13,7 +13,8 @@ import { useAxiosInterceptor } from './services/Interceptor';
 import { Users } from './pages/users/Users';
 import { Layout } from './pages/layout/Layout';
 import { Payments } from './pages/payments/Payments';
-import { socket, useSocket } from './services/socket.io';
+import { connectSocket } from './services/socket.io';
+import { getAccessToken } from './services/token.store';
 import { Accounts } from './pages/accounts/Accounts';
 import { Administration } from './pages/administration/Administration';
 import { Collections } from './pages/collections/Collections';
@@ -55,12 +56,11 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  useSocket('message', data => {
-    console.log(data);
-  })
-
   useEffect(() => {
-    socket.emit('message', 'Enviando mensaje desde react')
+    // Si la sesión ya estaba iniciada (recarga o reapertura de la app), se reconecta el
+    // WebSocket con el token almacenado. Tras el login lo hace auth.service.login(),
+    // y nunca se conecta antes del login porque autoConnect está en false.
+    if (getAccessToken()) connectSocket();
   }, [])
 
   return (
