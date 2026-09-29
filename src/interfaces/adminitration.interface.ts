@@ -44,7 +44,8 @@ export interface ISummary {
     totalEarnMonth: number;
     totalEarnRange: number;
     earns: IEarns;
-    losses?: IInventoryLossSummary;
+    // El backend ahora informa siempre el resumen de mermas dentro del rango
+    losses: IInventoryLossSummary;
     productPercentages: ProductPercentage[];
     quantityProducts: QuantityProducts;
 }

@@ -1,21 +1,31 @@
-import { ITokenExp, IToken } from "@/interfaces/user.interface";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
+import { IToken, ITokenExp } from '@/interfaces/user.interface';
+import { getAccessToken } from '@/services/token.store';
 
-export const validateToken = (): ITokenExp | null => {
-    const getToken = localStorage.getItem('token');
+export const decodeToken = (): ITokenExp | null => {
+    const rawToken = getAccessToken();
 
-    if (!getToken) {
+    if (!rawToken) {
         return null;
     }
 
-    const decoded: ITokenExp = jwtDecode<IToken>(getToken) as ITokenExp;
+    try {
+        const decoded = jwtDecode<IToken>(rawToken) as ITokenExp;
+        decoded.expired = Boolean(decoded.exp && decoded.exp * 1000 < Date.now());
+        return decoded;
+    } catch {
+        return null;
+    }
+};
 
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-        // Si `exp` existe y está en el pasado, el token ha expirado
+export const validateToken = (): ITokenExp | null => {
+    const decoded = decodeToken();
+
+    if (decoded && decoded.expired) {
         console.warn("El token ha expirado.");
-        decoded.expired = true;
     }
 
     return decoded;
+};
 
-}
+export const getCurrentRole = (): string => decodeToken()?.rol ?? '';

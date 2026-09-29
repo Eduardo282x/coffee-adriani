@@ -230,7 +230,8 @@ export interface PaginatedCutResponse {
 export interface BodyInventoryLoss {
     productId: number;
     quantity: number;
-    reason?: string;
+    // El backend exige el motivo de la merma
+    reason: string;
     date?: Date;
 }
 

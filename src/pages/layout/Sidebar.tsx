@@ -12,31 +12,49 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Link, useLocation, useNavigate } from 'react-router'
-import { menuSections } from "./sidebar.data"
+import { canAccessMenuItem, menuSections } from "./sidebar.data"
 import { useEffect, useState } from "react"
-import { validateToken } from "@/hooks/authtenticate"
+import { decodeToken } from "@/hooks/authtenticate"
 import { ITokenExp } from "@/interfaces/user.interface";
 import { FaCoffee } from "react-icons/fa";
+import { logout } from "@/services/auth.service";
 
 export const AppSidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [userData, setUserData] = useState<ITokenExp>()
-
-    const logout = () => {
-        navigate('/login')
-        localStorage.removeItem('token');
-    }
+    const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
     const goProfile = () => {
         navigate('/perfil')
     }
 
-    useEffect(() => { 
-        if (validateToken()) {
-            setUserData(validateToken() as ITokenExp)
+    useEffect(() => {
+        const decoded = decodeToken();
+        if (decoded) {
+            setUserData(decoded);
         }
     }, [])
+
+    const sections = menuSections
+        .map((section) => ({
+            ...section,
+            items: section.items.filter((item) => canAccessMenuItem(item, userData?.rol ?? '')),
+        }))
+        .filter((section) => section.items.length > 0);
+
+    const handleLogout = async () => {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+
+        try {
+            await logout();
+        } finally {
+            setIsLoggingOut(false);
+            setUserData(undefined);
+            navigate('/login', { replace: true });
+        }
+    }
 
     return (
         <Sidebar>
@@ -49,7 +67,7 @@ export const AppSidebar = () => {
                 </div>
             </SidebarHeader>
             <SidebarContent className="bg-[#6f4e37] text-gray-300 p-1">
-                {menuSections.map((section, index) => (
+                {sections.map((section, index) => (
                     <div key={section.label}>
                         {index > 0 && (
                             <div className="border-t border-white/10 my-1" />
@@ -95,9 +113,9 @@ export const AppSidebar = () => {
                                     <Settings className="mr-2 h-4 w-4" />
                                     <span>Configuración</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={logout}>
+                                <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Cerrar sesión</span>
+                                    <span>{isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

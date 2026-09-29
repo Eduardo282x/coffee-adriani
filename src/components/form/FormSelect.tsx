@@ -10,9 +10,16 @@ interface FormSelectProps {
     placeholder: string;
     name: string;
     options: IOptions[];
+    // El backend tiene enableImplicitConversion: false, así que un campo numérico
+    // enviado como string ("5") falla la validación. Con `coerce="number"` se envía 5.
+    coerce?: 'number';
 }
 
-export const FormSelect: FC<FormSelectProps> = ({ form, label, placeholder, name, options }) => {
+export const FormSelect: FC<FormSelectProps> = ({ form, label, placeholder, name, options, coerce }) => {
+    const handleValueChange = (value: string) => {
+        form.setValue(name, coerce === 'number' ? Number(value) : value, { shouldDirty: true, shouldValidate: true });
+    };
+
     return (
         <FormField
             control={form.control}
@@ -20,7 +27,11 @@ export const FormSelect: FC<FormSelectProps> = ({ form, label, placeholder, name
             render={({ field }) => (
                 <FormItem className='w-full'>
                     <FormLabel>{label}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value.toString()} defaultValue={field.value.toString()}>
+                    <Select
+                        onValueChange={handleValueChange}
+                        value={field.value?.toString() ?? ''}
+                        defaultValue={field.value?.toString() ?? ''}
+                    >
                         <FormControl className='w-full'>
                             <SelectTrigger>
                                 <SelectValue placeholder={placeholder} />

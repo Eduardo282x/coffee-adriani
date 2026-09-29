@@ -144,17 +144,17 @@ export const Administration = () => {
                     title: 'Ganancia estimada',
                     Icon: TrendingUp,
                     text: `${formatOnlyNumberWithDots(expenses.summary.earns.estimated)}$`,
-                    subtitle: 'Ganancia neta estimada del período',
+                    subtitle: 'Ganancia estimada del período',
                     classNameCard: 'text-green-800',
                 },
                 ...(productTypeSelected === 'Queso' ? [{
                     title: 'Mermas',
                     Icon: TrendingDown,
-                    text: `${formatOnlyNumberWithDots(expenses.summary.losses?.total ?? 0)}$`,
+                    text: `${formatOnlyNumberWithDots(expenses.summary.losses.total)}$`,
                     subtitle: 'Pérdidas por merma descontadas',
                     classNameCard: 'text-red-800',
                     badges: [
-                        { label: 'registros', value: String(expenses.summary.losses?.count ?? 0) },
+                        { label: 'registros', value: String(expenses.summary.losses.count) },
                     ],
                 }] : []),
                 {

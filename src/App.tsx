@@ -6,10 +6,7 @@ import { Dashboard } from './pages/dashboard/Dashboard';
 import { Clients } from './pages/clients/Clients';
 import { InvoicesPage } from './pages/invoices/Invoices';
 import { Products } from './pages/products/Products';
-// import { SidebarProvider } from './components/ui/sidebar';
-// import { AppSidebar } from './pages/layout/Sidebar';
 import { Inventory } from './pages/inventory/Inventory';
-// import { Sales } from './pages/sales/Sales';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useAxiosInterceptor } from './services/Interceptor';
@@ -26,17 +23,31 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Enterprise } from './pages/enterprise/Enterprise';
 import { Supplier } from './pages/supplier/Supplier';
 import { ItemsPage } from './pages/items/ItemsPage';
-// import { Analytics } from "@vercel/analytics/next"
+import { RoleGuard } from './components/auth/RoleGuard';
+import { ADMIN_ROLE } from './pages/layout/sidebar.data';
+import { isAxiosError } from 'axios';
 
 function AxiosInterceptorProvider() {
   useAxiosInterceptor();
   return null;
-};
+}
+
+// 401/403/429 no se reintentan: el refresh es de un solo uso y el throttling del backend
+// debe mostrarse al usuario en lugar de insistir en bucle.
+const NON_RETRIABLE_STATUS = [401, 403, 429];
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: (failureCount, error) => {
+        if (isAxiosError(error)) {
+          const status = error.response?.status;
+          if (status && NON_RETRIABLE_STATUS.includes(status)) {
+            return false;
+          }
+        }
+        return failureCount < 2;
+      },
       staleTime: 5 * 60 * 1000, // 5 minutos
       gcTime: 10 * 60 * 1000, // 10 minutos
     },
@@ -44,8 +55,6 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  // useAxiosInterceptor();
-
   useSocket('message', data => {
     console.log(data);
   })
@@ -69,10 +78,15 @@ function App() {
               <Route path="/facturas" element={<InvoicesPage />} />
               <Route path="/bultos" element={<ItemsPage />} />
               <Route path="/productos" element={<Products />} />
-              {/* <Route path="/productos/historial" element={<Products />} /> */}
-              {/* <Route path="/ventas" element={<Sales />} /> */}
               <Route path="/inventario" element={<Inventory />} />
-              <Route path="/usuarios" element={<Users />} />
+              <Route
+                path="/usuarios"
+                element={
+                  <RoleGuard roles={[ADMIN_ROLE]}>
+                    <Users />
+                  </RoleGuard>
+                }
+              />
               <Route path="/administracion" element={<Administration />} />
               <Route path="/cobranza" element={<Collections />} />
               <Route path="/pagos" element={<Payments />} />
@@ -85,22 +99,9 @@ function App() {
           </Routes>
         </BrowserRouter>
       </div>
-      {/* <Analytics/> */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }
 
 export default App
-
-
-// export const sendMessage = (channel: string, data: any) => {
-//   socket.emit(channel, data)
-// }
-
-// export const listenMessage = (channel: string) => {
-//   socket.on(channel, data => {
-//     console.log(data);
-//     return data;
-//   })
-// }

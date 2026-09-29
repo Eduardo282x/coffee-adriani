@@ -12,8 +12,10 @@ export const Notifications = () => {
     const getNotificationsApi = async () => {
         try {
             const response = await getNotifications() as INotification[];
-            setNotifications(response);
-            setCountNotifications(response.filter(item => item.seen === false).length);
+            if(response && response.length >= 1){
+                setNotifications(response);
+                setCountNotifications(response.filter(item => item.seen === false).length);
+            }
         } catch (error) {
             console.error('Error fetching notifications:', error);
         }

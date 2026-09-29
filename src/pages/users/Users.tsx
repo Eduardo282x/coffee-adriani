@@ -8,6 +8,7 @@ import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { postUsers, putUsers } from "@/services/user.service"
 import { IUsers } from "@/interfaces/user.interface"
+import { BodyUsers } from "@/interfaces/user.interface"
 import { defaultValues, IUsersForm, usersColumns } from "./users.data"
 import { UsersForm } from "./UsersForm"
 import { BaseResponse } from "@/services/base.interface"
@@ -68,10 +69,15 @@ export const Users = () => {
     }
 
     const actionDialog = async (data: IUsersForm) => {
-        const parseData = {
-            ...data,
-            rolId: Number(data.rolId)
+        // Body explícito: el backend usa forbidNonWhitelisted, así que el `id` de la fila
+        // (o cualquier otra clave extra del objeto de la tabla) haría que se rechace entero.
+        const parseData: BodyUsers = {
+            username: data.username,
+            name: data.name,
+            lastName: data.lastName,
+            rolId: Number(data.rolId),
         }
+
         let closeDialog = false;
         if (edit) {
             await putUsers(Number(dataDialog.id), parseData).then((res) => {

@@ -2,8 +2,7 @@ import { ScreenLoader } from '@/components/loaders/ScreenLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BaseResponse, BaseResponseLogin } from '@/services/base.interface';
-import { postDataApi } from '@/services/base.service';
+import { extractAuthError, login } from '@/services/auth.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
@@ -11,15 +10,12 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
 import logo from '@/assets/images/logo.jpg'
+import { Snackbar } from '@/components/snackbar/Snackbar';
+import toast from 'react-hot-toast';
 
 interface ILogin {
     username: string;
     password: string;
-}
-interface IRecover {
-    username: string;
-    password: string;
-    confirmPassword: string;
 }
 
 const validationSchemaLogin = z.object({
@@ -27,19 +23,10 @@ const validationSchemaLogin = z.object({
     password: z.string().refine(text => text !== '', { message: 'Este campo es requerido.' }),
 })
 
-const validationSchemaRecover = z.object({
-    username: z.string().refine(text => text !== '', { message: 'Este campo es requerido.' }),
-    password: z.string().refine(text => text !== '', { message: 'Este campo es requerido.' }),
-    confirmPassword: z.string().refine(text => text !== '', { message: 'Este campo es requerido.' }),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden.',
-});
-
 export const Login = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
-    const [recover, setRecover] = useState<boolean>(false);
 
     const formLogin = useForm<ILogin>({
         defaultValues: {
@@ -49,42 +36,26 @@ export const Login = () => {
         resolver: zodResolver(validationSchemaLogin)
     })
 
-    const formRecover = useForm<IRecover>({
-        defaultValues: {
-            username: '',
-            password: '',
-            confirmPassword: ''
-        },
-        resolver: zodResolver(validationSchemaRecover)
-    })
-
-    const onSubmit = async (login: ILogin) => {
+    const onSubmit = async (credentials: ILogin) => {
+        if (loading) return;
         setLoading(true);
-        await postDataApi('/auth', login).then((res: BaseResponseLogin | BaseResponse) => {
-            if (res.success) {
-                const parseResponse = res as BaseResponseLogin;
-                setTimeout(() => {
-                    localStorage.setItem('token', parseResponse.token)
-                    navigate('/')
-                }, 1500);
-            }
+
+        try {
+            await login({
+                username: credentials.username.trim(),
+                password: credentials.password,
+            });
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
+        } catch (error) {
+            // El login está limitado a 5/min por IP: se muestra el error en lugar de reintentar.
+            toast.custom(<Snackbar success={false} message={extractAuthError(error)} />, {
+                duration: 3000,
+                position: 'bottom-center'
+            });
             setLoading(false);
-        });
-    }
-
-    const onSubmitRecover = async (recover: IRecover) => {
-        setLoading(true);
-        const bodyRecovers = {
-            username: recover.username,
-            password: recover.password,
         }
-        await postDataApi('/auth/recover', bodyRecovers).then((res: BaseResponse) => {
-            if (res.success) {
-                setRecover(false);
-            }
-            setLoading(false);
-        });
-        formRecover.reset();
     }
 
     return (
@@ -100,56 +71,39 @@ export const Login = () => {
                 </div>
                 <p className='text-center text-2xl font-semibold  text-[#6f4e37]'>Iniciar sesión</p>
                 <p className='text-sm text-gray-400 text-center mb-2'>Ingresa tus credenciales para acceder</p>
-                {!recover ?
-                    <form onSubmit={formLogin.handleSubmit(onSubmit)} className=" flex flex-wrap justify-start items-start gap-4 w-full ">
-                        <div className="flex flex-col items-start justify-start gap-4 w-full">
-                            <Label className="text-right">
-                                Usuario
-                            </Label>
-                            <Input {...formLogin.register('username')} />
-                        </div>
-                        <div className="flex flex-col items-start justify-start gap-4 w-full">
-                            <Label className="text-right">
-                                Contraseña
-                            </Label>
-                            <div className='w-full border border-input file:border-0 rounded-md flex items-center justify-between p-2'>
-                                <input type={showPassword ? 'text' : 'password'} className='outline-none' {...formLogin.register('password')} />
-                                <span className='text-xs cursor-pointer ' onClick={() => setShowPassword(!showPassword)}>{showPassword ? <Eye /> : <EyeOff />}</span>
-                            </div>
-                        </div>
 
-                        <div className='w-full space-y-3' >
-                            <Button type='submit' variant='primary' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white' >Iniciar sesión</Button>
-                            <Button type='button' className='w-full' onClick={() => setRecover(true)}>Recuperar contraseña</Button>
+                <form onSubmit={formLogin.handleSubmit(onSubmit)} className=" flex flex-wrap justify-start items-start gap-4 w-full ">
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Usuario
+                        </Label>
+                        <Input {...formLogin.register('username')} />
+                    </div>
+                    <div className="flex flex-col items-start justify-start gap-4 w-full">
+                        <Label className="text-right">
+                            Contraseña
+                        </Label>
+                        <div className='w-full border border-input file:border-0 rounded-md flex items-center justify-between p-2'>
+                            <input type={showPassword ? 'text' : 'password'} className='outline-none' {...formLogin.register('password')} />
+                            <span className='text-xs cursor-pointer ' onClick={() => setShowPassword(!showPassword)}>{showPassword ? <Eye /> : <EyeOff />}</span>
                         </div>
-                    </form>
-                    :
-                    <form onSubmit={formRecover.handleSubmit(onSubmitRecover)} className=" flex flex-wrap justify-start items-start gap-4 w-full ">
-                        <div className="flex flex-col items-start justify-start gap-4 w-full">
-                            <Label className="text-right">
-                                Usuario
-                            </Label>
-                            <Input {...formRecover.register('username')} />
-                        </div>
-                        <div className="flex flex-col items-start justify-start gap-4 w-full">
-                            <Label className="text-right">
-                                Contraseña
-                            </Label>
-                            <Input {...formRecover.register('password')} />
-                        </div>
-                        <div className="flex flex-col items-start justify-start gap-4 w-full">
-                            <Label className="text-right">
-                                Confirmar Contraseña
-                            </Label>
-                            <Input {...formRecover.register('confirmPassword')} />
-                        </div>
+                    </div>
 
-                        <div className='w-full space-y-3' >
-                            <Button type='submit' variant='primary' className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white'>Recuperar</Button>
-                            <Button type='button' className='w-full' onClick={() => setRecover(false)}>Volver</Button>
-                        </div>
-                    </form>
-                }
+                    <div className="w-full space-y-3" >
+                        <Button
+                            type='submit'
+                            variant='primary'
+                            disabled={loading}
+                            className='w-full bg-[#6f4e37] hover:bg-[#6f4e37]/80 text-white disabled:opacity-60'
+                        >
+                            Iniciar sesión
+                        </Button>
+                    </div>
+                </form>
+
+                <p className='text-xs text-gray-400 text-center mt-4'>
+                    Si olvidaste tu contraseña, un Administrador debe restablecerla desde su perfil.
+                </p>
             </div>
 
         </div>

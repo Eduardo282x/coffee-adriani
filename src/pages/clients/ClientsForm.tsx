@@ -84,7 +84,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                     </div>
 
                     <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={clientsZones}></FormSelect>
-                    <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks}></FormSelect>
+                    <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={blocks} coerce='number'></FormSelect>
 
                 </form>
             </Form>

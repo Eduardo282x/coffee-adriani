@@ -7,10 +7,13 @@ import { MdAccountBalance, MdOutlineInventory2, MdOutlineMessage } from "react-i
 import { RiAdminLine } from "react-icons/ri"
 import { CiBoxes } from "react-icons/ci";
 
+export const ADMIN_ROLE = "Administrador";
+
 export interface MenuItem {
     title: string
     icon: LucideIcon | IconType
     href: string
+    roles?: string[]
 }
 
 export interface MenuSection {
@@ -59,7 +62,14 @@ export const menuSections: MenuSection[] = [
         label: "Configuración",
         items: [
             { title: "Cuentas de pago", icon: MdAccountBalance, href: "/cuentas-pago" },
-            { title: "Usuarios", icon: User, href: "/usuarios" },
+            { title: "Usuarios", icon: User, href: "/usuarios", roles: [ADMIN_ROLE] },
         ],
     },
 ]
+
+export const canAccessMenuItem = (item: MenuItem, role: string): boolean => {
+    if (!item.roles || item.roles.length === 0) {
+        return true;
+    }
+    return item.roles.includes(role);
+}

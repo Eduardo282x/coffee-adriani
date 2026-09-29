@@ -20,8 +20,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/socket.io': {
-        target: 'http://localhost:3000',
+      // El gateway de WebSocket del backend vive en /ws, no en /socket.io.
+      // (En desarrollo el socket apunta a VITE_BASE_URL_API, esto cubre el caso relativo.)
+      '/ws': {
+        target: 'http://localhost:3002',
         ws: true
       }
     }

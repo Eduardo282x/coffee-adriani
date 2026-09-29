@@ -1,5 +1,5 @@
 import { IPaymentForm, IPayInvoiceForm, PayDisassociateBody, PaymentMutationResponse } from "@/interfaces/payment.interface";
-import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.service";
+import { deleteDataApi, getDataApi, postDataApi, postDataApiStrict, putDataApi, putDataApiStrict } from "./base.service";
 import { DateRangeFilter, ExportDashboard } from "@/interfaces/invoice.interface";
 import { AccountForm } from "@/pages/accounts/accounts.data";
 
@@ -146,19 +146,13 @@ export const registerPayment = async (data: IPaymentForm) => {
 }
 
 export const postAssociatePayment = async (data: IPayInvoiceForm): Promise<PaymentMutationResponse> => {
-    try {
-        return await postDataApi(`${routePayment}/associate`, data) as PaymentMutationResponse;
-    } catch (err) {
-        return err as PaymentMutationResponse
-    }
+    // Estricto: si el backend rechaza la asociación, el error se propaga para que el
+    // diálogo NO se cierre y el usuario no pierda lo que ya seleccionó.
+    return await postDataApiStrict<PaymentMutationResponse>(`${routePayment}/associate`, data);
 }
 
 export const putDisassociatePayment = async (data: PayDisassociateBody): Promise<PaymentMutationResponse> => {
-    try {
-        return await putDataApi(`${routePayment}/disassociate`, data) as PaymentMutationResponse;
-    } catch (err) {
-        return err as PaymentMutationResponse
-    }
+    return await putDataApiStrict<PaymentMutationResponse>(`${routePayment}/disassociate`, data);
 }
 
 export const updatePayment = async (id: number, data: IPaymentForm) => {
