@@ -1,4 +1,4 @@
-import { Settings, LogOut, ChevronDown, User2, User } from "lucide-react"
+import { LogOut, ChevronDown, User2, User } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
@@ -109,10 +109,10 @@ export const AppSidebar = () => {
                                     <User2 className="mr-2 h-4 w-4" />
                                     <span>Perfil</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                {/* <DropdownMenuItem>
                                     <Settings className="mr-2 h-4 w-4" />
                                     <span>Configuración</span>
-                                </DropdownMenuItem>
+                                </DropdownMenuItem> */}
                                 <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>{isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
