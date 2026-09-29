@@ -22,10 +22,12 @@ import { useOptimizedInventory } from "@/hooks/inventory.hook";
 import { Skeleton } from "@/components/ui/skeleton";
 import { invoiceFilterStore } from "@/store/invoiceFilterStore";
 import { FilterBadges } from "./FilterBadges";
+import { isWithinPaymentTolerance, PAYMENT_TOLERANCE_USD, toUsd } from '@/lib/payment-tolerance';
 
 export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [selectInvoice, setSelectInvoice] = useState<InvoiceInvoice | null>(null);
+    const [toleranceWarning, setToleranceWarning] = useState<InvoiceInvoice | null>(null);
     const [loadingFile, setLoadingFile] = useState<boolean>(false);
     const [pageSize, setPageSize] = useState<number>(50);
     const dateStart = invoiceFilterStore((state) => state.dateStart);
@@ -125,6 +127,28 @@ export const InvoicesPage = () => {
     };
 
     const payInvoices = async (invoice: InvoiceInvoice) => {
+        // El backend da por liquidada cualquier factura cuyo restante caiga dentro de la
+        // tolerancia de $2, así que se avisa antes de cerrar un saldo pendiente por error.
+        const remaining = toUsd(invoice.remaining);
+
+        if (remaining > 0 && isWithinPaymentTolerance(remaining)) {
+            setToleranceWarning(invoice);
+            return;
+        }
+
+        try {
+            await payInvoice(invoice.id);
+        } catch (error) {
+            console.error('Error al pagar factura:', error);
+        }
+    };
+
+    const confirmPayInvoices = async () => {
+        if (!toleranceWarning) return;
+
+        const invoice = toleranceWarning;
+        setToleranceWarning(null);
+
         try {
             await payInvoice(invoice.id);
         } catch (error) {
@@ -365,6 +389,38 @@ export const InvoicesPage = () => {
                         onSubmit={generateInvoice}
                         data={selectInvoice}
                     />
+                </DialogComponent>
+
+                <DialogComponent
+                    open={toleranceWarning !== null}
+                    setOpen={(isOpen) => !isOpen && setToleranceWarning(null)}
+                    className="w-[90%] lg:w-1/3 px-4"
+                    label2="Confirmar pago"
+                    label1="Confirmar pago"
+                    isEdit={false}
+                >
+                    <div className='space-y-4 text-sm text-gray-700'>
+                        <p>
+                            La factura #{toleranceWarning?.controlNumber} tiene un saldo pendiente de{' '}
+                            <span className='font-semibold'>
+                                {formatOnlyNumberWithDots(toUsd(toleranceWarning?.remaining))} $
+                            </span>
+                            , que está dentro de la tolerancia de {PAYMENT_TOLERANCE_USD}$.
+                        </p>
+                        <p>
+                            El sistema considera pagada cualquier factura cuyo saldo no supere los{' '}
+                            {PAYMENT_TOLERANCE_USD}$, por lo que al marcarla como pagada se cerrará
+                            aunque quede diferencia.
+                        </p>
+                        <div className='flex justify-end gap-2 pt-2'>
+                            <Button variant='outline' onClick={() => setToleranceWarning(null)}>
+                                Cancelar
+                            </Button>
+                            <Button variant='primary' onClick={confirmPayInvoices} disabled={isMutating}>
+                                Marcar pagada
+                            </Button>
+                        </div>
+                    </div>
                 </DialogComponent>
             </main>
         </div>

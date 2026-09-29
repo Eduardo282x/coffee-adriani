@@ -12,6 +12,16 @@ import { TableComponent } from '@/components/table/TableComponent'
 import { IProducts } from '@/interfaces/product.interface'
 import { inventoryProductFormColumns } from './inventory.data'
 import { FormSelect } from '@/components/form/FormSelect'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// quantity y productId deben ser > 0: se valida aquí para no mandar un body que el
+// backend rechaza con 400 (forbidNonWhitelisted + validación numérica estricta).
+const inventoryUpdateSchema = z.object({
+    productId: z.number({ required_error: 'Este campo es requerido.' }).positive('Debe seleccionar un producto.'),
+    quantity: z.number({ required_error: 'Este campo es requerido.' }).positive('La cantidad debe ser mayor a 0.'),
+    description: z.string().optional(),
+})
 
 interface InventoryFormProps extends FromProps {
     productOptions: IOptions[]
@@ -149,7 +159,9 @@ export const InventoryFormUpdate: FC<InventoryFormProps> = ({ onSubmit, productO
         defaultValues: {
             productId: 0,
             quantity: 0,
+            description: '',
         },
+        resolver: zodResolver(inventoryUpdateSchema),
     });
 
     useEffect(() => {
@@ -166,12 +178,20 @@ export const InventoryFormUpdate: FC<InventoryFormProps> = ({ onSubmit, productO
     return (
         <Form {...formInventoryUpdate}>
             <form onSubmit={formInventoryUpdate.handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full py-4">
-                <FormSelect form={formInventoryUpdate} name='productId' label='Producto' placeholder='Seleccione un producto' options={productOptions}></FormSelect>
+                <FormSelect form={formInventoryUpdate} name='productId' label='Producto' placeholder='Seleccione un producto' options={productOptions} coerce='number'></FormSelect>
                 <div className="space-y-4 w-full">
                     <Label className="text-right">
                         Cantidad
                     </Label>
-                    <Input type='number' min={0} {...formInventoryUpdate.register('quantity', { valueAsNumber: true })} />
+                    {/* El backend exige quantity > 0: el control queda en 1 y no en 0 */}
+                    <Input type='number' min={1} step={1} {...formInventoryUpdate.register('quantity', { valueAsNumber: true })} />
+                </div>
+
+                <div className="space-y-4 w-full">
+                    <Label className="text-right">
+                        Descripcion
+                    </Label>
+                    <Input className="w-full" {...formInventoryUpdate.register('description')} />
                 </div>
 
                 <div className='w-full flex items-center justify-center'>

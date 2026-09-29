@@ -10,6 +10,7 @@ import { TableComponent } from '@/components/table/TableComponent';
 import { paymentsFilterColumns } from './payment.data';
 import toast from 'react-hot-toast';
 import { Snackbar } from '@/components/snackbar/Snackbar';
+import { isValidPaymentAmount, MAX_PAYMENT_AMOUNT_USD, MIN_PAYMENT_AMOUNT_USD } from '@/lib/payment-tolerance';
 // import { IDolar } from '@/interfaces/product.interface';
 
 interface PayInvoiceFormProps extends FromProps {
@@ -134,11 +135,34 @@ export const PayInvoiceForm: FC<PayInvoiceFormProps> = ({ onSubmit, data, invoic
     // }
 
     const sendPaymentInvoices = () => {
+        if (invoicesForPay.length === 0) {
+            toast.custom(<Snackbar success={false} message='Debe seleccionar al menos una factura' />, {
+                position: 'bottom-center',
+                duration: 3000,
+            })
+            return;
+        }
+
+        // El backend valida amount con @IsNumber({ maxDecimalPlaces: 2 }) entre 0.01 y 9999999.99,
+        // y details.amount siempre en USD. Se replica aquí para no gastar un request fallido.
+        const invalidInvoice = invoicesForPay.find(item => !isValidPaymentAmount(Number(item.totalPaid)));
+
+        if (invalidInvoice) {
+            toast.custom(
+                <Snackbar
+                    success={false}
+                    message={`El monto de la factura #${invalidInvoice.controlNumber} es inválido: debe estar entre ${MIN_PAYMENT_AMOUNT_USD}$ y ${MAX_PAYMENT_AMOUNT_USD}$ con máximo 2 decimales`}
+                />,
+                { position: 'bottom-center', duration: 4000 }
+            )
+            return;
+        }
+
         const dataPay: IPayInvoiceForm = {
-            paymentId: infoPayment.id,
+            paymentId: Number(infoPayment.id),
             details: invoicesForPay.map(item => {
                 return {
-                    invoiceId: item.id,
+                    invoiceId: Number(item.id),
                     amount: Number(item.totalPaid)
                 }
             })

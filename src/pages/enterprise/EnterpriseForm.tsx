@@ -17,6 +17,8 @@ import { EnterpriseItem } from "./enterprise.data";
 import { FormSelect } from "@/components/form/FormSelect";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IEnterpriseForm {
     controlNumber: string;
@@ -31,6 +33,17 @@ interface EnterpriseFormProps extends FromProps {
     products: IProducts[];
     suppliers: ISupplier[];
 }
+
+// El backend exige controlNumber único y no vacío, y supplierId numérico:
+// se valida antes para no depender del 409 del backend.
+const enterpriseSchema = z.object({
+    controlNumber: z.string().trim().min(1, { message: 'Este campo es requerido.' }),
+    description: z.string(),
+    supplierId: z.string().refine((value) => value !== '' && Number(value) > 0, {
+        message: 'Seleccione un proveedor.',
+    }),
+    entryDate: z.date(),
+});
 
 export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, productOptions, products, suppliers }) => {
     const [items, setItems] = useState<EnterpriseItem[]>([]);
@@ -47,7 +60,8 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
             description: '',
             supplierId: '',
             entryDate: new Date(),
-        }
+        },
+        resolver: zodResolver(enterpriseSchema),
     });
 
     const entryDate = form.watch('entryDate');

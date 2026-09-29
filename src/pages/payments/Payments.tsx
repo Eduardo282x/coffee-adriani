@@ -175,12 +175,16 @@ export const Payments = () => {
                     paymentId: paymentDisassociate.paymentId
                 };
                 await disassociatePayment(parseBody);
+                // El diálogo solo se cierra si el backend confirmó la desasociación.
+                setOpenDisassociate(false);
+                setPaymentDisassociate(null);
             } catch (error) {
                 console.error('Error al desasociar pago:', error);
             }
+        } else {
+            setOpenDisassociate(false);
+            setPaymentDisassociate(null);
         }
-        setOpenDisassociate(false);
-        setPaymentDisassociate(null);
     };
 
     const handleNewPayments = () => {
