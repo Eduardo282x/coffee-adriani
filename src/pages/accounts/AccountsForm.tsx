@@ -22,17 +22,6 @@ export const AccountsForm: FC<FromProps> = ({ onSubmit, data }) => {
     const [methods, setMethods] = useState<IOptions[]>([]);
     const [banks, setBanks] = useState<IOptions[]>([]);
 
-    useEffect(() => {
-        if (data) {
-            const parseData = {
-                name: data.name,
-                bank: data.bank,
-                methodId: data.methodId
-            }
-            form.reset(parseData)
-        }
-    }, [data, methods, banks])
-
     const form = useForm<AccountForm>({
         defaultValues: {
             name: '',
@@ -41,6 +30,18 @@ export const AccountsForm: FC<FromProps> = ({ onSubmit, data }) => {
         },
         resolver: zodResolver(validationSchema)
     })
+    const { reset } = form
+
+    useEffect(() => {
+        if (data) {
+            const parseData = {
+                name: data.name,
+                bank: data.bank,
+                methodId: data.methodId
+            }
+            reset(parseData)
+        }
+    }, [data, methods, banks, reset])
 
     useEffect(() => {
         getBanksApi();

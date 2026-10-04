@@ -43,7 +43,7 @@ export const Autocomplete: FC<AutoCompleteProps> = ({ data, placeholder, onChang
     useEffect(() => {
         setInputValue('')
         setDataFiltered(data);
-    }, [open])
+    }, [open, data])
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);

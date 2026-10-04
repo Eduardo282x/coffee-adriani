@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
@@ -36,11 +36,7 @@ export const Products = () => {
         deleteProducts
     } = productStore();
 
-    useEffect(() => {
-        getProductsStore();
-    }, [])
-
-    const getProductsStore = async () => {
+    const getProductsStore = useEffectEvent(async () => {
         try {
             if (!products || products.products.length == 0) {
                 await getProductsApi();
@@ -50,7 +46,11 @@ export const Products = () => {
         } finally {
             setLoading(false);
         }
-    }
+    })
+
+    useEffect(() => {
+        getProductsStore();
+    }, [])
 
     useEffect(() => {
         setData({ productsFilter: products.productsFilter, products: products.products })

@@ -51,6 +51,7 @@ export const Profile = () => {
             lastName: ''
         }
     });
+    const { reset } = formUser
 
     const formPassword = useForm<PasswordUser>({
         defaultValues: {
@@ -97,20 +98,16 @@ export const Profile = () => {
     }
 
     useEffect(() => {
-        if (!edit) {
-            resetValues();
-        }
-    }, [edit]);
+        if (edit) return;
 
-    const resetValues = () => {
         const decoded: ITokenExp | null = decodeToken();
         if (!decoded) return;
-        formUser.reset({
+        reset({
             username: decoded.username,
             name: decoded.name,
             lastName: decoded.lastName,
         })
-    }
+    }, [edit, reset]);
 
     return (
         <div>

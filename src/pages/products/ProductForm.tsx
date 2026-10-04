@@ -25,21 +25,21 @@ export const ProductForm: FC<FromProps> = ({ data, onSubmit }) => {
     resolver: zodResolver(validationSchema)
   })
 
-  useEffect(() => {
-    if (data) {
-      const parseBodyData: IProductsForm = {
-        name: data.name,
-        presentation: data.presentation,
-        price: data.price,
-        priceUSD: data.priceUSD,
-        amount: data.amount,
-        purchasePrice: data.purchasePrice,
-        purchasePriceUSD: data.purchasePriceUSD,
-        type: data.type,
+useEffect(() => {
+      if (data) {
+        const parseBodyData: IProductsForm = {
+          name: data.name,
+          presentation: data.presentation,
+          price: data.price,
+          priceUSD: data.priceUSD,
+          amount: data.amount,
+          purchasePrice: data.purchasePrice,
+          purchasePriceUSD: data.purchasePriceUSD,
+          type: data.type,
+        }
+        reset(parseBodyData)
       }
-      reset(parseBodyData)
-    }
-  }, [data])
+    }, [data, reset])
 
   return (
     <div>

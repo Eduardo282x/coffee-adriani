@@ -80,7 +80,7 @@ export const Enterprise = () => {
         } else {
             applyDateFilter(null);
         }
-    }, [dateStart?.from, dateStart?.to]);
+    }, [dateStart?.from, dateStart?.to, applyDateFilter]);
 
     const getActions = async (action: string, data: IInventoryEntry) => {
         if (action === 'Ver Pagos') {

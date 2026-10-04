@@ -30,6 +30,7 @@ export const UsersForm: FC<FromProps> = ({ data, onSubmit }) => {
         },
         resolver: zodResolver(validationSchema)
     })
+    const { reset } = form
 
     useEffect(() => {
         getRolesApi();
@@ -43,9 +44,9 @@ export const UsersForm: FC<FromProps> = ({ data, onSubmit }) => {
                 username: data.username,
                 rolId: data.rolId,
             }
-            form.reset(parseBodyData)
+            reset(parseBodyData)
         }
-    }, [data, roles])
+    }, [data, roles, reset])
 
     const getRolesApi = async () => {
         const response: Roles[] = await getRoles();

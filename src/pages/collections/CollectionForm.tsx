@@ -34,7 +34,7 @@ export const CollectionForm: FC<FromProps> = ({ data, onSubmit }) => {
                 content: data.content
             })
         }
-    }, [data])
+    }, [data, reset])
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap justify-start items-start gap-4 w-full  py-4">

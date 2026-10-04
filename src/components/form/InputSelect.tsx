@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useEffectEvent, useState } from "react";
 import { Input } from "../ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { IOptions } from "@/interfaces/form.interface";
@@ -36,21 +36,26 @@ export const InputSelect: FC<InputSelectProps> = ({ label, options, max, type, n
         }
     };
 
+    const notifyChange = useEffectEvent((fieldName: string, fieldValue: string) => {
+        onChange(fieldName, fieldValue);
+    })
+
     useEffect(() => {
-        onChange(name, `${optionSelected}${inputValue}`);
-    }, [optionSelected, inputValue]);
+        notifyChange(name, `${optionSelected}${inputValue}`);
+    }, [name, optionSelected, inputValue]);
 
     useEffect(() => {
         if (value) {
             const split = name === 'phone' ? 4 : 1;
             const prefix = value.slice(0, split).toString();
             const input = value.slice(split).toString();
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 setOptionSelected(prefix);
                 setInputValue(input);
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [value]);
+    }, [name, value]);
 
     return (
         <div className="flex items-center justify-center gap-2 w-full">

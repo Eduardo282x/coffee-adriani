@@ -5,7 +5,7 @@ import { Filter } from "@/components/table/Filter"
 // import { Button } from "@/components/ui/button"
 // import { Download } from "lucide-react"
 import { Block } from "@/interfaces/clients.interface"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useEffectEvent, useState } from "react"
 import { blockStore } from "@/store/clientStore"
 import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
@@ -100,7 +100,7 @@ const FiltersGroups = ({
         { label: 'Zona Oeste', value: 'Zona Oeste' }
     ];
 
-    const getBlockStoreApi = async () => {
+    const getBlockStoreApi = useEffectEvent(async () => {
         if (!blocks || blocks.allBlocks.length == 0) {
             try {
                 await getBlocksApi();
@@ -108,16 +108,16 @@ const FiltersGroups = ({
                 notifyError(error, 'No se pudieron cargar las zonas.');
             }
         }
-    }
+    })
 
-    const getProductsTypesApi = async () => {
+    const getProductsTypesApi = useEffectEvent(async () => {
         try {
             const response = await getProductType();
             setTypes(response);
         } catch (error) {
             notifyError(error, 'No se pudieron cargar los tipos de producto.');
         }
-    }
+    })
 
     useEffect(() => {
         getBlockStoreApi();

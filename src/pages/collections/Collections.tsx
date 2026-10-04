@@ -2,7 +2,7 @@ import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useEffectEvent } from "react"
 import { deleteMessageCollection, getCollection, getCollectionExcel, getCollectionHistory, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
 import { CollectionMessageBody, GroupCollection, GroupCollectionHistory, GroupMessages, ICollection, ICollectionHistory, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
 import { clientCollectionColumns, collectionErrorsColumns, collectionHistoryColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
@@ -57,7 +57,7 @@ export const Collections = () => {
         }
     }
 
-    const getMessageCollectionApi = async () => {
+    const getMessageCollectionApi = useEffectEvent(async () => {
         const response: IMessages[] = await getMessageCollection();
 
         const newColumns: IColumns<ICollection>[] = [
@@ -118,7 +118,7 @@ export const Collections = () => {
                 messages: response,
             });
         }
-    }
+    })
 
     const getCollectionHistoryApi = async () => {
         const response: ICollectionHistory[] = await getCollectionHistory();

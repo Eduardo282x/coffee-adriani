@@ -163,17 +163,19 @@ export const InventoryFormUpdate: FC<InventoryFormProps> = ({ onSubmit, productO
         },
         resolver: zodResolver(inventoryUpdateSchema),
     });
+    const { reset } = formInventoryUpdate
 
     useEffect(() => {
         if (data) {
-            setTimeout(() => {
-                formInventoryUpdate.reset({
+            const timer = setTimeout(() => {
+                reset({
                     productId: data.productId,
                     quantity: data.quantity,
                 })
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [data, productOptions])
+    }, [data, productOptions, reset])
 
     return (
         <Form {...formInventoryUpdate}>
@@ -211,6 +213,7 @@ export const HistoryInventoryFormUpdate: FC<FromProps> = ({ onSubmit, data }) =>
             date: new Date(),
         },
     });
+    const { reset } = formHistoryInventoryUpdate
 
     const onChangeDateForm = (date: Date | undefined) => {
         setEntryDate(date);
@@ -219,16 +222,17 @@ export const HistoryInventoryFormUpdate: FC<FromProps> = ({ onSubmit, data }) =>
 
     useEffect(() => {
         if (data) {
-            setTimeout(() => {
-                formHistoryInventoryUpdate.reset({
+            const timer = setTimeout(() => {
+                reset({
                     controlNumberOld: data.controlNumber,
                     controlNumber: data.controlNumber,
                     date: data.date ? new Date(data.date) : new Date(),
                 })
                 setEntryDate(data.date ? new Date(data.date) : new Date());
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [data])
+    }, [data, reset])
 
     return (
         <Form {...formHistoryInventoryUpdate}>

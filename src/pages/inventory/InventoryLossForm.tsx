@@ -29,18 +29,20 @@ export const InventoryLossForm: FC<InventoryLossFormProps> = ({ onSubmit, data }
         },
         resolver: zodResolver(inventoryLossSchema),
     });
+    const { reset } = formInventoryLoss
 
     useEffect(() => {
         if (data) {
-            setTimeout(() => {
-                formInventoryLoss.reset({
+            const timer = setTimeout(() => {
+                reset({
                     productId: data.productId,
                     quantity: 0,
                     reason: '',
                 })
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [data])
+    }, [data, reset])
 
     const onSubmitLoss = (formData: BodyInventoryLoss) => {
         onSubmit({

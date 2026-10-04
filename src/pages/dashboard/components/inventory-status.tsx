@@ -44,22 +44,20 @@ export const InventoryStatus = ({ inventoryData }: InventoryStatusProps) => {
     }, [])
 
     useEffect(() => {
-        calculateData()
-    }, [inventoryData])
-
-    const calculateData = () => {
         const prepareData: DataChart[] = [];
+
         if (inventoryData && inventoryData.products.length > 0) {
-            inventoryData.products.map((item, index) => {
+            inventoryData.products.forEach((item, index) => {
                 prepareData.push({
                     name: item.name,
                     value: item.amount,
                     color: coffeeColors[index]
                 })
             });
-            setData(prepareData);
         }
-    }
+
+        setData(prepareData);
+    }, [inventoryData])
 
     if (!mounted) return null
 

@@ -20,6 +20,7 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
     const form = useForm<IClientsForm>({
         defaultValues
     })
+    const { reset } = form
 
     useEffect(() => {
         if (data) {
@@ -33,11 +34,12 @@ export const ClientsForm: FC<ClientFormProps> = ({ data, onSubmit, blocks }) => 
                 zone: findZone ? findZone.value.toString() : '',
                 blockId: data.blockId.toString(),
             }
-            setTimeout(() => {
-                form.reset(parseBodyData)
+            const timer = setTimeout(() => {
+                reset(parseBodyData)
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [data, blocks])
+    }, [data, blocks, reset])
 
     const setValueInput = (name: string, value: string) => {
         form.setValue(name as TypesClientsForm, value)
@@ -110,11 +112,12 @@ export const BlockForm: FC<FromProps> = ({ data, onSubmit }) => {
                 name: data.name,
                 address: data.address,
             }
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 reset(parseBodyData)
             }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [data])
+    }, [data, reset])
 
     return (
         <div>

@@ -6,7 +6,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AccountPay } from '@/interfaces/payment.interface';
 import { postPaymentAccounts, putPaymentAccounts } from '@/services/payment.service';
 import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { AccountForm, accountsColumns, defaultValues } from './accounts.data';
 import { AccountsForm } from './AccountsForm';
 import { BaseResponse } from '@/services/base.interface';
@@ -28,11 +28,7 @@ export const Accounts = () => {
         deleteAccount
     } = accountStore();
 
-    useEffect(() => {
-        getAccountStore()
-    }, [])
-
-    const getAccountStore = async () => {
+    const getAccountStore = useEffectEvent(async () => {
         try {
             if (!accounts || accounts.allAccounts.length == 0) {
                 await getAccountsApi();
@@ -42,7 +38,11 @@ export const Accounts = () => {
         } finally {
             setLoading(false);
         }
-    }
+    })
+
+    useEffect(() => {
+        getAccountStore()
+    }, [])
 
     const deleteAction = async () => {
         try {

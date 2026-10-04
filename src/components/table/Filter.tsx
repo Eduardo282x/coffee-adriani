@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useEffectEvent, useState } from "react";
 import { IColumns } from "./table.interface";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
-import { debounce } from "@/lib/debounce";
 import { InvoiceApi } from "@/interfaces/invoice.interface";
 import { IPayments } from "@/interfaces/payment.interface";
 
@@ -21,37 +20,11 @@ interface IFilter {
 export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments, initialValue = '' }) => {
     const [filter, setFilter] = useState<string>(initialValue);
 
-    useEffect(() => {
-        if (!disabledEffect) {
-            setDataFilter(dataBase)
-        }
-    }, [dataBase])
+    const notifyDataFilter = useEffectEvent((value: any) => {
+        setDataFilter(value);
+    })
 
-    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-    const getNestedValue = (obj: any, path: string): string => {
-        return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || ''
-    }
-
-    useEffect(() => {
-        if (!setSearch) return; // si no hay setSearch, no hacemos debounce
-
-        const handler = setTimeout(() => {
-            setSearch(filter);
-        }, 500); // espera 500ms antes de notificar al padre
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [filter, setSearch]);
-
-    useEffect(() => {
-        if (setSearch) return; // ya se maneja arriba con debounce
-
-        handleFilter(filter);
-    }, [filter]);
-
-    const handleFilter = (value: string) => {
+    const applyLocalFilter = useEffectEvent((value: string) => {
         if (setSearch) return; // evitamos filtrar si solo estamos usando setSearch
 
         if (!value) {
@@ -102,14 +75,39 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabl
 
             setDataFilter(filtered);
         }
+    })
+
+    useEffect(() => {
+        if (!disabledEffect) {
+            notifyDataFilter(dataBase)
+        }
+    }, [dataBase, disabledEffect])
+
+    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    const getNestedValue = (obj: any, path: string): string => {
+        return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || ''
     }
 
-    const debouncedFilter = debounce(handleFilter, 200)
+    useEffect(() => {
+        if (!setSearch) return; // si no hay setSearch, no hacemos debounce
+
+        const handler = setTimeout(() => {
+            setSearch(filter);
+        }, 500); // espera 500ms antes de notificar al padre
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [filter, setSearch]);
+
+    useEffect(() => {
+        applyLocalFilter(filter);
+    }, [filter, setSearch]);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setFilter(value)
-        debouncedFilter(value)
     }
 
     return (

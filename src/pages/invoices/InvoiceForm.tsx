@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { IClients } from "@/interfaces/clients.interface";
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
 // import { getInventory } from "@/services/inventory.service";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useEffectEvent, useState } from "react";
 import { productColumns } from "./invoices.data";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
         }
     }, [data, inventory, clients])
 
-    const getClientStoreApi = async () => {
+    const getClientStoreApi = useEffectEvent(async () => {
         if (!clients || clients.allClients.length == 0) {
             try {
                 await getClientsApi();
@@ -94,7 +94,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 notifyError(error, 'No se pudieron cargar los clientes.');
             }
         }
-    }
+    })
 
     useEffect(() => {
         getClientStoreApi();

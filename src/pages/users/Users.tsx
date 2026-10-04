@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { TableComponent } from "@/components/table/TableComponent"
 // import { UsersColumns, defaultValues, IUsersForm } from "./client.data"
@@ -33,11 +33,7 @@ export const Users = () => {
         deleteUser
     } = userStore();
 
-    useEffect(() => {
-        getUsersStore()
-    }, [])
-
-    const getUsersStore = async () => {
+    const getUsersStore = useEffectEvent(async () => {
         try {
             if (!users || users.allUsers.length == 0) {
                 await getUsersApi();
@@ -47,7 +43,11 @@ export const Users = () => {
         } finally {
             setLoading(false);
         }
-    }
+    })
+
+    useEffect(() => {
+        getUsersStore()
+    }, [])
 
     const setUsersFilter = (usersFilter: IUsers[]) => {
         setUsers({ allUsers: users.allUsers, users: usersFilter })

@@ -5,3 +5,22 @@ allowBuilds:
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
+
+# No instalamos versiones publicadas hace menos de 7 días (10080 min). Los releases
+# maliciosos suelen detectarse y despublicarse en horas o pocos días, así que este
+# margen evita que entren en el árbol de dependencias. Al configurarlo de forma
+# explícita pnpm activa además el modo estricto: si la única versión que cumple el
+# rango es más nueva que la ventana, la instalación falla en lugar de instalarla.
+minimumReleaseAge: 10080
+
+# Falla si el nivel de confianza de un paquete baja respecto a versiones anteriores
+# (p.ej. si una versión con provenance/signature pasa a no tenerlos).
+trustPolicy: no-downgrade
+
+# El modelo de confianza compara contra TODA versión anterior, así que un paquete sin
+# proceso de firma firmado puede ser rechazado de por vida aunque su versión actual sea
+# íntegra. Solo aplicamos la política a lo reciente (30 días): el riesgo real es que una
+# cuenta de mantenedor sea tomada y publique malware, y eso siempre es una versión nueva.
+# Sin esto, `undici-types@6.21.0` (types-only, devDependency de @types/node, firmado en
+# npm, sin advisories, publicado en 2024-11) bloquea la instalación de todo el proyecto.
+trustPolicyIgnoreAfter: 43200

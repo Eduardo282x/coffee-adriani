@@ -100,16 +100,15 @@ export const Inventory = () => {
         }
     }, [products, getProductsApi])
 
-    const getProductsTypesApi = async () => {
-        const response = await getProductType();
-        setTypesProduct(response);
-    }
-
     useEffect(() => {
-        getProductsTypesApi();
+        const loadTypes = async () => {
+            const response = await getProductType();
+            setTypesProduct(response);
+        }
+        loadTypes();
         handleTypeProduct('Cafe');
         handleTypeMovement('IN');
-    }, [])
+    }, [handleTypeProduct, handleTypeMovement])
 
     useEffect(() => {
         const total: number = inventory.filter(inv => inv.product.type == typeProduct).reduce((acc, item) => acc + (item.product.presentation === '1kilo' ? (item.quantity * 0.2) : item.quantity), 0)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { postClients, putClients, generateReportPDF, getClientsExcel } from "@/services/clients.service"
 import { Block, BodyBlock, BodyReport, IClients } from "@/interfaces/clients.interface"
@@ -47,17 +47,12 @@ export const Clients = () => {
 
     const { blocks, setBlocks, blockOptions, getBlocksApi, deleteBlock, manipulateBlock } = blockStore();
 
-        const getProductsTypesApi = async () => {
+        const getProductsTypesApi = useEffectEvent(async () => {
         const response = await getProductType();
         setTypes(response);
-    }
-    
-    useEffect(() => {
-        getProductsTypesApi();
-        getClientDataStore();
-    }, [])
+    })
 
-    const getClientDataStore = async () => {
+    const getClientDataStore = useEffectEvent(async () => {
         try {
             if (!clients || !blocks || clients.allClients.length == 0 || blocks.allBlocks.length == 0) {
                 await getBlocksApi();
@@ -68,7 +63,12 @@ export const Clients = () => {
         } finally {
             setLoading(false);
         }
-    }
+    })
+
+    useEffect(() => {
+        getProductsTypesApi();
+        getClientDataStore();
+    }, [])
 
     const handleChangeBlock = (option: string) => {
         const filterClientsByBlock = option !== 'all' ? clients.allClients.filter(cli => cli.blockId === Number(option)) : clients.allClients
