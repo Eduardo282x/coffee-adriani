@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IColumns, IOptionActions, OrderBy } from "./table.interface";
 import { Paginator } from "./Paginator";
 import { ArrowUp, MoreHorizontal } from "lucide-react";
@@ -55,7 +55,16 @@ export const TableComponent = <T,>({
     totalPages
 }: TableProps<T>) => {
     const [dataFilter, setDataFilter] = useState<T[]>(dataBase || []);
-    const [columnData, setColumnData] = useState<IColumns<T>[]>(columns);
+
+    const [sortColumn, setSortColumn] = useState<string | null>(null);
+    const [sortDirection, setSortDirection] = useState<OrderBy>('');
+
+    const columnData = useMemo(() => {
+        return columns.map((col) => ({
+            ...col,
+            orderBy: col.column === sortColumn ? sortDirection : ('value' in col ? '' : col.orderBy), // o simplemente maneja tu orderBy aquí
+        }));
+    }, [columns, sortColumn, sortDirection]);
 
     const [internalPage, setInternalPage] = useState(0);
     const [localRowsPerPage, setLocalRowsPerPage] = useState(50);
@@ -75,10 +84,6 @@ export const TableComponent = <T,>({
         setInternalPage(0)
     }, [dataBase])
 
-    useEffect(() => {
-        setColumnData(columns)
-    }, [columns])
-
     const handleChangePage = (newPage: number, newRowsPerPage: number) => {
         if (onPageSizeChange && newRowsPerPage !== rowsPerPage) {
             onPageSizeChange(newRowsPerPage);
@@ -97,18 +102,19 @@ export const TableComponent = <T,>({
     const handleChangeOrder = (col: IColumns<T>) => {
         if (col.icon) return;
 
-        const current = columnData.find((co) => co.column === col.column);
-        const newOrderBy: OrderBy = current?.orderBy === 'asc'
+        // Determina el nuevo orden basándote en el estado actual
+        const isCurrent = sortColumn === col.column;
+        const currentOrder = isCurrent ? sortDirection : '';
+
+        const newOrderBy: OrderBy = currentOrder === 'asc'
             ? 'desc'
-            : current?.orderBy === 'desc'
+            : currentOrder === 'desc'
                 ? ''
                 : 'asc';
 
-        setColumnData((prev) =>
-            prev.map((co) =>
-                co.column === col.column ? { ...co, orderBy: newOrderBy } : { ...co, orderBy: '' }
-            )
-        );
+        // Actualizamos el estado atómico del orden
+        setSortColumn(newOrderBy === '' ? null : (col.column as string));
+        setSortDirection(newOrderBy);
 
         if (newOrderBy === '') {
             setDataFilter(dataBase);
@@ -123,8 +129,7 @@ export const TableComponent = <T,>({
         );
 
         setDataFilter(orderedData);
-    }
-
+    };
 
     return (
         <>

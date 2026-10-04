@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC, useEffect, useEffectEvent, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { IColumns } from "./table.interface";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
@@ -17,14 +17,26 @@ interface IFilter {
     initialValue?: string;
 }
 
-export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabledEffect = false, columns, filterInvoices, filterInvoicesPayments, initialValue = '' }) => {
+export const Filter: FC<IFilter> = ({
+    dataBase,
+    setDataFilter,
+    setSearch,
+    disabledEffect = false,
+    columns,
+    filterInvoices,
+    filterInvoicesPayments,
+    initialValue = ''
+}) => {
     const [filter, setFilter] = useState<string>(initialValue);
 
-    const notifyDataFilter = useEffectEvent((value: any) => {
-        setDataFilter(value);
-    })
+    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-    const applyLocalFilter = useEffectEvent((value: string) => {
+    const getNestedValue = (obj: any, path: string): string => {
+        return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || '';
+    };
+
+    // Función de filtrado local ejecutada directamente (sin efectos intermedios)
+    const applyLocalFilter = (value: string) => {
         if (setSearch) return; // evitamos filtrar si solo estamos usando setSearch
 
         if (!value) {
@@ -34,81 +46,69 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabl
 
         const keys = columns
             .filter((col: IColumns<unknown>) => col.icon === false)
-            .map((col: IColumns<unknown>) => col.column)
+            .map((col: IColumns<unknown>) => col.column);
 
-        const filtered = dataBase.filter((item) =>
-            keys.some((key) =>
-                normalize(getNestedValue(item, key)).includes(normalize(value))
-            )
-        )
-
-        setDataFilter(filtered);
+        const normalizedValue = normalize(value);
 
         if (filterInvoices) {
-            const normalizedValue = normalize(value);
-
             const filtered = dataBase.filter((item: InvoiceApi | IPayments) => {
-
-                // 1. Filtro por columnas (cliente)
                 const matchesClient = keys.some((key) =>
                     normalize(getNestedValue(item, key)).includes(normalizedValue)
                 );
 
                 if (filterInvoicesPayments) {
                     const parseData = item as IPayments;
-                    // 2. Filtro por facturas (controlNumber)
                     const matchesControlNumber = parseData.InvoicePayment.some(inv =>
                         normalize(inv.invoice.controlNumber).includes(normalizedValue)
                     );
-
                     return matchesClient || matchesControlNumber;
                 } else {
                     const parseData = item as InvoiceApi;
-                    // 2. Filtro por facturas (controlNumber)
                     const matchesControlNumber = parseData.invoices.some(inv =>
                         normalize(inv.controlNumber).includes(normalizedValue)
                     );
-
                     return matchesClient || matchesControlNumber;
                 }
             });
 
             setDataFilter(filtered);
-        }
-    })
+        } else {
+            const filtered = dataBase.filter((item) =>
+                keys.some((key) =>
+                    normalize(getNestedValue(item, key)).includes(normalizedValue)
+                )
+            );
 
+            setDataFilter(filtered);
+        }
+    };
+
+    // Inicialización de la data cuando cambia la base de datos o se habilita/deshabilita el efecto
     useEffect(() => {
         if (!disabledEffect) {
-            notifyDataFilter(dataBase)
+            setDataFilter(dataBase);
         }
-    }, [dataBase, disabledEffect])
+    }, [dataBase, disabledEffect, setDataFilter]);
 
-    const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-    const getNestedValue = (obj: any, path: string): string => {
-        return path.split('.').reduce((acc, key) => acc?.[key], obj)?.toString().toLowerCase() || ''
-    }
-
+    // Manejo del debounce únicamente para setSearch (con su respectiva limpieza)
     useEffect(() => {
-        if (!setSearch) return; // si no hay setSearch, no hacemos debounce
+        if (!setSearch) return;
 
         const handler = setTimeout(() => {
             setSearch(filter);
-        }, 500); // espera 500ms antes de notificar al padre
+        }, 500);
 
         return () => {
             clearTimeout(handler);
         };
     }, [filter, setSearch]);
 
-    useEffect(() => {
-        applyLocalFilter(filter);
-    }, [filter, setSearch]);
-
+    // Manejador del input unificado (actualiza estado y aplica el filtro de forma síncrona)
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        setFilter(value)
-    }
+        const value = e.target.value;
+        setFilter(value);
+        applyLocalFilter(value);
+    };
 
     return (
         <div className="relative flex-1 bg-white rounded-md w-full">
@@ -121,5 +121,5 @@ export const Filter: FC<IFilter> = ({ dataBase, setDataFilter, setSearch, disabl
                 onChange={onChange}
             />
         </div>
-    )
-}
+    );
+};

@@ -47,7 +47,7 @@ const enterpriseSchema = z.object({
 
 export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, productOptions, products, suppliers }) => {
     const [items, setItems] = useState<EnterpriseItem[]>([]);
-    const [total, setTotal] = useState<number>(0);
+
 
     const suppliersOptions = suppliers.map((supplier) => ({
         label: supplier.name,
@@ -147,12 +147,7 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
         onSubmit(body);
     };
 
-    useEffect(() => {
-        const newTotal = items.reduce((acc, item) => {
-            return acc + (item.subtotal || 0);
-        }, 0);
-        setTotal(newTotal);
-    }, [items]);
+
 
     return (
         <Form {...form}>
@@ -203,7 +198,7 @@ export const EnterpriseForm: FC<EnterpriseFormProps> = ({ onSubmit, data, produc
 
                 <TableComponent
                     columns={enterpriseItemColumns}
-                    total={formatOnlyNumberWithDots(total.toString())}
+                    total={formatOnlyNumberWithDots(items.reduce((acc, item) => acc + (item.subtotal || 0), 0).toString())}
                     dataBase={items}
                     action={changeDataTable}
                     includeFooter={true}

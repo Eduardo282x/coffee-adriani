@@ -63,6 +63,7 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
     }, [descriptions]);
 
     useEffect(() => {
+        let timeoutId;
         if (data) {
             const formData = {
                 reference: data.reference,
@@ -78,6 +79,10 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
                 form.reset(formData)
             }, 100);
         }
+        // Función de limpieza requerida por el linter
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, [data, form])
 
     const selectedAccountId = form.watch('accountId');

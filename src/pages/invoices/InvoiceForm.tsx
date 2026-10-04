@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Autocomplete } from "@/components/autocomplete/Autocomplete";
 import { TableComponent } from "@/components/table/TableComponent";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IClients } from "@/interfaces/clients.interface";
 import { GroupInventoryDate, IInventory } from "@/interfaces/inventory.interface";
-// import { getInventory } from "@/services/inventory.service";
 import { FC, useEffect, useEffectEvent, useState } from "react";
 import { productColumns } from "./invoices.data";
 import { Switch } from "@/components/ui/switch";
@@ -26,7 +24,6 @@ interface InvoiceFormProps extends FromProps {
 }
 
 export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory }) => {
-    // const [clients, setClients] = useState<GroupClientsOptions>({ allClients: [], clients: [] });
     const [clientSelected, setClientSelected] = useState<IClients | null>(null);
     const [inventoryData, setInventoryData] = useState<IInventory[]>([]);
     const [gifData, setGiftData] = useState<DetailsInvoices[]>([]);
@@ -45,6 +42,8 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
 
     useEffect(() => {
         const parseData: InvoiceInvoice = data as InvoiceInvoice;
+        let timeoutId;
+
         if (data != null) {
             const findClient = clients.allClients.find((cli) => cli.id === parseData.clientId);
             setConsignment(parseData.consignment);
@@ -84,7 +83,12 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                 setInventoryData(inventoryData.filter((inv) => inv !== undefined) as IInventory[]);
             }, 0);
         }
-    }, [data, inventory, clients])
+
+        // Función de limpieza requerida por el linter
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [data, inventory, clients]);
 
     const getClientStoreApi = useEffectEvent(async () => {
         if (!clients || clients.allClients.length == 0) {

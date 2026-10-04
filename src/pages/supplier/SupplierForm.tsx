@@ -20,6 +20,7 @@ export const SupplierForm: FC<FromProps> = ({ onSubmit, data }) => {
     });
 
     useEffect(() => {
+        let timeoutId;
         if (data) {
             setTimeout(() => {
                 form.reset({
@@ -32,6 +33,10 @@ export const SupplierForm: FC<FromProps> = ({ onSubmit, data }) => {
                 });
             }, 0);
         }
+          // Función de limpieza requerida por el linter
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, [data, form]);
 
     return (

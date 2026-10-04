@@ -75,11 +75,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
         }
     }
 
-    useEffect(() => {
-        if (paymentDate) {
-            searchDolarOptions(paymentDate);
-        }
-    }, [paymentDate]);
+
 
     const isBS = selectedAccount?.method?.currency === 'BS';
 
@@ -99,9 +95,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
         return amount;
     }, [amount, isBS, dolarRate]);
 
-    useEffect(() => {
-        setAmount(0);
-    }, [accountId]);
+
 
     const onSubmitForm = () => {
         if (amount <= 0) {
@@ -181,7 +175,10 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                     <Label>Cuenta de Pago</Label>
                     <Select
                         value={accountId === 0 ? '' : accountId.toString()}
-                        onValueChange={(v) => setAccountId(Number(v))}
+                        onValueChange={(v) => {
+                            setAccountId(Number(v));
+                            setAmount(0);
+                        }}
                     >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Seleccione cuenta" />
@@ -207,7 +204,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                         step={0.01}
                         value={amount || ''}
                         onChange={(e) => setAmount(Number(e.target.value))}
-                        placeholder={isBS ? "Monto en bolívares" : "Monto en dólares"}
+                        placeholder={isBS ? "Monto en bolÃƒÂ­vares" : "Monto en dÃƒÂ³lares"}
                     />
                     {isBS && amount > 0 && dolarRate > 0 && (
                         <p className="text-xs text-gray-500">
@@ -217,13 +214,18 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                     )}
                     {!isBS && (
                         <p className="text-xs text-gray-500">
-                            Máximo: $ {remaining.toFixed(2)}
+                            MÃƒÂ¡ximo: $ {remaining.toFixed(2)}
                         </p>
                     )}
                 </div>
 
                 <DatePicker
-                    setDate={setPaymentDate}
+                    setDate={(d) => {
+                        setPaymentDate(d);
+                        if (d) {
+                            searchDolarOptions(d);
+                        }
+                    }}
                     date={paymentDate}
                     label="Fecha de Pago"
                     maxDate={new Date()}
@@ -237,7 +239,7 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                         onValueChange={selectDolar}
                     >
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Seleccione tasa de dólar" />
+                            <SelectValue placeholder="Seleccione tasa de dÃƒÂ³lar" />
                         </SelectTrigger>
                         <SelectContent>
                             {dolarOptions.map((dolar) => (
@@ -255,18 +257,18 @@ export const EntryPaymentForm: FC<EntryPaymentFormProps> = ({ entry, accounts, o
                         className="w-full"
                         value={reference}
                         onChange={(e) => setReference(e.target.value)}
-                        placeholder="Número de referencia"
+                        placeholder="NÃƒÂºmero de referencia"
                     />
                 </div>
             </div>
 
             <div className="flex flex-col items-start justify-start gap-2">
-                <Label>Descripción</Label>
+                <Label>DescripciÃƒÂ³n</Label>
                 <Input
                     className="w-full"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Descripción del pago"
+                    placeholder="DescripciÃƒÂ³n del pago"
                 />
             </div>
 
