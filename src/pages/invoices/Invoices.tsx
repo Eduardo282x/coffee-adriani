@@ -361,7 +361,7 @@ export const InvoicesPage = () => {
                             totalPages={totalPages}
                             renderRow={(inv, index) => (
                                 <ExpansibleInvoice
-                                    key={index}
+                                    key={`${inv.client.id}-${index}`}
                                     invoice={inv}
                                     columns={invoiceColumns}
                                     setLoading={setLoadingFile}

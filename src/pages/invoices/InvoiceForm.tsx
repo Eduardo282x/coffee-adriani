@@ -247,7 +247,7 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
                     </Button>
 
                     {gifData && gifData.map((item, index: number) => (
-                        <div key={index} className="flex items-center justify-between gap-2 w-full">
+                        <div key={`${item.productId}-${index}`} className="flex items-center justify-between gap-2 w-full">
                             <Autocomplete placeholder="Seleccione un producto" data={inventory.inventory} onChange={(data) => onChangeGift(data, index)}></Autocomplete>
                             <Input className="w-15" value={item.quantity} onChange={(e) => onChangeQuantityGift(e.target.value, index)} type="number" />
                             <Button size='icon' onClick={() => removeGift(index)}><Trash2 className="text-red-500" /></Button>

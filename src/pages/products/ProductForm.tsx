@@ -45,7 +45,7 @@ useEffect(() => {
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 overflow-y-auto items-start gap-4 w-full py-4">
         {formDataProduct && formDataProduct.map((data: FormDataProduct, index: number) => (
-          <div key={index} className="flex flex-col items-start justify-start gap-4 w-full">
+          <div key={`${data.name}-${index}`} className="flex flex-col items-start justify-start gap-4 w-full">
             <Label className="text-right">
               {data.label}
             </Label>

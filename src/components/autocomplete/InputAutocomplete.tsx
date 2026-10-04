@@ -79,7 +79,7 @@ export const InputAutocomplete: FC<InputAutocomplete> = ({ data, onChange, value
                     <div className={`max-h-60 overflow-y-auto px-2 ${fullSize ? 'w-full' : 'w-80 max-w-80'}`}>
                         {dataFiltered && dataFiltered.map((option: IOptions, index: number) => (
                             <p
-                                key={index}
+                                key={`${option.value}-${index}`}
                                 onClick={() => handleSelect(option.value.toString())}
                                 className="text-sm flex items-center justify-between py-1 px-2 hover:bg-gray-100 rounded-md transition-all cursor-pointer">
                                 {option.label}

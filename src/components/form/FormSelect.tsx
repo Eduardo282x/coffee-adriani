@@ -39,7 +39,9 @@ export const FormSelect: FC<FormSelectProps> = ({ form, label, placeholder, name
                         </FormControl>
                         <SelectContent className='w-full'>
                             {options && options.map((opt: IOptions, index: number) => (
-                                <SelectItem key={index} value={opt.value.toString()}>{opt.label}</SelectItem>
+                                <SelectItem 
+                                key={`${opt.value}-${index}`} 
+                                value={opt.value.toString()}>{opt.label}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

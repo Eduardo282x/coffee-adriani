@@ -331,7 +331,7 @@ export const Payments = () => {
                         onPageSizeChange={setPageSize}
                         renderRow={(pay, index) => (
                             <PaymentExpandible
-                                key={index}
+                                key={`${pay.id}-${index}`}
                                 payment={pay}
                                 actionPayment={getActionExpansiblePayment}
                             />

@@ -40,7 +40,7 @@ export const DropdownColumnFilter = <T,>({ columns, setColumns }: DropdownColumn
                 <DropdownMenuContent align="start">
                     {columns.filter(item => item.icon == false).map((column: IColumns<T>, index: number) => (
                         <DropdownMenuCheckboxItem
-                            key={index}
+                            key={`${column.column}-${index}`}
                             className='capitalize hover:bg-gray-200'
                             checked={column.visible}
                             onCheckedChange={(checked) => changeChecked(column, checked)}

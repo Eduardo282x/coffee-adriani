@@ -173,7 +173,7 @@ export const PaymentFilter: FC<PaymentsFilterProps> = ({
             <DropDownFilter>
                 <div className='space-y-2 p-1'>
                     {optionsFilters.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between w-80">
+                        <div key={`${item.value}-${index}`} className="flex items-center justify-between w-80">
                             <Label className="mb-2">{item.label}</Label>
                             <Select value={item.value} onValueChange={(value) => handleChangeFilter(item.name, value)}>
                                 <SelectTrigger className="w-40">

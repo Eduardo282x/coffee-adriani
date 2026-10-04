@@ -134,7 +134,7 @@ export const TableComponent = <T,>({
                         <TableRow>
                             {columnData.map((col: IColumns<T>, index: number) => (
                                 <TableHead
-                                    key={index}
+                                    key={`${col.column}-${index}`}
                                     onClick={() => handleChangeOrder(col)}
                                     className="cursor-pointer bg-white z-50"
                                 >
@@ -172,9 +172,9 @@ export const TableComponent = <T,>({
                         ) : (
                             displayedData.map((data, index: number) => (
                                 isExpansible ?
-                                    <TableRowExpansible key={index} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
+                                    <TableRowExpansible key={`${data}-${index}`} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                                     :
-                                    <TableRowNormal key={index} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
+                                    <TableRowNormal key={`${data}-${index}`} index={index} data={data} columns={columns} action={action} renderRow={renderRow} colSpanColumns={colSpanColumns} columnData={columnData} />
                             ))
                         )}
                     </TableBody>
@@ -197,7 +197,7 @@ export const TableComponent = <T,>({
                     ))
                 ) : (
                     displayedData.map((item, index) => (
-                        <CardDynamicMobile key={index} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
+                        <CardDynamicMobile key={`${item}-${index}`} data={item} columns={columnData} isExpansible={isExpansible as boolean} renderRow={renderRow} />
                     ))
                 )}
             </div>
@@ -262,7 +262,7 @@ const CardDynamicMobile = <T,>({ data, columns, isExpansible, renderRow }: CardD
             )}
 
             {columns.filter(item => !item.optionActions).map((col: IColumns<T>, index: number) => (
-                <div key={index} className="flex gap-2">
+                <div key={`${col.column}-${index}`} className="flex gap-2">
                     <span className="font-semibold">{col.label}:</span>
                     <span>{col.element(data)}</span>
                 </div>
@@ -289,14 +289,14 @@ interface TableRowNormalProps<T> {
 
 const TableRowNormal = <T,>({ index, columns, data, colSpanColumns, columnData, action, renderRow }: TableRowNormalProps<T>) => {
     return (
-        <TableRow key={index}>
+        <TableRow key={`${columns}-${index}`}>
             {renderRow ?
-                <TableCell key={index} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">
+                <TableCell key={`${columns}-${index}`} colSpan={colSpanColumns ? columnData.length : 1} className="p-0">
                     {renderRow(data, index)}
                 </TableCell>
                 :
                 (columns && columns.map((column: IColumns<T>, index: number) => (
-                    <TableCell key={index}>
+                    <TableCell key={`${columns}-${index}`}>
                         {(!column.icon
                             ? <ColumnType column={column} data={data} action={action} />
                             : <ColumnIcon column={column} data={data} action={action} />
@@ -419,7 +419,7 @@ const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
             {actions.length == 1 ?
                 <div className="flex justify-center gap-2">
                     {actions.map((icon: IOptionActions<T>, index: number) => (
-                        <div key={index} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
+                        <div key={`${icon.label}-${index}`} onClick={() => action && action(icon.label, data)} className={`flex justify-center ${icon.className}`}>
                             <ToolTip tooltip={icon.label}>
                                 <div className="p-1 hover:bg-gray-300 rounded-md cursor-pointer">
                                     <icon.icon className={`h-4 w-4 ${icon.className}`} />
@@ -439,7 +439,7 @@ const ColumnIcon = <T,>({ column, data, action }: ColumnProps<T>) => {
 
                     <DropdownMenuContent align="end">
                         {actions.map((icon: IOptionActions<T>, index: number) => (
-                            <DropdownMenuItem key={index} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
+                            <DropdownMenuItem key={`${icon.label}-${index}`} onClick={() => action && action(icon.label, data)} className={`${icon.className}`}>
                                 <icon.icon className={`mr-2 h-4 w-4 ${icon.className}`} />
                                 <span className={`${icon.className}`}>{icon.label}</span>
                             </DropdownMenuItem>

@@ -67,7 +67,7 @@ export const InputSelect: FC<InputSelectProps> = ({ label, options, max, type, n
                     <SelectGroup>
                         <SelectLabel>{label}</SelectLabel>
                         {options.map((option: IOptions, index: number) => (
-                            <SelectItem key={index} value={option.value.toString()}>
+                            <SelectItem key={`${option.value}-${index}`} value={option.value.toString()}>
                                 {option.label}
                             </SelectItem>
                         ))}
