@@ -13,6 +13,7 @@ import { defaultValues, IUsersForm, usersColumns } from "./users.data"
 import { UsersForm } from "./UsersForm"
 import { BaseResponse } from "@/services/base.interface"
 import { userStore } from "@/store/userStore"
+import { notifyError } from "@/lib/error-feedback"
 // import { UsersForm } from "./UsersForm"
 
 
@@ -37,11 +38,15 @@ export const Users = () => {
     }, [])
 
     const getUsersStore = async () => {
-        if (!users || users.allUsers.length == 0) {
-            setLoading(true);
-            await getUsersApi();
+        try {
+            if (!users || users.allUsers.length == 0) {
+                await getUsersApi();
+            }
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los usuarios.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     const setUsersFilter = (usersFilter: IUsers[]) => {
@@ -63,9 +68,14 @@ export const Users = () => {
         }
     }
 
-    const deleteAction = () => {
-        deleteUser(Number(dataDialog.id))
-        setOpenDeleteDialog(false);
+    const deleteAction = async () => {
+        try {
+            await deleteUser(Number(dataDialog.id))
+            setOpenDeleteDialog(false);
+        } catch {
+            // El interceptor ya notificó el error; el diálogo de confirmación queda
+            // abierto para permitir el reintento.
+        }
     }
 
     const actionDialog = async (data: IUsersForm) => {
@@ -78,21 +88,25 @@ export const Users = () => {
             rolId: Number(data.rolId),
         }
 
-        let closeDialog = false;
-        if (edit) {
-            await putUsers(Number(dataDialog.id), parseData).then((res) => {
-                const parseResponse: BaseResponse = res as BaseResponse;
-                closeDialog = parseResponse.success;
-            })
-        } else {
-            await postUsers(parseData).then((res: BaseResponse) => {
-                closeDialog = res.success;
-            })
-        }
+        try {
+            let closeDialog = false;
+            if (edit) {
+                await putUsers(Number(dataDialog.id), parseData).then((res) => {
+                    const parseResponse: BaseResponse = res as BaseResponse;
+                    closeDialog = parseResponse.success;
+                })
+            } else {
+                await postUsers(parseData).then((res: BaseResponse) => {
+                    closeDialog = res.success;
+                })
+            }
 
-        if (closeDialog) {
-            setOpenDialog(false);
-            await getUsersApi();
+            if (closeDialog) {
+                setOpenDialog(false);
+                await getUsersApi();
+            }
+        } catch {
+            // El formulario se mantiene abierto si la escritura no se completó.
         }
     }
 

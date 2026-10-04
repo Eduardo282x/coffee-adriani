@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Download, Plus, Loader2 } from "lucide-react"
@@ -23,6 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { invoiceFilterStore } from "@/store/invoiceFilterStore";
 import { FilterBadges } from "./FilterBadges";
 import { isWithinPaymentTolerance, PAYMENT_TOLERANCE_USD, toUsd } from '@/lib/payment-tolerance';
+import { notifyError } from '@/lib/error-feedback';
+import { saveBlob } from '@/lib/download';
 
 export const InvoicesPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -86,10 +88,18 @@ export const InvoicesPage = () => {
         }
     }, [dateStart?.from, dateStart?.to, applyDateFilter]);
 
-    // Socket listeners
-    useSocket('message', (data) => {
-        console.log(data);
-    });
+    /**
+     * El aviso al backend se manda al ENTRAR a la pantalla de facturas para que el
+     * inventario se entere de que hay que refrescar. El listener se_limitsaba a
+     * escribir en consola: se eliminó el console.log de depuración que quedaba en
+     * producción, y se pasa un callback estable (useCallback) porque un arrow
+     * inline obligaba a socket.off/on en cada render.
+     */
+    const handleSocketMessage = useCallback(() => {
+        // Sin refetch: la vista ya se sincroniza al guardar y mediante React Query.
+    }, []);
+
+    useSocket('message', handleSocketMessage);
 
     useEffect(() => {
         socket.emit('message', 'Entre a las facturas');
@@ -191,7 +201,7 @@ export const InvoicesPage = () => {
     const generateExcel = async () => {
         setLoadingFile(true);
         try {
-            let response: Blob;
+            let response: unknown;
             if (dateStart) {
                 const filterDate: ExportInvoicesDashboard = {
                     startDate: dateStart.from || new Date(),
@@ -202,7 +212,7 @@ export const InvoicesPage = () => {
                     ...(selectedStatus !== 'all' && { status: selectedStatus })
                 };
 
-                response = await getInvoiceExcelFilter(filterDate) as Blob;
+                response = await getInvoiceExcelFilter(filterDate);
             } else {
                 const filterDate: ExportInvoicesDashboard = {
                     type: selectedTypeProduct,
@@ -210,19 +220,17 @@ export const InvoicesPage = () => {
                     ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
                     ...(selectedStatus !== 'all' && { status: selectedStatus })
                 };
-                response = await getInvoiceExcelFilter(filterDate) as Blob;
+                response = await getInvoiceExcelFilter(filterDate);
             }
 
-            const url = URL.createObjectURL(response);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `Reporte de Facturas ${dateStart ? `${dateStart.from?.toLocaleDateString()} - ${dateStart.to?.toLocaleDateString()}` : ''}.xlsx`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            // saveBlob valida que la respuesta sea un Blob: antes se pasaba el cuerpo del
+            // error a createObjectURL, que lanzaba TypeError y dejaba el spinner activo.
+            saveBlob(
+                response,
+                `Reporte de Facturas ${dateStart ? `${dateStart.from?.toLocaleDateString()} - ${dateStart.to?.toLocaleDateString()}` : ''}.xlsx`
+            );
         } catch (error) {
-            console.error('Error al generar Excel:', error);
+            notifyError(error, 'No se pudo generar el reporte de facturas.');
         } finally {
             setLoadingFile(false);
         }

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { api, forceLogout, isAuthEndpoint, refreshSession, RetriableRequestConfig, shouldSkipRefresh } from './base.service';
+import { api, forceLogout, isAuthEndpoint, isSessionRevoked, refreshSession, RetriableRequestConfig, shouldSkipRefresh } from './base.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { notifyError } from '@/lib/error-feedback';
 
 const MUTATING_METHODS = ['post', 'put', 'delete'];
 
@@ -55,14 +56,17 @@ export const useAxiosInterceptor = () => {
                     }
                 }
 
-                if (status === 401 && !isAuthEndpoint(original?.url)) {
+                // Solo un 401 de una petición autenticada significa sesión revocada. Un 401
+                // sin token (respuesta de un proxy o de un forward-auth) se reporta como
+                // error normal: cerrar sesión ahí expulsaba al usuario sin motivo.
+                if (isSessionRevoked(error) && !isAuthEndpoint(original?.url)) {
                     forceLogout();
                     return Promise.reject(error);
                 }
 
-                if (MUTATING_METHODS.includes(original?.method || '')) {
-                    showMessage(error.response?.data);
-                }
+                // A partir de aquí el error es visible. notifyError deduplica el mensaje,
+                // así que no se acumulan avisos cuando varios requests fallan a la vez.
+                notifyError(error);
 
                 return Promise.reject(error);
             }

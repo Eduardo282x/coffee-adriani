@@ -19,13 +19,18 @@ export const inventoryStore = create<InventoryState>((set) => ({
     setInventory: (inventory: IInventory[]) => set(() => ({ inventory })),
     getInventoryApi: async () => {
         set(() => ({ loading: true }))
-        const response: IInventory[] = await getInventory();
-        if (response && response.length > 0) {
-            set(() => ({
-                inventory: response,
-                inventoryHistory: []
-            }))
+        // finally (y no un set suelto al final): si la petición falla, el loading se
+        // restauraba solo en el camino feliz y quedaba en true para siempre.
+        try {
+            const response: IInventory[] = await getInventory();
+            if (response && response.length > 0) {
+                set(() => ({
+                    inventory: response,
+                    inventoryHistory: []
+                }))
+            }
+        } finally {
+            set(() => ({ loading: false }))
         }
-        set(() => ({ loading: false }))
     }
 }))

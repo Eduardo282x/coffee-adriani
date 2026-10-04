@@ -19,13 +19,18 @@ export const accountStore = create<PaymentState>((set) => ({
     setLoading: (loading: boolean) => { (set(() => ({ loading }))) },
     getAccountsApi: async () => {
         set(() => ({ loading: true }))
-        const response: AccountPay[] = await getPaymentAccounts();
-        if (response && response.length > 0) {
-            set(() => ({
-                accounts: { accounts: response, allAccounts: response },
-            }))
+// finally: un fallo dejaba loading en true y la pantalla
+            // mostrando el spinner de forma permanente.
+        try {
+            const response: AccountPay[] = await getPaymentAccounts();
+            if (response && response.length > 0) {
+                set(() => ({
+                    accounts: { accounts: response, allAccounts: response },
+                }))
+            }
+        } finally {
+            set(() => ({ loading: false }))
         }
-        set(() => ({ loading: false }))
     },
     deleteAccount: async (id: number) => {
         await deletePaymentAccounts(id);

@@ -11,6 +11,7 @@ import { AccountForm, accountsColumns, defaultValues } from './accounts.data';
 import { AccountsForm } from './AccountsForm';
 import { BaseResponse } from '@/services/base.interface';
 import { accountStore } from '@/store/paymentStore';
+import { notifyError } from '@/lib/error-feedback';
 
 export const Accounts = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -32,16 +33,25 @@ export const Accounts = () => {
     }, [])
 
     const getAccountStore = async () => {
-        if (!accounts || accounts.allAccounts.length == 0) {
-            setLoading(true);
-            await getAccountsApi();
+        try {
+            if (!accounts || accounts.allAccounts.length == 0) {
+                await getAccountsApi();
+            }
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar las cuentas de pago.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     const deleteAction = async () => {
-        await deleteAccount(Number(dataDialog?.id))
-        setOpenDeleteDialog(false);
+        try {
+            await deleteAccount(Number(dataDialog?.id))
+            setOpenDeleteDialog(false);
+        } catch {
+            // El interceptor ya notificó el fallo: el diálogo de confirmación se mantiene
+            // abierto para que el usuario pueda reintentar sin volver a abrirlo.
+        }
     }
 
     const setAccountsFilters = (data: AccountPay[]) => {
@@ -67,21 +77,25 @@ export const Accounts = () => {
     }
 
     const actionDialog = async (data: AccountForm) => {
-        let closeDialog = false;
-        if (edit) {
-            await putPaymentAccounts(Number(dataDialog.id), data).then((res) => {
-                const parseResponse: BaseResponse = res as BaseResponse;
-                closeDialog = parseResponse.success;
-            })
-        } else {
-            await postPaymentAccounts(data).then((res: BaseResponse) => {
-                closeDialog = res.success;
-            })
-        }
+        try {
+            let closeDialog = false;
+            if (edit) {
+                await putPaymentAccounts(Number(dataDialog.id), data).then((res) => {
+                    const parseResponse: BaseResponse = res as BaseResponse;
+                    closeDialog = parseResponse.success;
+                })
+            } else {
+                await postPaymentAccounts(data).then((res: BaseResponse) => {
+                    closeDialog = res.success;
+                })
+            }
 
-        if (closeDialog) {
-            setOpenDialog(false);
-            await getAccountsApi();
+            if (closeDialog) {
+                setOpenDialog(false);
+                await getAccountsApi();
+            }
+        } catch {
+            // El formulario queda abierto: solo se cierra si la escritura se completó.
         }
     }
 

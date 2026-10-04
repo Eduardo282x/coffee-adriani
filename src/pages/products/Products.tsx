@@ -13,6 +13,7 @@ import { IColumns } from "@/components/table/table.interface"
 import { DolarComponents } from "@/components/dolar/DolarComponents"
 import { DropdownColumnFilter } from "@/components/table/DropdownColumnFilter"
 import { productStore } from "@/store/productStore"
+import { notifyError } from "@/lib/error-feedback"
 
 export const Products = () => {
     // const [products, setProducts] = useState<IProducts[]>([]);
@@ -40,11 +41,15 @@ export const Products = () => {
     }, [])
 
     const getProductsStore = async () => {
-        if (!products || products.products.length == 0) {
-            setLoading(true);
-            await getProductsApi();
+        try {
+            if (!products || products.products.length == 0) {
+                await getProductsApi();
+            }
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los productos.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     useEffect(() => {
@@ -83,19 +88,27 @@ export const Products = () => {
     }
 
     const deleteAction = async () => {
-        await deleteProducts(Number(dataDialog.id))
-        setOpenDeleteDialog(false);
-        // await getProductsApi();
+        try {
+            await deleteProducts(Number(dataDialog.id))
+            setOpenDeleteDialog(false);
+            // await getProductsApi();
+        } catch {
+            // El interceptor ya notificó el error; el diálogo permanece abierto.
+        }
     }
 
     const actionDialog = async (data: IProducts) => {
-        if (edit) {
-            await putProduct(Number(dataDialog.id), data)
-        } else {
-            await postProduct(data)
+        try {
+            if (edit) {
+                await putProduct(Number(dataDialog.id), data)
+            } else {
+                await postProduct(data)
+            }
+            setOpenDialog(false);
+            await getProductsApi();
+        } catch {
+            // El formulario permanece abierto si la escritura falló.
         }
-        setOpenDialog(false);
-        await getProductsApi();
     }
 
     useEffect(() => {

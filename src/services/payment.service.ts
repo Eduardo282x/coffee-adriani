@@ -22,132 +22,80 @@ export interface FilterPayments {
 }
 
 export const getPayment = async () => {
-    try {
-        return await getDataApi(routePayment);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(routePayment);
 }
 
 export const getPaymentsPaginated = async (filters: FilterPaymentsPaginated) => {
-    try {
-        // Filtrar valores undefined/null antes de crear query params
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filters).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    // Filtrar valores undefined/null antes de crear query params
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
-        return await getDataApi(`${routePayment}/paginated?${query}`);
-    } catch (err) {
-        return err
-    }
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
+    return await getDataApi(`${routePayment}/paginated?${query}`);
 }
 export const getPaymentStatistics = async (dateRange: FilterPayments) => {
-    try {
-        // Filtrar valores undefined/null antes de crear query params
-        const cleanFilters = Object.fromEntries(
-            Object.entries(dateRange).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    // Filtrar valores undefined/null antes de crear query params
+    const cleanFilters = Object.fromEntries(
+        Object.entries(dateRange).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        const queryString = query ? `?${query}` : '';
-        return await getDataApi(`${routePayment}/statistics${queryString}`);
-    } catch (err) {
-        return err
-    }
+    const queryString = query ? `?${query}` : '';
+    return await getDataApi(`${routePayment}/statistics${queryString}`);
 }
 
 export const getPaymentDetails = async (paymentId: number) => {
-    try {
-        return await getDataApi(`${routePayment}/details/${paymentId}`);
-    } catch (err) {
-        return err;
-    }
+    return await getDataApi(`${routePayment}/details/${paymentId}`);
 };
 
 export const getPaymentDescriptions = async () => {
-    try {
-        return await getDataApi(`${routePayment}/descriptions`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routePayment}/descriptions`);
 }
 export const getPaymentAccounts = async () => {
-    try {
-        return await getDataApi(`${routePayment}/accounts`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routePayment}/accounts`);
 }
 
 export const getPaymentFilter = async (data: DateRangeFilter) => {
-    try {
-        return await postDataApi(`${routePayment}/filter`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routePayment}/filter`, data);
 }
 
 export const getPaymentMethod = async () => {
-    try {
-        return await getDataApi(`${routePayment}/methods`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routePayment}/methods`);
 }
 export const getBanks = async () => {
-    try {
-        return await getDataApi(`${routePayment}/banks`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routePayment}/banks`);
 }
 
 export const postPaymentAccounts = async (data: AccountForm) => {
-    try {
-        return await postDataApi(`${routePayment}/accounts`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routePayment}/accounts`, data);
 }
 
 export const putPaymentAccounts = async (id: number, data: AccountForm) => {
-    try {
-        return await putDataApi(`${routePayment}/accounts/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routePayment}/accounts/${id}`, data);
 }
 
 export const deletePaymentAccounts = async (id: number) => {
-    try {
-        return await deleteDataApi(`${routePayment}/accounts/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routePayment}/accounts/${id}`);
 }
 
 
 export const registerPayment = async (data: IPaymentForm) => {
-    try {
-        return await postDataApi(routePayment, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routePayment, data);
 }
 
 export const postAssociatePayment = async (data: IPayInvoiceForm): Promise<PaymentMutationResponse> => {
-    // Estricto: si el backend rechaza la asociación, el error se propaga para que el
-    // diálogo NO se cierre y el usuario no pierda lo que ya seleccionó.
+    // Estricto: si el backend rechaza la asociaciÃ³n, el error se propaga para que el
+    // diÃ¡logo NO se cierre y el usuario no pierda lo que ya seleccionÃ³.
     return await postDataApiStrict<PaymentMutationResponse>(`${routePayment}/associate`, data);
 }
 
@@ -156,33 +104,17 @@ export const putDisassociatePayment = async (data: PayDisassociateBody): Promise
 }
 
 export const updatePayment = async (id: number, data: IPaymentForm) => {
-    try {
-        return await putDataApi(`${routePayment}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routePayment}/${id}`, data);
 }
 
 export const putConfirmPayment = async (id: number) => {
-    try {
-        return await putDataApi(`${routePayment}/zelle/${id}`, {});
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routePayment}/zelle/${id}`, {});
 }
 
 export const deletePayment = async (id: number) => {
-    try {
-        return await deleteDataApi(`${routePayment}/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routePayment}/${id}`);
 }
 
 export const getPaymentItemsAnalytics = async (data: ExportDashboard) => {
-    try {
-        return await postDataApi(`${routePayment}/analysis`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routePayment}/analysis`, data);
 }

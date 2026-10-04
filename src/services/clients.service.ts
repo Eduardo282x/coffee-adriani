@@ -5,80 +5,40 @@ const routeClients = '/clients';
 const routeBlocks = `${routeClients}/blocks`;
 
 export const getClients = async () => {
-    try {
-        return await getDataApi(routeClients);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(routeClients);
 }
 export const getClientsExcel = async () => {
-    try {
-        return await getDataFileApi(`${routeClients}/excel`);
-    } catch (err) {
-        return err
-    }
+    return await getDataFileApi(`${routeClients}/excel`);
 }
 
 export const postClients = async (data: BodyClients) => {
-    try {
-        return await postDataApi(routeClients, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeClients, data);
 }
 
 export const putClients = async (id: number, data: BodyClients) => {
-    try {
-        return await putDataApi(`${routeClients}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeClients}/${id}`, data);
 }
 
 export const deleteClients = async (id: number,) => {
-    try {
-        return await deleteDataApi(`${routeClients}/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeClients}/${id}`);
 }
 
 export const getBlocks = async () => {
-    try {
-        return await getDataApi(routeBlocks);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(routeBlocks);
 }
 
 export const postBlocks = async (data: BodyBlock) => {
-    try {
-        return await postDataApi(routeBlocks, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeBlocks, data);
 }
 
 export const putBlocks = async (id: number, data: BodyBlock) => {
-    try {
-        return await putDataApi(`${routeBlocks}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeBlocks}/${id}`, data);
 }
 
 export const deleteBlocks = async (id: number,) => {
-    try {
-        return await deleteDataApi(`${routeBlocks}/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeBlocks}/${id}`);
 }
 
 export const generateReportPDF = async (data: BodyReport) => {
-    try {
-        return await postDataFileApi(`${routeClients}/report`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataFileApi(`${routeClients}/report`, data);
 }

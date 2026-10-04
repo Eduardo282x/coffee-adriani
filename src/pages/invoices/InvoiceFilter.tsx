@@ -13,6 +13,7 @@ import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 import { getProductType } from "@/services/products.service"
 import { ProductType } from "@/interfaces/product.interface"
 import { invoiceFilterStore } from "@/store/invoiceFilterStore"
+import { notifyError } from "@/lib/error-feedback"
 // useOptimizedInvoices removed to avoid creating a separate hook instance here
 
 interface IInvoiceFilter {
@@ -101,13 +102,21 @@ const FiltersGroups = ({
 
     const getBlockStoreApi = async () => {
         if (!blocks || blocks.allBlocks.length == 0) {
-            await getBlocksApi();
+            try {
+                await getBlocksApi();
+            } catch (error) {
+                notifyError(error, 'No se pudieron cargar las zonas.');
+            }
         }
     }
 
     const getProductsTypesApi = async () => {
-        const response = await getProductType();
-        setTypes(response);
+        try {
+            const response = await getProductType();
+            setTypes(response);
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los tipos de producto.');
+        }
     }
 
     useEffect(() => {

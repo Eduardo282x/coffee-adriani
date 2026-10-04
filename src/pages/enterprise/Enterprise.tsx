@@ -146,11 +146,15 @@ export const Enterprise = () => {
     };
 
     const handleDeletePayment = async () => {
-        if (entryPaymentSelected) {
+        if (!entryPaymentSelected) return;
+
+        try {
             await deletePayment(entryPaymentSelected.payment.id);
+            setOpenDeletePaymentDialog(false);
+            setEntryPaymentSelected(null);
+        } catch {
+            // El interceptor ya notificó el error; el diálogo queda abierto.
         }
-        setOpenDeletePaymentDialog(false);
-        setEntryPaymentSelected(null);
     };
 
     const handlePaymentSubmit = async (data: EntryPaymentFormType) => {

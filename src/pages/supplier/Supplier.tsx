@@ -56,22 +56,30 @@ export const Supplier = () => {
     };
 
     const actionDialog = async (formData: { name: string; rif: string; phone: string; address: string; rubro: string, email: string }) => {
-        if (edit && supplierSelected) {
-            await updateSupplier({ id: supplierSelected.id, data: formData });
-        } else {
-            await createSupplier(formData);
+        try {
+            if (edit && supplierSelected) {
+                await updateSupplier({ id: supplierSelected.id, data: formData });
+            } else {
+                await createSupplier(formData);
+            }
+            setOpenDialog(false);
+            setSupplierSelected(null);
+            await refetch();
+        } catch {
+            // El formulario queda abierto si la escritura no se completó.
         }
-        setOpenDialog(false);
-        setSupplierSelected(null);
-        await refetch();
     };
 
     const deleteAction = async () => {
-        if (supplierSelected) {
+        if (!supplierSelected) return;
+
+        try {
             await deleteSupplier(supplierSelected.id);
             setOpenDeleteDialog(false);
             setSupplierSelected(null);
             await refetch();
+        } catch {
+            // El interceptor ya notificó el error; el diálogo de confirmación queda abierto.
         }
     };
 

@@ -21,6 +21,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { RiFileExcel2Line } from "react-icons/ri"
 import { getProductType } from "@/services/products.service"
 import { ProductType } from "@/interfaces/product.interface"
+import { notifyError } from "@/lib/error-feedback"
+import { saveBlob } from "@/lib/download"
 
 export const Clients = () => {
     const [showBlocks, setShowBlocks] = useState<boolean>(false);
@@ -56,12 +58,16 @@ export const Clients = () => {
     }, [])
 
     const getClientDataStore = async () => {
-        if (!clients || !blocks || clients.allClients.length == 0 || blocks.allBlocks.length == 0) {
-            setLoading(true);
-            await getBlocksApi();
-            await getClientsApi();
+        try {
+            if (!clients || !blocks || clients.allClients.length == 0 || blocks.allBlocks.length == 0) {
+                await getBlocksApi();
+                await getClientsApi();
+            }
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los clientes.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     const handleChangeBlock = (option: string) => {
@@ -118,12 +124,16 @@ export const Clients = () => {
     }
 
     const deleteAction = async () => {
-        if (showBlocks) {
-            await deleteBlock(Number(dataDialogBlock?.id))
-            setOpenDeleteDialogBlock(false);
-        } else {
-            await deleteClient(Number(dataDialog.id))
-            setOpenDeleteDialog(false);
+        try {
+            if (showBlocks) {
+                await deleteBlock(Number(dataDialogBlock?.id))
+                setOpenDeleteDialogBlock(false);
+            } else {
+                await deleteClient(Number(dataDialog.id))
+                setOpenDeleteDialog(false);
+            }
+        } catch {
+            // El interceptor ya notificó el error; el diálogo de confirmación queda abierto.
         }
     }
 
@@ -143,22 +153,25 @@ export const Clients = () => {
             parseData.orderDirection = data.orderDirection
         }
 
-        const response = await generateReportPDF(parseData) as Blob;
-        const url = URL.createObjectURL(response);
-        const link = window.document.createElement("a");
-        link.href = url;
-        link.download = `Reporte de Clientes - ${formatDate(new Date())}.pdf`;
-        window.document.body.appendChild(link);
-        link.click();
-        window.document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        setOpenDialogReport(false);
-        setLoading(false);
+        try {
+            const response = await generateReportPDF(parseData);
+            saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.pdf`);
+            setOpenDialogReport(false);
+        } catch (error) {
+            notifyError(error, 'No se pudo generar el reporte.');
+        } finally {
+            // Sin este finally el fallo dejaba el spinner girando indefinidamente.
+            setLoading(false);
+        }
     }
 
     const actionDialogBlock = async (data: BodyBlock) => {
-        await manipulateBlock(data, edit, Number(dataDialogBlock?.id))
-        setOpenDialogBlock(false);
+        try {
+            await manipulateBlock(data, edit, Number(dataDialogBlock?.id))
+            setOpenDialogBlock(false);
+        } catch {
+            // El formulario queda abierto si la escritura falló.
+        }
     }
 
     const actionDialog = async (data: IClientsForm) => {
@@ -167,13 +180,18 @@ export const Clients = () => {
             blockId: Number(data.blockId)
         }
 
-        if (edit) {
-            await putClients(Number(dataDialog.id), parseData)
-        } else {
-            await postClients(parseData)
+        try {
+            if (edit) {
+                await putClients(Number(dataDialog.id), parseData)
+            } else {
+                await postClients(parseData)
+            }
+            setOpenDialog(false);
+            await getClientsApi();
+        } catch {
+            // El formulario queda abierto si la escritura falló: antes se cerraba
+            // siempre, y el usuario creía que el cliente se había guardado.
         }
-        setOpenDialog(false);
-        await getClientsApi();
     }
 
     useEffect(() => {
@@ -188,15 +206,12 @@ export const Clients = () => {
     }
 
     const exportExcel = async () => {
-        const response = await getClientsExcel() as Blob;
-        const url = URL.createObjectURL(response);
-        const link = window.document.createElement("a");
-        link.href = url;
-        link.download = `Reporte de Clientes - ${formatDate(new Date())}.xlsx`;
-        window.document.body.appendChild(link);
-        link.click();
-        window.document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        try {
+            const response = await getClientsExcel();
+            saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.xlsx`);
+        } catch (error) {
+            notifyError(error, 'No se pudo exportar el archivo.');
+        }
     }
 
     return (

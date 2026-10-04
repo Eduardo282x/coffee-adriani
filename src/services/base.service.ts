@@ -6,9 +6,18 @@ import { disconnectSocket } from './socket.io';
 
 const baseURL = `${import.meta.env.VITE_BASE_URL_API}/api`;
 
-export const api = axios.create({ baseURL });
+/**
+ * Sin timeout, una petición que se queda colgada (gateway sin respuesta, socket
+ * abierto del otro lado) dejaba el spinner de la vista girando indefinidamente.
+ */
+const REQUEST_TIMEOUT_MS = 30_000;
 
-export const authApi = axios.create({ baseURL });
+/** Exportaciones Excel/PDF y snapshots: el backend puede tardar bastante. */
+export const EXPORT_TIMEOUT_MS = 180_000;
+
+export const api = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS });
+
+export const authApi = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS });
 
 export const AUTH_ENDPOINTS = [
     '/auth',
@@ -116,103 +125,105 @@ api.interceptors.request.use(
     }
 );
 
-export const getDataApi = (endpoint: string) => {
-    return api.get(endpoint).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+/**
+ * Un 401 solo significa "sesión revocada" si la petición iba autenticada. Un 401
+ * sin token enviado es casi siempre una respuesta de la capa de infraestructura
+ * (un forward-auth o un proxy delante de la app). Antes, ese caso cerraba la
+ * sesión y expulsaba al usuario a /login, perdiendo todo su trabajo.
+ */
+export const isSessionRevoked = (error: AxiosError<unknown>): boolean => {
+    if (error.response?.status !== 401) return false;
+    const config = error.config as RetriableRequestConfig | undefined;
+    return Boolean(config?.headers?.Authorization);
+};
+
+// -----------------------------------------------------------------------------
+// Helpers de API.
+//
+// Antes estos helpers envolvían la llamada en `.catch(err => err.response?.data)`,
+// de modo que un 502, un timeout o una caída de red RESOLVÍAN con `undefined` en
+// lugar de rechazar. Las vistas interpretaban ese `undefined` como "no hay datos"
+// o como éxito, cerrando diálogos tras operaciones que nunca ocurrieron.
+//
+// Ahora rechazan como hace axios. Cada vista decide qué mostrar; el toast global
+// de error vive en error-feedback.ts (con deduplicación) para que nunca se
+// acumulen avisos duplicados.
+// -----------------------------------------------------------------------------
+
+export const getDataApi = async (endpoint: string) => {
+    const response = await api.get(endpoint);
+    return response.data;
 }
 
-export const getDataFileApi = (endpoint: string) => {
-    return api.get(endpoint, {
+export const getDataFileApi = async (endpoint: string): Promise<Blob> => {
+    const response = await api.get(endpoint, {
         responseType: 'blob',
-    },).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+        timeout: EXPORT_TIMEOUT_MS,
+    });
+    return response.data;
 }
 
-export const postDataFileGetApi = async (endpoint: string, data: any) => {
-    return await api.post(endpoint, data, {
-        responseType: 'blob'
-    })
-        .catch((err) => {
-            return err.response?.data;
-        })
+export const postDataFileGetApi = async (endpoint: string, data: any): Promise<Blob> => {
+    const response = await api.post(endpoint, data, {
+        responseType: 'blob',
+        timeout: EXPORT_TIMEOUT_MS,
+    });
+    return response.data;
 }
 
 export const postDataApi = async (endpoint: string, data: any): Promise<BaseResponseLogin | BaseResponse | any> => {
-    return await api.post(endpoint, data).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+    const response = await api.post(endpoint, data);
+    return response.data;
 }
 
 export const postFilesDataApi = async (endpoint: string, formData: FormData): Promise<BaseResponseLogin | BaseResponse> => {
-    return await api.put(endpoint, formData, {
+    const response = await api.put(endpoint, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
-    }).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+    });
+    return response.data;
 }
-export const postDataFileApi = async (endpoint: string, data: any): Promise<BaseResponseLogin | BaseResponse> => {
-    return await api.post(endpoint, data, { responseType: 'blob' }).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+
+export const postDataFileApi = async (endpoint: string, data: any): Promise<Blob> => {
+    const response = await api.post(endpoint, data, {
+        responseType: 'blob',
+        timeout: EXPORT_TIMEOUT_MS,
+    });
+    return response.data;
 }
 
 export const putDataApi = async (endpoint: string, data: any): Promise<BaseResponse> => {
-    return await api.put(endpoint, data).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+    const response = await api.put(endpoint, data);
+    return response.data;
 }
 
 export const deleteDataApi = async (endpoint: string): Promise<BaseResponse> => {
-    return await api.delete(endpoint).then((response) => {
-        return response.data;
-    }).catch(err => {
-        return err.response?.data;
-    })
+    const response = await api.delete(endpoint);
+    return response.data;
 }
 
-// Helpers estrictos: a diferencia de los anteriores, rechazan la promesa en lugar de devolver el cuerpo
-// del error. Se usan en los flujos que necesitan ramificar según el resultado (inventario, asociación de
-// pagos, autenticación) porque los diálogos no deben cerrarse como si la operación hubiera sido exitosa.
-
-const rejectWith = async <T>(promise: Promise<T>): Promise<T> => {
-    return promise.catch((error) => {
-        return Promise.reject(error);
-    });
-}
+// -----------------------------------------------------------------------------
+// Helpers genéricos: se conservan para los servicios que ya tipan su respuesta.
+// -----------------------------------------------------------------------------
 
 export const getDataApiStrict = async <T>(endpoint: string): Promise<T> => {
-    const response = await rejectWith(api.get<T>(endpoint));
+    const response = await api.get<T>(endpoint);
     return response.data;
 }
 
 export const postDataApiStrict = async <T>(endpoint: string, data: any): Promise<T> => {
-    const response = await rejectWith(api.post<T>(endpoint, data));
+    const response = await api.post<T>(endpoint, data);
     return response.data;
 }
 
 export const putDataApiStrict = async <T>(endpoint: string, data: any): Promise<T> => {
-    const response = await rejectWith(api.put<T>(endpoint, data));
+    const response = await api.put<T>(endpoint, data);
     return response.data;
 }
 
 export const deleteDataApiStrict = async <T>(endpoint: string): Promise<T> => {
-    const response = await rejectWith(api.delete<T>(endpoint));
+    const response = await api.delete<T>(endpoint);
     return response.data;
 }
 

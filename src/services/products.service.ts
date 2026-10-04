@@ -4,81 +4,41 @@ import { deleteDataApi, getDataApi, postDataApi, putDataApi } from "./base.servi
 const routeProduct = '/products';
 
 export const getProduct = async () => {
-    try {
-        return await getDataApi(routeProduct);
-    } catch (err) {
-        return err;
-    }
+    return await getDataApi(routeProduct);
 }
 
 export const getProductType = async () => {
-    try {
-        return await getDataApi(`${routeProduct}/type`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeProduct}/type`);
 }
 
 export const getProductDolar = async () => {
-    try {
-        return await getDataApi(`${routeProduct}/dolar`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeProduct}/dolar`);
 }
 
 export const getProductDolarFilter = async (date: string) => {
-    try {
-        return await getDataApi(`${routeProduct}/dolar-filter?date=${date}`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeProduct}/dolar-filter?date=${date}`);
 }
 
 export const updateDolarAutomatic = async () => {
-    try {
-        return await postDataApi(`${routeProduct}/dolar/automatic`, {});
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeProduct}/dolar/automatic`, {});
 }
 
 export const updateDolar = async (data: DolarBody) => {
-    try {
-        return await postDataApi(`${routeProduct}/dolar`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeProduct}/dolar`, data);
 }
 
 export const getProductHistory= async () => {
-    try {
-        return await getDataApi(`${routeProduct}/history`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeProduct}/history`);
 }
 
 export const postProduct = async (data: BodyProduct) => {
-    try {
-        return await postDataApi(routeProduct, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeProduct, data);
 }
 
 export const putProduct = async (id: number, data: BodyProduct) => {
-    try {
-        return await putDataApi(`${routeProduct}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeProduct}/${id}`, data);
 }
 
 export const deleteProduct = async (id: number,) => {
-    try {
-        return await deleteDataApi(`${routeProduct}/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeProduct}/${id}`);
 }

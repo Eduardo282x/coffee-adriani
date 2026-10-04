@@ -9,6 +9,8 @@ import { clientCollectionColumns, collectionErrorsColumns, collectionHistoryColu
 import { CollectionExpandible } from "./CollectionExpandible"
 import { Button } from "@/components/ui/button"
 import { IColumns } from "@/components/table/table.interface.ts";
+import { notifyError } from "@/lib/error-feedback"
+import { saveBlob } from "@/lib/download"
 
 // import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DialogComponent } from "@/components/dialog/DialogComponent.tsx"
@@ -40,14 +42,19 @@ export const Collections = () => {
 
     const getCollectionsApi = async () => {
         setLoading(true);
-        const response: ICollection[] = await getCollection();
-        if (response) {
-            setCollections({
-                allCollections: response,
-                collections: response,
-            });
+        try {
+            const response: ICollection[] = await getCollection();
+            if (response) {
+                setCollections({
+                    allCollections: response,
+                    collections: response,
+                });
+            }
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los mensajes.');
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     const getMessageCollectionApi = async () => {
@@ -191,7 +198,12 @@ export const Collections = () => {
                 send: data.send
             }
 
-            await putCollection(data.id, updateData);
+            try {
+                await putCollection(data.id, updateData);
+            } catch {
+                // El interceptor ya notificó el error. La tabla queda como quedó
+                // en el render optimista: se sincroniza al recargar.
+            }
         }
 
     }
@@ -210,52 +222,68 @@ export const Collections = () => {
     }
 
     const onSubmitMessage = async (message: CollectionMessageBody) => {
-        if (messageSelected) {
-            await putMessageCollection(messageSelected.id, message);
-            const updatedMessage = {
-                ...messageSelected,
-                title: message.title,
-                content: message.content,
-                updatedAt: new Date(),
-            };
-            setMessages(prev => ({
-                ...prev,
-                messages: prev.messages.map(item => item.id == messageSelected.id ? updatedMessage : item),
-            }));
-        } else {
-            await postMessageCollection(message);
-            const newMessage = {
-                id: Math.floor(Math.random() * 1000) + 100, // Simula un ID único
-                title: message.title,
-                content: message.content,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-            setMessages(prev => ({
-                ...prev,
-                messages: [...prev.messages, newMessage],
-            }));
+        // El estado local se actualiza solo si la escritura se completó. Antes se
+        // hacía igual en ambos casos, así que un fallo de red dejaba el mensaje
+        // "guardado" en pantalla sin estar en el servidor.
+        try {
+            if (messageSelected) {
+                await putMessageCollection(messageSelected.id, message);
+                const updatedMessage = {
+                    ...messageSelected,
+                    title: message.title,
+                    content: message.content,
+                    updatedAt: new Date(),
+                };
+                setMessages(prev => ({
+                    ...prev,
+                    messages: prev.messages.map(item => item.id == messageSelected.id ? updatedMessage : item),
+                }));
+            } else {
+                await postMessageCollection(message);
+                const newMessage = {
+                    id: Math.floor(Math.random() * 1000) + 100, // Simula un ID único
+                    title: message.title,
+                    content: message.content,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
+                setMessages(prev => ({
+                    ...prev,
+                    messages: [...prev.messages, newMessage],
+                }));
+            }
+            setOpenDialog(false);
+            // await getMessageCollectionApi();
+        } catch {
+            // El formulario permanece abierto con los datos ya escritos.
         }
-        setOpenDialog(false);
-        // await getMessageCollectionApi();
     }
 
     const deleteMessageAPI = async (actionDelete: boolean) => {
         if (actionDelete && messageSelected) {
-            await deleteMessageCollection(messageSelected.id);
-            setMessages(prev => ({
-                ...prev,
-                messages: prev.messages.filter(item => item.id != messageSelected.id),
-            }));
-            // await getMessageCollectionApi();
+            try {
+                await deleteMessageCollection(messageSelected.id);
+                setMessages(prev => ({
+                    ...prev,
+                    messages: prev.messages.filter(item => item.id != messageSelected.id),
+                }));
+                // await getMessageCollectionApi();
+            } catch {
+                return;
+            }
         }
         setOpenDialogDeleteMessage(false);
     }
 
     const sendMessage = async () => {
         setLoading(true);
-        await postSendMessageCollection();
-        setLoading(false);
+        try {
+            await postSendMessageCollection();
+        } catch {
+            // El interceptor ya notificó el error.
+        } finally {
+            setLoading(false);
+        }
     }
 
     const toggleSendData = (send: boolean) => {
@@ -265,6 +293,16 @@ export const Collections = () => {
 
     const updateAllMessageClient = async (messageId: number) => {
         const findMessage = messages.allMessages.find(item => item.id == messageId) as Message;
+
+        // Se llama desde onClick sin await: el fallo se absorbe acá para no dejar
+        // una promesa rechazada sin manejar.
+        try {
+            await putAllMessageCollection(messageId);
+        } catch {
+            return;
+        }
+
+        // El estado local se actualiza solo si el servidor confirmó el cambio.
         setCollections(prev => ({
             ...prev,
             collections: prev.collections.map(item => ({
@@ -273,11 +311,15 @@ export const Collections = () => {
                 message: findMessage
             }))
         }))
-
-        await putAllMessageCollection(messageId);
     }
 
     const markCollections = async (mark: MarkBody) => {
+        try {
+            await putMarkCollection(mark);
+        } catch {
+            return;
+        }
+
         setCollections(prev => {
             return {
                 ...prev,
@@ -289,7 +331,6 @@ export const Collections = () => {
                 })
             }
         })
-        await putMarkCollection(mark);
     }
 
     useEffect(() => {
@@ -304,15 +345,12 @@ export const Collections = () => {
     }
 
     const exportExcelCollection = async () => {
-        const response = await getCollectionExcel() as Blob;
-        const url = URL.createObjectURL(response);
-        const link = window.document.createElement("a");
-        link.href = url;
-        link.download = `Cobranza.xlsx`;
-        window.document.body.appendChild(link);
-        link.click();
-        window.document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        try {
+            const response = await getCollectionExcel();
+            saveBlob(response, `Cobranza.xlsx`);
+        } catch (error) {
+            notifyError(error, 'No se pudo exportar la cobranza.');
+        }
     }
 
     const handleSendReminder = (colletion: ICollection) => {

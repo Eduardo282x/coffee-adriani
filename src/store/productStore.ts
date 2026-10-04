@@ -23,21 +23,25 @@ export const productStore = create<ProductState>((set) => ({
     setProducts: (products: GroupProducts) => set(() => ({ products })),
     getProductsApi: async () => {
         set(() => ({ loading: true }))
-        const response: IProducts[] = await getProduct();
-        const responseHistory: IProducts[] = await getProductHistory();
-        if (response && response.length > 0) {
-            set(() => ({
-                productOptions: response.map(pro => {
-                    return {
-                        label: `${pro.name} ${pro.presentation} - ${pro.priceUSD}$`,
-                        value: pro.id
-                    }
-                }),
-                products: { products: response, productsFilter: response },
-                productsHistory: responseHistory
-            }))
+        // finally: un fallo dejaba loading en true y el spinner girando para siempre.
+        try {
+            const response: IProducts[] = await getProduct();
+            const responseHistory: IProducts[] = await getProductHistory();
+            if (response && response.length > 0) {
+                set(() => ({
+                    productOptions: response.map(pro => {
+                        return {
+                            label: `${pro.name} ${pro.presentation} - ${pro.priceUSD}$`,
+                            value: pro.id
+                        }
+                    }),
+                    products: { products: response, productsFilter: response },
+                    productsHistory: responseHistory
+                }))
+            }
+        } finally {
+            set(() => ({ loading: false }))
         }
-        set(() => ({ loading: false }))
     },
     deleteProducts: async (id: number) => {
         await deleteProduct(id);

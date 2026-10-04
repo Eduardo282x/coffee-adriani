@@ -23,6 +23,8 @@ import { ProductType } from "@/interfaces/product.interface"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getProductType } from "@/services/products.service"
 import { useDashboard } from "@/hooks/dashboard.hook"
+import { notifyError } from "@/lib/error-feedback"
+import { saveBlob } from "@/lib/download"
 // import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io"
 
 
@@ -62,8 +64,12 @@ export const Dashboard = () => {
     }, [])
 
     const getProductsTypesApi = async () => {
-        const response = await getProductType();
-        setTypes(response);
+        try {
+            const response = await getProductType();
+            setTypes(response);
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los tipos de producto.');
+        }
     }
 
     const changeStatusInvoice = (status: string) => {
@@ -71,31 +77,21 @@ export const Dashboard = () => {
     }
 
     const exportData = async () => {
-        const response = await exportDashboard();
-        if (!response) return;
-
-        const url = URL.createObjectURL(response)
-        const link = window.document.createElement("a")
-        link.href = url
-        link.download = `Reporte de Facturas ${formatDate(new Date())}.xlsx`
-        window.document.body.appendChild(link)
-        link.click()
-        window.document.body.removeChild(link)
-        URL.revokeObjectURL(url);
+        try {
+            const response = await exportDashboard();
+            saveBlob(response, `Reporte de Facturas ${formatDate(new Date())}.xlsx`);
+        } catch (error) {
+            notifyError(error, 'No se pudo exportar el reporte.');
+        }
     }
 
     const downloadSnapshotFile = async (id: number, fileName: string) => {
-        const response = await downloadSnapshot(id);
-        if (!response) return;
-
-        const url = URL.createObjectURL(response)
-        const link = window.document.createElement("a")
-        link.href = url
-        link.download = fileName
-        window.document.body.appendChild(link)
-        link.click()
-        window.document.body.removeChild(link)
-        URL.revokeObjectURL(url);
+        try {
+            const response = await downloadSnapshot(id);
+            saveBlob(response, fileName);
+        } catch (error) {
+            notifyError(error, 'No se pudo descargar el archivo.');
+        }
     }
 
     const returnPercent = (part: number, total: number) => {

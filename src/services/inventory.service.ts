@@ -31,261 +31,165 @@ export interface InventoryLossFilter {
 }
 
 export const getInventory = async () => {
-    try {
-        return await getDataApi(routeInventory);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(routeInventory);
 }
 
 export const getInventoryHistory = async (filter: InventoryHistoryFilter) => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        return await getDataApi(`${routeInventory}/history?${query}`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInventory}/history?${query}`);
 }
 
 export const postInventory = async (data: BodyInventory) => {
-    try {
-        return await postDataApi(routeInventory, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeInventory, data);
 }
 
 export const putInventory = async (id: number, data: BodyInventorySimple) => {
-    try {
-        return await putDataApi(`${routeInventory}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInventory}/${id}`, data);
 }
 
 export const deleteInventory = async (id: number,) => {
-    try {
-        return await deleteDataApi(`${routeInventory}/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeInventory}/${id}`);
 }
 
 export const putInventoryHistory = async (data: BodyUpdateHistoryInventory) => {
-    try {
-        return await putDataApi(`${routeInventory}/history`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInventory}/history`, data);
 }
 
 // Inventory Entries
 export const getInventoryEntries = async (filter: InventoryHistoryFilter) => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        return await getDataApi(`${routeInventory}/entries?${query}`) as Promise<PaginatedEntryResponse>;
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInventory}/entries?${query}`) as Promise<PaginatedEntryResponse>;
 }
 
 export const getInventoryEntryById = async (id: number) => {
-    try {
-        return await getDataApi(`${routeInventory}/entries/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInventory}/entries/${id}`);
 }
 
 export const createInventoryEntry = async (data: CreateInventoryEntryForm) => {
-    try {
-        return await postDataApi(`${routeInventory}/entries`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeInventory}/entries`, data);
 }
 
 export const updateInventoryEntry = async (id: number, data: CreateInventoryEntryForm) => {
-    try {
-        return await putDataApi(`${routeInventory}/entries/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInventory}/entries/${id}`, data);
 }
 
 export const deleteInventoryEntry = async (id: number) => {
-    try {
-        return await deleteDataApi(`${routeInventory}/entries/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeInventory}/entries/${id}`);
 }
 
 // Enterprise Entries (solo movementType=IN)
 export const getEnterpriseEntries = async (filter: InventoryHistoryFilter) => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        return await getDataApi(`${routeInventory}/enterprise?${query}`) as Promise<PaginatedEntryResponse>;
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInventory}/enterprise?${query}`) as Promise<PaginatedEntryResponse>;
 }
 
 export const getEnterpriseEntryById = async (id: number) => {
-    try {
-        return await getDataApi(`${routeInventory}/enterprise/${id}`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInventory}/enterprise/${id}`);
 }
 
 export const getEntryStatistics = async (filter: Omit<InventoryHistoryFilter, 'page' | 'limit'>): Promise<EntryStatisticsResponse | null> => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        const queryString = query ? `?${query}` : '';
-        return await getDataApi(`${routeInventory}/entries/statistics${queryString}`) as Promise<EntryStatisticsResponse>;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+    const queryString = query ? `?${query}` : '';
+    return await getDataApi(`${routeInventory}/entries/statistics${queryString}`) as Promise<EntryStatisticsResponse>;
 }
 
 // Entry Payments
 const routeEntryPayments = '/entry-payments';
 
 export const getEntryPayments = async (entryId: number): Promise<EntryPaymentsResponse | null> => {
-    try {
-        return await getDataApi(`${routeEntryPayments}/entry/${entryId}`) as Promise<EntryPaymentsResponse>;
-    } catch (err) {
-        console.log(err);
-        return null
-    }
+    return await getDataApi(`${routeEntryPayments}/entry/${entryId}`) as Promise<EntryPaymentsResponse>;
 }
 
 export const createEntryPayment = async (data: EntryPaymentForm) => {
-    try {
-        return await postDataApi(routeEntryPayments, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeEntryPayments, data);
 }
 
 export const associateEntryPayment = async (data: { inventoryEntryId: number; paymentId: number; amount: number }) => {
-    try {
-        return await postDataApi(`${routeEntryPayments}/associate`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeEntryPayments}/associate`, data);
 }
 
 export const disassociateEntryPayment = async (data: { inventoryEntryId: number; paymentId: number }) => {
-    try {
-        return await putDataApi(`${routeEntryPayments}/disassociate`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeEntryPayments}/disassociate`, data);
 }
 
 export const updateEntryPayment = async (paymentId: number, data: EntryPaymentForm) => {
-    try {
-        return await putDataApi(`${routeEntryPayments}/${paymentId}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeEntryPayments}/${paymentId}`, data);
 }
 
 export const deleteEntryPayment = async (paymentId: number) => {
-    try {
-        return await deleteDataApi(`${routeEntryPayments}/${paymentId}`);
-    } catch (err) {
-        return err
-    }
+    return await deleteDataApi(`${routeEntryPayments}/${paymentId}`);
 }
 
 //Inventory Cuts
 
 export const getInventoryCut = async (filter: InventoryCutFilter): Promise<PaginatedCutResponse | null> => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        const queryString = query ? `?${query}` : '';
-        return await getDataApi(`${routeInventory}/cuts${queryString}`) as Promise<PaginatedCutResponse>;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+    const queryString = query ? `?${query}` : '';
+    return await getDataApi(`${routeInventory}/cuts${queryString}`) as Promise<PaginatedCutResponse>;
 }
 
 // Inventory Losses (merma)
 
 export const createInventoryLoss = async (data: BodyInventoryLoss) => {
-    try {
-        return await postDataApi(`${routeInventory}/losses`, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeInventory}/losses`, data);
 }
 
 export const getInventoryLosses = async (filter: InventoryLossFilter): Promise<PaginatedLossResponse | null> => {
-    try {
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filter).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filter).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        const queryString = query ? `?${query}` : '';
-        return await getDataApi(`${routeInventory}/losses${queryString}`) as Promise<PaginatedLossResponse>;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+    const queryString = query ? `?${query}` : '';
+    return await getDataApi(`${routeInventory}/losses${queryString}`) as Promise<PaginatedLossResponse>;
 }

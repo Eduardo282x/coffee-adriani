@@ -40,28 +40,13 @@ export const getSuppliersPaginated = async (filters: SupplierFilterPaginate): Pr
 }
 
 export const postSupplier = async (data: BodySupplier) => {
-    try {
-        return await postDataApi(routeSupplier, data);
-    } catch (err) {
-        return err;
-    }
+    return await postDataApi(routeSupplier, data);
 }
 
 export const putSupplier = async (id: number, data: BodySupplier) => {
-    try {
-        return await putDataApi(`${routeSupplier}/${id}`, data);
-    } catch (err) {
-        return err;
-    }
+    return await putDataApi(`${routeSupplier}/${id}`, data);
 }
 
 export const deleteSupplier = async (id: number): Promise<BaseResponse> => {
-    try {
-        return await deleteDataApi(`${routeSupplier}/${id}`) as BaseResponse;
-    } catch (err) {
-        return {
-            message: String(err),
-            success: false
-        };
-    }
+    return await deleteDataApi(`${routeSupplier}/${id}`) as BaseResponse;
 }

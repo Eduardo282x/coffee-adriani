@@ -5,11 +5,7 @@ import { BaseResponse } from "./base.interface";
 const routeInvoice = '/invoices';
 
 export const getInvoice = async () => {
-    try {
-        return await getDataApi(routeInvoice);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(routeInvoice);
 }
 
 export interface InvoiceFilterPaginate extends InvoiceDateRangeFilter {
@@ -26,151 +22,81 @@ interface InvoiceDateRangeFilter {
 }
 
 export const getInvoicesFilterPaginated = async (filtersInvoice: InvoiceFilterPaginate): Promise<InvoiceAPINew[] | BaseResponse> => {
-    try {
-        // Filtrar valores undefined/null antes de crear query params
-        const cleanFilters = Object.fromEntries(
-            Object.entries(filtersInvoice).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    // Filtrar valores undefined/null antes de crear query params
+    const cleanFilters = Object.fromEntries(
+        Object.entries(filtersInvoice).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        return await getDataApi(`${routeInvoice}/paginated?${query}`);
-    } catch (err) {
-        return {
-            message: String(err),
-            success: false
-        }
-    }
+    return await getDataApi(`${routeInvoice}/paginated?${query}`);
 }
 export const getInvoiceDetails = async (invoiceId: number) => {
-    try {
-        return await getDataApi(`${routeInvoice}/details/${invoiceId}`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInvoice}/details/${invoiceId}`);
 }
 export const getInvoiceStatistics = async (dateRange: InvoiceDateRangeFilter) => {
-    try {
-        // Filtrar valores undefined/null antes de crear query params
-        const cleanFilters = Object.fromEntries(
-            Object.entries(dateRange).filter(([, value]) =>
-                value !== undefined && value !== null && value !== ''
-            )
-        );
+    // Filtrar valores undefined/null antes de crear query params
+    const cleanFilters = Object.fromEntries(
+        Object.entries(dateRange).filter(([, value]) =>
+            value !== undefined && value !== null && value !== ''
+        )
+    );
 
-        const query = Object.keys(cleanFilters)
-            .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
-            .join('&');
+    const query = Object.keys(cleanFilters)
+        .map(key => `${key}=${encodeURIComponent(cleanFilters[key as keyof typeof cleanFilters])}`)
+        .join('&');
 
-        const queryString = query ? `?${query}` : '';
-        return await getDataApi(`${routeInvoice}/statistics${queryString}`);
-    } catch (err) {
-        return err
-    }
+    const queryString = query ? `?${query}` : '';
+    return await getDataApi(`${routeInvoice}/statistics${queryString}`);
 }
 export const getInvoiceUnordered = async () => {
-    try {
-        return await getDataApi(`${routeInvoice}/unordered`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInvoice}/unordered`);
 }
 
 export const getInvoiceExpired = async () => {
-    try {
-        return await getDataApi(`${routeInvoice}/expired`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInvoice}/expired`);
 }
 
 export const checkInvoicesPayment = async (invoiceId: number) => {
-    try {
-        return await postDataApi(`${routeInvoice}/check-invoice/${invoiceId}`, {});
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeInvoice}/check-invoice/${invoiceId}`, {});
 }
 
 export const getInvoiceFilter = async (filter: DateRangeFilter) => {
-    try {
-        return await postDataApi(`${routeInvoice}/filter`, filter);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(`${routeInvoice}/filter`, filter);
 }
 
 export const getInvoiceExcelFilter = async (filter: ExportInvoicesDashboard) => {
-    try {
-        return await postDataFileApi(`${routeInvoice}/export`, filter);
-    } catch (err) {
-        return err
-    }
+    return await postDataFileApi(`${routeInvoice}/export`, filter);
 }
 
 export const getInvoiceHistory = async () => {
-    try {
-        return await getDataApi(`${routeInvoice}/history`);
-    } catch (err) {
-        return err
-    }
+    return await getDataApi(`${routeInvoice}/history`);
 }
 
 export const postInvoice = async (data: IInvoiceForm) => {
-    try {
-        return await postDataApi(routeInvoice, data);
-    } catch (err) {
-        return err
-    }
+    return await postDataApi(routeInvoice, data);
 }
 
 export const putInvoice = async (id: number, data: IInvoiceForm) => {
-    try {
-        return await putDataApi(`${routeInvoice}/${id}`, data);
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInvoice}/${id}`, data);
 }
 export const putPayInvoice = async (id: number) => {
-    try {
-        return await putDataApi(`${routeInvoice}/pay/${id}`, {});
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInvoice}/pay/${id}`, {});
 }
 export const putLostInvoices = async (id: number) => {
-    try {
-        return await putDataApi(`${routeInvoice}/lost/${id}`, {});
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInvoice}/lost/${id}`, {});
 }
 export const putPendingInvoice = async (id: number) => {
-    try {
-        return await putDataApi(`${routeInvoice}/pending/${id}`, {});
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInvoice}/pending/${id}`, {});
 }
 export const putCleanInvoice = async (id: number) => {
-    try {
-        return await putDataApi(`${routeInvoice}/clean/${id}`, {});
-    } catch (err) {
-        return err
-    }
+    return await putDataApi(`${routeInvoice}/clean/${id}`, {});
 }
 
 export const deleteInvoice = async (id: number): Promise<BaseResponse> => {
-    try {
-        return await deleteDataApi(`${routeInvoice}/${id}`) as BaseResponse;
-    } catch (err: unknown) {
-        return {
-            message: String(err),
-            success: false
-        }
-    }
+    return await deleteDataApi(`${routeInvoice}/${id}`) as BaseResponse;
 }

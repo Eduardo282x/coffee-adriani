@@ -19,6 +19,7 @@ import { DetailsInvoices, InvoiceInvoice } from "@/interfaces/invoice.interface"
 import { clientStore } from "@/store/clientStore";
 import { Trash2 } from "lucide-react";
 import { formatOnlyNumberWithDots } from "@/hooks/formaters";
+import { notifyError } from "@/lib/error-feedback";
 
 interface InvoiceFormProps extends FromProps {
     inventory: GroupInventoryDate
@@ -87,7 +88,11 @@ export const InvoiceForm: FC<InvoiceFormProps> = ({ onSubmit, data, inventory })
 
     const getClientStoreApi = async () => {
         if (!clients || clients.allClients.length == 0) {
-            await getClientsApi();
+            try {
+                await getClientsApi();
+            } catch (error) {
+                notifyError(error, 'No se pudieron cargar los clientes.');
+            }
         }
     }
 

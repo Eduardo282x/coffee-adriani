@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { inventoryColumnDetailHistory, inventoryColumns, inventoryColumnsHistory, inventoryLossColumns } from "./inventory.data";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TableComponent } from "@/components/table/TableComponent";
@@ -71,6 +71,17 @@ export const Inventory = () => {
         handleTypeMovement,
     } = useEnterpriseEntries()
 
+    // Agrupa los eventos del WebSocket en una sola ventana de refresco.
+    const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (refetchTimer.current) {
+                clearTimeout(refetchTimer.current);
+            }
+        };
+    }, []);
+
     const {
         losses,
         isLoadingLosses,
@@ -136,27 +147,39 @@ export const Inventory = () => {
     }
 
     const actionDialog = async (data: BodyInventory) => {
-        await postInventory(data)
-        setOpenDialog(false);
-        await refetchInventory();
-        await refetchInventoryHistory();
+        try {
+            await postInventory(data)
+            setOpenDialog(false);
+            await refetchInventory();
+            await refetchInventoryHistory();
+        } catch {
+            // El formulario queda abierto si la escritura no se completó.
+        }
     }
 
     const actionDialogUpdate = async (data: BodyInventorySimple) => {
-        if (inventorySelected) {
+        if (!inventorySelected) return;
+
+        try {
             await putInventory(inventorySelected.id, data);
+            setOpenDialogUpdate(false);
+            await refetchInventory();
+            await refetchInventoryHistory();
+        } catch {
+            // El formulario queda abierto si la escritura no se completó.
         }
-        setOpenDialogUpdate(false);
-        await refetchInventory();
-        await refetchInventoryHistory();
     }
 
     const actionDialogLoss = async (data: BodyInventoryLoss) => {
-        await createInventoryLoss(data);
-        setOpenDialogLoss(false);
-        await refetchInventory();
-        await refetchInventoryHistory();
-        await refetchLosses();
+        try {
+            await createInventoryLoss(data);
+            setOpenDialogLoss(false);
+            await refetchInventory();
+            await refetchInventoryHistory();
+            await refetchLosses();
+        } catch {
+            // El formulario queda abierto si la escritura no se completó.
+        }
     }
 
     const changeTypeProduct = (type: string) => {
@@ -203,11 +226,30 @@ export const Inventory = () => {
         console.log('Edit entry:', data);
     }
 
-    const handleSocketMessage = useCallback(async (data: unknown) => {
-        console.log(data);
-        await refetchInventory();
-        await refetchInventoryHistory();
-        await refetchLosses();
+    /**
+     * Refresco por evento en vivo.
+     *
+     * Antes esto se ejecutaba en cada mensaje del canal "message", lo que disparaba
+     * tres peticiones por evento. Como Inventario y Facturas escuchan el mismo canal y
+     * varias pestañas abiertas refinician a la vez, un solo registro hacia un
+     * thundering herd de GETs. Se agrupan los eventos en una ventana de 400 ms y se
+     * evita refetchear si la pestaña está oculta: React Query refresca solo al volver.
+     */
+    const handleSocketMessage = useCallback(() => {
+        if (typeof document !== 'undefined' && document.hidden) {
+            return;
+        }
+
+        if (refetchTimer.current) {
+            clearTimeout(refetchTimer.current);
+        }
+
+        refetchTimer.current = setTimeout(() => {
+            refetchTimer.current = null;
+            void refetchInventory();
+            void refetchInventoryHistory();
+            void refetchLosses();
+        }, 400);
     }, [refetchInventory, refetchInventoryHistory, refetchLosses]);
 
     useSocket('message', handleSocketMessage);
