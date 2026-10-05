@@ -4,6 +4,8 @@ import { BaseResponseLogin, BaseResponse } from './base.interface';
 import { getAccessToken, getRefreshToken, isAccessTokenExpiring, saveSession, clearSession } from './token.store';
 import { disconnectSocket, reconnectSocket } from './socket.io';
 
+const RETRYABLE_REFRESH_STATUS = [408, 429];
+
 const baseURL = `${import.meta.env.VITE_BASE_URL_API}/api`;
 
 /**
@@ -48,14 +50,22 @@ export const getErrorPayload = (error: unknown): any => {
  * Distingue "el refresh token está revocado" de "el refresh no se pudo ejecutar".
  *
  * Solo una respuesta 4xx del endpoint de refresh significa que el servidor rechazó el
- * token. Sin respuesta (caída de red, DNS, CORS), timeout o 5xx, la sesión sigue siendo
- * válida en el servidor: cerrar la sesión ante un 502 tira la sesión y el trabajo del
- * usuario por un problema de infraestructura.
+ * token. Sin respuesta (caída de red, DNS, CORS), timeout, 5xx o throttling, la sesión
+ * sigue siendo válida en el servidor: cerrar la sesión ante un 502 tira la sesión y el
+ * trabajo del usuario por un problema de infraestructura.
  */
 export const isRefreshAuthRejection = (error: unknown): boolean => {
     if (!axios.isAxiosError(error)) return false;
     const status = error.response?.status;
-    return typeof status === 'number' && status >= 400 && status < 500;
+
+    // Sin respuesta HTTP el refresh ni siquiera llegó a evaluarse en el servidor.
+    if (typeof status !== 'number') return false;
+
+    // 408 y 429 son transitorios: /auth también tiene throttling, y un rate limit no
+    // invalida el refresh token.
+    if (RETRYABLE_REFRESH_STATUS.includes(status)) return false;
+
+    return status >= 400 && status < 500;
 };
 
 let refreshPromise: Promise<string> | null = null;
