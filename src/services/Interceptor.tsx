@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { api, forceLogout, isAuthEndpoint, isSessionRevoked, refreshSession, RetriableRequestConfig, shouldSkipRefresh } from './base.service';
+import { api, forceLogout, isAuthEndpoint, isRefreshAuthRejection, isSessionRevoked, refreshSession, RetriableRequestConfig, shouldSkipRefresh } from './base.service';
 import { Snackbar } from '@/components/snackbar/Snackbar';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { notifyError } from '@/lib/error-feedback';
 
 const MUTATING_METHODS = ['post', 'put', 'delete'];
+
+const IDEMPOTENT_METHODS = ['get', 'head', 'options'];
 
 const isValidMessage = (msg: any) => {
     return typeof msg === 'string' && msg.trim().length > 2;
@@ -44,16 +46,34 @@ export const useAxiosInterceptor = () => {
                 if (canRetry && original) {
                     original._retried = true;
 
+                    let accessToken: string;
+
                     try {
-                        const accessToken = await refreshSession();
-                        original.headers.Authorization = accessToken;
-                        return await api(original);
-                    } catch {
-                        // El refresh es de un solo uso: si falla, la sesión queda revocada.
-                        // Se cierra sesión y se redirige, sin reintentar.
-                        forceLogout();
+                        accessToken = await refreshSession();
+                    } catch (refreshError) {
+                        // Solo un 4xx del endpoint de refresh significa token revocado de
+                        // verdad. Ante un fallo transitorio (red caída, 502, timeout) la
+                        // sesión sigue viva en el servidor: se avisa y el usuario continúa
+                        // trabajando, y shouldSkipRefresh() deja reintentar tras el cooldown.
+                        if (isRefreshAuthRejection(refreshError)) {
+                            forceLogout();
+                        } else {
+                            notifyError(error);
+                        }
+
                         return Promise.reject(error);
                     }
+
+                    // Un 401 en un POST/PUT/DELETE puede venir de una regla de negocio y
+                    // no del token. Reejecutarlo duplicaría la operación, así que solo se
+                    // renueva el token para el próximo intento y el original se rechaza.
+                    if (!IDEMPOTENT_METHODS.includes((original.method || 'get').toLowerCase())) {
+                        notifyError(error);
+                        return Promise.reject(error);
+                    }
+
+                    original.headers.Authorization = accessToken;
+                    return await api(original);
                 }
 
                 // Solo un 401 de una petición autenticada significa sesión revocada. Un 401

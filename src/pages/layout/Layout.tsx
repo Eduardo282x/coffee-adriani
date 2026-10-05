@@ -1,23 +1,22 @@
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from './Sidebar'
 import { Navigate, Outlet } from 'react-router'
-import { decodeToken } from '@/hooks/authtenticate';
-import { clearSession } from '@/services/token.store';
-import { useEffect } from 'react';
+import { ScreenLoader } from '@/components/loaders/ScreenLoader'
+import { useSession } from '@/hooks/use-session'
 
 export const Layout = () => {
-    const tokenData = decodeToken();
-    const isAuthenticated = Boolean(tokenData && !tokenData.expired);
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            clearSession();
-        }
-    }, [isAuthenticated]);
+    const session = useSession();
 
     // Guard declarativo: antes el <Outlet /> se renderizaba igual y las páginas protegidas
     // lanzaban sus peticiones sin token, porque el redirect ocurría en un useEffect post-pintado.
-    if (!isAuthenticated) {
+    // El orden importa: primero se resuelve la sesión (incluido el refresh), después se decide
+    // si hay algo que renderizar. Sin ese paso intermedio, un token vencido expulsaba al
+    // usuario antes de que el interceptor tuviera oportunidad de renovarlo.
+    if (session === 'verifying') {
+        return <ScreenLoader />;
+    }
+
+    if (session === 'anonymous') {
         return <Navigate to="/login" replace />;
     }
 

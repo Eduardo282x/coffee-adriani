@@ -2,7 +2,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 import { getAccessToken, getRefreshToken, isAccessTokenExpiring, saveSession, clearSession } from './token.store';
-import { disconnectSocket } from './socket.io';
+import { disconnectSocket, reconnectSocket } from './socket.io';
 
 const baseURL = `${import.meta.env.VITE_BASE_URL_API}/api`;
 
@@ -12,12 +12,18 @@ const baseURL = `${import.meta.env.VITE_BASE_URL_API}/api`;
  */
 const REQUEST_TIMEOUT_MS = 30_000;
 
+/**
+ * El refresh está en el camino crítico de cada 401 y del guard de ruta: si se cuelga
+ * 30s, el usuario ve el spinner del login bloqueado medio minuto.
+ */
+const AUTH_TIMEOUT_MS = 10_000;
+
 /** Exportaciones Excel/PDF y snapshots: el backend puede tardar bastante. */
 export const EXPORT_TIMEOUT_MS = 180_000;
 
 export const api = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS });
 
-export const authApi = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS });
+export const authApi = axios.create({ baseURL, timeout: AUTH_TIMEOUT_MS });
 
 export const AUTH_ENDPOINTS = [
     '/auth',
@@ -38,8 +44,33 @@ export const getErrorPayload = (error: unknown): any => {
     return undefined;
 };
 
+/**
+ * Distingue "el refresh token está revocado" de "el refresh no se pudo ejecutar".
+ *
+ * Solo una respuesta 4xx del endpoint de refresh significa que el servidor rechazó el
+ * token. Sin respuesta (caída de red, DNS, CORS), timeout o 5xx, la sesión sigue siendo
+ * válida en el servidor: cerrar la sesión ante un 502 tira la sesión y el trabajo del
+ * usuario por un problema de infraestructura.
+ */
+export const isRefreshAuthRejection = (error: unknown): boolean => {
+    if (!axios.isAxiosError(error)) return false;
+    const status = error.response?.status;
+    return typeof status === 'number' && status >= 400 && status < 500;
+};
+
 let refreshPromise: Promise<string> | null = null;
 let proactiveRefreshFailedFor: string | null = null;
+let proactiveRefreshFailedAt = 0;
+let refreshRejectedFor: string | null = null;
+
+/**
+ * Ventana de calma tras un refresh proactivo fallido. Bloquear el refresh de forma
+ * permanente convertía cualquier fallo de red en un cierre de sesión inevitable: el
+ * siguiente 401 ya no tenía refresh disponible y caía directo en forceLogout(). El
+ * bloqueo debe ser transitorio, solo para no reenviar un refresh de un solo uso ya
+ * consumido en bucle cerrado.
+ */
+const REFRESH_RETRY_COOLDOWN_MS = 15_000;
 
 export const forceLogout = (): void => {
     // Sesión inválida (401 sin refresh posible): cerrar también el WebSocket.
@@ -47,6 +78,8 @@ export const forceLogout = (): void => {
     clearSession();
     refreshPromise = null;
     proactiveRefreshFailedFor = null;
+    proactiveRefreshFailedAt = 0;
+    refreshRejectedFor = null;
     if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.replace('/login');
     }
@@ -71,8 +104,12 @@ const performRefresh = async (): Promise<string> => {
         refreshToken: data.refreshToken,
         expiresIn: Number(data.expiresIn) || 0,
     });
+    // El socket se autentica en el handshake: sin reconectar seguiría con el token viejo.
+    reconnectSocket();
 
     proactiveRefreshFailedFor = null;
+    proactiveRefreshFailedAt = 0;
+    refreshRejectedFor = null;
     return accessToken;
 };
 
@@ -86,11 +123,14 @@ export const refreshSession = (): Promise<string> => {
     return refreshPromise;
 };
 
-// Si un refresh proactivo ya falló para este token, reintentarlo podría reenviar un refresh de un solo uso
-// ya consumido y provocar la revocación de toda la familia de sesiones. No se reintenta.
+// Si un refresh proactivo acaba de fallar para este token, se espera la ventana de calma
+// antes de volver a intentarlo: reenviar de inmediato un refresh de un solo uso ya
+// consumido podría provocar la revocación de toda la familia de sesiones.
 export const shouldSkipRefresh = (): boolean => {
     const currentToken = getAccessToken();
-    return Boolean(currentToken) && proactiveRefreshFailedFor === currentToken;
+    if (!currentToken || proactiveRefreshFailedFor !== currentToken) return false;
+
+    return Date.now() - proactiveRefreshFailedAt < REFRESH_RETRY_COOLDOWN_MS;
 };
 
 const resolveAccessToken = async (): Promise<string | null> => {
@@ -106,8 +146,16 @@ const resolveAccessToken = async (): Promise<string | null> => {
 
     try {
         return await refreshSession();
-    } catch {
-        proactiveRefreshFailedFor = token;
+    } catch (error) {
+        // Solo un rechazo de autenticación bloquea los reintentos. Un fallo transitorio
+        // devuelve el token viejo sin armar la trampa, así el 401 posterior puede
+        // reintentar el refresh una vez pasado el cooldown.
+        if (isRefreshAuthRejection(error)) {
+            proactiveRefreshFailedFor = token;
+            proactiveRefreshFailedAt = Date.now();
+            refreshRejectedFor = token;
+        }
+
         return token;
     }
 };
@@ -130,11 +178,20 @@ api.interceptors.request.use(
  * sin token enviado es casi siempre una respuesta de la capa de infraestructura
  * (un forward-auth o un proxy delante de la app). Antes, ese caso cerraba la
  * sesión y expulsaba al usuario a /login, perdiendo todo su trabajo.
+ *
+ * Tampoco es revocación cuando queda un refresh token válido y el último refresh
+ * falló por causas transitorias: ese 401 se explica por el access token vencido,
+ * no por una sesión invalidada. Cerrarla ahí era lo que sacaba a los usuarios al
+ * login cada vez que el backend devolvía un 502 o tardaba en responder.
  */
 export const isSessionRevoked = (error: AxiosError<unknown>): boolean => {
     if (error.response?.status !== 401) return false;
     const config = error.config as RetriableRequestConfig | undefined;
-    return Boolean(config?.headers?.Authorization);
+    if (!config?.headers?.Authorization) return false;
+
+    if (getRefreshToken() && refreshRejectedFor !== getAccessToken()) return false;
+
+    return true;
 };
 
 // -----------------------------------------------------------------------------

@@ -13,28 +13,20 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Link, useLocation, useNavigate } from 'react-router'
 import { canAccessMenuItem, menuSections } from "./sidebar.data"
-import { useEffect, useState } from "react"
-import { decodeToken } from "@/hooks/authtenticate"
-import { ITokenExp } from "@/interfaces/user.interface";
+import { useState } from "react"
+import { useTokenData } from "@/hooks/authtenticate"
 import { FaCoffee } from "react-icons/fa";
 import { logout } from "@/services/auth.service";
 
 export const AppSidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [userData, setUserData] = useState<ITokenExp>()
     const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+    const userData = useTokenData();
 
     const goProfile = () => {
         navigate('/perfil')
     }
-
-    useEffect(() => {
-        const decoded = decodeToken();
-        if (decoded) {
-            setUserData(decoded);
-        }
-    }, [])
 
     const sections = menuSections
         .map((section) => ({
@@ -51,7 +43,6 @@ export const AppSidebar = () => {
             await logout();
         } finally {
             setIsLoggingOut(false);
-            setUserData(undefined);
             navigate('/login', { replace: true });
         }
     }

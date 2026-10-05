@@ -47,6 +47,17 @@ export const connectSocket = () => {
     if (!socket.connected) socket.connect();
 };
 
+/**
+ * El gateway autentica por el token del handshake, no por un header de la conexión ya
+ * abierta. Tras un refresh hay que rehacer el handshake para que el backend no corte la
+ * conexión al expirarle el token viejo.
+ */
+export const reconnectSocket = () => {
+    if (!getAccessToken()) return;
+    if (socket.connected) socket.disconnect();
+    socket.connect();
+};
+
 export const disconnectSocket = () => {
     socket.disconnect();
 };
