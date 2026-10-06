@@ -138,10 +138,11 @@ const FiltersGroups = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectItem value='all'>Todos</SelectItem>
-                            <SelectItem value='Pagado'>Pagado</SelectItem>
+                            <SelectItem value='Creada'>Creadas</SelectItem>
+                            <SelectItem value='Pagado'>Pagadas</SelectItem>
                             <SelectItem value='Pendiente'>Pendiente</SelectItem>
                             <SelectItem value='Abonadas'>Abonadas</SelectItem>
-                            <SelectItem value='Vencida'>Vencida</SelectItem>
+                            <SelectItem value='Vencida'>Vencidas</SelectItem>
                             <SelectItem value='Perdidas'>Perdidas</SelectItem>
                         </SelectGroup>
                     </SelectContent>
