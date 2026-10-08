@@ -7,10 +7,24 @@ const ACCESS_EXPIRES_AT_KEY = 'accessTokenExpiresAt';
 const ACCESS_ISSUED_AT_KEY = 'accessTokenIssuedAt';
 const LEGACY_TOKEN_KEY = 'token';
 
-// sessionStorage y no localStorage: la sesión sobrevive a un F5 o a un deploy (que
-// cambian el hash del bundle y obligan a recargar), pero se limpia al cerrar la
-// pestaña. Con tokens solo en RAM (commit 261174e) cualquier recarga cerraba la sesión.
+// localStorage para que la sesión sobreviva al cierre de pestaña/navegador (paridad
+// con el token único de 7 días) además del F5 y los deploys. El refresh token rota con
+// ventana de gracia y las pestañas se coordinan por BroadcastChannel/Web Locks, así que
+// persistirlo no reintroduce el reuso problemático. Si localStorage no está disponible
+// (modo privado o cuota) se cae a sessionStorage y, en último caso, a memoria.
+//
+// La lectura prefiere localStorage pero cae a sessionStorage para migrar sesiones
+// vivas que quedaron guardadas por la versión anterior.
 const readStorage = (key: string): string | null => {
+    try {
+        const fromLocal = localStorage.getItem(key);
+        if (fromLocal !== null) {
+            return fromLocal;
+        }
+    } catch {
+        // localStorage no disponible: se intenta el fallback por pestaña.
+    }
+
     try {
         return sessionStorage.getItem(key);
     } catch {
@@ -20,13 +34,25 @@ const readStorage = (key: string): string | null => {
 
 const writeStorage = (key: string, value: string): void => {
     try {
+        localStorage.setItem(key, value);
+    } catch {
+        // Modo privado o cuota llena: se intenta el fallback por pestaña.
+    }
+
+    try {
         sessionStorage.setItem(key, value);
     } catch {
-        // Modo privado o cuota llena: la sesión sigue viva solo en memoria.
+        // Sin storage: la sesión sigue viva solo en memoria.
     }
 };
 
 const removeStorage = (key: string): void => {
+    try {
+        localStorage.removeItem(key);
+    } catch {
+        // Ignorado a propósito.
+    }
+
     try {
         sessionStorage.removeItem(key);
     } catch {

@@ -2,7 +2,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 import { getAccessToken, getRefreshToken, isAccessTokenExpiring, saveSession, clearSession } from './token.store';
-import { disconnectSocket, reconnectSocket } from './socket.io';
+import { disconnectSocket, reconnectSocket, setTokenRefresher } from './socket.io';
 import { broadcastLogout, broadcastSession, subscribeToSessionChannel } from './session-channel';
 
 const RETRYABLE_REFRESH_STATUS = [408, 429];
@@ -198,6 +198,10 @@ export const refreshSession = (): Promise<string> => {
     }
     return refreshPromise;
 };
+
+// El socket renueva el access token antes de reconectar tras un rechazo del gateway
+// (import perezoso vía hook para no crear un ciclo socket.io <-> base.service).
+setTokenRefresher(refreshSession);
 
 // Si un refresh proactivo acaba de fallar para este token, se espera la ventana de calma
 // antes de volver a intentarlo: reenviar de inmediato un refresh de un solo uso ya

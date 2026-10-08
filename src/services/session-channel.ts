@@ -3,11 +3,11 @@ import type { SessionTokens } from './base.interface';
 /**
  * Coordinación de sesión entre pestañas del mismo origen.
  *
- * `sessionStorage` es por pestaña: al duplicar una pestaña el navegador copia sus
- * tokens, de modo que dos pestañas pueden compartir el MISMO refresh token de un
- * solo uso. Si una rota y la otra reintenta con el viejo, el backend lo interpreta
- * como reuso. El canal notifica a las demás pestañas el par nuevo (para que
- * converjan) y el cierre de sesión (para que ninguna quede con credenciales muertas).
+ * La sesión se persiste en `localStorage`, de modo que todas las pestañas del mismo
+ * navegador comparten el MISMO refresh token de un solo uso. Si una rota y otra
+ * reintenta con el viejo, el backend lo interpretaría como reuso. El canal notifica a
+ * las demás pestañas el par nuevo (para que converjan) y el cierre de sesión (para que
+ * ninguna quede con credenciales muertas).
  */
 const CHANNEL_NAME = 'cafe-adriani-session';
 

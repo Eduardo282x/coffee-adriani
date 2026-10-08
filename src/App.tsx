@@ -16,6 +16,7 @@ import { ADMIN_ROLE } from './pages/layout/sidebar.data';
 import { isAxiosError } from 'axios';
 import { Toaster } from 'react-hot-toast';
 import { useNetworkStatus } from './hooks/use-network-status';
+import { useSessionKeepAlive } from './hooks/use-session-keepalive';
 
 // Rutas divididas en chunks. Antes todo el app se empaquetaba en un único archivo de
 // 1.5 MB (510 KB gzip): quien abría el login descargaba también el dashboard con sus
@@ -78,6 +79,10 @@ const OfflineBanner = () => {
 };
 
 function App() {
+  // Renueva el access token al recuperar foco/visibilidad: evita la latencia de la
+  // primera acción y que el socket reconecte con un token vencido tras la inactividad.
+  useSessionKeepAlive();
+
   useEffect(() => {
     // Coordina la sesión con otras pestañas: adopta los tokens renovados por otra
     // pestaña y propaga el cierre de sesión (evita reusar un refresh ya rotado).
