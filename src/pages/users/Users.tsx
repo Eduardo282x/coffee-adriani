@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { TableComponent } from "@/components/table/TableComponent"
 // import { UsersColumns, defaultValues, IUsersForm } from "./client.data"
@@ -49,9 +49,9 @@ export const Users = () => {
         getUsersStore()
     }, [])
 
-    const setUsersFilter = (usersFilter: IUsers[]) => {
+    const setUsersFilter = useCallback((usersFilter: IUsers[]) => {
         setUsers({ allUsers: users.allUsers, users: usersFilter })
-    }
+    }, [setUsers, users.allUsers])
 
     const getAction = (action: string, data: IUsersForm) => {
         setDataDialog(data);

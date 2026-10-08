@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus } from "lucide-react"
@@ -68,9 +68,9 @@ export const Products = () => {
         }
     }
 
-    const setProductFilter = (products: IProducts[]) => {
+    const setProductFilter = useCallback((products: IProducts[]) => {
         setData((prev) => ({ ...prev, productsFilter: products }))
-    }
+    }, [])
 
     const getAction = (action: string, data: IProducts) => {
         setDataDialog(data);

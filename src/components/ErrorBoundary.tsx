@@ -61,7 +61,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
                     <p className='text-sm text-gray-600'>
                         La aplicación encontró un error inesperado y se detuvo para no mostrarte
-                        información incorrecta. Podés recargar la página o volver a intentarlo.
+                        información incorrecta. Puedes recargar la página o volver a intentarlo.
                     </p>
 
                     <pre className='max-h-32 overflow-auto rounded-md bg-gray-100 p-3 text-xs text-gray-700 whitespace-pre-wrap'>

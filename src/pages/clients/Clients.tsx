@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { postClients, putClients, generateReportPDF, getClientsExcel } from "@/services/clients.service"
 import { Block, BodyBlock, BodyReport, IClients } from "@/interfaces/clients.interface"
@@ -75,13 +75,13 @@ export const Clients = () => {
         setClients({ allClients: clients.allClients, clients: filterClientsByBlock, clientsFilter: filterClientsByBlock })
     }
 
-    const setClientsFilter = (clientsFilter: IClients[]) => {
+    const setClientsFilter = useCallback((clientsFilter: IClients[]) => {
         setClients({ allClients: clients.allClients, clients: clients.clients, clientsFilter: clientsFilter })
-    }
+    }, [setClients, clients.allClients, clients.clients])
 
-    const setBlocksFilter = (block: Block[]) => {
+    const setBlocksFilter = useCallback((block: Block[]) => {
         setBlocks({ allBlocks: blocks.allBlocks, blocks: block })
-    }
+    }, [setBlocks, blocks.allBlocks])
 
     const addNew = () => {
         setEdit(false);

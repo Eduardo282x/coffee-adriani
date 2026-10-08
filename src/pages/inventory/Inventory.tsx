@@ -141,9 +141,9 @@ export const Inventory = () => {
         setLossDateRangeFilter(dateRange ?? undefined);
     }, [dateRange, setLossDateRangeFilter]);
 
-    const setInventoryFilter = (inventoryFilter: IInventory[]) => {
+    const setInventoryFilter = useCallback((inventoryFilter: IInventory[]) => {
         setData((prev) => ({ ...prev, inventory: inventoryFilter }));
-    }
+    }, [])
 
     const actionDialog = async (data: BodyInventory) => {
         try {

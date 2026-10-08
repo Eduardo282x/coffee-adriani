@@ -2,7 +2,7 @@ import { ScreenLoader } from "@/components/loaders/ScreenLoader"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Filter } from "@/components/table/Filter"
 import { TableComponent } from "@/components/table/TableComponent"
-import { useState, useEffect, useEffectEvent } from "react"
+import { useCallback, useState, useEffect, useEffectEvent } from "react"
 import { deleteMessageCollection, getCollection, getCollectionExcel, getCollectionHistory, getMessageCollection, postMessageCollection, postSendMessageCollection, putAllMessageCollection, putCollection, putMarkCollection, putMessageCollection } from "@/services/collection.service"
 import { CollectionMessageBody, GroupCollection, GroupCollectionHistory, GroupMessages, ICollection, ICollectionHistory, IMessages, MarkBody, Message } from "@/interfaces/collection.interface"
 import { clientCollectionColumns, collectionErrorsColumns, collectionHistoryColumns, isToday, messageCollectionColumns, normalColumns } from "./collection.data.tsx"
@@ -136,23 +136,23 @@ export const Collections = () => {
         getMessageCollectionApi();
     }, [])
 
-    const setFilterCollection = (collections: ICollection[]) => {
+    const setFilterCollection = useCallback((collections: ICollection[]) => {
         setCollections(prev => {
             return {
                 ...prev,
                 collections
             }
         })
-    };
+    }, []);
 
-    const setFilterMessage = (messages: IMessages[]) => {
+    const setFilterMessage = useCallback((messages: IMessages[]) => {
         setMessages(prev => {
             return {
                 ...prev,
                 messages
             }
         })
-    }
+    }, [])
 
     const newMessage = () => {
         setOpenDialog(true);

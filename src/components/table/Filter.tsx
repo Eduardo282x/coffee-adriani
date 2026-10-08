@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { IColumns } from "./table.interface";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
@@ -28,6 +28,17 @@ export const Filter: FC<IFilter> = ({
     initialValue = ''
 }) => {
     const [filter, setFilter] = useState<string>(initialValue);
+
+    // `setDataFilter` es un prop cuya identidad se recrea en cada render en varios
+    // llamadores. Si estuviera en las dependencias del efecto de inicialización, cada
+    // render del padre dispararía el efecto → setDataFilter(dataBase) → nuevo estado
+    // → re-render → bucle "Maximum update depth exceeded". El ref conserva siempre la
+    // última versión del callback sin disparar el efecto por su identidad.
+    const setDataFilterRef = useRef(setDataFilter);
+
+    useEffect(() => {
+        setDataFilterRef.current = setDataFilter;
+    });
 
     const normalize = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
@@ -86,9 +97,9 @@ export const Filter: FC<IFilter> = ({
     // Inicialización de la data cuando cambia la base de datos o se habilita/deshabilita el efecto
     useEffect(() => {
         if (!disabledEffect) {
-            setDataFilter(dataBase);
+            setDataFilterRef.current(dataBase);
         }
-    }, [dataBase, disabledEffect, setDataFilter]);
+    }, [dataBase, disabledEffect]);
 
     // Manejo del debounce únicamente para setSearch (con su respectiva limpieza)
     useEffect(() => {

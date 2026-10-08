@@ -6,7 +6,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AccountPay } from '@/interfaces/payment.interface';
 import { postPaymentAccounts, putPaymentAccounts } from '@/services/payment.service';
 import { Plus } from 'lucide-react';
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useState } from 'react'
 import { AccountForm, accountsColumns, defaultValues } from './accounts.data';
 import { AccountsForm } from './AccountsForm';
 import { BaseResponse } from '@/services/base.interface';
@@ -54,12 +54,12 @@ export const Accounts = () => {
         }
     }
 
-    const setAccountsFilters = (data: AccountPay[]) => {
+    const setAccountsFilters = useCallback((data: AccountPay[]) => {
         setAccounts({
             allAccounts: accounts.allAccounts,
             accounts: data
         })
-    }
+    }, [setAccounts, accounts.allAccounts])
 
     const getActions = (action: string, data: AccountPay) => {
         setDataDialog(data);
