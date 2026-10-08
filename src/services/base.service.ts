@@ -3,6 +3,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { BaseResponseLogin, BaseResponse } from './base.interface';
 import { getAccessToken, getRefreshToken, isAccessTokenExpiring, saveSession, clearSession } from './token.store';
 import { disconnectSocket, reconnectSocket } from './socket.io';
+import { broadcastLogout, broadcastSession, subscribeToSessionChannel } from './session-channel';
 
 const RETRYABLE_REFRESH_STATUS = [408, 429];
 
@@ -82,8 +83,12 @@ let refreshRejectedFor: string | null = null;
  */
 const REFRESH_RETRY_COOLDOWN_MS = 15_000;
 
-export const forceLogout = (): void => {
+const applyLogout = (broadcast: boolean): void => {
     // Sesión inválida (401 sin refresh posible): cerrar también el WebSocket.
+    if (broadcast) {
+        broadcastLogout();
+    }
+
     disconnectSocket();
     clearSession();
     refreshPromise = null;
@@ -93,6 +98,35 @@ export const forceLogout = (): void => {
     if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.replace('/login');
     }
+};
+
+export const forceLogout = (): void => applyLogout(true);
+
+let sessionChannelReady = false;
+
+/**
+ * Escucha los cambios de sesión de otras pestañas: adopta el par de tokens
+ * renovado por otra pestaña (evita que esta reintente con uno ya rotado) y
+ * propaga el cierre de sesión. Idempotente: se registra una sola vez.
+ */
+export const initSessionChannel = (): void => {
+    if (sessionChannelReady) {
+        return;
+    }
+
+    sessionChannelReady = true;
+
+    subscribeToSessionChannel({
+        onSession: (tokens) => {
+            // Solo se adopta si difiere del actual: evita re-renders y no pisa un
+            // token más nuevo ya en memoria.
+            if (tokens.accessToken && tokens.accessToken !== getAccessToken()) {
+                saveSession(tokens);
+                reconnectSocket();
+            }
+        },
+        onLogout: () => applyLogout(false),
+    });
 };
 
 const performRefresh = async (): Promise<string> => {
@@ -109,11 +143,16 @@ const performRefresh = async (): Promise<string> => {
         throw new Error('La respuesta del refresh no trae un par de tokens válido');
     }
 
+    const expiresIn = Number(data.expiresIn) || 0;
+
     saveSession({
         accessToken,
         refreshToken: data.refreshToken,
-        expiresIn: Number(data.expiresIn) || 0,
+        expiresIn,
     });
+    // Otras pestañas pueden compartir el mismo refresh token de un solo uso:
+    // se les comunica el par nuevo para que no reintenten con el ya consumido.
+    broadcastSession({ accessToken, refreshToken: data.refreshToken, expiresIn });
     // El socket se autentica en el handshake: sin reconectar seguiría con el token viejo.
     reconnectSocket();
 
@@ -123,10 +162,37 @@ const performRefresh = async (): Promise<string> => {
     return accessToken;
 };
 
+type RefreshLockManager = {
+    request: <T>(name: string, callback: () => Promise<T>) => Promise<T>;
+};
+
+/**
+ * Serializa el refresh entre pestañas con la Web Locks API. Sin esto, dos pestañas
+ * que comparten el mismo refresh token pueden llamar a /auth/refresh a la vez.
+ * Al obtener el lock se revalida: si otra pestaña ya renovó, no hace falta repetir.
+ */
+const runRefresh = async (): Promise<string> => {
+    const locks = typeof navigator !== 'undefined'
+        ? (navigator as Navigator & { locks?: RefreshLockManager }).locks
+        : undefined;
+
+    if (!locks?.request) {
+        return performRefresh();
+    }
+
+    return locks.request('cafe-adriani-refresh', async () => {
+        const current = getAccessToken();
+        if (current && !isAccessTokenExpiring()) {
+            return current;
+        }
+        return performRefresh();
+    });
+};
+
 // Single-flight: si llegan varios 401 a la vez, una sola llamada al refresh y el resto espera esta promesa.
 export const refreshSession = (): Promise<string> => {
     if (!refreshPromise) {
-        refreshPromise = performRefresh().finally(() => {
+        refreshPromise = runRefresh().finally(() => {
             refreshPromise = null;
         });
     }

@@ -2,6 +2,7 @@ import { authApi, api, getErrorPayload } from './base.service';
 import { BaseResponse, BaseResponseLogin } from './base.interface';
 import { clearSession, getAccessToken, getRefreshToken, saveSession } from './token.store';
 import { connectSocket, disconnectSocket } from './socket.io';
+import { broadcastLogout } from './session-channel';
 
 export interface LoginBody {
     username: string;
@@ -47,6 +48,8 @@ export const logout = async (): Promise<BaseResponse | undefined> => {
     // a un usuario que ya cerró sesión.
     disconnectSocket();
     clearSession();
+    // Otras pestañas comparten la credencial: se les avisa para que también salgan.
+    broadcastLogout();
 
     if (!refreshToken) {
         return undefined;
@@ -67,6 +70,7 @@ export const logoutAll = async (): Promise<BaseResponse> => {
     if (!token) {
         disconnectSocket();
         clearSession();
+        broadcastLogout();
         throw new Error('No hay sesión activa');
     }
 
@@ -75,6 +79,7 @@ export const logoutAll = async (): Promise<BaseResponse> => {
     });
     disconnectSocket();
     clearSession();
+    broadcastLogout();
     return data;
 };
 

@@ -1,5 +1,5 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { isRefreshAuthRejection, refreshSession } from '@/services/base.service';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { isRefreshAuthRejection, refreshSession, shouldSkipRefresh } from '@/services/base.service';
 import {
     clearSession,
     getSessionSnapshot,
@@ -8,13 +8,19 @@ import {
 } from '@/services/token.store';
 import { notifyError } from '@/lib/error-feedback';
 
-export type SessionStatus = 'verifying' | 'authenticated' | 'anonymous';
+export type SessionStatus = 'verifying' | 'authenticated' | 'anonymous' | 'error';
+
+export interface SessionState {
+    status: SessionStatus;
+    /** Reintenta la renovación tras un estado de error. */
+    retry: () => void;
+}
 
 /** Escalera de reintentos del refresh antes de dejar de insistir. */
 const RETRY_DELAYS_MS = [0, 3000, 8000, 15000];
 
-/** Ritmo sostenido una vez agotada la escalera, hasta que el backend responda. */
-const RETRY_WHEN_BACK_MS = 15_000;
+/** Reintento del guard mientras el refresh está en su ventana de calma. */
+const SKIP_COOLDOWN_RECHECK_MS = 5_000;
 
 /**
  * Estado de sesión para el guard de rutas.
@@ -27,14 +33,21 @@ const RETRY_WHEN_BACK_MS = 15_000;
  * Ahora el store es reactivo y el guard intenta renovar antes de renderizar el Outlet:
  * 'verifying'     → hay token y se está renovando;
  * 'authenticated' → listo para renderizar;
- * 'anonymous'     → no hay token, o el servidor rechazó el refresh token.
+ * 'anonymous'     → no hay token, o el servidor rechazó el refresh token;
+ * 'error'         → se agotó la escalera de reintentos; la sesión NO se destruye,
+ *                   pero se deja de insistir y se le ofrece al usuario reintentar.
  *
  * Un fallo transitorio (sin red, 5xx, throttling) nunca destruye la sesión: se reintenta
  * con backoff. Destruirla ahí volvía a expulsar al usuario por causas de infraestructura.
+ * Cuando la escalera se agota no se mantiene el loader indefinidamente: antes eso dejaba
+ * la app "colgada" en un spinner sin salida si el backend no respondía.
  */
-export const useSession = (): SessionStatus => {
+export const useSession = (): SessionState => {
     const token = useSyncExternalStore(subscribeToSession, getSessionSnapshot, getSessionSnapshot);
     const [status, setStatus] = useState<SessionStatus>(token ? 'verifying' : 'anonymous');
+    const [retryNonce, setRetryNonce] = useState(0);
+
+    const retry = useCallback(() => setRetryNonce((nonce) => nonce + 1), []);
 
     useEffect(() => {
         if (!token) {
@@ -54,6 +67,14 @@ export const useSession = (): SessionStatus => {
         setStatus('verifying');
 
         const renew = () => {
+            // Si el último refresh falló por autenticación, se respeta la ventana
+            // de calma antes de volver a presentar el token: reenviarlo de
+            // inmediato sería lo que dispara la detección de reuso.
+            if (shouldSkipRefresh()) {
+                timer = setTimeout(renew, SKIP_COOLDOWN_RECHECK_MS);
+                return;
+            }
+
             refreshSession().then(
                 () => {
                     // saveSession emite el token nuevo, lo que dispara este efecto otra
@@ -77,10 +98,14 @@ export const useSession = (): SessionStatus => {
                         notifyError(error, 'No pudimos renovar tu sesión. Reintentando…');
                     }
 
-                    const delay = attempt < RETRY_DELAYS_MS.length
-                        ? RETRY_DELAYS_MS[attempt]
-                        : RETRY_WHEN_BACK_MS;
+                    // Escalera agotada: se detiene el bucle y se expone un estado de error
+                    // con acciones, en lugar de dejar el loader girando para siempre.
+                    if (attempt >= RETRY_DELAYS_MS.length) {
+                        setStatus('error');
+                        return;
+                    }
 
+                    const delay = RETRY_DELAYS_MS[attempt];
                     attempt += 1;
                     timer = setTimeout(renew, delay);
                 }
@@ -93,7 +118,7 @@ export const useSession = (): SessionStatus => {
             cancelled = true;
             if (timer) clearTimeout(timer);
         };
-    }, [token]);
+    }, [token, retryNonce]);
 
-    return status;
+    return { status, retry };
 };

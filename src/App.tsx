@@ -8,6 +8,7 @@ import { useAxiosInterceptor } from './services/Interceptor';
 import { Layout } from './pages/layout/Layout';
 import { connectSocket } from './services/socket.io';
 import { getAccessToken } from './services/token.store';
+import { initSessionChannel } from './services/base.service';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RoleGuard } from './components/auth/RoleGuard';
@@ -78,6 +79,10 @@ const OfflineBanner = () => {
 
 function App() {
   useEffect(() => {
+    // Coordina la sesión con otras pestañas: adopta los tokens renovados por otra
+    // pestaña y propaga el cierre de sesión (evita reusar un refresh ya rotado).
+    initSessionChannel();
+
     // Si la sesión ya estaba iniciada (recarga o reapertura de la app), se reconecta el
     // WebSocket con el token almacenado. Tras el login lo hace auth.service.login(),
     // y nunca se conecta antes del login porque autoConnect está en false.
