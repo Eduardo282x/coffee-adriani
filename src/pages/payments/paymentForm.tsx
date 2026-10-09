@@ -88,10 +88,11 @@ export const PaymentForm: FC<PaymentFormProps> = ({ onSubmit, data, accounts, de
     const selectedAccountId = form.watch('accountId');
 
     useEffect(() => {
+        if (data) return;
         const findAccount = accountsOptions.find(item => item.value == selectedAccountId?.toString());
         const isGastos = findAccount?.label.includes('Gastos') as boolean;
         form.setValue('type', isGastos ? 'EXPENSE' : 'INCOME');
-    }, [accountsOptions, selectedAccountId, form])
+    }, [accountsOptions, selectedAccountId, form,data])
 
     const onSubmitForm = (data: IPaymentForm) => {
         const dateObj = typeof paymentDate === 'string' ? new Date(paymentDate) : paymentDate;
