@@ -10,14 +10,14 @@ export const FilterBadges = () => {
     const search = invoiceFilterStore((s) => s.search);
     const selectedZone = invoiceFilterStore((s) => s.selectedZone);
     const selectedBlock = invoiceFilterStore((s) => s.selectedBlock);
-    const selectedStatus = invoiceFilterStore((s) => s.selectedStatus);
+    const selectedStatuses = invoiceFilterStore((s) => s.selectedStatuses);
     const selectedTypeProduct = invoiceFilterStore((s) => s.selectedTypeProduct);
     const selectedProductIds = invoiceFilterStore((s) => s.selectedProductIds);
     const dateStart = invoiceFilterStore((s) => s.dateStart);
     const setSearch = invoiceFilterStore((s) => s.setSearch);
     const setSelectedZone = invoiceFilterStore((s) => s.setSelectedZone);
     const setSelectedBlock = invoiceFilterStore((s) => s.setSelectedBlock);
-    const setSelectedStatus = invoiceFilterStore((s) => s.setSelectedStatus);
+    const setSelectedStatuses = invoiceFilterStore((s) => s.setSelectedStatuses);
     const setSelectedTypeProduct = invoiceFilterStore((s) => s.setSelectedTypeProduct);
     const setSelectedProductIds = invoiceFilterStore((s) => s.setSelectedProductIds);
     const setDateStart = invoiceFilterStore((s) => s.setDateStart);
@@ -45,9 +45,13 @@ export const FilterBadges = () => {
             onClear: () => setSelectedBlock('all')
         });
     }
-    if (selectedStatus && selectedStatus !== 'all') {
-        badges.push({ key: 'status', label: `Estado: ${selectedStatus}`, onClear: () => setSelectedStatus('all') });
-    }
+    selectedStatuses.forEach((status) => {
+        badges.push({
+            key: `status-${status}`,
+            label: `Estado: ${status}`,
+            onClear: () => setSelectedStatuses(selectedStatuses.filter((value) => value !== status))
+        });
+    });
     if (selectedTypeProduct && selectedTypeProduct !== defaultTypeProduct) {
         badges.push({
             key: 'type',

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DateRangeFilter, InvoiceStatus, IInvoiceForm, InvoiceAPINew } from '@/interfaces/invoice.interface';
+import { DateRangeFilter, IInvoiceForm, InvoiceAPINew } from '@/interfaces/invoice.interface';
 import { invalidateDashboardQueries } from '@/hooks/dashboard.hook';
 import {
     getInvoicesFilterPaginated,
@@ -40,8 +40,9 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
     const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
     const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
-    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const selectedStatuses = invoiceFilterStore((state) => state.selectedStatuses);
     const productIdsParam = selectedProductIds.join(',');
+    const statusesParam = selectedStatuses.join(',');
 
     const queryClient = useQueryClient();
 
@@ -64,7 +65,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         error: invoicesError,
         refetch: refetchInvoices
     } = useQuery({
-        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, selectedStatus],
+        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, statusesParam],
         queryFn: async () => {
             const params: InvoiceFilterPaginate = {
                 page: pageRef.current + 1,
@@ -78,7 +79,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
                 ...(productIdsParam && { productIds: productIdsParam }),
                 ...(selectedZone !== 'all' && { zone: selectedZone }),
                 ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-                ...(selectedStatus !== 'all' && { status: selectedStatus })
+                ...(statusesParam && { statuses: statusesParam })
             };
 
             return getInvoicesFilterPaginated(params) as unknown as InvoiceAPINew;
@@ -93,7 +94,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, productIdsParam, search, selectedZone, selectedBlock, selectedStatus],
+        queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, productIdsParam, search, selectedZone, selectedBlock, statusesParam],
         queryFn: () => getInvoiceStatistics({
             startDate: formatDateOnly(dateFilter?.startDate),
             endDate: formatDateOnly(dateFilter?.endDate),
@@ -102,7 +103,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
             ...(productIdsParam && { productIds: productIdsParam }),
             ...(selectedZone !== 'all' && { zone: selectedZone }),
             ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-            ...(selectedStatus !== 'all' && { status: selectedStatus })
+            ...(statusesParam && { statuses: statusesParam })
         }),
         enabled: enableStatistics,
         staleTime: 2 * 60 * 1000,
@@ -178,13 +179,14 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         return {
             invoices: invoicesData.invoices ?? [],
             totalCount: invoicesData.pagination?.totalCount ?? 0,
+            totalClients: invoicesData.pagination?.totalClients ?? 0,
             totalPages: invoicesData.pagination?.totalPages ?? 0,
         };
     }, [invoicesData]);
 
     useEffect(() => {
         setPage(0);
-    }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, selectedStatus, pageSize]);
+    }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, statusesParam, pageSize]);
 
     // Refetch manual al cambiar página o tamaño (no están en el queryKey)
     useEffect(() => {
@@ -225,8 +227,8 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         invoiceFilterStore.getState().setSelectedTypeProduct(option);
     }, []);
 
-    const handleChangeStatusInvoice = useCallback((option: InvoiceStatus) => {
-        invoiceFilterStore.getState().setSelectedStatus(option);
+    const handleChangeStatuses = useCallback((option: string[]) => {
+        invoiceFilterStore.getState().setSelectedStatuses(option);
     }, []);
 
     // 6. Funciones de mutación wrapper
@@ -280,6 +282,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         statistics: statisticsData,
         invoicesDetails: invoicesDetails,
         totalCount: processedData?.totalCount || 0,
+        totalClients: processedData?.totalClients || 0,
         totalPages: processedData?.totalPages || 0,
 
         // Estados de carga
@@ -299,14 +302,14 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         handleChangeTypeProduct,
         handleChangeZone,
         handleChangeSearch,
-        handleChangeStatusInvoice,
+        handleChangeStatuses,
         setInvoiceId,
         currentFilter: dateFilter,
         selectedZone,
         selectedBlock,
         selectedTypeProduct,
         selectedProductIds,
-        selectedStatus,
+        selectedStatuses,
 
         // Mutaciones
         createInvoice,

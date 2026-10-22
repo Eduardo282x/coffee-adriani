@@ -93,6 +93,7 @@ export interface Pagination {
     page: number;
     limit: number;
     totalCount: number;
+    totalClients?: number;
     totalPages: number;
     hasNext: boolean;
     hasPrev: boolean;
@@ -209,6 +210,7 @@ export interface ExportInvoicesDashboard {
     endDate?: Date | string;
     zone?: string;
     status?: string;
+    statuses?: string[];
     blockId?: string;
     productIds?: number[];
 }

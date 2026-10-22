@@ -19,6 +19,7 @@ interface InvoiceDateRangeFilter {
     search?: string,
     blockId?: string,
     status?: InvoiceStatus,
+    statuses?: string,
     productIds?: string
 }
 

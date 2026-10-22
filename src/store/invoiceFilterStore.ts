@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { DateRange } from 'react-day-picker'
-import { InvoiceStatus } from '@/interfaces/invoice.interface'
 
 interface InvoiceFilterState {
     search: string;
@@ -9,14 +8,14 @@ interface InvoiceFilterState {
     selectedBlock: string;
     selectedTypeProduct: string;
     selectedProductIds: number[];
-    selectedStatus: InvoiceStatus;
+    selectedStatuses: string[];
     dateStart: DateRange | undefined;
     setSearch: (value: string) => void;
     setSelectedZone: (value: string) => void;
     setSelectedBlock: (value: string) => void;
     setSelectedTypeProduct: (value: string) => void;
     setSelectedProductIds: (value: number[]) => void;
-    setSelectedStatus: (value: InvoiceStatus) => void;
+    setSelectedStatuses: (value: string[]) => void;
     setDateStart: (value: DateRange | undefined) => void;
     resetFilters: () => void;
 }
@@ -27,7 +26,7 @@ const defaultFilters = {
     selectedBlock: 'all',
     selectedTypeProduct: 'Cafe',
     selectedProductIds: [] as number[],
-    selectedStatus: 'all' as InvoiceStatus,
+    selectedStatuses: [] as string[],
     dateStart: undefined,
 };
 
@@ -59,7 +58,7 @@ export const invoiceFilterStore = create<InvoiceFilterState>()(
                 ...(state.selectedTypeProduct !== selectedTypeProduct && { selectedProductIds: [] }),
             })),
             setSelectedProductIds: (selectedProductIds) => set({ selectedProductIds }),
-            setSelectedStatus: (selectedStatus) => set({ selectedStatus }),
+            setSelectedStatuses: (selectedStatuses) => set({ selectedStatuses }),
             setDateStart: (dateStart) => set({ dateStart }),
             resetFilters: () => set({ ...defaultFilters }),
         }),
@@ -71,15 +70,22 @@ export const invoiceFilterStore = create<InvoiceFilterState>()(
                 selectedBlock: state.selectedBlock,
                 selectedTypeProduct: state.selectedTypeProduct,
                 selectedProductIds: state.selectedProductIds,
-                selectedStatus: state.selectedStatus,
+                selectedStatuses: state.selectedStatuses,
                 dateStart: serializeDateRange(state.dateStart),
             }),
             merge: (persisted, current) => {
-                const data = (persisted ?? {}) as Partial<InvoiceFilterState>;
+                const data = (persisted ?? {}) as Partial<InvoiceFilterState> & { selectedStatus?: string };
+                const legacyStatus = data.selectedStatus;
+                const persistedStatuses = Array.isArray(data.selectedStatuses)
+                    ? data.selectedStatuses
+                    : legacyStatus && legacyStatus !== 'all'
+                        ? [legacyStatus]
+                        : current.selectedStatuses;
                 return {
                     ...current,
                     ...data,
                     selectedProductIds: Array.isArray(data.selectedProductIds) ? data.selectedProductIds : current.selectedProductIds,
+                    selectedStatuses: persistedStatuses,
                     dateStart: deserializeDateRange(data.dateStart as { from?: string; to?: string } | undefined),
                 };
             },

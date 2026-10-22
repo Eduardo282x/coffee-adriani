@@ -167,43 +167,56 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-4 w-full">
-                <FormSelect form={form} name='type' label='Tipo de Producto' placeholder='Seleccione un tipo de producto' options={types.map(type => ({ label: type.type, value: type.type }))} />
-                
-                <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
-                <FormSelect form={form} name='orderBy' label='Ordenar por (Opcional)' placeholder='Seleccione un campo' options={reportOrderByOptions} />
-                
-                <FormSelect form={form} name='status' label='Filtro de deuda' placeholder='Seleccione un estado' options={
-                    [
-                        { label: 'Todos', value: 'all' },
-                        { label: 'Con deuda', value: 'pending' },
-                        { label: 'Sin deuda', value: 'clean' },
-                    ]
-                } />
-                <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-6">
+                <section className="space-y-4">
+                    <div className="border-b pb-2">
+                        <h3 className="text-base font-semibold text-[#6f4e37]">Filtros</h3>
+                        <p className="text-sm text-muted-foreground">Define qué clientes y facturas se incluirán en el reporte.</p>
+                    </div>
 
-                <FormMultiSelect
-                    form={form}
-                    name='invoiceStatuses'
-                    label='Estado de factura'
-                    placeholder='Todos (pendientes)'
-                    options={invoiceStatusOptions}
-                    emptyMessage='No hay estados disponibles'
-                />
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <FormSelect form={form} name='type' label='Tipo de Producto' placeholder='Seleccione un tipo de producto' options={types.map(type => ({ label: type.type, value: type.type }))} />
+                        <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
+                        <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
 
-                <div className='w-full'>
-                    <DatePicker
-                        label='Fecha hasta (Opcional)'
-                        date={selectedEndDate}
-                        setDate={(date) => form.setValue('endDate', date, { shouldDirty: true })}
-                        maxDate={undefined}
-                        minDate={undefined}
-                    />
-                </div>
+                        <FormSelect form={form} name='status' label='Filtro de deuda' placeholder='Seleccione un estado' options={
+                            [
+                                { label: 'Todos', value: 'all' },
+                                { label: 'Con deuda', value: 'pending' },
+                                { label: 'Sin deuda', value: 'clean' },
+                            ]
+                        } />
+                        <FormMultiSelect
+                            form={form}
+                            name='invoiceStatuses'
+                            label='Estado de factura'
+                            placeholder='Todos (pendientes)'
+                            options={invoiceStatusOptions}
+                            emptyMessage='No hay estados disponibles'
+                        />
+                        <DatePicker
+                            label='Fecha hasta (Opcional)'
+                            date={selectedEndDate}
+                            setDate={(date) => form.setValue('endDate', date, { shouldDirty: true })}
+                            maxDate={undefined}
+                            minDate={undefined}
+                        />
+                    </div>
+                </section>
 
-                <FormSelect form={form} name='orderDirection' label='Dirección (Opcional)' placeholder='Seleccione una dirección' options={reportOrderDirectionOptions} />
+                <section className="space-y-4">
+                    <div className="border-b pb-2">
+                        <h3 className="text-base font-semibold text-[#6f4e37]">Ordenar</h3>
+                        <p className="text-sm text-muted-foreground">Opcional: define el orden de los resultados.</p>
+                    </div>
 
-                <div className='col-span-3 w-full flex items-center justify-center'>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormSelect form={form} name='orderBy' label='Ordenar por (Opcional)' placeholder='Seleccione un campo' options={reportOrderByOptions} />
+                        <FormSelect form={form} name='orderDirection' label='Dirección (Opcional)' placeholder='Seleccione una dirección' options={reportOrderDirectionOptions} />
+                    </div>
+                </section>
+
+                <div className='w-full flex items-center justify-center'>
                     <Button type='submit' variant='primary' className='w-40 text-white bg-green-700 hover:bg-green-600' >Generar Reporte</Button>
                 </div>
             </form>

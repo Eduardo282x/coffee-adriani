@@ -37,7 +37,7 @@ export const InvoicesPage = () => {
 
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
-    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const selectedStatuses = invoiceFilterStore((state) => state.selectedStatuses);
     const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
 
     const inventory = useMemo<GroupInventoryDate>(() => {
@@ -53,6 +53,7 @@ export const InvoicesPage = () => {
         invoices,
         statistics,
         totalCount,
+        totalClients,
         totalPages,
         page,
         setPage,
@@ -210,7 +211,7 @@ export const InvoicesPage = () => {
                     type: selectedTypeProduct,
                     ...(selectedZone !== 'all' && { zone: selectedZone }),
                     ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-                    ...(selectedStatus !== 'all' && { status: selectedStatus }),
+                    ...(selectedStatuses.length > 0 && { statuses: selectedStatuses }),
                     ...(selectedProductIds.length > 0 && { productIds: selectedProductIds })
                 };
 
@@ -220,7 +221,7 @@ export const InvoicesPage = () => {
                     type: selectedTypeProduct,
                     ...(selectedZone !== 'all' && { zone: selectedZone }),
                     ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-                    ...(selectedStatus !== 'all' && { status: selectedStatus }),
+                    ...(selectedStatuses.length > 0 && { statuses: selectedStatuses }),
                     ...(selectedProductIds.length > 0 && { productIds: selectedProductIds })
                 };
                 response = await getInvoiceExcelFilter(filterDate);
@@ -331,6 +332,13 @@ export const InvoicesPage = () => {
                                     <p>
                                         <span className="font-bold">Bultos restantes: </span>
                                         {formatOnlyNumberWithDots(statistics.packagePending, 4)} bultos
+                                    </p>
+                                    <p>
+                                        <span className="font-bold">Clientes: </span>
+                                        {totalClients}
+                                        <span className="text-muted-foreground"> · </span>
+                                        <span className="font-bold">Facturas: </span>
+                                        {totalCount}
                                     </p>
                                 </div>
                                 <DetailsPackage

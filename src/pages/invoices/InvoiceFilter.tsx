@@ -7,7 +7,7 @@ import { Filter } from "@/components/table/Filter"
 import { Block } from "@/interfaces/clients.interface"
 import { FC, useEffect, useEffectEvent, useMemo, useState } from "react"
 import { blockStore } from "@/store/clientStore"
-import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
+import { InvoiceApi, InvoiceAPINewInvoice } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
 import { getProduct, getProductType } from "@/services/products.service"
@@ -31,14 +31,14 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     const setSearch = invoiceFilterStore((state) => state.setSearch);
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
-    const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const selectedStatuses = invoiceFilterStore((state) => state.selectedStatuses);
     const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
     const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
     const dateStart = invoiceFilterStore((state) => state.dateStart);
     const setDateStart = invoiceFilterStore((state) => state.setDateStart);
     const setSelectedZone = invoiceFilterStore((state) => state.setSelectedZone);
     const setSelectedBlock = invoiceFilterStore((state) => state.setSelectedBlock);
-    const setSelectedStatus = invoiceFilterStore((state) => state.setSelectedStatus);
+    const setSelectedStatuses = invoiceFilterStore((state) => state.setSelectedStatuses);
     const setSelectedTypeProduct = invoiceFilterStore((state) => state.setSelectedTypeProduct);
     const setSelectedProductIds = invoiceFilterStore((state) => state.setSelectedProductIds);
 
@@ -52,14 +52,14 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 
             <DropDownFilter>
                 <FiltersGroups
-                    handleChangeStatusInvoice={setSelectedStatus}
+                    handleChangeStatuses={setSelectedStatuses}
                     handleChangeTypeProduct={setSelectedTypeProduct}
                     handleChangeZone={setSelectedZone}
                     handleChangeBlock={setSelectedBlock}
                     dateStart={dateStart}
                     setDateStart={setDateStart}
                     selectedZone={selectedZone}
-                    selectedStatus={selectedStatus}
+                    selectedStatuses={selectedStatuses}
                     selectedBlock={selectedBlock}
                     selectedTypeProduct={selectedTypeProduct}
                     selectedProductIds={selectedProductIds}
@@ -74,20 +74,20 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
 
 
 const FiltersGroups = ({
-    handleChangeStatusInvoice,
+    handleChangeStatuses,
     handleChangeBlock,
     handleChangeTypeProduct,
     handleChangeZone,
     dateStart,
     setDateStart,
     selectedZone,
-    selectedStatus,
+    selectedStatuses,
     selectedBlock,
     selectedTypeProduct,
     selectedProductIds,
     handleChangeProducts,
 }: {
-    handleChangeStatusInvoice: (value: InvoiceStatus) => void;
+    handleChangeStatuses: (value: string[]) => void;
     handleChangeTypeProduct: (value: string) => void;
     handleChangeZone: (value: string) => void;
     handleChangeBlock: (value: string) => void;
@@ -95,7 +95,7 @@ const FiltersGroups = ({
     dateStart: import("react-day-picker").DateRange | undefined;
     setDateStart: (date: import("react-day-picker").DateRange | undefined) => void;
     selectedBlock?: string;
-    selectedStatus?: string;
+    selectedStatuses: string[];
     selectedZone?: string;
     selectedTypeProduct?: string;
     selectedProductIds: number[];
@@ -108,6 +108,15 @@ const FiltersGroups = ({
         { label: 'Zona Sur', value: 'Zona Sur' },
         { label: 'Zona Este', value: 'Zona Este' },
         { label: 'Zona Oeste', value: 'Zona Oeste' }
+    ];
+    const statusOptions = [
+        { label: 'Creada', value: 'Creada' },
+        { label: 'Pagado', value: 'Pagado' },
+        { label: 'Pendiente', value: 'Pendiente' },
+        { label: 'Abonadas', value: 'Abonadas' },
+        { label: 'Vencida', value: 'Vencida' },
+        { label: 'Cancelada', value: 'Cancelada' },
+        { label: 'Perdidas', value: 'Perdidas' },
     ];
 
     const getBlockStoreApi = useEffectEvent(async () => {
@@ -161,22 +170,14 @@ const FiltersGroups = ({
 
             <div className="w-full">
                 <Label className="mb-2">Estado Factura</Label>
-                <Select onValueChange={handleChangeStatusInvoice} value={selectedStatus}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Estado Factura" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value='all'>Todos</SelectItem>
-                            <SelectItem value='Creada'>Creadas</SelectItem>
-                            <SelectItem value='Pagado'>Pagadas</SelectItem>
-                            <SelectItem value='Pendiente'>Pendiente</SelectItem>
-                            <SelectItem value='Abonadas'>Abonadas</SelectItem>
-                            <SelectItem value='Vencida'>Vencidas</SelectItem>
-                            <SelectItem value='Perdidas'>Perdidas</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+                <MultiSelect
+                    options={statusOptions}
+                    selected={selectedStatuses}
+                    onChange={handleChangeStatuses}
+                    placeholder="Todos los estados"
+                    searchPlaceholder="Buscar estado..."
+                    emptyMessage="No hay estados disponibles"
+                />
             </div>
 
             <div className="w-full">
