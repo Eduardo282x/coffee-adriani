@@ -45,13 +45,13 @@ export const FilterBadges = () => {
             onClear: () => setSelectedBlock('all')
         });
     }
-    selectedStatuses.forEach((status) => {
+    if (selectedStatuses.length > 0) {
         badges.push({
-            key: `status-${status}`,
-            label: `Estado: ${status}`,
-            onClear: () => setSelectedStatuses(selectedStatuses.filter((value) => value !== status))
+            key: 'statuses',
+            label: `Estados: ${selectedStatuses.join(', ')}`,
+            onClear: () => setSelectedStatuses([])
         });
-    });
+    }
     if (selectedTypeProduct && selectedTypeProduct !== defaultTypeProduct) {
         badges.push({
             key: 'type',
