@@ -18,7 +18,8 @@ interface InvoiceDateRangeFilter {
     endDate?: Date | string,
     search?: string,
     blockId?: string,
-    status?: InvoiceStatus
+    status?: InvoiceStatus,
+    productIds?: string
 }
 
 export const getInvoicesFilterPaginated = async (filtersInvoice: InvoiceFilterPaginate): Promise<InvoiceAPINew[] | BaseResponse> => {

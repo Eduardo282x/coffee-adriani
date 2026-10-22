@@ -38,6 +38,7 @@ export const InvoicesPage = () => {
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
     const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
 
     const inventory = useMemo<GroupInventoryDate>(() => {
         const parseInventory = inventoryList.map((inv) => ({
@@ -209,7 +210,8 @@ export const InvoicesPage = () => {
                     type: selectedTypeProduct,
                     ...(selectedZone !== 'all' && { zone: selectedZone }),
                     ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-                    ...(selectedStatus !== 'all' && { status: selectedStatus })
+                    ...(selectedStatus !== 'all' && { status: selectedStatus }),
+                    ...(selectedProductIds.length > 0 && { productIds: selectedProductIds })
                 };
 
                 response = await getInvoiceExcelFilter(filterDate);
@@ -218,7 +220,8 @@ export const InvoicesPage = () => {
                     type: selectedTypeProduct,
                     ...(selectedZone !== 'all' && { zone: selectedZone }),
                     ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
-                    ...(selectedStatus !== 'all' && { status: selectedStatus })
+                    ...(selectedStatus !== 'all' && { status: selectedStatus }),
+                    ...(selectedProductIds.length > 0 && { productIds: selectedProductIds })
                 };
                 response = await getInvoiceExcelFilter(filterDate);
             }

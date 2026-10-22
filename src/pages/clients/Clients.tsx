@@ -11,7 +11,7 @@ import { Plus } from "lucide-react"
 import { DialogComponent } from "@/components/dialog/DialogComponent"
 import { BlockForm, ClientsForm, ReportForm } from "./ClientsForm"
 // import { Download } from "lucide-react";
-import { formatDate } from "@/hooks/formaters"
+import { formatDate, formatDateOnly } from "@/hooks/formaters"
 import { clientStore, blockStore } from "@/store/clientStore"
 // import { RiFileExcel2Line } from "react-icons/ri"
 import { FaRegFilePdf } from "react-icons/fa"
@@ -34,6 +34,7 @@ export const Clients = () => {
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [openDeleteDialogBlock, setOpenDeleteDialogBlock] = useState<boolean>(false);
     const [openDropdown, setOpenDropdown] = useState(false);
+    const [reportMode, setReportMode] = useState<'pdf' | 'excel'>('pdf');
 
 
     const [dataDialog, setDataDialog] = useState<IClientsForm>(defaultValues);
@@ -143,7 +144,9 @@ export const Clients = () => {
             type: data.type,
             status: data.status,
             zone: data.zone == 'all' ? '' : data.zone,
-            blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId)
+            blockId: data.blockId.toString() == 'all' ? 0 : Number(data.blockId),
+            invoiceStatuses: data.invoiceStatuses ?? [],
+            ...(data.endDate && { endDate: formatDateOnly(data.endDate) })
         }
 
         if (data.orderBy) {
@@ -154,11 +157,16 @@ export const Clients = () => {
         }
 
         try {
-            const response = await generateReportPDF(parseData);
-            saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.pdf`);
+            if (reportMode === 'excel') {
+                const response = await getClientsExcel(parseData);
+                saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.xlsx`);
+            } else {
+                const response = await generateReportPDF(parseData);
+                saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.pdf`);
+            }
             setOpenDialogReport(false);
         } catch (error) {
-            notifyError(error, 'No se pudo generar el reporte.');
+            notifyError(error, `No se pudo generar el reporte ${reportMode === 'excel' ? 'Excel' : 'PDF'}.`);
         } finally {
             // Sin este finally el fallo dejaba el spinner girando indefinidamente.
             setLoading(false);
@@ -202,16 +210,14 @@ export const Clients = () => {
 
     const exportPDF = () => {
         setOpenDropdown(false);
+        setReportMode('pdf');
         setOpenDialogReport(true);
     }
 
-    const exportExcel = async () => {
-        try {
-            const response = await getClientsExcel();
-            saveBlob(response, `Reporte de Clientes - ${formatDate(new Date())}.xlsx`);
-        } catch (error) {
-            notifyError(error, 'No se pudo exportar el archivo.');
-        }
+    const exportExcel = () => {
+        setOpenDropdown(false);
+        setReportMode('excel');
+        setOpenDialogReport(true);
     }
 
     return (
@@ -324,8 +330,8 @@ export const Clients = () => {
                     open={openDialogReport}
                     setOpen={setOpenDialogReport}
                     className="w-[90%] lg:w-180"
-                    label2="Generar Reporte"
-                    label1="Generar Reporte"
+                    label2={reportMode === 'excel' ? 'Generar Reporte Excel' : 'Generar Reporte PDF'}
+                    label1={reportMode === 'excel' ? 'Generar Reporte Excel' : 'Generar Reporte PDF'}
                     isEdit={false}
                 >
                     <ReportForm onSubmit={generateReport} data={null} blocks={blockOptions} types={types}></ReportForm>

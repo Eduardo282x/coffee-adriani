@@ -1,11 +1,13 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
-import { clientsZones, defaultValues, IClientsForm, reportOrderByOptions, reportOrderDirectionOptions, rifOptions, TypesClientsForm } from './client.data'
+import { clientsZones, defaultValues, IClientsForm, invoiceStatusOptions, reportOrderByOptions, reportOrderDirectionOptions, rifOptions, TypesClientsForm } from './client.data'
 import { FC, useEffect } from 'react'
 import { InputSelect } from '@/components/form/InputSelect'
 import { Form } from '@/components/ui/form'
 import { FormSelect } from '@/components/form/FormSelect'
+import { FormMultiSelect } from '@/components/form/FormMultiSelect'
+import { DatePicker } from '@/components/datepicker/DatePicker'
 import { FromProps, IOptions } from '@/interfaces/form.interface'
 import { Button } from '@/components/ui/button';
 import { BodyBlock, BodyReport } from '@/interfaces/clients.interface'
@@ -150,10 +152,18 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
             zone: '',
             type: 'Cafe',
             blockId: 0,
+            invoiceStatuses: [],
             orderBy: '',
             orderDirection: '',
         }
     });
+
+    const endDateValue = form.watch('endDate');
+    const selectedEndDate = endDateValue
+        ? endDateValue instanceof Date
+            ? endDateValue
+            : new Date(`${endDateValue}T12:00:00`)
+        : undefined;
 
     return (
         <Form {...form}>
@@ -163,7 +173,7 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
                 <FormSelect form={form} name='blockId' label='Bloque' placeholder='Seleccione un bloque' options={[{ label: 'Todos', value: 'all' }, ...blocks]} />
                 <FormSelect form={form} name='orderBy' label='Ordenar por (Opcional)' placeholder='Seleccione un campo' options={reportOrderByOptions} />
                 
-                <FormSelect form={form} name='status' label='Estado' placeholder='Seleccione un estado' options={
+                <FormSelect form={form} name='status' label='Filtro de deuda' placeholder='Seleccione un estado' options={
                     [
                         { label: 'Todos', value: 'all' },
                         { label: 'Con deuda', value: 'pending' },
@@ -171,6 +181,25 @@ export const ReportForm: FC<ClientFormProps> = ({ onSubmit, blocks, types }) => 
                     ]
                 } />
                 <FormSelect form={form} name='zone' label='Zona' placeholder='Seleccione una zona' options={[{ label: 'Todos', value: 'all' }, ...clientsZones]} />
+
+                <FormMultiSelect
+                    form={form}
+                    name='invoiceStatuses'
+                    label='Estado de factura'
+                    placeholder='Todos (pendientes)'
+                    options={invoiceStatusOptions}
+                    emptyMessage='No hay estados disponibles'
+                />
+
+                <div className='w-full'>
+                    <DatePicker
+                        label='Fecha hasta (Opcional)'
+                        date={selectedEndDate}
+                        setDate={(date) => form.setValue('endDate', date, { shouldDirty: true })}
+                        maxDate={undefined}
+                        minDate={undefined}
+                    />
+                </div>
 
                 <FormSelect form={form} name='orderDirection' label='Dirección (Opcional)' placeholder='Seleccione una dirección' options={reportOrderDirectionOptions} />
 

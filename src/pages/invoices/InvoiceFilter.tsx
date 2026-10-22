@@ -5,15 +5,16 @@ import { Filter } from "@/components/table/Filter"
 // import { Button } from "@/components/ui/button"
 // import { Download } from "lucide-react"
 import { Block } from "@/interfaces/clients.interface"
-import { FC, useEffect, useEffectEvent, useState } from "react"
+import { FC, useEffect, useEffectEvent, useMemo, useState } from "react"
 import { blockStore } from "@/store/clientStore"
 import { InvoiceApi, InvoiceAPINewInvoice, InvoiceStatus } from "@/interfaces/invoice.interface"
 import { IColumns } from "@/components/table/table.interface"
 import { DropDownFilter } from "@/components/dropdownFilter/DropDownFilter"
-import { getProductType } from "@/services/products.service"
-import { ProductType } from "@/interfaces/product.interface"
+import { getProduct, getProductType } from "@/services/products.service"
+import { IProducts, ProductType } from "@/interfaces/product.interface"
 import { invoiceFilterStore } from "@/store/invoiceFilterStore"
 import { notifyError } from "@/lib/error-feedback"
+import { MultiSelect } from "@/components/multiSelect/MultiSelect"
 // useOptimizedInvoices removed to avoid creating a separate hook instance here
 
 interface IInvoiceFilter {
@@ -32,12 +33,14 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
     const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
     const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
+    const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
     const dateStart = invoiceFilterStore((state) => state.dateStart);
     const setDateStart = invoiceFilterStore((state) => state.setDateStart);
     const setSelectedZone = invoiceFilterStore((state) => state.setSelectedZone);
     const setSelectedBlock = invoiceFilterStore((state) => state.setSelectedBlock);
     const setSelectedStatus = invoiceFilterStore((state) => state.setSelectedStatus);
     const setSelectedTypeProduct = invoiceFilterStore((state) => state.setSelectedTypeProduct);
+    const setSelectedProductIds = invoiceFilterStore((state) => state.setSelectedProductIds);
 
     return (
         <div className="flex items-center gap-3">
@@ -59,6 +62,8 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
                     selectedStatus={selectedStatus}
                     selectedBlock={selectedBlock}
                     selectedTypeProduct={selectedTypeProduct}
+                    selectedProductIds={selectedProductIds}
+                    handleChangeProducts={setSelectedProductIds}
                 />
             </DropDownFilter>
 
@@ -78,21 +83,26 @@ const FiltersGroups = ({
     selectedZone,
     selectedStatus,
     selectedBlock,
-    selectedTypeProduct
+    selectedTypeProduct,
+    selectedProductIds,
+    handleChangeProducts,
 }: {
     handleChangeStatusInvoice: (value: InvoiceStatus) => void;
     handleChangeTypeProduct: (value: string) => void;
     handleChangeZone: (value: string) => void;
     handleChangeBlock: (value: string) => void;
+    handleChangeProducts: (value: number[]) => void;
     dateStart: import("react-day-picker").DateRange | undefined;
     setDateStart: (date: import("react-day-picker").DateRange | undefined) => void;
     selectedBlock?: string;
     selectedStatus?: string;
     selectedZone?: string;
     selectedTypeProduct?: string;
+    selectedProductIds: number[];
 }) => {
     const { blocks, getBlocksApi } = blockStore();
     const [types, setTypes] = useState<ProductType[]>([]);
+    const [products, setProducts] = useState<IProducts[]>([]);
     const zones = [
         { label: 'Zona Norte', value: 'Zona Norte' },
         { label: 'Zona Sur', value: 'Zona Sur' },
@@ -119,10 +129,30 @@ const FiltersGroups = ({
         }
     })
 
+    const getProductsApi = useEffectEvent(async () => {
+        try {
+            const response = await getProduct();
+            setProducts(response);
+        } catch (error) {
+            notifyError(error, 'No se pudieron cargar los productos.');
+        }
+    })
+
     useEffect(() => {
         getBlockStoreApi();
         getProductsTypesApi();
+        getProductsApi();
     }, []);
+
+    const productOptions = useMemo(
+        () => products
+            .filter((product) => !selectedTypeProduct || product.type === selectedTypeProduct)
+            .map((product) => ({
+                label: `${product.name} ${product.presentation}`,
+                value: product.id.toString(),
+            })),
+        [products, selectedTypeProduct]
+    );
 
     return (
         <div className="flex flex-col items-start justify-start gap-2 p-1">
@@ -197,6 +227,19 @@ const FiltersGroups = ({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+            </div>
+
+            <div className="w-full">
+                <Label className="mb-2">Productos</Label>
+                <MultiSelect
+                    options={productOptions}
+                    selected={selectedProductIds.map(String)}
+                    onChange={(values) => handleChangeProducts(values.map(Number))}
+                    placeholder="Todos los productos"
+                    searchPlaceholder="Buscar producto..."
+                    emptyMessage="No hay productos para este tipo"
+                    disabled={productOptions.length === 0}
+                />
             </div>
         </div>
     )

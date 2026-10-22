@@ -8,12 +8,14 @@ interface InvoiceFilterState {
     selectedZone: string;
     selectedBlock: string;
     selectedTypeProduct: string;
+    selectedProductIds: number[];
     selectedStatus: InvoiceStatus;
     dateStart: DateRange | undefined;
     setSearch: (value: string) => void;
     setSelectedZone: (value: string) => void;
     setSelectedBlock: (value: string) => void;
     setSelectedTypeProduct: (value: string) => void;
+    setSelectedProductIds: (value: number[]) => void;
     setSelectedStatus: (value: InvoiceStatus) => void;
     setDateStart: (value: DateRange | undefined) => void;
     resetFilters: () => void;
@@ -24,6 +26,7 @@ const defaultFilters = {
     selectedZone: 'all',
     selectedBlock: 'all',
     selectedTypeProduct: 'Cafe',
+    selectedProductIds: [] as number[],
     selectedStatus: 'all' as InvoiceStatus,
     dateStart: undefined,
 };
@@ -51,7 +54,11 @@ export const invoiceFilterStore = create<InvoiceFilterState>()(
             setSearch: (search) => set({ search }),
             setSelectedZone: (selectedZone) => set({ selectedZone }),
             setSelectedBlock: (selectedBlock) => set({ selectedBlock }),
-            setSelectedTypeProduct: (selectedTypeProduct) => set({ selectedTypeProduct }),
+            setSelectedTypeProduct: (selectedTypeProduct) => set((state) => ({
+                selectedTypeProduct,
+                ...(state.selectedTypeProduct !== selectedTypeProduct && { selectedProductIds: [] }),
+            })),
+            setSelectedProductIds: (selectedProductIds) => set({ selectedProductIds }),
             setSelectedStatus: (selectedStatus) => set({ selectedStatus }),
             setDateStart: (dateStart) => set({ dateStart }),
             resetFilters: () => set({ ...defaultFilters }),
@@ -63,6 +70,7 @@ export const invoiceFilterStore = create<InvoiceFilterState>()(
                 selectedZone: state.selectedZone,
                 selectedBlock: state.selectedBlock,
                 selectedTypeProduct: state.selectedTypeProduct,
+                selectedProductIds: state.selectedProductIds,
                 selectedStatus: state.selectedStatus,
                 dateStart: serializeDateRange(state.dateStart),
             }),
@@ -71,6 +79,7 @@ export const invoiceFilterStore = create<InvoiceFilterState>()(
                 return {
                     ...current,
                     ...data,
+                    selectedProductIds: Array.isArray(data.selectedProductIds) ? data.selectedProductIds : current.selectedProductIds,
                     dateStart: deserializeDateRange(data.dateStart as { from?: string; to?: string } | undefined),
                 };
             },

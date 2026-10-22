@@ -1,5 +1,5 @@
 import { BodyClients, BodyBlock, BodyReport } from "@/interfaces/clients.interface";
-import { deleteDataApi, getDataApi, postDataApi, putDataApi, postDataFileApi, getDataFileApi } from "./base.service";
+import { deleteDataApi, getDataApi, postDataApi, putDataApi, postDataFileApi } from "./base.service";
 
 const routeClients = '/clients';
 const routeBlocks = `${routeClients}/blocks`;
@@ -7,8 +7,8 @@ const routeBlocks = `${routeClients}/blocks`;
 export const getClients = async () => {
     return await getDataApi(routeClients);
 }
-export const getClientsExcel = async () => {
-    return await getDataFileApi(`${routeClients}/excel`);
+export const getClientsExcel = async (data: BodyReport) => {
+    return await postDataFileApi(`${routeClients}/excel`, data);
 }
 
 export const postClients = async (data: BodyClients) => {

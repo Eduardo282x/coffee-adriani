@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
 import { blockStore } from "@/store/clientStore"
 import { invoiceFilterStore } from "@/store/invoiceFilterStore"
+import { useOptimizedInventory } from "@/hooks/inventory.hook"
 
 const defaultTypeProduct = 'Cafe';
 
@@ -11,15 +12,18 @@ export const FilterBadges = () => {
     const selectedBlock = invoiceFilterStore((s) => s.selectedBlock);
     const selectedStatus = invoiceFilterStore((s) => s.selectedStatus);
     const selectedTypeProduct = invoiceFilterStore((s) => s.selectedTypeProduct);
+    const selectedProductIds = invoiceFilterStore((s) => s.selectedProductIds);
     const dateStart = invoiceFilterStore((s) => s.dateStart);
     const setSearch = invoiceFilterStore((s) => s.setSearch);
     const setSelectedZone = invoiceFilterStore((s) => s.setSelectedZone);
     const setSelectedBlock = invoiceFilterStore((s) => s.setSelectedBlock);
     const setSelectedStatus = invoiceFilterStore((s) => s.setSelectedStatus);
     const setSelectedTypeProduct = invoiceFilterStore((s) => s.setSelectedTypeProduct);
+    const setSelectedProductIds = invoiceFilterStore((s) => s.setSelectedProductIds);
     const setDateStart = invoiceFilterStore((s) => s.setDateStart);
 
     const { blocks } = blockStore();
+    const { inventory } = useOptimizedInventory({ enableHistory: false });
     const blockName = blocks?.allBlocks.find((b) => b.id.toString() === selectedBlock)?.name;
 
     const badges: { key: string; label: string; onClear: () => void }[] = [];
@@ -49,6 +53,18 @@ export const FilterBadges = () => {
             key: 'type',
             label: `Producto: ${selectedTypeProduct}`,
             onClear: () => setSelectedTypeProduct(defaultTypeProduct)
+        });
+    }
+    if (selectedProductIds.length > 0) {
+        const productNames = selectedProductIds.map((productId) => {
+            const product = inventory.find((item) => item.productId === productId)?.product;
+            return product ? `${product.name} ${product.presentation}` : `#${productId}`;
+        });
+        const label = `${productNames.join(', ')}`;
+        badges.push({
+            key: 'products',
+            label: `Productos: ${label.length > 40 ? `${label.slice(0, 40)}…` : label}`,
+            onClear: () => setSelectedProductIds([])
         });
     }
     if (dateStart) {

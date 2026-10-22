@@ -176,6 +176,15 @@ export const reportOrderDirectionOptions: IOptions[] = [
     { label: 'Descendente', value: 'desc' },
 ]
 
+export const invoiceStatusOptions: IOptions[] = [
+    { label: 'Creada', value: 'Creada' },
+    { label: 'Pendiente', value: 'Pendiente' },
+    { label: 'Pagado', value: 'Pagado' },
+    { label: 'Vencida', value: 'Vencida' },
+    { label: 'Cancelada', value: 'Cancelada' },
+    { label: 'Perdidas', value: 'Perdidas' },
+]
+
 export interface IClientsForm {
     id?: number;
     name: string;

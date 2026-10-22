@@ -29,6 +29,8 @@ export interface BodyReport {
     zone: string;
     blockId: number;
     status: string;
+    invoiceStatuses?: string[];
+    endDate?: Date | string;
     orderDirection?: 'asc' | 'desc' | '';
     orderBy?: ReportOrderBy
 }

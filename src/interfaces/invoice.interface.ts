@@ -210,4 +210,5 @@ export interface ExportInvoicesDashboard {
     zone?: string;
     status?: string;
     blockId?: string;
+    productIds?: number[];
 }

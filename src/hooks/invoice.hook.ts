@@ -39,7 +39,9 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
     const selectedZone = invoiceFilterStore((state) => state.selectedZone);
     const selectedBlock = invoiceFilterStore((state) => state.selectedBlock);
     const selectedTypeProduct = invoiceFilterStore((state) => state.selectedTypeProduct);
+    const selectedProductIds = invoiceFilterStore((state) => state.selectedProductIds);
     const selectedStatus = invoiceFilterStore((state) => state.selectedStatus);
+    const productIdsParam = selectedProductIds.join(',');
 
     const queryClient = useQueryClient();
 
@@ -62,7 +64,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         error: invoicesError,
         refetch: refetchInvoices
     } = useQuery({
-        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus],
+        queryKey: ['invoices', dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, selectedStatus],
         queryFn: async () => {
             const params: InvoiceFilterPaginate = {
                 page: pageRef.current + 1,
@@ -73,6 +75,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
                 }),
                 search: search.trim(),
                 type: selectedTypeProduct,
+                ...(productIdsParam && { productIds: productIdsParam }),
                 ...(selectedZone !== 'all' && { zone: selectedZone }),
                 ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
                 ...(selectedStatus !== 'all' && { status: selectedStatus })
@@ -90,12 +93,13 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         isLoading: isLoadingStatistics,
         refetch: refetchStatistics
     } = useQuery({
-        queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, search, selectedZone, selectedBlock, selectedStatus],
+        queryKey: ['invoice-statistics', dateFilter, selectedTypeProduct, productIdsParam, search, selectedZone, selectedBlock, selectedStatus],
         queryFn: () => getInvoiceStatistics({
             startDate: formatDateOnly(dateFilter?.startDate),
             endDate: formatDateOnly(dateFilter?.endDate),
             search: search.trim(),
             type: selectedTypeProduct,
+            ...(productIdsParam && { productIds: productIdsParam }),
             ...(selectedZone !== 'all' && { zone: selectedZone }),
             ...(selectedBlock !== 'all' && { blockId: selectedBlock }),
             ...(selectedStatus !== 'all' && { status: selectedStatus })
@@ -180,7 +184,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
 
     useEffect(() => {
         setPage(0);
-    }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, selectedStatus, pageSize]);
+    }, [dateFilter, search, selectedZone, selectedBlock, selectedTypeProduct, productIdsParam, selectedStatus, pageSize]);
 
     // Refetch manual al cambiar página o tamaño (no están en el queryKey)
     useEffect(() => {
@@ -301,6 +305,7 @@ export const useOptimizedInvoices = (options: UseInvoicesOptions = {}) => {
         selectedZone,
         selectedBlock,
         selectedTypeProduct,
+        selectedProductIds,
         selectedStatus,
 
         // Mutaciones
