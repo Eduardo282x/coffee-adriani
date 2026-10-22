@@ -43,10 +43,10 @@ export const InvoiceFilter: FC<IInvoiceFilter> = ({
     const setSelectedProductIds = invoiceFilterStore((state) => state.setSelectedProductIds);
 
     return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-end gap-3">
 
             <div className="w-60">
-                <Label className="mb-2">Buscar</Label>
+                {/* <Label className="mb-2">Buscar</Label> */}
                 <Filter dataBase={[]} setSearch={setSearch} columns={clientColumns} setDataFilter={setInvoicesFilter} filterInvoices={true} initialValue={search} />
             </div>
 

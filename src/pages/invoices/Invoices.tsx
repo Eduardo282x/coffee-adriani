@@ -277,7 +277,7 @@ export const InvoicesPage = () => {
 
             <div className="w-full h-3 bg-[#6f4e37] border-b"></div>
 
-            <main className="flex-1 min-h-0 overflow-y-auto p-4 md:px-6">
+            <main className="flex-1 min-h-0 overflow-y-auto md:px-4">
                 <div className="flex flex-wrap items-center justify-between">
                     <h2 className="text-2xl font-bold tracking-tight text-[#6f4e37]">
                         Gestión de Facturas
